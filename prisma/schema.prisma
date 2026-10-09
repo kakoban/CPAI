@@ -1,0 +1,53 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Workbook {
+  id           String         @id @default(uuid()) @db.Uuid
+  projectTitle String         @default("XYZ Company Customer Support Chatbot") @map("project_title") @db.VarChar(255)
+  organization String         @default("OWJ Business Council") @db.VarChar(255)
+  studentName  String         @default("Anonymous") @map("student_name") @db.VarChar(255)
+  language     String         @default("fa") @db.VarChar(10)
+  theme        String         @default("light") @db.VarChar(10)
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  pages        WorkbookPage[]
+  evaluations  AiEvaluation[]
+
+  @@map("workbooks")
+}
+
+model WorkbookPage {
+  id          Int      @id @default(autoincrement())
+  workbookId  String   @map("workbook_id") @db.Uuid
+  pageNumber  Int      @map("page_number")
+  phaseId     Int      @default(1) @map("phase_id")
+  contentText String?  @map("content_text") @db.Text
+  contentJson Json?    @default("{}") @map("content_json")
+  isCompleted Boolean  @default(false) @map("is_completed")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  workbook    Workbook @relation(fields: [workbookId], references: [id], onDelete: Cascade)
+
+  @@unique([workbookId, pageNumber])
+  @@index([workbookId])
+  @@index([pageNumber])
+  @@map("workbook_pages")
+}
+
+model AiEvaluation {
+  id           Int      @id @default(autoincrement())
+  workbookId   String   @map("workbook_id") @db.Uuid
+  pageNumber   Int      @map("page_number")
+  score        Decimal? @db.Decimal(5, 2)
+  feedbackText String?  @map("feedback_text") @db.Text
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  workbook     Workbook @relation(fields: [workbookId], references: [id], onDelete: Cascade)
+
+  @@index([workbookId])
+  @@map("ai_evaluations")
+}
