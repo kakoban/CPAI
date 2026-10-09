@@ -1,0 +1,6 @@
+{
+  "name": "CPMAI Workbook - AI Project Management",
+  "description": "Comprehensive interactive bilingual (FA/EN) workbook for the Cognitive Project Management for AI (CPMAI) methodology by OWJ Business Council.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg: #f4f4f1;
+    --card: #ffffff;
+    --card-subtle: #f8f9f7;
+    --ink: #1c2830;
+    --mute: #5d6b73;
+    --line: #d9dad5;
+    --sand: #1f5163;
+    --sandbg: #e3eef1;
+    --onsand: #ffffff;
+    --ok: #2f7d5b;
+    --okbg: #e3f2ea;
+    --bad: #b3432f;
+    --badbg: #f9e6e1;
+    --focus: #2a6f97;
+    --font-ui: "IBM Plex Sans", system-ui, sans-serif;
+    --font-serif: "Newsreader", Georgia, serif;
+    --font-fa: "Vazirmatn", system-ui, sans-serif;
+  }
+
+  :root.dark,
+  :root[data-theme="dark"] {
+    --bg: #12171b;
+    --card: #1a2228;
+    --card-subtle: #151c21;
+    --ink: #e8ebe9;
+    --mute: #9aa8b0;
+    --line: #2d3942;
+    --sand: #6fb3c6;
+    --sandbg: #1b2c32;
+    --onsand: #0f1a1e;
+    --ok: #63c496;
+    --okbg: #173025;
+    --bad: #ee8f7a;
+    --badbg: #3a1f19;
+    --focus: #7cc0e8;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-fa);
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  [dir="ltr"] body,
+  [lang="en"] body {
+    font-family: var(--font-ui);
+  }
+
+  [dir="ltr"] .font-serif-heading,
+  [lang="en"] .font-serif-heading {
+    font-family: var(--font-serif);
+  }
+
+  [dir="rtl"] .font-serif-heading,
+  [lang="fa"] .font-serif-heading {
+    font-family: var(--font-fa);
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--mute);
+}
+
+@media print {
+  aside, .no-print {
+    display: none !important;
+  }
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  .app-container {
+    display: block !important;
+  }
+}
