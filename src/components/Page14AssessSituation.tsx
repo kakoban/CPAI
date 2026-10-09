@@ -44,6 +44,7 @@ interface Page14Props {
   content: string;
   onChangeContent: (val: string) => void;
   onGoToPage13: () => void;
+  onGoToPage15?: () => void;
 }
 
 interface ResourceRole {
@@ -98,7 +99,8 @@ export const Page14AssessSituation: React.FC<Page14Props> = ({
   lang,
   content,
   onChangeContent,
-  onGoToPage13
+  onGoToPage13,
+  onGoToPage15
 }) => {
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'resources' | 'schedule' | 'templates' | 'canvas' | 'audit'>('resources');
@@ -1317,11 +1319,11 @@ D. Critical Path Dependencies & Lead Times:
         </div>
       )}
 
-      {/* Footer Navigation (Previous: Page 13 / Slide 23) */}
+      {/* Footer Navigation (Previous: Page 13 / Next: Page 15) */}
       <div className="flex items-center justify-between pt-4 border-t border-[#d9dad5] dark:border-[#2d3942] flex-wrap gap-3">
         <button
           onClick={onGoToPage13}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-xs font-medium text-[#1c2830] dark:text-[#e8ebe9] hover:bg-[#e2e8f0] dark:hover:bg-[#25323d] transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-xs font-medium text-[#1c2830] dark:text-[#e8ebe9] hover:bg-[#e2e8f0] dark:hover:bg-[#25323d] transition-colors cursor-pointer"
         >
           {lang === 'fa' ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
           <span>
@@ -1331,14 +1333,19 @@ D. Critical Path Dependencies & Lead Times:
           </span>
         </button>
 
-        <div className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] flex items-center gap-2">
-          <span>
-            {lang === 'fa'
-              ? 'تکمیل کاربرگ ارزیابی وضعیت و نیازمندی‌های منابع/زمان‌بندی (اسلاید ۲۴)'
-              : 'Slide 24 Assess Situation Completed'}
-          </span>
-          <span className="w-2.5 h-2.5 rounded-full bg-[#2f7d5b]" />
-        </div>
+        {onGoToPage15 && (
+          <button
+            onClick={onGoToPage15}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#00738c] text-white text-xs font-medium hover:bg-[#005f73] transition-colors cursor-pointer"
+          >
+            <span>
+              {lang === 'fa'
+                ? 'صفحه بعدی: صفحه ۱۵ (اسلاید ۲۵: منابع فناوری و مهارت‌ها)'
+                : 'Next: Page 15 (Slide 25: Technology & Skills)'}
+            </span>
+            {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+          </button>
+        )}
       </div>
     </div>
   );

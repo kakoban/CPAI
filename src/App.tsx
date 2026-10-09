@@ -14,11 +14,13 @@ import { Page11AiSuccessCriteria } from './components/Page11AiSuccessCriteria';
 import { Page12AiPatterns } from './components/Page12AiPatterns';
 import { Page13WhichPatternsUsed } from './components/Page13WhichPatternsUsed';
 import { Page14AssessSituation } from './components/Page14AssessSituation';
+import { Page15TechnologyAndSkills } from './components/Page15TechnologyAndSkills';
 import { Footer } from './components/Footer';
 import { OWJ_LOGO } from './data/logo';
-import { Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar } from 'lucide-react';
+import { Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive } from 'lucide-react';
 
-const STORAGE_KEY = 'cpmai-workbook-14pages-v1';
+const STORAGE_KEY = 'cpmai-workbook-15pages-v1';
+const LEGACY_KEY_14 = 'cpmai-workbook-14pages-v1';
 const LEGACY_KEY_13 = 'cpmai-workbook-13pages-v1';
 const LEGACY_KEY_12 = 'cpmai-workbook-12pages-v1';
 const LEGACY_KEY_11 = 'cpmai-workbook-11pages-v1';
@@ -34,7 +36,7 @@ const LEGACY_KEY_2 = 'cpmai-workbook-2pages-v1';
 const LEGACY_KEY = 'cpmai-wb-p1-v1';
 
 export default function App() {
-  const [page, setPage] = useState<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14>(1);
+  const [page, setPage] = useState<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15>(1);
   const [lang, setLang] = useState<Language>('fa');
   const [theme, setTheme] = useState<Theme>('light');
 
@@ -85,6 +87,9 @@ export default function App() {
   // Page 14 state (Task Group: Assess Situation / Tasks: Resource Requirements & Schedule Requirements - Slide 24)
   const [page14Content, setPage14Content] = useState('');
 
+  // Page 15 state (Task Group: Assess Situation / Task: Resource Requirements - Technology & Skills Inventory - Slide 25)
+  const [page15Content, setPage15Content] = useState('');
+
   const [toastMsg, setToastMsg] = useState('');
 
   // Load from localStorage on mount
@@ -92,6 +97,7 @@ export default function App() {
     try {
       const stored =
         localStorage.getItem(STORAGE_KEY) ||
+        localStorage.getItem(LEGACY_KEY_14) ||
         localStorage.getItem(LEGACY_KEY_13) ||
         localStorage.getItem(LEGACY_KEY_12) ||
         localStorage.getItem(LEGACY_KEY_11) ||
@@ -130,6 +136,7 @@ export default function App() {
         if (d.page12Content) setPage12Content(d.page12Content);
         if (d.page13Content) setPage13Content(d.page13Content);
         if (d.page14Content) setPage14Content(d.page14Content);
+        if (d.page15Content) setPage15Content(d.page15Content);
       }
     } catch {
       // Ignore parse error
@@ -160,14 +167,15 @@ export default function App() {
       page11Content,
       page12Content,
       page13Content,
-      page14Content
+      page14Content,
+      page15Content
     };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch {
       // Storage unavailable
     }
-  }, [page, lang, theme, read, story, bg, obj, qs, ans, page2Content, page3Content, page4Content, page5Content, page6Content, page7Content, page8Content, page9Content, page10Content, page11Content, page12Content, page13Content, page14Content]);
+  }, [page, lang, theme, read, story, bg, obj, qs, ans, page2Content, page3Content, page4Content, page5Content, page6Content, page7Content, page8Content, page9Content, page10Content, page11Content, page12Content, page13Content, page14Content, page15Content]);
 
   // Sync document language, direction, and theme
   useEffect(() => {
@@ -286,11 +294,17 @@ export default function App() {
     fullText += lang === 'fa'
       ? `--- صفحه ۱۴: ارزیابی وضعیت — نیازمندی‌های منابع و زمان‌بندی (اسلاید ۲۴) ---\nTask Group: Assess Situation\nTask: Resource Requirements & Task: Schedule Requirements\nResources: Personnel/Skills, Compute/GPU hardware, Software/Data stack, Budget\nSchedule: Agile sprint cadence, CPMAI 6-phase stage-gates, Hard deadlines, Critical path dependencies\n\n`
       : `--- Page 14: Assess Situation — Resource & Schedule Requirements (Slide 24) ---\nTask Group: Assess Situation\nTask: Resource Requirements & Task: Schedule Requirements\nResources: Personnel/Skills, Compute/GPU hardware, Software/Data stack, Budget\nSchedule: Agile sprint cadence, CPMAI 6-phase stage-gates, Hard deadlines, Critical path dependencies\n\n`;
-    fullText += page14Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
+    fullText += (page14Content || '(محتوایی در بوم ثبت نشده است / No content entered)') + '\n\n';
+
+    // Page 15
+    fullText += lang === 'fa'
+      ? `--- صفحه ۱۵: سیاهه منابع فناوری و مهارت‌های مورد نیاز (اسلاید ۲۵) ---\nTask Group: Assess Situation\nTask: Resource Requirements — Technology Resources & Skills Inventory\nTechnology: Hardware, AI/NLP Frameworks, Cloud Hosting, APIs & CI/CD\nSkills: Core ML/NLP, Solutions Architecture, Domain SME, Agile PM, Skill Gaps\n\n`
+      : `--- Page 15: Technology Resources & Skills Inventory (Slide 25) ---\nTask Group: Assess Situation\nTask: Resource Requirements — Technology Resources & Skills Inventory\nTechnology: Hardware, AI/NLP Frameworks, Cloud Hosting, APIs & CI/CD\nSkills: Core ML/NLP, Solutions Architecture, Domain SME, Agile PM, Skill Gaps\n\n`;
+    fullText += page15Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(fullText).then(() => {
-        showToast(lang === 'fa' ? 'پاسخ‌های هر ۱۴ صفحه کپی شد!' : 'Workbook answers for all 14 pages copied!');
+        showToast(lang === 'fa' ? 'پاسخ‌های هر ۱۵ صفحه کپی شد!' : 'Workbook answers for all 15 pages copied!');
       });
     }
   };
@@ -320,6 +334,7 @@ export default function App() {
     setPage12Content('');
     setPage13Content('');
     setPage14Content('');
+    setPage15Content('');
     showToast(lang === 'fa' ? 'تمام پاسخ‌ها پاک شدند' : 'Workbook reset');
   };
 
@@ -563,6 +578,21 @@ export default function App() {
             >
               <Calendar className="w-3.5 h-3.5 text-[#6ee7b7]" />
               <span>{lang === 'fa' ? 'صفحه ۱۴: ارزیابی وضعیت (۲۴)' : 'Page 14 (Assess Situation)'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(15);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 15
+                  ? 'bg-[#1b3a4b] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <HardDrive className="w-3.5 h-3.5 text-[#99e2b4]" />
+              <span>{lang === 'fa' ? 'صفحه ۱۵: فناوری و مهارت‌ها (۲۵)' : 'Page 15 (Tech & Skills)'}</span>
             </button>
           </div>
 
@@ -853,6 +883,23 @@ export default function App() {
             onChangeContent={setPage14Content}
             onGoToPage13={() => {
               setPage(13);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onGoToPage15={() => {
+              setPage(15);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
+
+        {/* Page 15 (Matching Slide 25: Task Group: Assess Situation / Task: Resource Requirements - Technology Resources & Skills Inventory) */}
+        {page === 15 && (
+          <Page15TechnologyAndSkills
+            lang={lang}
+            content={page15Content}
+            onChangeContent={setPage15Content}
+            onGoToPage14={() => {
+              setPage(14);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           />
