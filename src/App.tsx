@@ -17,7 +17,7 @@ import { Page14AssessSituation } from './components/Page14AssessSituation';
 import { Page15TechnologyAndSkills } from './components/Page15TechnologyAndSkills';
 import { Footer } from './components/Footer';
 import { OWJ_LOGO } from './data/logo';
-import { Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive } from 'lucide-react';
+import { Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud } from 'lucide-react';
 
 const STORAGE_KEY = 'cpmai-workbook-15pages-v1';
 const LEGACY_KEY_14 = 'cpmai-workbook-14pages-v1';
@@ -91,6 +91,8 @@ export default function App() {
   const [page15Content, setPage15Content] = useState('');
 
   const [toastMsg, setToastMsg] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [cloudStatus, setCloudStatus] = useState<'idle' | 'synced' | 'error'>('idle');
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -336,6 +338,55 @@ export default function App() {
     setPage14Content('');
     setPage15Content('');
     showToast(lang === 'fa' ? 'تمام پاسخ‌ها پاک شدند' : 'Workbook reset');
+  };
+
+  const handleSyncToCloud = async () => {
+    setIsSyncing(true);
+    try {
+      const payload = {
+        projectTitle: story || 'XYZ Company Customer Support Chatbot',
+        organization: 'OWJ Business Council',
+        studentName: 'CPMAI Practitioner',
+        language: lang,
+        theme: theme,
+        pages: [
+          { pageNumber: 1, contentText: `${story}\n\n${bg}\n\n${obj}`, contentJson: { story, bg, obj, qs }, isCompleted: true },
+          { pageNumber: 2, contentText: page2Content, contentJson: { content: page2Content }, isCompleted: !!page2Content },
+          { pageNumber: 3, contentText: page3Content, contentJson: { content: page3Content }, isCompleted: !!page3Content },
+          { pageNumber: 4, contentText: page4Content, contentJson: { content: page4Content }, isCompleted: !!page4Content },
+          { pageNumber: 5, contentText: page5Content, contentJson: { content: page5Content }, isCompleted: !!page5Content },
+          { pageNumber: 6, contentText: page6Content, contentJson: { content: page6Content }, isCompleted: !!page6Content },
+          { pageNumber: 7, contentText: page7Content, contentJson: { content: page7Content }, isCompleted: !!page7Content },
+          { pageNumber: 8, contentText: page8Content, contentJson: { content: page8Content }, isCompleted: !!page8Content },
+          { pageNumber: 9, contentText: page9Content, contentJson: { content: page9Content }, isCompleted: !!page9Content },
+          { pageNumber: 10, contentText: page10Content, contentJson: { content: page10Content }, isCompleted: !!page10Content },
+          { pageNumber: 11, contentText: page11Content, contentJson: { content: page11Content }, isCompleted: !!page11Content },
+          { pageNumber: 12, contentText: page12Content, contentJson: { content: page12Content }, isCompleted: !!page12Content },
+          { pageNumber: 13, contentText: page13Content, contentJson: { content: page13Content }, isCompleted: !!page13Content },
+          { pageNumber: 14, contentText: page14Content, contentJson: { content: page14Content }, isCompleted: !!page14Content },
+          { pageNumber: 15, contentText: page15Content, contentJson: { content: page15Content }, isCompleted: !!page15Content },
+        ]
+      };
+
+      const res = await fetch('/api/workbooks/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        setCloudStatus('synced');
+        showToast(lang === 'fa' ? '✓ اطلاعات با پایگاه داده Neon همگام‌سازی شد.' : '✓ Synced with Neon PostgreSQL cloud database.');
+      } else {
+        setCloudStatus('error');
+        showToast(lang === 'fa' ? 'خطا در ارتباط با سرور ابری' : 'Failed to sync with cloud database');
+      }
+    } catch {
+      setCloudStatus('error');
+      showToast(lang === 'fa' ? 'خطا در اتصال به اینترنت یا پایگاه داده' : 'Network/database connection error');
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   return (
@@ -906,11 +957,29 @@ export default function App() {
         )}
 
         {/* Reset Option and Auto-save indicator */}
-        <div className="mt-8 pt-4 border-t border-[#d9dad5] dark:border-[#2d3942] flex items-center justify-between text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#2f7d5b]" />
-            <span>{lang === 'fa' ? 'پاسخ‌های شما روی همین دستگاه ذخیره می‌شود.' : 'Your answers automatically save on this device.'}</span>
-          </span>
+        <div className="mt-8 pt-4 border-t border-[#d9dad5] dark:border-[#2d3942] flex flex-wrap items-center justify-between gap-3 text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
+          <div className="flex items-center gap-4 flex-wrap">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#2f7d5b]" />
+              <span>{lang === 'fa' ? 'پاسخ‌های شما روی همین دستگاه ذخیره می‌شود.' : 'Your answers automatically save on this device.'}</span>
+            </span>
+
+            <button
+              onClick={handleSyncToCloud}
+              disabled={isSyncing}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#2f7d5b]/10 hover:bg-[#2f7d5b]/20 text-[#2f7d5b] dark:text-[#52b788] border border-[#2f7d5b]/30 transition-colors cursor-pointer text-xs font-medium"
+              title={lang === 'fa' ? 'همگام‌سازی و ذخیره پاسخ‌ها در پایگاه داده ابری Neon' : 'Sync and save responses to Neon Cloud Database'}
+            >
+              <Cloud className="w-3.5 h-3.5" />
+              <span>
+                {isSyncing
+                  ? (lang === 'fa' ? 'در حال ذخیره ابری...' : 'Syncing to cloud...')
+                  : cloudStatus === 'synced'
+                  ? (lang === 'fa' ? '✓ همگام با دیتابیس ابری نئون' : '✓ Synced with Neon DB')
+                  : (lang === 'fa' ? 'ذخیره در پایگاه داده ابری نئون' : 'Save to Neon Cloud DB')}
+              </span>
+            </button>
+          </div>
 
           <button
             onClick={handleReset}
