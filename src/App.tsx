@@ -15,11 +15,9 @@ import { Page12AiPatterns } from './components/Page12AiPatterns';
 import { Page13WhichPatternsUsed } from './components/Page13WhichPatternsUsed';
 import { Page14AssessSituation } from './components/Page14AssessSituation';
 import { Page15TechnologyAndSkills } from './components/Page15TechnologyAndSkills';
-import { WorkbookReferenceViewer } from './components/WorkbookReferenceViewer';
-import { INSTRUCTOR_EXEMPLAR_ANSWERS } from './data/exemplarData';
 import { Footer } from './components/Footer';
 import { OWJ_LOGO } from './data/logo';
-import { Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud, GraduationCap, Sparkles, HelpCircle, Eye } from 'lucide-react';
+import { Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud } from 'lucide-react';
 
 const STORAGE_KEY = 'cpmai-workbook-15pages-v1';
 const LEGACY_KEY_14 = 'cpmai-workbook-14pages-v1';
@@ -95,9 +93,6 @@ export default function App() {
   const [toastMsg, setToastMsg] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
   const [cloudStatus, setCloudStatus] = useState<'idle' | 'synced' | 'error'>('idle');
-  const [userRole, setUserRole] = useState<'student' | 'instructor'>('student');
-  const [activeView, setActiveView] = useState<'exercise' | 'reference'>('reference');
-  const [showExemplarDrawer, setShowExemplarDrawer] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -124,8 +119,6 @@ export default function App() {
         if (d.page) setPage(d.page);
         if (d.lang) setLang(d.lang);
         if (d.theme) setTheme(d.theme);
-        if (d.userRole) setUserRole(d.userRole);
-        if (d.activeView) setActiveView(d.activeView);
         if (d.read !== undefined) setRead(d.read);
         if (d.story) setStory(d.story);
         if (d.bg) setBg(d.bg);
@@ -177,16 +170,14 @@ export default function App() {
       page12Content,
       page13Content,
       page14Content,
-      page15Content,
-      userRole,
-      activeView
+      page15Content
     };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch {
       // Storage unavailable
     }
-  }, [page, lang, theme, userRole, activeView, read, story, bg, obj, qs, ans, page2Content, page3Content, page4Content, page5Content, page6Content, page7Content, page8Content, page9Content, page10Content, page11Content, page12Content, page13Content, page14Content, page15Content]);
+  }, [page, lang, theme, read, story, bg, obj, qs, ans, page2Content, page3Content, page4Content, page5Content, page6Content, page7Content, page8Content, page9Content, page10Content, page11Content, page12Content, page13Content, page14Content, page15Content]);
 
   // Sync document language, direction, and theme
   useEffect(() => {
@@ -398,85 +389,6 @@ export default function App() {
     }
   };
 
-  const handleApplyExemplar = (pageNumber: number) => {
-    switch (pageNumber) {
-      case 1:
-        setStory(INSTRUCTOR_EXEMPLAR_ANSWERS.page1.story);
-        setBg(INSTRUCTOR_EXEMPLAR_ANSWERS.page1.bg);
-        setObj(INSTRUCTOR_EXEMPLAR_ANSWERS.page1.obj);
-        setQs([...INSTRUCTOR_EXEMPLAR_ANSWERS.page1.qs]);
-        break;
-      case 2:
-        setPage2Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page2);
-        break;
-      case 3:
-        setPage3Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page3);
-        break;
-      case 4:
-        setPage4Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page4);
-        break;
-      case 5:
-        setPage5Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page5);
-        break;
-      case 6:
-        setPage6Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page6);
-        break;
-      case 7:
-        setPage7Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page7);
-        break;
-      case 8:
-        setPage8Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page8);
-        break;
-      case 9:
-        setPage9Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page9);
-        break;
-      case 10:
-        setPage10Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page10);
-        break;
-      case 11:
-        setPage11Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page11);
-        break;
-      case 12:
-        setPage12Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page12);
-        break;
-      case 13:
-        setPage13Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page13);
-        break;
-      case 14:
-        setPage14Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page14);
-        break;
-      case 15:
-        setPage15Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page15);
-        break;
-    }
-    setPage(pageNumber);
-    setActiveView('exercise');
-    showToast(lang === 'fa' ? `✓ پاسخ نمونه استاد در صفحه ${pageNumber} اعمال شد.` : `✓ Exemplar solution applied to page ${pageNumber}.`);
-  };
-
-  const handleApplyAllExemplars = () => {
-    setStory(INSTRUCTOR_EXEMPLAR_ANSWERS.page1.story);
-    setBg(INSTRUCTOR_EXEMPLAR_ANSWERS.page1.bg);
-    setObj(INSTRUCTOR_EXEMPLAR_ANSWERS.page1.obj);
-    setQs([...INSTRUCTOR_EXEMPLAR_ANSWERS.page1.qs]);
-    setPage2Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page2);
-    setPage3Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page3);
-    setPage4Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page4);
-    setPage5Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page5);
-    setPage6Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page6);
-    setPage7Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page7);
-    setPage8Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page8);
-    setPage9Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page9);
-    setPage10Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page10);
-    setPage11Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page11);
-    setPage12Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page12);
-    setPage13Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page13);
-    setPage14Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page14);
-    setPage15Content(INSTRUCTOR_EXEMPLAR_ANSWERS.page15);
-    setActiveView('exercise');
-    showToast(lang === 'fa' ? '✓ تمام پاسخ‌های حل‌شده استاد (صفحات ۱ تا ۱۵) در کل کتاب کار بارگذاری شدند.' : '✓ Full master exemplar solution loaded across all 15 workbook pages.');
-  };
-
   return (
     <div className="min-h-screen bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] transition-colors flex flex-col">
       {/* Top Header Bar */}
@@ -507,64 +419,236 @@ export default function App() {
             </div>
           </a>
 
-          {/* Middle: Active View Tabs */}
-          <div className="flex items-center p-1 rounded-xl bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-xs font-semibold">
+          {/* 4-Page Navigation Segmented Control */}
+          <div className="flex items-center p-1 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] overflow-x-auto max-w-full">
             <button
-              onClick={() => { setActiveView('reference'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                activeView === 'reference'
-                  ? 'bg-white dark:bg-[#1a2228] text-[#2f7d5b] dark:text-[#52b788] shadow-xs font-bold'
+              onClick={() => {
+                setPage(1);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 1
+                  ? 'bg-[#ffffff] dark:bg-[#1a2228] text-[#1f5163] dark:text-[#6fb3c6] shadow-xs font-semibold'
                   : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
               }`}
             >
               <BookOpen className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'کتاب کار و سناریو (۱-۲۵)' : 'Workbook & Case (1-25)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۱: درک کسب‌وکار' : 'Page 1'}</span>
             </button>
 
             <button
-              onClick={() => { setActiveView('exercise'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                activeView === 'exercise'
-                  ? 'bg-[#2f7d5b] text-white shadow-xs font-bold'
+              onClick={() => {
+                setPage(2);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 2
+                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
                   : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'بوم تمرینات (۱-۱۵)' : 'Exercises (1-15)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۲: حل مسئله' : 'Page 2'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(3);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 3
+                  ? 'bg-[#b87333] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <Award className="w-3.5 h-3.5" />
+              <span>{lang === 'fa' ? 'صفحه ۳: معیارهای موفقیت' : 'Page 3'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(4);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 4
+                  ? 'bg-[#1f5163] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <DollarSign className="w-3.5 h-3.5" />
+              <span>{lang === 'fa' ? 'صفحه ۴: هزینه-فایده' : 'Page 4: Budget'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(5);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 5
+                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>{lang === 'fa' ? 'صفحه ۵: برآورد ROI (۱۵)' : 'Page 5 (Expected ROI)'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(6);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 6
+                  ? 'bg-[#1b3a4b] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <Brain className="w-3.5 h-3.5 text-[#99e2b4]" />
+              <span>{lang === 'fa' ? 'صفحه ۶: الزامات شناختی (۱۶)' : 'Page 6 (Cognitive Req.)'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(7);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 7
+                  ? 'bg-[#0f4c5c] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <Cpu className="w-3.5 h-3.5 text-[#6ee7b7]" />
+              <span>{lang === 'fa' ? 'صفحه ۷: چرا AI؟ (۱۷)' : 'Page 7 (Why AI?)'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(8);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 8
+                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5 text-[#99e2b4]" />
+              <span>{lang === 'fa' ? 'صفحه ۸: بخش‌های غیرشناختی (۱۸)' : 'Page 8 (Noncognitive Parts)'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(9);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 9
+                  ? 'bg-[#1b3a4b] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <Target className="w-3.5 h-3.5 text-[#99e2b4]" />
+              <span>{lang === 'fa' ? 'صفحه ۹: اهداف شناختی (۱۹)' : 'Page 9 (Cognitive Obj.)'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(10);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 10
+                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <Gauge className="w-3.5 h-3.5 text-[#6ee7b7]" />
+              <span>{lang === 'fa' ? 'صفحه ۱۰: نتایج شناختی (۲۰)' : 'Page 10 (Cognitive Outcomes)'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(11);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 11
+                  ? 'bg-[#1f5163] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-[#6ee7b7]" />
+              <span>{lang === 'fa' ? 'صفحه ۱۱: معیارهای موفقیت AI (۲۱)' : 'Page 11 (AI Success Criteria)'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(12);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 12
+                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <Network className="w-3.5 h-3.5 text-[#6ee7b7]" />
+              <span>{lang === 'fa' ? 'صفحه ۱۲: الگوهای هوش مصنوعی (۲۲)' : 'Page 12 (AI Patterns)'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(13);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 13
+                  ? 'bg-[#1f5163] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <Workflow className="w-3.5 h-3.5 text-[#6ee7b7]" />
+              <span>{lang === 'fa' ? 'صفحه ۱۳: تعیین الگوها (۲۳)' : 'Page 13 (Which Patterns)'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(14);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 14
+                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <Calendar className="w-3.5 h-3.5 text-[#6ee7b7]" />
+              <span>{lang === 'fa' ? 'صفحه ۱۴: ارزیابی وضعیت (۲۴)' : 'Page 14 (Assess Situation)'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(15);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 15
+                  ? 'bg-[#1b3a4b] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <HardDrive className="w-3.5 h-3.5 text-[#99e2b4]" />
+              <span>{lang === 'fa' ? 'صفحه ۱۵: فناوری و مهارت‌ها (۲۵)' : 'Page 15 (Tech & Skills)'}</span>
             </button>
           </div>
 
           {/* Tools & Utilities */}
           <div className="flex items-center gap-1.5">
-            {/* Role Switcher (Student vs Instructor) */}
-            <div className="flex items-center p-0.5 rounded-xl bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-xs font-semibold">
-              <button
-                onClick={() => { setUserRole('student'); showToast(lang === 'fa' ? 'حالت دانشجو فعال شد (تمرین‌محور)' : 'Student mode activated'); }}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                  userRole === 'student'
-                    ? 'bg-blue-600 text-white shadow-xs font-bold'
-                    : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-                }`}
-                title={lang === 'fa' ? 'نسخه دانشجو: تمرین‌محور' : 'Student Mode'}
-              >
-                <GraduationCap className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{lang === 'fa' ? 'دانشجو' : 'Student'}</span>
-              </button>
-
-              <button
-                onClick={() => { setUserRole('instructor'); showToast(lang === 'fa' ? 'حالت استاد فعال شد (مرجع حل‌شده)' : 'Instructor mode activated'); }}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                  userRole === 'instructor'
-                    ? 'bg-amber-600 text-white shadow-xs font-bold'
-                    : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-                }`}
-                title={lang === 'fa' ? 'نسخه استاد: کامل با پاسخ‌های حل‌شده' : 'Instructor Mode'}
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{lang === 'fa' ? 'استاد' : 'Instructor'}</span>
-              </button>
-            </div>
-
             {/* Copy All Answers */}
             <button
               onClick={handleCopyAll}
@@ -605,75 +689,6 @@ export default function App() {
         </div>
       </header>
 
-      {/* Secondary Sub-Bar for Exercises (15 Page Navigation & Role Actions) */}
-      {activeView === 'exercise' && (
-        <div className="w-full bg-[#ffffff]/90 dark:bg-[#161c22]/90 backdrop-blur-md border-b border-[#d9dad5] dark:border-[#2d3942] py-2 px-4 sticky top-16 z-20">
-          <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-            {/* 15 Page Navigation Buttons */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0 scrollbar-thin text-xs">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((pNum) => (
-                <button
-                  key={pNum}
-                  onClick={() => { setPage(pNum); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                  className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-all cursor-pointer ${
-                    page === pNum
-                      ? 'bg-[#2f7d5b] text-white shadow-xs font-bold scale-105'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
-                  }`}
-                >
-                  {lang === 'fa' ? `ص ${pNum}` : `P ${pNum}`}
-                </button>
-              ))}
-            </div>
-
-            {/* Role-Specific Toolbar */}
-            <div className="flex items-center gap-2 text-xs shrink-0 self-end md:self-auto">
-              <button
-                onClick={() => { setActiveView('reference'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
-                title={lang === 'fa' ? `مشاهده اسلاید معادل در کتاب کار (صفحه ${page + 18})` : `View slide ${page + 18}`}
-              >
-                <Eye className="w-3.5 h-3.5 text-[#2f7d5b]" />
-                <span>{lang === 'fa' ? `اسلاید ص ${page + 18}` : `Slide ${page + 18}`}</span>
-              </button>
-
-              {userRole === 'instructor' ? (
-                <>
-                  <button
-                    onClick={() => handleApplyExemplar(page)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 font-medium transition-colors cursor-pointer"
-                    title={lang === 'fa' ? 'بارگذاری پاسخ نمونه این صفحه' : 'Load exemplar for this page'}
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>{lang === 'fa' ? 'تزریق پاسخ نمونه' : 'Load Answer'}</span>
-                  </button>
-                  <button
-                    onClick={handleApplyAllExemplars}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-600 text-white hover:bg-amber-700 font-medium shadow-xs transition-colors cursor-pointer"
-                    title={lang === 'fa' ? 'حل کامل تمام ۱۵ صفحه کتاب کار' : 'Fill all pages'}
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>{lang === 'fa' ? 'حل کل کتاب کار' : 'Solve All'}</span>
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => setShowExemplarDrawer(prev => !prev)}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-md border font-medium transition-colors cursor-pointer ${
-                    showExemplarDrawer
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                      : 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30 hover:bg-blue-500/20'
-                  }`}
-                >
-                  <HelpCircle className="w-3.5 h-3.5" />
-                  <span>{showExemplarDrawer ? (lang === 'fa' ? 'بستن راهنما' : 'Close Guide') : (lang === 'fa' ? 'راهنمای حل استاد' : 'Instructor Guide')}</span>
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Main Content Area */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-7 lg:p-10">
         {toastMsg && (
@@ -683,45 +698,7 @@ export default function App() {
           </div>
         )}
 
-        {activeView === 'reference' && (
-          <WorkbookReferenceViewer
-            lang={lang}
-            userRole={userRole}
-            onNavigateToExercisePage={(exPage) => {
-              setPage(exPage);
-              setActiveView('exercise');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onApplyExemplarToStudent={handleApplyExemplar}
-          />
-        )}
-
-        {activeView === 'exercise' && (
-          <>
-            {/* Student In-Page Exemplar Drawer */}
-            {userRole === 'student' && showExemplarDrawer && (
-              <div className="mb-6 p-4 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 shadow-xs text-xs space-y-2 animate-fade-in">
-                <div className="flex items-center justify-between text-blue-900 dark:text-blue-200 font-bold text-sm">
-                  <div className="flex items-center gap-2">
-                    <HelpCircle className="w-4 h-4 text-blue-600" />
-                    <span>{lang === 'fa' ? `راهنمای استاد و پاسخ نمونه (اسلاید ${page + 18}):` : `Instructor Guide & Model Answer (Slide ${page + 18}):`}</span>
-                  </div>
-                  <button
-                    onClick={() => handleApplyExemplar(page)}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded bg-blue-600 text-white text-[11px] hover:bg-blue-700 transition-colors cursor-pointer"
-                  >
-                    <Sparkles className="w-3 h-3" />
-                    <span>{lang === 'fa' ? 'کپی در فرم من' : 'Copy to my form'}</span>
-                  </button>
-                </div>
-                <p className="text-blue-800 dark:text-blue-300 leading-relaxed font-sans whitespace-pre-wrap">
-                  {page === 1 
-                    ? `${INSTRUCTOR_EXEMPLAR_ANSWERS.page1.story}\n\n${INSTRUCTOR_EXEMPLAR_ANSWERS.page1.obj}`
-                    : (INSTRUCTOR_EXEMPLAR_ANSWERS as any)[`page${page}`]}
-                </p>
-              </div>
-            )}
-{/* Page 1 (Matching Image 1) */}
+        {/* Page 1 (Matching Image 1) */}
         {page === 1 && (
           <Page1BusinessUnderstanding
             lang={lang}
@@ -977,9 +954,6 @@ export default function App() {
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           />
-        )}
-
-        </>
         )}
 
         {/* Reset Option and Auto-save indicator */}
