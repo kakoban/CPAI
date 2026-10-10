@@ -15,11 +15,13 @@ import { Page12AiPatterns } from './components/Page12AiPatterns';
 import { Page13WhichPatternsUsed } from './components/Page13WhichPatternsUsed';
 import { Page14AssessSituation } from './components/Page14AssessSituation';
 import { Page15TechnologyAndSkills } from './components/Page15TechnologyAndSkills';
+import { Page16ScheduleRequirements } from './components/Page16ScheduleRequirements';
 import { Footer } from './components/Footer';
 import { OWJ_LOGO } from './data/logo';
-import { Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud } from 'lucide-react';
+import { Clock, Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud } from 'lucide-react';
 
-const STORAGE_KEY = 'cpmai-workbook-15pages-v1';
+const STORAGE_KEY = 'cpmai-workbook-16pages-v1';
+const LEGACY_KEY_15 = 'cpmai-workbook-15pages-v1';
 const LEGACY_KEY_14 = 'cpmai-workbook-14pages-v1';
 const LEGACY_KEY_13 = 'cpmai-workbook-13pages-v1';
 const LEGACY_KEY_12 = 'cpmai-workbook-12pages-v1';
@@ -36,7 +38,7 @@ const LEGACY_KEY_2 = 'cpmai-workbook-2pages-v1';
 const LEGACY_KEY = 'cpmai-wb-p1-v1';
 
 export default function App() {
-  const [page, setPage] = useState<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15>(1);
+  const [page, setPage] = useState<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16>(1);
   const [lang, setLang] = useState<Language>('fa');
   const [theme, setTheme] = useState<Theme>('light');
 
@@ -90,6 +92,9 @@ export default function App() {
   // Page 15 state (Task Group: Assess Situation / Task: Resource Requirements - Technology & Skills Inventory - Slide 25)
   const [page15Content, setPage15Content] = useState('');
 
+  // Page 16 state (Task Group: Assess Situation / Task: Schedule Requirements - Slide 26)
+  const [page16Content, setPage16Content] = useState('');
+
   const [toastMsg, setToastMsg] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
   const [cloudStatus, setCloudStatus] = useState<'idle' | 'synced' | 'error'>('idle');
@@ -139,6 +144,7 @@ export default function App() {
         if (d.page13Content) setPage13Content(d.page13Content);
         if (d.page14Content) setPage14Content(d.page14Content);
         if (d.page15Content) setPage15Content(d.page15Content);
+        if (d.page16Content) setPage16Content(d.page16Content);
       }
     } catch {
       // Ignore parse error
@@ -170,14 +176,15 @@ export default function App() {
       page12Content,
       page13Content,
       page14Content,
-      page15Content
+      page15Content,
+      page16Content
     };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch {
       // Storage unavailable
     }
-  }, [page, lang, theme, read, story, bg, obj, qs, ans, page2Content, page3Content, page4Content, page5Content, page6Content, page7Content, page8Content, page9Content, page10Content, page11Content, page12Content, page13Content, page14Content, page15Content]);
+  }, [page, lang, theme, read, story, bg, obj, qs, ans, page2Content, page3Content, page4Content, page5Content, page6Content, page7Content, page8Content, page9Content, page10Content, page11Content, page12Content, page13Content, page14Content, page15Content, page16Content]);
 
   // Sync document language, direction, and theme
   useEffect(() => {
@@ -304,9 +311,15 @@ export default function App() {
       : `--- Page 15: Technology Resources & Skills Inventory (Slide 25) ---\nTask Group: Assess Situation\nTask: Resource Requirements — Technology Resources & Skills Inventory\nTechnology: Hardware, AI/NLP Frameworks, Cloud Hosting, APIs & CI/CD\nSkills: Core ML/NLP, Solutions Architecture, Domain SME, Agile PM, Skill Gaps\n\n`;
     fullText += page15Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
 
+    // Page 16
+    fullText += '\n\n' + (lang === 'fa'
+      ? `--- صفحه ۱۶: الزامات زمان‌بندی و وابستگی‌های پروژه (اسلاید ۲۶) ---\nTask Group: Assess Situation\nTask: Schedule Requirements\nSchedule: 4-Month MVP, 2-to-4-week agile sprints, pilot testing\nConstraints: Budget < $1M, API dependencies, CCPA data permissions\n\n`
+      : `--- Page 16: Task: Schedule Requirements (Slide 26) ---\nTask Group: Assess Situation\nTask: Schedule Requirements\nSchedule: 4-Month MVP, 2-to-4-week agile sprints, pilot testing\nConstraints: Budget < $1M, API dependencies, CCPA data permissions\n\n`);
+    fullText += page16Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
+
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(fullText).then(() => {
-        showToast(lang === 'fa' ? 'پاسخ‌های هر ۱۵ صفحه کپی شد!' : 'Workbook answers for all 15 pages copied!');
+        showToast(lang === 'fa' ? 'پاسخ‌های هر ۱۶ صفحه کپی شد!' : 'Workbook answers for all 16 pages copied!');
       });
     }
   };
@@ -337,6 +350,7 @@ export default function App() {
     setPage13Content('');
     setPage14Content('');
     setPage15Content('');
+    setPage16Content('');
     showToast(lang === 'fa' ? 'تمام پاسخ‌ها پاک شدند' : 'Workbook reset');
   };
 
@@ -365,6 +379,7 @@ export default function App() {
           { pageNumber: 13, contentText: page13Content, contentJson: { content: page13Content }, isCompleted: !!page13Content },
           { pageNumber: 14, contentText: page14Content, contentJson: { content: page14Content }, isCompleted: !!page14Content },
           { pageNumber: 15, contentText: page15Content, contentJson: { content: page15Content }, isCompleted: !!page15Content },
+          { pageNumber: 16, contentText: page16Content, contentJson: { content: page16Content }, isCompleted: !!page16Content },
         ]
       };
 
@@ -951,6 +966,23 @@ export default function App() {
             onChangeContent={setPage15Content}
             onGoToPage14={() => {
               setPage(14);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onGoToPage16={() => {
+              setPage(16);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
+
+        {/* Page 16 (Matching Slide 26: Task Group: Assess Situation / Task: Schedule Requirements) */}
+        {page === 16 && (
+          <Page16ScheduleRequirements
+            lang={lang}
+            content={page16Content}
+            onChangeContent={setPage16Content}
+            onGoToPage15={() => {
+              setPage(15);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           />

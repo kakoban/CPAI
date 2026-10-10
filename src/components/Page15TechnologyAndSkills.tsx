@@ -50,6 +50,7 @@ interface Page15Props {
   content: string;
   onChangeContent: (val: string) => void;
   onGoToPage14: () => void;
+  onGoToPage16?: () => void;
 }
 
 interface TechResourceItem {
@@ -96,7 +97,8 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
   lang,
   content,
   onChangeContent,
-  onGoToPage14
+  onGoToPage14,
+  onGoToPage16
 }) => {
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'canvas' | 'tech_catalog' | 'skills_matrix' | 'gap_analysis' | 'samples' | 'readiness'>('canvas');
@@ -927,14 +929,19 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
           </span>
         </button>
 
-        <div className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] flex items-center gap-2">
-          <span>
-            {lang === 'fa'
-              ? 'تکمیل کاربرگ سیاهه فناوری و مهارت‌های شناختی (اسلاید ۲۵)'
-              : 'Slide 25 Technology & Skills Completed'}
-          </span>
-          <span className="w-2.5 h-2.5 rounded-full bg-[#2f7d5b]" />
-        </div>
+        {onGoToPage16 && (
+          <button
+            onClick={onGoToPage16}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#00738c] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
+          >
+            <span>
+              {lang === 'fa'
+                ? 'صفحه بعدی: صفحه ۱۶ (اسلاید ۲۶: الزامات زمان‌بندی)'
+                : 'Next: Page 16 (Slide 26: Schedule Requirements)'}
+            </span>
+            {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+          </button>
+        )}
       </div>
     </div>
   );
