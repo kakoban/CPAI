@@ -337,6 +337,17 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleLogout = () => {
+    authApi.logout();
+    setCurrentUser(null);
+    setPage('landing');
+    showToast(
+      lang === 'fa'
+        ? 'با موفقیت از حساب خود خارج شدید.'
+        : 'Signed out successfully.'
+    );
+  };
+
   const handleCopyAll = () => {
     let fullText = lang === 'fa'
       ? `=== کتاب کار CPMAI: فاز اول درک کسب‌وکار ===\nمشاوران مدیریت کسب و کار اوج (owjbc.com)\n\n`
@@ -615,16 +626,7 @@ export default function App() {
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          onLogout={() => {
-            authApi.logout();
-            setCurrentUser(null);
-            setPage('landing');
-            showToast(
-              lang === 'fa'
-                ? 'با موفقیت از حساب خود خارج شدید.'
-                : 'Signed out successfully.'
-            );
-          }}
+          onLogout={handleLogout}
         />
 
         {/* Mandatory Post-Registration Onboarding Modal */}
@@ -633,6 +635,7 @@ export default function App() {
             isOpen={true}
             currentUser={currentUser}
             onComplete={handleOnboardingComplete}
+            onLogout={handleLogout}
             lang={lang}
           />
         )}
@@ -1731,16 +1734,7 @@ export default function App() {
                 : `Welcome, ${user.displayName || user.email}`
             );
           }}
-          onLogout={() => {
-            authApi.logout();
-            setCurrentUser(null);
-            setPage('landing');
-            showToast(
-              lang === 'fa'
-                ? 'با موفقیت از حساب خود خارج شدید.'
-                : 'Signed out successfully.'
-            );
-          }}
+          onLogout={handleLogout}
         />
 
         {/* Mandatory Post-Registration Onboarding Modal */}
@@ -1749,6 +1743,7 @@ export default function App() {
             isOpen={true}
             currentUser={currentUser}
             onComplete={handleOnboardingComplete}
+            onLogout={handleLogout}
             lang={lang}
           />
         )}

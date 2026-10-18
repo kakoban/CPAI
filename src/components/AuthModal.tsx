@@ -70,7 +70,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onLoginSuccess,
   onLogout
 }) => {
-  const [authTab, setAuthTab] = useState<'google' | 'email'>('google');
+  const [authTab, setAuthTab] = useState<'google' | 'email'>('email');
   const [emailInput, setEmailInput] = useState<string>('');
   const [passInput, setPassInput] = useState<string>('');
   const [showPass, setShowPass] = useState<boolean>(false);
@@ -274,7 +274,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         setErrorMsg('خطای راه‌اندازی کلاینت گوگل: ' + gisErr.message);
       }
     } else {
-      handleSimulatedGoogleLogin();
+      setAuthTab('email');
+      setErrorMsg(
+        lang === 'fa'
+          ? 'سرویس گوگل برای این دامنه متصل نیست. لطفاً از تب «ورود با ایمیل» با ایمیل دلخواه خود وارد شوید.'
+          : 'Google OAuth is not configured for this domain. Please sign in with your email.'
+      );
     }
   };
 
@@ -813,20 +818,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     </span>
                   </button>
 
-                  {/* Developer Demo Button */}
-                  <button
-                    type="button"
-                    onClick={handleSimulatedGoogleLogin}
-                    disabled={isLoading}
-                    className="w-full flex items-center justify-center gap-2 p-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] font-semibold border border-black/[0.04] transition-colors cursor-pointer"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-[#fbbf24]" />
-                    <span>
+                  {/* Direct Email Hint */}
+                  <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-[#2563EB] dark:text-[#60A5FA] text-xs text-right space-y-1">
+                    <p className="font-bold flex items-center gap-1.5 justify-end">
+                      <span>{lang === 'fa' ? 'ورود مستقیم با هر ایمیلی فعال است' : 'Direct Email Sign-in'}</span>
+                      <Mail className="w-3.5 h-3.5" />
+                    </p>
+                    <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
                       {lang === 'fa'
-                        ? 'تست سریع احراز هویت (حالت شبیه‌سازی)'
-                        : 'Quick Test Sign-in (Demo Mode)'}
-                    </span>
-                  </button>
+                        ? 'برای ورود یا ثبت‌نام کافیست به تب «ورود با ایمیل» در بالا مراجعه فرمایید.'
+                        : 'Switch to the "Sign In with Email" tab above to sign in or register.'}
+                    </p>
+                  </div>
                 </div>
               )}
 

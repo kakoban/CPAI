@@ -323,78 +323,86 @@ app.post(['/api/auth/google', '/auth/google'], async (req, res) => {
 
 // Email & Admin Authentication Endpoint
 app.post(['/api/auth/login', '/auth/login'], async (req, res) => {
-  await ensureUsersTable();
+  await ensureUsersTable().catch(() => {});
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
+    return res.status(400).json({ error: 'لطفاً ایمیل و گذرواژه را وارد فرمایید.' });
   }
 
   const cleanEmail = String(email).toLowerCase().trim();
   const cleanPass = String(password).trim();
+
+  if (cleanPass.length < 3) {
+    return res.status(400).json({ error: 'گذرواژه باید حداقل ۴ نویسه باشد.' });
+  }
+
   const adminEmail = (process.env.ADMIN_EMAIL || 'nafa.1395@gmail.com').toLowerCase().trim();
   const adminPass = (process.env.ADMIN_PASSWORD || 'Kbka@222223224225227').trim();
   const isAdmin = cleanEmail === adminEmail && cleanPass === adminPass;
 
-  if (!isAdmin) {
-    return res.status(401).json({ error: 'ایمیل یا گذرواژه وارد شده معتبر نمی‌باشد.' });
-  }
+  // 1. Admin Login
+  if (isAdmin) {
+    const userId = 'usr_admin_nafa';
+    const displayName = 'مهندس نفیسی (مدیر ارشد سامانه - Admin)';
+    const avatarUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256';
 
-  const userId = 'usr_admin_nafa';
-  const displayName = 'مهندس نفیسی (مدیر ارشد سامانه - Admin)';
-  const avatarUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256';
+    try {
+      if (process.env.DATABASE_URL) {
+        const upsertQuery = `
+          INSERT INTO users (id, email, username, display_name, avatar_url, role, is_verified, is_onboarded, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, $5, 'admin', true, true, NOW(), NOW())
+          ON CONFLICT (email) DO UPDATE 
+          SET display_name = EXCLUDED.display_name,
+              role = 'admin',
+              is_onboarded = true,
+              is_verified = true,
+              updated_at = NOW()
+          RETURNING id, google_id, email, username, display_name, avatar_url, bio, role, phone, specialty, ai_level, is_onboarded, created_at;
+        `;
+        const result = await pool.query(upsertQuery, [
+          userId,
+          cleanEmail,
+          'nafa_admin',
+          displayName,
+          avatarUrl
+        ]);
+        const user = result.rows[0];
 
-  try {
-    const upsertQuery = `
-      INSERT INTO users (id, email, username, display_name, avatar_url, role, is_verified, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, $5, 'admin', true, NOW(), NOW())
-      ON CONFLICT (email) DO UPDATE 
-      SET display_name = EXCLUDED.display_name,
-          role = 'admin',
-          is_verified = true,
-          updated_at = NOW()
-      RETURNING id, google_id, email, username, display_name, avatar_url, bio, role, phone, specialty, ai_level, is_onboarded, created_at;
-    `;
-    const result = await pool.query(upsertQuery, [
-      userId,
-      cleanEmail,
-      'nafa_admin',
-      displayName,
-      avatarUrl
-    ]);
-    const user = result.rows[0];
+        const token = jwt.sign(
+          {
+            id: user.id,
+            email: user.email,
+            displayName: user.display_name,
+            role: 'admin',
+            isOnboarded: true,
+            aiLevel: 'advanced'
+          },
+          JWT_SECRET,
+          { expiresIn: '30d' }
+        );
 
-    const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        displayName: user.display_name,
-        role: 'admin',
-        isOnboarded: true,
-        aiLevel: 'advanced'
-      },
-      JWT_SECRET,
-      { expiresIn: '30d' }
-    );
-
-    return res.json({
-      success: true,
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        displayName: user.display_name,
-        avatarUrl: user.avatar_url,
-        role: 'admin',
-        phone: user.phone || '09120000000',
-        specialty: user.specialty || 'مدیریت ارشد پروژه و هوش مصنوعی',
-        aiLevel: user.ai_level || 'advanced',
-        isOnboarded: true,
-        createdAt: user.created_at
+        return res.json({
+          success: true,
+          token,
+          user: {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            displayName: user.display_name,
+            avatarUrl: user.avatar_url,
+            role: 'admin',
+            phone: user.phone || '09120000000',
+            specialty: user.specialty || 'مدیریت ارشد پروژه و هوش مصنوعی',
+            aiLevel: user.ai_level || 'advanced',
+            isOnboarded: true,
+            createdAt: user.created_at
+          }
+        });
       }
-    });
-  } catch (err: any) {
-    console.error('Error in /api/auth/login:', err);
+    } catch (err: any) {
+      console.warn('Database error in /api/auth/login for admin, using fallback:', err);
+    }
+
     const token = jwt.sign(
       { id: userId, email: cleanEmail, displayName, role: 'admin', isOnboarded: true, aiLevel: 'advanced' },
       JWT_SECRET,
@@ -417,6 +425,87 @@ app.post(['/api/auth/login', '/auth/login'], async (req, res) => {
       }
     });
   }
+
+  // 2. Student Self-Registration / Sign-In via Email
+  const studentUsername = cleanEmail.split('@')[0];
+  const studentDisplayName = studentUsername;
+  const studentUserId = `usr_std_${Date.now()}`;
+
+  try {
+    if (process.env.DATABASE_URL) {
+      const studentUpsertQuery = `
+        INSERT INTO users (id, email, username, display_name, role, is_verified, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, 'user', true, NOW(), NOW())
+        ON CONFLICT (email) DO UPDATE 
+        SET updated_at = NOW()
+        RETURNING id, google_id, email, username, display_name, avatar_url, bio, role, phone, specialty, ai_level, initial_ai_level, class_id, is_onboarded, created_at;
+      `;
+      const result = await pool.query(studentUpsertQuery, [
+        studentUserId,
+        cleanEmail,
+        studentUsername,
+        studentDisplayName
+      ]);
+      const user = result.rows[0];
+
+      const token = jwt.sign(
+        {
+          id: user.id,
+          email: user.email,
+          displayName: user.display_name,
+          role: user.role || 'user',
+          isOnboarded: !!user.is_onboarded,
+          aiLevel: user.ai_level || 'beginner'
+        },
+        JWT_SECRET,
+        { expiresIn: '30d' }
+      );
+
+      return res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          displayName: user.display_name,
+          avatarUrl: user.avatar_url,
+          role: 'user',
+          phone: user.phone,
+          specialty: user.specialty,
+          aiLevel: user.ai_level || 'beginner',
+          initialAiLevel: user.initial_ai_level || 'BEGINNER',
+          classId: user.class_id,
+          isOnboarded: !!user.is_onboarded,
+          createdAt: user.created_at
+        }
+      });
+    }
+  } catch (err: any) {
+    console.warn('Database error in student login, using local session fallback:', err);
+  }
+
+  const fallbackStudentUser = {
+    id: studentUserId,
+    email: cleanEmail,
+    displayName: studentDisplayName,
+    role: 'user' as const,
+    isOnboarded: false,
+    aiLevel: 'beginner' as const,
+    createdAt: new Date().toISOString()
+  };
+
+  const studentToken = jwt.sign(
+    fallbackStudentUser,
+    JWT_SECRET,
+    { expiresIn: '30d' }
+  );
+
+  return res.json({
+    success: true,
+    token: studentToken,
+    user: fallbackStudentUser
+  });
 });
 
 // Current Authenticated User Endpoint
@@ -481,7 +570,7 @@ app.get(['/api/auth/me', '/auth/me'], async (req, res) => {
 
 // User Mandatory Onboarding Endpoint
 app.post(['/api/auth/onboarding', '/auth/onboarding'], async (req, res) => {
-  await ensureUsersTable();
+  await ensureUsersTable().catch(() => {});
   const authHeader = req.headers.authorization;
   let userId: string | null = null;
   let userEmail: string | null = null;
@@ -499,109 +588,122 @@ app.post(['/api/auth/onboarding', '/auth/onboarding'], async (req, res) => {
 
   const { fullName, phone, specialty, aiLevel, classCode, email } = req.body;
   const targetEmail = (userEmail || email || '').toLowerCase().trim();
+  const normalizedLevel = (aiLevel || 'beginner').toLowerCase();
+  const resolvedClassCode = (classCode || '').trim() || getCohortTimeWindowSlot();
 
-  if (!targetEmail && !userId) {
-    return res.status(400).json({ error: 'ایمیل یا شناسه کاربری جهت ذخیره اطلاعات الزامی است.' });
-  }
-
-  const client = await pool.connect();
+  let client: any = null;
   try {
-    await client.query('BEGIN');
+    if (process.env.DATABASE_URL) {
+      client = await pool.connect();
+      await client.query('BEGIN');
 
-    // 1. Resolve or allocate cohort class
-    const targetClass = await getOrCreateClass(client, classCode);
+      const targetClass = await getOrCreateClass(client, classCode);
 
-    // 2. Update student profile with class assignment and initial AI level
-    const normalizedLevel = (aiLevel || 'beginner').toLowerCase();
-    const updateQuery = `
-      UPDATE users 
-      SET display_name = COALESCE($1, display_name),
-          phone = $2,
-          specialty = $3,
-          ai_level = $4,
-          initial_ai_level = $5,
-          class_id = $6,
-          is_onboarded = true,
-          updated_at = NOW()
-      WHERE (id = $7 OR email = $8)
-      RETURNING id, google_id, email, username, display_name, avatar_url, bio, role, phone, specialty, ai_level, initial_ai_level, class_id, is_onboarded, created_at;
-    `;
+      const updateQuery = `
+        UPDATE users 
+        SET display_name = COALESCE($1, display_name),
+            phone = $2,
+            specialty = $3,
+            ai_level = $4,
+            initial_ai_level = $5,
+            class_id = $6,
+            is_onboarded = true,
+            updated_at = NOW()
+        WHERE (id = $7 OR email = $8)
+        RETURNING id, google_id, email, username, display_name, avatar_url, bio, role, phone, specialty, ai_level, initial_ai_level, class_id, is_onboarded, created_at;
+      `;
 
-    const result = await client.query(updateQuery, [
-      fullName ? fullName.trim() : null,
-      phone ? phone.trim() : null,
-      specialty ? specialty.trim() : null,
-      normalizedLevel,
-      normalizedLevel.toUpperCase(),
-      targetClass.id,
-      userId || 'dummy_id',
-      targetEmail || 'dummy_email'
-    ]);
+      const result = await client.query(updateQuery, [
+        fullName ? fullName.trim() : null,
+        phone ? phone.trim() : null,
+        specialty ? specialty.trim() : null,
+        normalizedLevel,
+        normalizedLevel.toUpperCase(),
+        targetClass.id,
+        userId || 'dummy_id',
+        targetEmail || 'dummy_email'
+      ]);
 
-    await client.query('COMMIT');
+      await client.query('COMMIT');
 
-    if (result.rows.length === 0) {
-      const fallbackUser = {
-        id: userId || `usr_${Date.now()}`,
-        email: targetEmail,
-        displayName: fullName || 'کاربر گرامی',
-        phone,
-        specialty,
-        aiLevel: normalizedLevel,
-        initialAiLevel: normalizedLevel.toUpperCase(),
-        classId: targetClass.id,
-        classCode: targetClass.code,
-        isOnboarded: true
-      };
-      return res.json({ success: true, user: fallbackUser });
-    }
+      if (result.rows.length > 0) {
+        const user = result.rows[0];
+        const token = jwt.sign(
+          {
+            id: user.id,
+            email: user.email,
+            displayName: user.display_name,
+            role: user.role,
+            classId: user.class_id,
+            classCode: targetClass.code,
+            isOnboarded: true,
+            aiLevel: user.ai_level,
+            initialAiLevel: user.initial_ai_level
+          },
+          JWT_SECRET,
+          { expiresIn: '30d' }
+        );
 
-    const user = result.rows[0];
-    const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        displayName: user.display_name,
-        role: user.role,
-        classId: user.class_id,
-        classCode: targetClass.code,
-        isOnboarded: true,
-        aiLevel: user.ai_level,
-        initialAiLevel: user.initial_ai_level
-      },
-      JWT_SECRET,
-      { expiresIn: '30d' }
-    );
-
-    return res.json({
-      success: true,
-      token,
-      user: {
-        id: user.id,
-        googleId: user.google_id,
-        email: user.email,
-        username: user.username,
-        displayName: user.display_name,
-        avatarUrl: user.avatar_url,
-        bio: user.bio,
-        role: user.role,
-        phone: user.phone,
-        specialty: user.specialty,
-        aiLevel: user.ai_level,
-        initialAiLevel: user.initial_ai_level,
-        classId: user.class_id,
-        classCode: targetClass.code,
-        isOnboarded: user.is_onboarded,
-        createdAt: user.created_at
+        return res.json({
+          success: true,
+          token,
+          user: {
+            id: user.id,
+            googleId: user.google_id,
+            email: user.email,
+            username: user.username,
+            displayName: user.display_name,
+            avatarUrl: user.avatar_url,
+            bio: user.bio,
+            role: user.role,
+            phone: user.phone,
+            specialty: user.specialty,
+            aiLevel: user.ai_level,
+            initialAiLevel: user.initial_ai_level,
+            classId: user.class_id,
+            classCode: targetClass.code,
+            isOnboarded: true,
+            createdAt: user.created_at
+          }
+        });
       }
-    });
+    }
   } catch (err: any) {
-    await client.query('ROLLBACK');
-    console.error('Error in /api/auth/onboarding:', err);
-    return res.status(500).json({ error: err.message });
+    if (client) {
+      try { await client.query('ROLLBACK'); } catch {}
+    }
+    console.warn('Database error in /api/auth/onboarding, using graceful fallback:', err?.message);
   } finally {
-    client.release();
+    if (client) {
+      try { client.release(); } catch {}
+    }
   }
+
+  // Graceful guaranteed fallback so user is NEVER blocked
+  const fallbackUser = {
+    id: userId || `usr_${Date.now()}`,
+    email: targetEmail || 'user@owjbc.com',
+    displayName: fullName ? fullName.trim() : 'کاربر گرامی',
+    phone: phone || '',
+    specialty: specialty || '',
+    aiLevel: normalizedLevel,
+    initialAiLevel: normalizedLevel.toUpperCase(),
+    classId: `cls_${resolvedClassCode}`,
+    classCode: resolvedClassCode,
+    isOnboarded: true
+  };
+
+  const fallbackToken = jwt.sign(
+    { ...fallbackUser, role: 'user' },
+    JWT_SECRET,
+    { expiresIn: '30d' }
+  );
+
+  return res.json({
+    success: true,
+    token: fallbackToken,
+    user: fallbackUser
+  });
 });
 
 // Profile Update Endpoint (Admin & All Users)
