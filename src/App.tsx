@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Language, Theme } from './types/cpmai';
+import { Page0LlmFundamentals } from './components/Page0LlmFundamentals';
 import { Page1BusinessUnderstanding } from './components/Page1BusinessUnderstanding';
 import { Page2ProblemIteration } from './components/Page2ProblemIteration';
 import { Page3SuccessCriteria } from './components/Page3SuccessCriteria';
@@ -16,11 +17,35 @@ import { Page13WhichPatternsUsed } from './components/Page13WhichPatternsUsed';
 import { Page14AssessSituation } from './components/Page14AssessSituation';
 import { Page15TechnologyAndSkills } from './components/Page15TechnologyAndSkills';
 import { Page16ScheduleRequirements } from './components/Page16ScheduleRequirements';
+import { Page17ProjectConstraintsAndModelPerformance } from './components/Page17ProjectConstraintsAndModelPerformance';
+import { Page18ModelPerformanceMetrics } from './components/Page18ModelPerformanceMetrics';
+import { Page19ModelPerformanceRequirements } from './components/Page19ModelPerformanceRequirements';
+import { Page20AcceptableKpiPerformanceValues } from './components/Page20AcceptableKpiPerformanceValues';
+import { Page21RequiredTechnologyKpis } from './components/Page21RequiredTechnologyKpis';
+import { InteractivePlacementQuiz } from './components/InteractivePlacementQuiz';
+import { AgentifyLanding } from './components/landing/AgentifyLanding';
+import { AuthModal } from './components/AuthModal';
+import { OnboardingModal } from './components/OnboardingModal';
+import { ContentProtectionShield } from './components/ContentProtectionShield';
+import { ClassLeaderboardModal } from './components/leaderboard/ClassLeaderboardModal';
+import { AdminControlCenterModal } from './components/admin/AdminControlCenterModal';
+import { authApi } from './services/authApi';
+import { lmsApi } from './services/lmsApi';
+import { UserProfile } from './types/auth';
+import { SessionLockEntity } from './types/lms';
 import { Footer } from './components/Footer';
-import { OWJ_LOGO } from './data/logo';
-import { Clock, Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud } from 'lucide-react';
+import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from './data/logo';
+import { Clock, Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud, Calculator, Bot, Server, Sparkles, Trophy, Lock, Unlock, GraduationCap } from 'lucide-react';
 
-const STORAGE_KEY = 'cpmai-workbook-16pages-v1';
+export type AppPage = 'landing' | 'quiz' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21;
+
+const STORAGE_KEY = 'cpmai-workbook-21pages-with-page0-v1';
+const LEGACY_KEY_21 = 'cpmai-workbook-21pages-v1';
+const LEGACY_KEY_20 = 'cpmai-workbook-20pages-v1';
+const LEGACY_KEY_19 = 'cpmai-workbook-19pages-v1';
+const LEGACY_KEY_18 = 'cpmai-workbook-18pages-v1';
+const LEGACY_KEY_17 = 'cpmai-workbook-17pages-v1';
+const LEGACY_KEY_16 = 'cpmai-workbook-16pages-v1';
 const LEGACY_KEY_15 = 'cpmai-workbook-15pages-v1';
 const LEGACY_KEY_14 = 'cpmai-workbook-14pages-v1';
 const LEGACY_KEY_13 = 'cpmai-workbook-13pages-v1';
@@ -38,9 +63,60 @@ const LEGACY_KEY_2 = 'cpmai-workbook-2pages-v1';
 const LEGACY_KEY = 'cpmai-wb-p1-v1';
 
 export default function App() {
-  const [page, setPage] = useState<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16>(1);
+  const [page, setPage] = useState<AppPage>('landing');
   const [lang, setLang] = useState<Language>('fa');
   const [theme, setTheme] = useState<Theme>('light');
+
+  // Google OAuth / GIS Authentication State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+
+  // LMS & Cohort State
+  const [sessionLocks, setSessionLocks] = useState<SessionLockEntity[]>([]);
+  const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState<boolean>(false);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
+
+  const refreshCurriculumLocks = () => {
+    lmsApi.fetchCurriculumLocks().then((res) => {
+      if (res?.locks) {
+        setSessionLocks(res.locks);
+      }
+    }).catch(() => {});
+  };
+
+  useEffect(() => {
+    const saved = authApi.getSavedUser();
+    if (saved) {
+      setCurrentUser(saved);
+    }
+    authApi.fetchCurrentUser().then((u) => {
+      if (u) setCurrentUser(u);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (currentUser) {
+      refreshCurriculumLocks();
+    }
+  }, [currentUser]);
+
+  const isSessionLocked = (sessionNum: number): boolean => {
+    if (currentUser?.role === 'admin') return false; // Admin bypass!
+    if (sessionNum <= 1) return false; // Sessions 0 & 1 always accessible
+    const lock = sessionLocks.find((l) => l.sessionNum === sessionNum);
+    return lock ? !lock.isUnlocked : false;
+  };
+
+  // Enforce authentication: All platform features require login
+  useEffect(() => {
+    if (!currentUser && page !== 'landing') {
+      setPage('landing');
+      setIsAuthModalOpen(true);
+    }
+  }, [currentUser, page]);
+
+  // Page 0 state (Applied LLM Fundamentals & Prompting Toolkit Sandbox)
+  const [page0Content, setPage0Content] = useState('');
 
   // Page 1 state
   const [read, setRead] = useState(false);
@@ -95,6 +171,21 @@ export default function App() {
   // Page 16 state (Task Group: Assess Situation / Task: Schedule Requirements - Slide 26)
   const [page16Content, setPage16Content] = useState('');
 
+  // Page 17 state (Slide 27: Project Constraints & Acceptable Model Performance Values)
+  const [page17Content, setPage17Content] = useState('');
+
+  // Page 18 state (Slide 28: Figure 3 Confusion Matrix & Acceptable Model Performance Values)
+  const [page18Content, setPage18Content] = useState('');
+
+  // Page 19 state (Slide 29: Desired Performance Metrics & Sensitivities)
+  const [page19Content, setPage19Content] = useState('');
+
+  // Page 20 state (Slide 30: Task Acceptable KPI Performance Values)
+  const [page20Content, setPage20Content] = useState('');
+
+  // Page 21 state (Slide 31: Required Technology KPIs)
+  const [page21Content, setPage21Content] = useState('');
+
   const [toastMsg, setToastMsg] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
   const [cloudStatus, setCloudStatus] = useState<'idle' | 'synced' | 'error'>('idle');
@@ -104,6 +195,13 @@ export default function App() {
     try {
       const stored =
         localStorage.getItem(STORAGE_KEY) ||
+        localStorage.getItem(LEGACY_KEY_21) ||
+        localStorage.getItem(LEGACY_KEY_20) ||
+        localStorage.getItem(LEGACY_KEY_19) ||
+        localStorage.getItem(LEGACY_KEY_18) ||
+        localStorage.getItem(LEGACY_KEY_17) ||
+        localStorage.getItem(LEGACY_KEY_16) ||
+        localStorage.getItem(LEGACY_KEY_15) ||
         localStorage.getItem(LEGACY_KEY_14) ||
         localStorage.getItem(LEGACY_KEY_13) ||
         localStorage.getItem(LEGACY_KEY_12) ||
@@ -121,9 +219,10 @@ export default function App() {
 
       if (stored) {
         const d = JSON.parse(stored);
-        if (d.page) setPage(d.page);
+        if (d.page !== undefined) setPage(d.page);
         if (d.lang) setLang(d.lang);
         if (d.theme) setTheme(d.theme);
+        if (d.page0Content) setPage0Content(d.page0Content);
         if (d.read !== undefined) setRead(d.read);
         if (d.story) setStory(d.story);
         if (d.bg) setBg(d.bg);
@@ -145,6 +244,11 @@ export default function App() {
         if (d.page14Content) setPage14Content(d.page14Content);
         if (d.page15Content) setPage15Content(d.page15Content);
         if (d.page16Content) setPage16Content(d.page16Content);
+        if (d.page17Content) setPage17Content(d.page17Content);
+        if (d.page18Content) setPage18Content(d.page18Content);
+        if (d.page19Content) setPage19Content(d.page19Content);
+        if (d.page20Content) setPage20Content(d.page20Content);
+        if (d.page21Content) setPage21Content(d.page21Content);
       }
     } catch {
       // Ignore parse error
@@ -157,6 +261,7 @@ export default function App() {
       page,
       lang,
       theme,
+      page0Content,
       read,
       story,
       bg,
@@ -177,14 +282,19 @@ export default function App() {
       page13Content,
       page14Content,
       page15Content,
-      page16Content
+      page16Content,
+      page17Content,
+      page18Content,
+      page19Content,
+      page20Content,
+      page21Content
     };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch {
       // Storage unavailable
     }
-  }, [page, lang, theme, read, story, bg, obj, qs, ans, page2Content, page3Content, page4Content, page5Content, page6Content, page7Content, page8Content, page9Content, page10Content, page11Content, page12Content, page13Content, page14Content, page15Content, page16Content]);
+  }, [page, lang, theme, page0Content, read, story, bg, obj, qs, ans, page2Content, page3Content, page4Content, page5Content, page6Content, page7Content, page8Content, page9Content, page10Content, page11Content, page12Content, page13Content, page14Content, page15Content, page16Content, page17Content, page18Content, page19Content, page20Content, page21Content]);
 
   // Sync document language, direction, and theme
   useEffect(() => {
@@ -208,10 +318,36 @@ export default function App() {
     setTimeout(() => setToastMsg(''), 3500);
   };
 
+  const handleOnboardingComplete = (updatedUser: UserProfile) => {
+    setCurrentUser(updatedUser);
+    refreshCurriculumLocks();
+    const levelName =
+      updatedUser.aiLevel === 'beginner'
+        ? (lang === 'fa' ? 'مقدماتی' : 'Beginner')
+        : updatedUser.aiLevel === 'intermediate'
+        ? (lang === 'fa' ? 'متوسط' : 'Intermediate')
+        : (lang === 'fa' ? 'پیشرفته' : 'Advanced');
+
+    showToast(
+      lang === 'fa'
+        ? `اطلاعات با موفقیت ثبت شد. آزمون سطح‌سنجی متناسب با سطح ${levelName} برای شما آماده است.`
+        : `Profile saved. Placement quiz calibrated to ${levelName} track is ready!`
+    );
+    setPage('quiz');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleCopyAll = () => {
     let fullText = lang === 'fa'
       ? `=== کتاب کار CPMAI: فاز اول درک کسب‌وکار ===\nمشاوران مدیریت کسب و کار اوج (owjbc.com)\n\n`
       : `=== CPMAI Workbook: Phase I Business Understanding ===\nOWJ Business Council (owjbc.com)\n\n`;
+
+    // Page 0
+    if (page0Content.trim()) {
+      fullText += lang === 'fa'
+        ? `--- صفحه ۰: پیش‌نویس کارگاه پرامپت LLM ---\n${page0Content}\n\n`
+        : `--- Page 0: LLM Prompt Sandbox Draft ---\n${page0Content}\n\n`;
+    }
 
     // Page 1
     fullText += lang === 'fa' ? `--- صفحه ۱: اهداف کسب‌وکار ---\n` : `--- Page 1: Determine Business Objectives ---\n`;
@@ -317,9 +453,39 @@ export default function App() {
       : `--- Page 16: Task: Schedule Requirements (Slide 26) ---\nTask Group: Assess Situation\nTask: Schedule Requirements\nSchedule: 4-Month MVP, 2-to-4-week agile sprints, pilot testing\nConstraints: Budget < $1M, API dependencies, CCPA data permissions\n\n`);
     fullText += page16Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
 
+    // Page 17
+    fullText += '\n\n' + (lang === 'fa'
+      ? `--- صفحه ۱۷: محدودیت‌های تکمیلی و مقادیر عملکرد مدل (اسلاید ۲۷) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable Model Performance Values\nConstraints: Budget limits, data volume/noise, legacy API rate limits, CCPA privacy, seasonal peak freeze\nPerformance: Probabilistic error awareness & baseline thresholds\n\n`
+      : `--- Page 17: Project Constraints & Model Performance Values (Slide 27) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable Model Performance Values\nConstraints: Budget limits, data volume/noise, legacy API rate limits, CCPA privacy, seasonal peak freeze\nPerformance: Probabilistic error awareness & baseline thresholds\n\n`);
+    fullText += page17Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
+
+    // Page 18
+    fullText += '\n\n' + (lang === 'fa'
+      ? `--- صفحه ۱۸: ماتریس درهم‌ریختگی و مقادیر قابل قبول عملکرد مدل (اسلاید ۲۸) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable Model Performance Values (Figure 3 Confusion Matrix)\nArtifacts: Accuracy, Precision, Recall, F1 Score, Max False Positive Rate\n\n`
+      : `--- Page 18: Confusion Matrix & Model Performance Values (Slide 28) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable Model Performance Values (Figure 3 Confusion Matrix)\nArtifacts: Accuracy, Precision, Recall, F1 Score, Max False Positive Rate\n\n`);
+    fullText += page18Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
+
+    // Page 19
+    fullText += '\n\n' + (lang === 'fa'
+      ? `--- صفحه ۱۹: سنجه‌های مطلوب عملکرد و حساسیت‌ها (اسلاید ۲۹) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable Model Performance Values (Slide 29)\nArtifact: Maximum Acceptable False Negative Rate (FNR)\nQ1: Desired / Required Performance Metrics\nQ2: Sensitivities to False Positives/Negatives & GenAI Inaccuracies\n\n`
+      : `--- Page 19: Desired Performance Metrics & Sensitivities (Slide 29) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable Model Performance Values (Slide 29)\nArtifact: Maximum Acceptable False Negative Rate (FNR)\nQ1: Desired / Required Performance Metrics\nQ2: Sensitivities to False Positives/Negatives & GenAI Inaccuracies\n\n`);
+    fullText += page19Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
+
+    // Page 20
+    fullText += '\n\n' + (lang === 'fa'
+      ? `--- صفحه ۲۰: مقادیر قابل قبول سنجه‌های کلیدی عملکرد کسب‌وکار (اسلاید ۳۰) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable KPI Performance Values (Slide 30)\nArtifacts: Required Business KPIs (Efficiency, CSAT, Error Reduction, Revenue)\nFinancial ROI & Cost Savings Estimation\n\n`
+      : `--- Page 20: Acceptable Business KPI Performance Values (Slide 30) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable KPI Performance Values (Slide 30)\nArtifacts: Required Business KPIs (Efficiency, CSAT, Error Reduction, Revenue)\nFinancial ROI & Cost Savings Estimation\n\n`);
+    fullText += page20Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
+
+    // Page 21
+    fullText += '\n\n' + (lang === 'fa'
+      ? `--- صفحه ۲۱: سنجه‌های کلیدی عملکرد فناوری (اسلاید ۳۱) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable KPI Performance Values — Required Technology KPIs (Slide 31)\nArtifacts: Latency SLAs, Cloud FinOps, Throughput, Error Rates, High Availability\n\n`
+      : `--- Page 21: Required Technology KPIs (Slide 31) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable KPI Performance Values — Required Technology KPIs (Slide 31)\nArtifacts: Latency SLAs, Cloud FinOps, Throughput, Error Rates, High Availability\n\n`);
+    fullText += page21Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
+
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(fullText).then(() => {
-        showToast(lang === 'fa' ? 'پاسخ‌های هر ۱۶ صفحه کپی شد!' : 'Workbook answers for all 16 pages copied!');
+        showToast(lang === 'fa' ? 'پاسخ‌های هر ۲۱ صفحه کپی شد!' : 'Workbook answers for all 21 pages copied!');
       });
     }
   };
@@ -351,6 +517,7 @@ export default function App() {
     setPage14Content('');
     setPage15Content('');
     setPage16Content('');
+    setPage17Content('');
     showToast(lang === 'fa' ? 'تمام پاسخ‌ها پاک شدند' : 'Workbook reset');
   };
 
@@ -380,6 +547,7 @@ export default function App() {
           { pageNumber: 14, contentText: page14Content, contentJson: { content: page14Content }, isCompleted: !!page14Content },
           { pageNumber: 15, contentText: page15Content, contentJson: { content: page15Content }, isCompleted: !!page15Content },
           { pageNumber: 16, contentText: page16Content, contentJson: { content: page16Content }, isCompleted: !!page16Content },
+          { pageNumber: 17, contentText: page17Content, contentJson: { content: page17Content }, isCompleted: !!page17Content },
         ]
       };
 
@@ -404,38 +572,175 @@ export default function App() {
     }
   };
 
+  // Agentify Enterprise Hero Landing Page (Pure English & Login-gated)
+  if (page === 'landing') {
+    return (
+      <>
+        <AgentifyLanding
+          onEnterApp={() => {
+            if (!currentUser) {
+              setIsAuthModalOpen(true);
+            } else {
+              setPage(0);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }}
+          onOpenAuth={() => setIsAuthModalOpen(true)}
+          currentUser={currentUser}
+          onGoToQuiz={() => {
+            if (!currentUser) {
+              setIsAuthModalOpen(true);
+            } else {
+              setPage('quiz');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }}
+        />
+
+        {/* User Authentication Modal (Admin & Google) */}
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          lang={lang}
+          currentUser={currentUser}
+          onLoginSuccess={(user) => {
+            setCurrentUser(user);
+            showToast(
+              lang === 'fa'
+                ? `خوش آمدید، ${user.displayName || user.email}`
+                : `Welcome, ${user.displayName || user.email}`
+            );
+            if (user.isOnboarded) {
+              setPage(0);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onLogout={() => {
+            authApi.logout();
+            setCurrentUser(null);
+            setPage('landing');
+            showToast(
+              lang === 'fa'
+                ? 'با موفقیت از حساب خود خارج شدید.'
+                : 'Signed out successfully.'
+            );
+          }}
+        />
+
+        {/* Mandatory Post-Registration Onboarding Modal */}
+        {currentUser && !currentUser.isOnboarded && (
+          <OnboardingModal
+            isOpen={true}
+            currentUser={currentUser}
+            onComplete={handleOnboardingComplete}
+            lang={lang}
+          />
+        )}
+
+        {/* Class Leaderboard Modal */}
+        <ClassLeaderboardModal
+          isOpen={isLeaderboardModalOpen}
+          onClose={() => setIsLeaderboardModalOpen(false)}
+          currentUser={currentUser}
+          lang={lang}
+        />
+
+        {/* Admin Control Center Modal (Admin Only) */}
+        {currentUser?.role === 'admin' && (
+          <AdminControlCenterModal
+            isOpen={isAdminModalOpen}
+            onClose={() => setIsAdminModalOpen(false)}
+            currentUser={currentUser}
+            lang={lang}
+          />
+        )}
+      </>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] transition-colors flex flex-col">
+    <div className="protected-workspace min-h-[100dvh] bg-[#f5f5f2] dark:bg-[#0f1418] text-[#1c2830] dark:text-[#e8ebe9] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(31,81,99,0.08),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(111,179,198,0.06),rgba(0,0,0,0))] transition-colors flex flex-col selection:bg-[#1f5163]/20 selection:text-[#1f5163] dark:selection:bg-[#6fb3c6]/20 dark:selection:text-[#6fb3c6]">
+      {/* OWJ Content Protection Shield (Anti-Copy, Anti-Print, Anti-Snipping with Smart Prompt Whitelist) */}
+      <ContentProtectionShield lang={lang} isAdmin={currentUser?.role === 'admin'} />
+
       {/* Top Header Bar */}
-      <header className="sticky top-0 z-30 w-full bg-[#ffffff]/90 dark:bg-[#1a2228]/90 backdrop-blur-md border-b border-[#d9dad5] dark:border-[#2d3942]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <header className="sticky top-0 z-40 w-full bg-[#ffffff]/90 dark:bg-[#161e24]/90 backdrop-blur-xl border-b border-[#d9dad5]/80 dark:border-[#26333c]/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+        <div className="w-full max-w-[1700px] mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-3 sm:gap-4">
           {/* Brand & Organization */}
           <a
             href="https://owjbc.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2.5 group"
+            className="flex items-center gap-2.5 group shrink-0 select-none cursor-pointer"
           >
-            <div className="bg-[#ffffff] p-1 rounded-md border border-[#d9dad5] shadow-2xs">
+            <div className="bg-[#ffffff] p-1.5 rounded-xl border border-black/[0.08] dark:border-white/[0.12] shadow-[0_2px_8px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.03] group-hover:scale-105 group-hover:shadow-md transition-all duration-200 shrink-0 flex items-center justify-center">
               <img
                 src={OWJ_LOGO}
                 alt="OWJ Business Council"
-                className="h-7 w-auto object-contain"
+                className="h-8 w-auto min-w-[50px] max-w-[90px] object-contain shrink-0"
                 referrerPolicy="no-referrer"
+                onError={(e) => {
+                  e.currentTarget.src = OWJ_LOGO_FALLBACK;
+                }}
               />
             </div>
-            <div className="flex flex-col">
-              <span className="font-semibold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9] group-hover:text-[#1f5163] dark:group-hover:text-[#6fb3c6] transition-colors">
+            <div className="flex flex-col shrink-0 min-w-max">
+              <span className="font-extrabold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9] group-hover:text-[#1f5163] dark:group-hover:text-[#6fb3c6] transition-colors whitespace-nowrap">
                 {lang === 'fa' ? 'کتاب کار CPMAI' : 'CPMAI Workbook'}
               </span>
-              <span className="text-[10px] text-[#5d6b73] dark:text-[#9aa8b0]">
+              <span className="text-[10px] text-[#5d6b73] dark:text-[#9aa8b0] whitespace-nowrap">
                 {lang === 'fa' ? 'مشاوران مدیریت کسب و کار اوج' : 'OWJ Business Council'}
               </span>
             </div>
           </a>
 
-          {/* 4-Page Navigation Segmented Control */}
-          <div className="flex items-center p-1 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] overflow-x-auto max-w-full">
+          {/* Page Navigation Segmented Control */}
+          <div className="flex-1 min-w-0 flex items-center p-1.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-inner overflow-x-auto gap-1">
+            {/* Landing Page Gateway */}
+            <button
+              onClick={() => {
+                setPage('landing');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-[0.96] shrink-0 border bg-[#2563EB]/10 dark:bg-[#2563EB]/15 text-[#2563EB] dark:text-[#60A5FA] border-[#2563EB]/30 hover:bg-[#2563EB]/20 cursor-pointer"
+              title={lang === 'fa' ? 'بازگشت به صفحه معرفی و لندینگ' : 'Return to Agentify Landing Page'}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{lang === 'fa' ? 'صفحه لندینگ' : 'Landing'}</span>
+            </button>
+
+            {/* Entry Assessment: Readiness Placement Quiz */}
+            <button
+              onClick={() => {
+                setPage('quiz');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-[0.96] shrink-0 border ${
+                page === 'quiz'
+                  ? 'bg-gradient-to-r from-[#2f7d5b] to-[#1f5163] text-white border-transparent shadow-xs ring-2 ring-[#2f7d5b]/30'
+                  : 'bg-[#2f7d5b]/10 dark:bg-[#2f7d5b]/15 text-[#2f7d5b] dark:text-[#52b788] border-[#2f7d5b]/30 hover:bg-[#2f7d5b]/20'
+              }`}
+            >
+              <Target className="w-3.5 h-3.5" />
+              <span>{lang === 'fa' ? '🎯 آزمون سطح‌سنجی (ورود)' : '🎯 Readiness Quiz'}</span>
+            </button>
+
+            {/* Page 0: LLM Fundamentals & Prompting Toolkit */}
+            <button
+              onClick={() => {
+                setPage(0);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-150 active:scale-[0.96] shrink-0 ${
+                page === 0
+                  ? 'bg-gradient-to-r from-[#1f5163] to-[#0f4c5c] text-white shadow-xs'
+                  : 'text-[#1f5163] dark:text-[#6fb3c6] hover:bg-[#e3eef1] dark:hover:bg-[#1e2a30]'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#fbbf24]" />
+              <span>{lang === 'fa' ? 'صفحه ۰: جعبه‌ابزار و مبانی LLM' : 'Page 0: LLM Toolkit'}</span>
+            </button>
+
             <button
               onClick={() => {
                 setPage(1);
@@ -464,6 +769,7 @@ export default function App() {
             >
               <Layers className="w-3.5 h-3.5" />
               <span>{lang === 'fa' ? 'صفحه ۲: حل مسئله' : 'Page 2'}</span>
+              {isSessionLocked(2) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
             <button
@@ -479,6 +785,7 @@ export default function App() {
             >
               <Award className="w-3.5 h-3.5" />
               <span>{lang === 'fa' ? 'صفحه ۳: معیارهای موفقیت' : 'Page 3'}</span>
+              {isSessionLocked(3) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
             <button
@@ -494,6 +801,7 @@ export default function App() {
             >
               <DollarSign className="w-3.5 h-3.5" />
               <span>{lang === 'fa' ? 'صفحه ۴: هزینه-فایده' : 'Page 4: Budget'}</span>
+              {isSessionLocked(4) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
             <button
@@ -509,6 +817,7 @@ export default function App() {
             >
               <TrendingUp className="w-3.5 h-3.5" />
               <span>{lang === 'fa' ? 'صفحه ۵: برآورد ROI (۱۵)' : 'Page 5 (Expected ROI)'}</span>
+              {isSessionLocked(5) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
             <button
@@ -524,6 +833,7 @@ export default function App() {
             >
               <Brain className="w-3.5 h-3.5 text-[#99e2b4]" />
               <span>{lang === 'fa' ? 'صفحه ۶: الزامات شناختی (۱۶)' : 'Page 6 (Cognitive Req.)'}</span>
+              {isSessionLocked(6) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
             <button
@@ -539,6 +849,7 @@ export default function App() {
             >
               <Cpu className="w-3.5 h-3.5 text-[#6ee7b7]" />
               <span>{lang === 'fa' ? 'صفحه ۷: چرا AI؟ (۱۷)' : 'Page 7 (Why AI?)'}</span>
+              {isSessionLocked(7) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
             <button
@@ -554,6 +865,7 @@ export default function App() {
             >
               <Layers className="w-3.5 h-3.5 text-[#99e2b4]" />
               <span>{lang === 'fa' ? 'صفحه ۸: بخش‌های غیرشناختی (۱۸)' : 'Page 8 (Noncognitive Parts)'}</span>
+              {isSessionLocked(8) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
             <button
@@ -569,6 +881,7 @@ export default function App() {
             >
               <Target className="w-3.5 h-3.5 text-[#99e2b4]" />
               <span>{lang === 'fa' ? 'صفحه ۹: اهداف شناختی (۱۹)' : 'Page 9 (Cognitive Obj.)'}</span>
+              {isSessionLocked(9) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
             <button
@@ -584,6 +897,7 @@ export default function App() {
             >
               <Gauge className="w-3.5 h-3.5 text-[#6ee7b7]" />
               <span>{lang === 'fa' ? 'صفحه ۱۰: نتایج شناختی (۲۰)' : 'Page 10 (Cognitive Outcomes)'}</span>
+              {isSessionLocked(10) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
             <button
@@ -599,6 +913,7 @@ export default function App() {
             >
               <ShieldCheck className="w-3.5 h-3.5 text-[#6ee7b7]" />
               <span>{lang === 'fa' ? 'صفحه ۱۱: معیارهای موفقیت AI (۲۱)' : 'Page 11 (AI Success Criteria)'}</span>
+              {isSessionLocked(11) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
             <button
@@ -614,6 +929,7 @@ export default function App() {
             >
               <Network className="w-3.5 h-3.5 text-[#6ee7b7]" />
               <span>{lang === 'fa' ? 'صفحه ۱۲: الگوهای هوش مصنوعی (۲۲)' : 'Page 12 (AI Patterns)'}</span>
+              {isSessionLocked(12) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
             <button
@@ -629,6 +945,7 @@ export default function App() {
             >
               <Workflow className="w-3.5 h-3.5 text-[#6ee7b7]" />
               <span>{lang === 'fa' ? 'صفحه ۱۳: تعیین الگوها (۲۳)' : 'Page 13 (Which Patterns)'}</span>
+              {isSessionLocked(13) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
             <button
@@ -644,6 +961,7 @@ export default function App() {
             >
               <Calendar className="w-3.5 h-3.5 text-[#6ee7b7]" />
               <span>{lang === 'fa' ? 'صفحه ۱۴: ارزیابی وضعیت (۲۴)' : 'Page 14 (Assess Situation)'}</span>
+              {isSessionLocked(14) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
             <button
@@ -659,11 +977,179 @@ export default function App() {
             >
               <HardDrive className="w-3.5 h-3.5 text-[#99e2b4]" />
               <span>{lang === 'fa' ? 'صفحه ۱۵: فناوری و مهارت‌ها (۲۵)' : 'Page 15 (Tech & Skills)'}</span>
+              {isSessionLocked(15) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(16);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 16
+                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5 text-[#6ee7b7]" />
+              <span>{lang === 'fa' ? 'صفحه ۱۶: زمان‌بندی (۲۶)' : 'Page 16 (Schedule)'}</span>
+              {isSessionLocked(16) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(17);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 17
+                  ? 'bg-[#1b3a4b] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <Gauge className="w-3.5 h-3.5 text-[#99e2b4]" />
+              <span>{lang === 'fa' ? 'صفحه ۱۷: محدودیت‌ها و عملکرد (۲۷)' : 'Page 17 (Constraints & Performance)'}</span>
+              {isSessionLocked(17) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(18);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 18
+                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <Calculator className="w-3.5 h-3.5 text-[#6ee7b7]" />
+              <span>{lang === 'fa' ? 'صفحه ۱۸: سنجه‌ها و ماتریس (۲۸)' : 'Page 18 (Metrics)'}</span>
+              {isSessionLocked(18) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(19);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 19
+                  ? 'bg-[#1b3a4b] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <Bot className="w-3.5 h-3.5 text-[#99e2b4]" />
+              <span>{lang === 'fa' ? 'صفحه ۱۹: سنجه‌ها و حساسیت‌ها (۲۹)' : 'Page 19 (Sensitivities)'}</span>
+              {isSessionLocked(19) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(20);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 20
+                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5 text-[#6ee7b7]" />
+              <span>{lang === 'fa' ? 'صفحه ۲۰: سنجه‌های KPI کسب‌وکار (۳۰)' : 'Page 20 (Business KPIs)'}</span>
+              {isSessionLocked(20) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
+            </button>
+
+            <button
+              onClick={() => {
+                setPage(21);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+                page === 21
+                  ? 'bg-[#1b3a4b] text-white shadow-xs font-semibold'
+                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <Server className="w-3.5 h-3.5 text-[#99e2b4]" />
+              <span>{lang === 'fa' ? 'صفحه ۲۱: سنجه‌های فناوری (۳۱)' : 'Page 21 (Tech KPIs)'}</span>
+              {isSessionLocked(21) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
           </div>
 
           {/* Tools & Utilities */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Class Leaderboard Button */}
+            <button
+              onClick={() => setIsLeaderboardModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20 active:scale-[0.96] cursor-pointer shrink-0"
+              title={lang === 'fa' ? 'جدول رتبه‌بندی رقابتی هم‌دوره‌ای‌ها (Class Leaderboard)' : 'Class Leaderboard'}
+            >
+              <Trophy className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{lang === 'fa' ? 'رتبه‌بندی کلاس' : 'Leaderboard'}</span>
+            </button>
+
+            {/* Admin Control Center Button */}
+            {currentUser?.role === 'admin' && (
+              <button
+                onClick={() => setIsAdminModalOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30 hover:bg-purple-500/25 active:scale-[0.96] cursor-pointer shrink-0"
+                title={lang === 'fa' ? 'مرکز فرماندهی مدیریت دوره (Admin Control Center)' : 'Admin Control Center'}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">{lang === 'fa' ? 'پنل مدیریت' : 'Admin Panel'}</span>
+              </button>
+            )}
+
+            {/* User Profile / Google Sign-In Button */}
+            {currentUser ? (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="flex items-center gap-1.5 p-1 pe-2.5 rounded-xl border border-[#2f7d5b]/30 bg-[#2f7d5b]/10 hover:bg-[#2f7d5b]/20 transition-all text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] cursor-pointer"
+                title={lang === 'fa' ? 'حساب کاربری' : 'User Account'}
+              >
+                {currentUser.avatarUrl ? (
+                  <img
+                    src={currentUser.avatarUrl}
+                    alt={currentUser.displayName}
+                    className="w-5 h-5 rounded-lg object-cover border border-white dark:border-[#161e24]"
+                  />
+                ) : (
+                  <div className="w-5 h-5 rounded-lg bg-[#2f7d5b] text-white flex items-center justify-center text-[10px] font-mono">
+                    {currentUser.displayName.charAt(0)}
+                  </div>
+                )}
+                <span className="hidden md:inline max-w-28 truncate text-[11px]">
+                  {currentUser.displayName}
+                </span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-gradient-to-r from-[#1f5163] to-[#00738c] hover:from-[#163c4a] hover:to-[#0f4c5c] text-white shadow-xs hover:shadow-md transition-all active:scale-[0.96] cursor-pointer shrink-0"
+              >
+                <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
+                  <path
+                    fill="#fff"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#fff"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#fff"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  />
+                  <path
+                    fill="#fff"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  />
+                </svg>
+                <span>{lang === 'fa' ? 'ورود / عضویت' : 'Sign In'}</span>
+              </button>
+            )}
+
             {/* Copy All Answers */}
             <button
               onClick={handleCopyAll}
@@ -674,13 +1160,43 @@ export default function App() {
               <span className="hidden sm:inline">{lang === 'fa' ? 'کپی پاسخ‌ها' : 'Copy'}</span>
             </button>
 
-            {/* Print / PDF */}
+            {/* Print / PDF Protection */}
             <button
-              onClick={() => window.print()}
-              title={lang === 'fa' ? 'چاپ یا خروجی PDF' : 'Print / PDF'}
-              className="p-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:bg-[#f4f4f1] dark:hover:bg-[#12171b]"
+              onClick={() => {
+                showToast(
+                  lang === 'fa'
+                    ? '🚫 خروجی PDF و چاپ متدولوژی به دلیل حقوق کپی‌رایت اوج مسدود است. برای ذخیره کار خود، از دکمه «کپی پاسخ‌ها» استفاده کنید.'
+                    : '🚫 Printing methodology to PDF is restricted by OWJ Copyright. Use "Copy Answers" for your work.'
+                );
+              }}
+              title={lang === 'fa' ? 'حفاظت کپی‌رایت چاپ' : 'Print Protected'}
+              className="p-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:bg-[#f4f4f1] dark:hover:bg-[#12171b] cursor-pointer"
             >
-              <Printer className="w-3.5 h-3.5" />
+              <Printer className="w-3.5 h-3.5 opacity-60" />
+            </button>
+
+            {/* Anti-Screenshot Shield Status & Test */}
+            <button
+              onClick={() => {
+                if (typeof (window as any).__triggerScreenShield === 'function') {
+                  (window as any).__triggerScreenShield();
+                } else {
+                  showToast(
+                    lang === 'fa'
+                      ? '🛡️ سپر ضد اسکرین‌شات و کپی‌رایت اوج فعال است.'
+                      : '🛡️ OWJ Anti-Screenshot Guard is active.'
+                  );
+                }
+              }}
+              title={
+                lang === 'fa'
+                  ? 'سپر ضد اسکرین‌شات و کپی‌رایت اوج (فعال) - برای تست کلیک فرمایید'
+                  : 'OWJ Anti-Screenshot & Copyright Guard (Active) - Click to test'
+              }
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-[0.96] transition-all cursor-pointer text-xs font-semibold shrink-0"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span className="hidden lg:inline">{lang === 'fa' ? 'سپر کپی‌رایت' : 'Protected'}</span>
             </button>
 
             {/* Language Switch */}
@@ -713,6 +1229,40 @@ export default function App() {
           </div>
         )}
 
+        {/* Readiness Placement Quiz View */}
+        {page === 'quiz' && (
+          <InteractivePlacementQuiz
+            lang={lang}
+            currentUser={currentUser}
+            onOpenLeaderboard={() => setIsLeaderboardModalOpen(true)}
+            onNavigateToPage={(targetPage) => {
+              setPage(targetPage as AppPage);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onCloseQuiz={() => {
+              setPage(0);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
+
+        {/* Page 0: Applied LLM Fundamentals & Prompting Toolkit */}
+        {page === 0 && (
+          <Page0LlmFundamentals
+            lang={lang}
+            content={page0Content}
+            onChangeContent={setPage0Content}
+            onGoToPage1={() => {
+              setPage(1);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onOpenQuiz={() => {
+              setPage('quiz');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
+
         {/* Page 1 (Matching Image 1) */}
         {page === 1 && (
           <Page1BusinessUnderstanding
@@ -730,6 +1280,10 @@ export default function App() {
             onRemoveQ={(index) => setQs(prev => prev.filter((_, i) => i !== index))}
             ans={ans}
             onSelectAns={(qIdx, oIdx) => setAns(prev => ({ ...prev, [qIdx]: oIdx }))}
+            onGoToPage0={() => {
+              setPage(0);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             onGoToPage2={() => {
               setPage(2);
               window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -737,8 +1291,59 @@ export default function App() {
           />
         )}
 
-        {/* Page 2 (Matching Image 2) */}
-        {page === 2 && (
+        {/* Curriculum Drip Gating for Locked Sessions */}
+        {typeof page === 'number' && page >= 2 && isSessionLocked(page) ? (
+          <div className="max-w-3xl mx-auto py-12 px-4 animate-fadeIn">
+            <div className="p-1.5 rounded-3xl bg-black/[0.04] dark:bg-white/[0.05] border border-black/[0.08] dark:border-white/[0.1] shadow-2xl">
+              <div className="rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-8 text-center space-y-6">
+                <div className="w-16 h-16 mx-auto rounded-3xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shadow-inner">
+                  <Lock className="w-8 h-8 animate-pulse" />
+                </div>
+                <div className="space-y-2">
+                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                    محتوای آموزشی قطره‌ای (Curriculum Drip Gating)
+                  </span>
+                  <h3 className="text-lg font-black text-[#1c2830] dark:text-[#e8ebe9]">
+                    دسترسی به جلسه {page} در حال حاضر قفل است
+                  </h3>
+                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] max-w-md mx-auto leading-relaxed">
+                    جهت همگامی یادگیری در کارگاه و طبق متدولوژی استقرار CPMAI، این جلسه پس از تدریس استاد در کلاس باز خواهد شد.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                  <button
+                    onClick={() => {
+                      setPage(1);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="px-5 py-2.5 rounded-xl bg-[#2f7d5b] hover:bg-[#256347] text-white font-bold text-xs transition-all shadow-xs cursor-pointer"
+                  >
+                    بازگشت به جلسه ۱ (درک کسب‌وکار)
+                  </button>
+                  <button
+                    onClick={() => {
+                      setPage('quiz');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-all shadow-xs cursor-pointer"
+                  >
+                    شرکت در آزمون سطح‌سنجی
+                  </button>
+                  <button
+                    onClick={() => setIsLeaderboardModalOpen(true)}
+                    className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition-all shadow-xs cursor-pointer"
+                  >
+                    مشاهده جدول رتبه‌بندی کلاس 🏆
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Page 2 (Matching Image 2) */}
+            {page === 2 && (
           <Page2ProblemIteration
             lang={lang}
             content={page2Content}
@@ -985,7 +1590,94 @@ export default function App() {
               setPage(15);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            onGoToPage17={() => {
+              setPage(17);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
           />
+        )}
+
+        {/* Page 17 (Matching Slide 27: Project Constraints & Task: Acceptable Model Performance Values) */}
+        {page === 17 && (
+          <Page17ProjectConstraintsAndModelPerformance
+            lang={lang}
+            content={page17Content}
+            onChangeContent={setPage17Content}
+            onGoToPage16={() => {
+              setPage(16);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onGoToPage18={() => {
+              setPage(18);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
+
+        {/* Page 18 (Matching Slide 28: Figure 3 Confusion Matrix & Task: Acceptable Model Performance Values) */}
+        {page === 18 && (
+          <Page18ModelPerformanceMetrics
+            lang={lang}
+            content={page18Content}
+            onChangeContent={setPage18Content}
+            onGoToPage17={() => {
+              setPage(17);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onGoToPage19={() => {
+              setPage(19);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
+
+        {/* Page 19 (Matching Slide 29: Desired Performance Metrics & Sensitivities) */}
+        {page === 19 && (
+          <Page19ModelPerformanceRequirements
+            lang={lang}
+            content={page19Content}
+            onChangeContent={setPage19Content}
+            onGoToPage18={() => {
+              setPage(18);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onGoToPage20={() => {
+              setPage(20);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
+
+        {/* Page 20 (Matching Slide 30: Task Acceptable KPI Performance Values) */}
+        {page === 20 && (
+          <Page20AcceptableKpiPerformanceValues
+            lang={lang}
+            content={page20Content}
+            onChangeContent={setPage20Content}
+            onGoToPage19={() => {
+              setPage(19);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onGoToPage21={() => {
+              setPage(21);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
+
+        {/* Page 21 (Matching Slide 31: Required Technology KPIs) */}
+        {page === 21 && (
+          <Page21RequiredTechnologyKpis
+            lang={lang}
+            content={page21Content}
+            onChangeContent={setPage21Content}
+            onGoToPage20={() => {
+              setPage(20);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
+        )}
+          </>
         )}
 
         {/* Reset Option and Auto-save indicator */}
@@ -1024,6 +1716,60 @@ export default function App() {
 
         {/* Footer with OWJ Council & PMI Copyright */}
         <Footer lang={lang} />
+
+        {/* Google OAuth & User Authentication Modal */}
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          lang={lang}
+          currentUser={currentUser}
+          onLoginSuccess={(user) => {
+            setCurrentUser(user);
+            showToast(
+              lang === 'fa'
+                ? `خوش آمدید، ${user.displayName || user.email}`
+                : `Welcome, ${user.displayName || user.email}`
+            );
+          }}
+          onLogout={() => {
+            authApi.logout();
+            setCurrentUser(null);
+            setPage('landing');
+            showToast(
+              lang === 'fa'
+                ? 'با موفقیت از حساب خود خارج شدید.'
+                : 'Signed out successfully.'
+            );
+          }}
+        />
+
+        {/* Mandatory Post-Registration Onboarding Modal */}
+        {currentUser && !currentUser.isOnboarded && (
+          <OnboardingModal
+            isOpen={true}
+            currentUser={currentUser}
+            onComplete={handleOnboardingComplete}
+            lang={lang}
+          />
+        )}
+
+        {/* Class Leaderboard Modal */}
+        <ClassLeaderboardModal
+          isOpen={isLeaderboardModalOpen}
+          onClose={() => setIsLeaderboardModalOpen(false)}
+          currentUser={currentUser}
+          lang={lang}
+        />
+
+        {/* Admin Control Center Modal (Admin Only) */}
+        {currentUser?.role === 'admin' && (
+          <AdminControlCenterModal
+            isOpen={isAdminModalOpen}
+            onClose={() => setIsAdminModalOpen(false)}
+            currentUser={currentUser}
+            lang={lang}
+          />
+        )}
       </main>
     </div>
   );

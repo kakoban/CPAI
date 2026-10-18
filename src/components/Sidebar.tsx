@@ -1,7 +1,7 @@
 import React from 'react';
 import { PhaseId, Language } from '../types/cpmai';
 import { UI_TRANSLATIONS } from '../data/translations';
-import { OWJ_LOGO } from '../data/logo';
+import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../data/logo';
 import { Check } from 'lucide-react';
 
 interface SidebarProps {
@@ -52,6 +52,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             alt={t.org}
             className="h-9 w-auto object-contain"
             referrerPolicy="no-referrer"
+            onError={(e) => {
+              e.currentTarget.src = OWJ_LOGO_FALLBACK;
+            }}
           />
         </div>
         <div className="flex flex-col">

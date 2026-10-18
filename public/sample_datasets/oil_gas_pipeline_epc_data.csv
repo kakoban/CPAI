@@ -1,0 +1,11 @@
+Subsystem_Code,Subsystem_Name,Discipline,Planned_Manhours,Actual_Manhours,Welding_Dia_Inch_Planned,Welding_Dia_Inch_Actual,NDT_Repair_Rate_Pct,Hydrotest_Packs_Approved,Material_Delivery_Pct,HSE_LTI_Incidents,SPI,CPI,Risk_Level
+SS-01,Pipeline Trenching & ROW,Civil,14500,15200,0,0,0.0,0,98.5,0,0.96,0.95,Low
+SS-02,Mainline Welding Section A,Piping/Welding,38000,41200,42000,39500,2.1,0,95.0,0,0.94,0.91,Medium
+SS-03,Mainline Welding Section B (Mountainous),Piping/Welding,45000,52000,42000,36800,4.6,0,88.0,0,0.85,0.81,High-Critical
+SS-04,AUT & NDT Joint Inspection,QA/QC,12000,13100,0,0,3.2,0,100.0,0,0.92,0.92,Medium
+SS-05,Field Joint Coating & Wrapping,Corrosion/Protection,18500,19800,0,0,1.2,0,94.0,0,0.93,0.93,Low
+SS-06,HDD River Crossing Boring,Specialist Trenchless,22000,28500,4500,3900,1.8,0,82.0,1,0.78,0.77,High-Critical
+SS-07,Compressor Station Piping & Spools,Mechanical/Piping,56000,60500,58000,54200,2.4,8,91.0,0,0.93,0.90,Medium
+SS-08,Compressor Station Equipment Erection,Mechanical,28000,29200,0,0,0.0,4,96.0,0,0.97,0.96,Low
+SS-09,Hydrostatic Testing Packages (Pack 1-12),Pre-commissioning,16000,18500,0,0,0.8,9,92.0,0,0.88,0.86,Medium
+SS-10,Tie-in & Nitrogen Purging,Pre-commissioning,9500,9800,8500,8200,1.1,3,99.0,0,0.96,0.97,Low

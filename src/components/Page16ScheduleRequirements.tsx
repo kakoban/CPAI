@@ -33,6 +33,7 @@ interface Page16Props {
   content: string;
   onChangeContent: (val: string) => void;
   onGoToPage15: () => void;
+  onGoToPage17?: () => void;
 }
 
 interface MilestoneItem {
@@ -75,7 +76,8 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
   lang,
   content,
   onChangeContent,
-  onGoToPage15
+  onGoToPage15,
+  onGoToPage17
 }) => {
   const [activeTab, setActiveTab] = useState<'canvas' | 'milestones' | 'constraints' | 'guide'>('canvas');
   const [selectedCase, setSelectedCase] = useState<string>('xyz_chatbot');
@@ -666,18 +668,28 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
       )}
 
       {/* Footer Navigation */}
-      <div className="flex items-center justify-between pt-4 border-t border-[#d9dad5] dark:border-[#2d3942] text-xs">
+      <div className="flex items-center justify-between pt-4 border-t border-[#d9dad5] dark:border-[#2d3942] text-xs flex-wrap gap-3">
         <button
           onClick={onGoToPage15}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] hover:bg-gray-100 dark:hover:bg-gray-800 font-medium transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] hover:bg-gray-100 dark:hover:bg-gray-800 font-medium transition-colors cursor-pointer"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
+          {lang === 'fa' ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
           <span>{lang === 'fa' ? 'صفحه قبلی: ۱۵ (فناوری و مهارت‌ها)' : 'Previous: Page 15'}</span>
         </button>
 
-        <span className="text-gray-400 font-mono">
-          Slide 26 / Phase I Complete
-        </span>
+        {onGoToPage17 && (
+          <button
+            onClick={onGoToPage17}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#00738c] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
+          >
+            <span>
+              {lang === 'fa'
+                ? 'صفحه بعدی: ۱۷ (اسلاید ۲۷: محدودیت‌ها و عملکرد مدل)'
+                : 'Next: Page 17 (Slide 27: Constraints & Performance)'}
+            </span>
+            {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+          </button>
+        )}
       </div>
     </div>
   );

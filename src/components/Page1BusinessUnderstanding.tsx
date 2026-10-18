@@ -18,6 +18,7 @@ interface Page1Props {
   ans: Record<number, number>;
   onSelectAns: (qIdx: number, oIdx: number) => void;
   onGoToPage2: () => void;
+  onGoToPage0?: () => void;
 }
 
 export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
@@ -35,7 +36,8 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
   onRemoveQ,
   ans,
   onSelectAns,
-  onGoToPage2
+  onGoToPage2,
+  onGoToPage0
 }) => {
   const [newQ, setNewQ] = useState('');
   const [showExample, setShowExample] = useState(false);
@@ -431,25 +433,38 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
         </div>
       </div>
 
-      {/* Prominent Next Page Button */}
-      <div className="p-4 sm:p-5 rounded-xl bg-[#e3eef1] dark:bg-[#1b2c32] border border-[#1f5163]/20 flex items-center justify-between gap-4">
-        <div>
-          <span className="text-xs font-semibold text-[#1f5163] dark:text-[#6fb3c6] block">
-            {lang === 'fa' ? 'گام بعدی در کتاب کار' : 'Next Workbook Step'}
-          </span>
-          <span className="text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9] font-medium">
-            {t.nextPageBtn}
-          </span>
-        </div>
+      {/* Bottom Navigation Buttons */}
+      <div className="p-4 sm:p-5 rounded-xl bg-[#e3eef1] dark:bg-[#1b2c32] border border-[#1f5163]/20 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        {onGoToPage0 ? (
+          <button
+            type="button"
+            onClick={onGoToPage0}
+            className="flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg border border-[#1f5163]/30 bg-white dark:bg-[#16252b] text-[#1f5163] dark:text-[#6fb3c6] hover:bg-[#1f5163]/10 transition-colors shadow-2xs"
+          >
+            {lang === 'fa' ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+            <span>{lang === 'fa' ? 'صفحه ۰ (جعبه‌ابزار و مبانی LLM)' : 'Page 0 (LLM Toolkit)'}</span>
+          </button>
+        ) : <div />}
 
-        <button
-          type="button"
-          onClick={onGoToPage2}
-          className="flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#0a7b97] text-white hover:bg-[#08677e] transition-colors shadow-xs"
-        >
-          <span>{lang === 'fa' ? 'ورود به صفحه ۲' : 'Go to Page 2'}</span>
-          {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-        </button>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="hidden md:block text-right">
+            <span className="text-[10px] font-semibold text-[#1f5163] dark:text-[#6fb3c6] block">
+              {lang === 'fa' ? 'گام بعدی' : 'Next Step'}
+            </span>
+            <span className="text-xs text-[#1c2830] dark:text-[#e8ebe9] font-medium">
+              {t.nextPageBtn}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={onGoToPage2}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#0a7b97] text-white hover:bg-[#08677e] transition-colors shadow-xs"
+          >
+            <span>{lang === 'fa' ? 'ورود به صفحه ۲' : 'Go to Page 2'}</span>
+            {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
     </div>
   );

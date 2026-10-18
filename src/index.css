@@ -43,7 +43,28 @@
     background-color: var(--bg);
     color: var(--ink);
     font-family: var(--font-fa);
-    transition: background-color 0.2s ease, color 0.2s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Anti-slop typography rules from taste-skill */
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Haptic interactive transitions */
+  button, a {
+    -webkit-tap-highlight-color: transparent;
   }
 
   [dir="ltr"] body,
@@ -78,15 +99,76 @@
   background: var(--mute);
 }
 
+/* -------------------------------------------------------------
+   Enterprise Content & Copyright Protection Rules
+   ------------------------------------------------------------- */
+.protected-workspace {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Whitelist: User input boxes, code blocks, and prompt copying zones */
+.protected-workspace input,
+.protected-workspace textarea,
+.protected-workspace [contenteditable="true"],
+.allow-select,
+.allow-copy {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+
+/* Strict Anti-Print & Anti-PDF Export Protection */
 @media print {
-  aside, .no-print {
+  body * {
     display: none !important;
   }
-  main {
-    max-width: 100% !important;
-    padding: 0 !important;
-  }
-  .app-container {
+  body::before {
+    content: "محتوای متدولوژی و آموزشی این پلتفرم تحت حقوق کپی‌رایت انحصاری مؤسسه مشاوران مدیریت کسب‌وکار اوج (OWJ Business Council) محفوظ است و قابلیت چاپ، پرینت یا ذخیره به عنوان PDF ندارد.";
     display: block !important;
+    position: fixed;
+    top: 45%;
+    left: 8%;
+    right: 8%;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    color: #b3432f;
+    direction: rtl;
+    line-height: 1.8;
   }
+}
+
+/* Screen Capture & Snipping Tool Obfuscation */
+body.screen-protected .protected-workspace,
+body.screen-protected main,
+body.screen-protected header {
+  filter: blur(50px) grayscale(100%) !important;
+  opacity: 0.03 !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  transition: filter 0.05s ease, opacity 0.05s ease !important;
+}
+
+
+/* Agentify Landing Page Font and Mask Utilities */
+.font-orbitron {
+  font-family: 'Orbitron', monospace, sans-serif;
+}
+
+.font-inter {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.mask-radial-edges {
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);
+}
+
+.mask-vertical-fade {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 100%);
 }

@@ -1,0 +1,9 @@
+Equipment_Tag,Equipment_Type,Process_Unit,Governing_Standard,Operating_Pressure_Bar,Hydrotest_Pressure_Bar,Punch_Cat_A_Blockers,Punch_Cat_B_Minor,Vibration_Velocity_mm_s,Corrosion_Allowance_mm,QA_QC_Signoff,Commissioning_Status
+V-101,Vacuum Distillation Column,CDU-01,ASME Sec VIII Div 1,3.5,6.2,0,4,0.0,3.0,Approved,Ready-for-Feed
+E-102A,Crude Preheat Heat Exchanger,CDU-01,TEMA-R / ASME VIII,28.0,42.5,0,2,0.0,4.5,Approved,Hydrotested
+E-102B,Crude Preheat Heat Exchanger,CDU-01,TEMA-R / ASME VIII,28.0,42.5,1,3,0.0,4.5,Pending-Gasket-Fix,Punch-Clearance
+P-105A,Crude Charge Pump (Motor Driven),Offsites,API 610 11th Ed,45.0,68.0,0,1,2.1,0.0,Approved,Cold-Commissioned
+P-105B,Crude Charge Pump (Turbine Driven),Offsites,API 610 11th Ed,45.0,68.0,2,5,4.8,0.0,Rejected-Alignment,Field-Rework
+C-201,Centrifugal Gas Compressor,HDT-02,API 617 8th Ed,85.0,128.0,1,6,1.8,0.0,Pending-Lube-Oil-Flush,Pre-commissioning
+TK-301,Floating Roof Crude Storage Tank,Tank-Farm,API 650 12th Ed,Atm,Water-Fill,0,3,0.0,6.0,Approved,Settlement-Tested
+R-401,Hydrotreater Reactor (Cr-Mo-V),HDT-02,ASME Sec VIII Div 2,145.0,218.0,0,1,0.0,6.5,Approved,Catalyst-Loading
