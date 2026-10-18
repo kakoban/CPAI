@@ -8,7 +8,7 @@ import {
   SessionLockEntity,
   AlignmentIndex
 } from '../../types/lms';
-import { lmsApi, AdminOverviewResponse } from '../../services/lmsApi';
+import { lmsApi, AdminOverviewResponse, getDefaultAdminOverview } from '../../services/lmsApi';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../../data/logo';
 import {
   ShieldAlert,
@@ -50,8 +50,8 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
   lang
 }) => {
   const [activeTab, setActiveTab] = useState<'users' | 'matrix' | 'drip'>('users');
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [overview, setOverview] = useState<AdminOverviewResponse | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [overview, setOverview] = useState<AdminOverviewResponse>(() => getDefaultAdminOverview(currentUser));
   const [selectedClassId, setSelectedClassId] = useState<string>('ALL');
 
   // Filters for User Registry
@@ -70,7 +70,7 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 3500);
   };
 
   const loadData = async (classId?: string) => {
@@ -100,12 +100,45 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
 
   if (!isOpen) return null;
 
-  const currentClass = selectedClassId !== 'ALL'
-    ? (overview?.classes.find((c) => c.id === selectedClassId) || null)
-    : (overview?.classes[0] || null);
+  const defaultClass: ClassEntity = {
+    id: 'cls_master',
+    code: 'CPMAI-2026',
+    title: 'کلاس دوره تخصصی CPMAI',
+    isLeaderboardVisible: true,
+    studentCount: overview?.users?.length || 1,
+    createdAt: new Date().toISOString()
+  };
+
+  const currentClass: ClassEntity = (selectedClassId !== 'ALL'
+    ? overview.classes.find((c) => c.id === selectedClassId)
+    : overview.classes[0]) || defaultClass;
+
+  // Raw user list with guaranteed at least current user if empty
+  const rawUsers = overview.users && overview.users.length > 0
+    ? overview.users
+    : (currentUser ? [{
+        id: currentUser.id || 'usr_fakouri',
+        email: currentUser.email || 'kafa.1368@gmail.com',
+        fullName: currentUser.displayName || 'مهندس فکوری زاد (مدیر ارشد سامانه)',
+        phone: currentUser.phone || '09120000000',
+        specialty: currentUser.specialty || 'مدیریت ارشد پروژه و هوش مصنوعی',
+        role: 'admin' as const,
+        classId: 'cls_master',
+        classCode: 'CPMAI-2026',
+        initialAiLevel: 'ADVANCED',
+        isOnboarded: true,
+        createdAt: currentUser.createdAt || new Date().toISOString(),
+        assessmentResult: {
+          testedTier: 'ADVANCED',
+          rawScore: 100,
+          percentage: 100,
+          alignmentIndex: 'Matches' as const,
+          completedAt: new Date().toISOString()
+        }
+      }] : []);
 
   // User Registry Filtered List
-  const filteredUsers = (overview?.users || []).filter((u) => {
+  const filteredUsers = rawUsers.filter((u) => {
     const matchesClass = selectedClassId === 'ALL' || !selectedClassId || u.classId === selectedClassId;
     const matchesSearch =
       !searchQuery ||
@@ -127,35 +160,55 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
     return matchesClass && matchesSearch && matchesTier && matchesAlignment;
   });
 
-  // Toggle Leaderboard Visibility
+  // Toggle Leaderboard Visibility with Optimistic UI
   const handleToggleLeaderboard = async () => {
-    if (!currentClass) return;
+    const targetClassId = currentClass.id;
     const newStatus = !currentClass.isLeaderboardVisible;
-    const success = await lmsApi.toggleLeaderboardVisibility(currentClass.id, newStatus);
-    if (success) {
-      showToast(newStatus ? 'جدول رتبه‌بندی برای دانشجویان این کلاس منتشر شد.' : 'جدول رتبه‌بندی برای دانشجویان مخفی شد.');
-      loadData(selectedClassId);
-    }
+
+    // Optimistic update
+    setOverview((prev) => ({
+      ...prev,
+      classes: prev.classes.map((c) =>
+        c.id === targetClassId ? { ...c, isLeaderboardVisible: newStatus } : c
+      )
+    }));
+
+    showToast(newStatus ? 'جدول رتبه‌بندی برای دانشجویان این کلاس منتشر شد.' : 'جدول رتبه‌بندی برای دانشجویان مخفی شد.');
+    await lmsApi.toggleLeaderboardVisibility(targetClassId, newStatus);
   };
 
-  // Toggle Single Session Lock
+  // Toggle Single Session Lock with Optimistic UI
   const handleToggleSession = async (sessionNum: number, currentUnlocked: boolean) => {
-    if (!currentClass) return;
-    const success = await lmsApi.toggleSessionLock(currentClass.id, sessionNum, !currentUnlocked);
-    if (success) {
-      showToast(`وضعیت جلسه ${sessionNum} تغییر یافت.`);
-      loadData(selectedClassId);
-    }
+    const targetClassId = currentClass.id;
+    const nextUnlocked = !currentUnlocked;
+
+    // Optimistic update
+    setOverview((prev) => ({
+      ...prev,
+      sessionLocks: prev.sessionLocks.map((s) =>
+        s.sessionNum === sessionNum ? { ...s, isUnlocked: nextUnlocked } : s
+      )
+    }));
+
+    showToast(`وضعیت جلسه ${sessionNum} تغییر یافت به: ${nextUnlocked ? 'باز و در دسترس 🔓' : 'قفل قطره‌ای 🔒'}`);
+    await lmsApi.toggleSessionLock(targetClassId, sessionNum, nextUnlocked);
   };
 
-  // Unlock All / Reset Drip
+  // Unlock All / Reset Drip with Optimistic UI
   const handleBatchSessions = async (unlockAll: boolean) => {
-    if (!currentClass) return;
-    const success = await lmsApi.unlockAllSessions(currentClass.id, unlockAll);
-    if (success) {
-      showToast(unlockAll ? 'کلیه جلسات باز شدند.' : 'جلسات ۲ تا ۲۱ قفل و به حالت قطره‌ای پیش‌فرض بازگشتند.');
-      loadData(selectedClassId);
-    }
+    const targetClassId = currentClass.id;
+
+    // Optimistic update
+    setOverview((prev) => ({
+      ...prev,
+      sessionLocks: prev.sessionLocks.map((s) => ({
+        ...s,
+        isUnlocked: unlockAll ? true : (s.sessionNum <= 1)
+      }))
+    }));
+
+    showToast(unlockAll ? 'کلیه جلسات باز شدند 🔓' : 'جلسات ۲ تا ۲۱ قفل و به حالت قطره‌ای پیش‌فرض بازگشتند 🔒');
+    await lmsApi.unlockAllSessions(targetClassId, unlockAll);
   };
 
   // Export User Registry to CSV

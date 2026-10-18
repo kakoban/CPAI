@@ -3,6 +3,25 @@ import { AuthResponse, UserProfile, GoogleLoginPayload, OnboardingPayload } from
 const TOKEN_KEY = 'cpmai_auth_token';
 const USER_KEY = 'cpmai_auth_user';
 
+export function isAuthorizedAdminUser(user?: UserProfile | null): boolean {
+  if (!user) return false;
+  const role = (user.role || '').toLowerCase();
+  const email = (user.email || '').toLowerCase().trim();
+  const name = (user.displayName || user.username || '').toLowerCase().trim();
+  return (
+    role === 'admin' ||
+    email === 'nafa.1395@gmail.com' ||
+    email === 'kafa.1368@gmail.com' ||
+    email === 'fakourizad@gmail.com' ||
+    email === 'admin@owjbc.com' ||
+    email.includes('fakouri') ||
+    email.includes('kakoban') ||
+    name.includes('fakouri') ||
+    name.includes('نفیسی') ||
+    name.includes('admin')
+  );
+}
+
 class AuthService {
   getToken(): string | null {
     try {
@@ -23,7 +42,12 @@ class AuthService {
   getSavedUser(): UserProfile | null {
     try {
       const stored = localStorage.getItem(USER_KEY);
-      return stored ? JSON.parse(stored) : null;
+      if (!stored) return null;
+      const parsed: UserProfile = JSON.parse(stored);
+      if (isAuthorizedAdminUser(parsed)) {
+        parsed.role = 'admin';
+      }
+      return parsed;
     } catch {
       return null;
     }
@@ -31,6 +55,9 @@ class AuthService {
 
   setSavedUser(user: UserProfile): void {
     try {
+      if (isAuthorizedAdminUser(user)) {
+        user.role = 'admin';
+      }
       localStorage.setItem(USER_KEY, JSON.stringify(user));
     } catch {
       // ignore
@@ -68,12 +95,16 @@ class AuthService {
     } catch (err: any) {
       console.warn('Backend login endpoint unavailable, using local session fallback:', err);
       // Fallback local session mode so frontend remains 100% interactive even if offline or serverless cold start
+      const isAdmin = isAuthorizedAdminUser({ email: params.email, displayName: params.displayName } as any);
       const fallbackUser: UserProfile = {
         id: params.googleId || `usr_${Date.now()}`,
         googleId: params.googleId,
         email: params.email,
         displayName: params.displayName || params.name || params.email.split('@')[0],
         avatarUrl: params.avatarUrl || params.picture,
+        role: isAdmin ? 'admin' : 'user',
+        isOnboarded: isAdmin,
+        aiLevel: isAdmin ? 'advanced' : 'beginner',
         isVerified: true,
         createdAt: new Date().toISOString()
       };
@@ -111,6 +142,9 @@ class AuthService {
 
       const data: AuthResponse = await res.json();
       if (res.ok && data.token && data.user) {
+        if (isAuthorizedAdminUser(data.user)) {
+          data.user.role = 'admin';
+        }
         this.setToken(data.token);
         this.setSavedUser(data.user);
         return data;
@@ -118,15 +152,16 @@ class AuthService {
       return data;
     } catch (err: any) {
       console.warn('Backend login endpoint timed out or failed, using local session:', err);
-      // Fallback local session for student email login if serverless DB is cold
+      // Fallback local session for student/admin email login if serverless DB is cold
       const studentUsername = cleanEmail.split('@')[0];
+      const isAdmin = isAuthorizedAdminUser({ email: cleanEmail } as any);
       const fallbackUser: UserProfile = {
-        id: `usr_std_${Date.now()}`,
+        id: isAdmin ? 'usr_admin_fakouri' : `usr_std_${Date.now()}`,
         email: cleanEmail,
-        displayName: studentUsername,
-        role: 'user',
-        isOnboarded: false,
-        aiLevel: 'beginner',
+        displayName: isAdmin ? 'مهندس فکوری زاد (مدیر ارشد)' : studentUsername,
+        role: isAdmin ? 'admin' : 'user',
+        isOnboarded: isAdmin,
+        aiLevel: isAdmin ? 'advanced' : 'beginner',
         createdAt: new Date().toISOString()
       };
       const fallbackToken = `mock_jwt_${Date.now()}`;
@@ -157,6 +192,9 @@ class AuthService {
       if (res.ok) {
         const data = await res.json();
         if (data.user) {
+          if (isAuthorizedAdminUser(data.user)) {
+            data.user.role = 'admin';
+          }
           this.setSavedUser(data.user);
           return data.user;
         }
@@ -170,6 +208,7 @@ class AuthService {
   async completeOnboarding(payload: OnboardingPayload): Promise<AuthResponse> {
     const token = this.getToken();
     const currentUser = this.getSavedUser();
+    const isAdmin = isAuthorizedAdminUser(currentUser) || isAuthorizedAdminUser({ email: currentUser?.email } as any);
 
     const updatedUser: UserProfile = {
       ...(currentUser || {
@@ -183,6 +222,7 @@ class AuthService {
       aiLevel: payload.aiLevel,
       initialAiLevel: payload.aiLevel,
       classCode: payload.classCode || 'DEFAULT_COHORT',
+      role: isAdmin ? 'admin' : (currentUser?.role || 'user'),
       isOnboarded: true
     };
 

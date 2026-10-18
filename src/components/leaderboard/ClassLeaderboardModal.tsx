@@ -3,6 +3,7 @@ import { Language } from '../../types/cpmai';
 import { UserProfile } from '../../types/auth';
 import { LeaderboardEntry, LeaderboardResponse } from '../../types/lms';
 import { lmsApi } from '../../services/lmsApi';
+import { isAuthorizedAdminUser } from '../../services/authApi';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../../data/logo';
 import {
   Trophy,
@@ -49,7 +50,7 @@ export const ClassLeaderboardModal: React.FC<ClassLeaderboardModalProps> = ({
     totalParticipants: 0
   });
 
-  const isAdmin = (currentUser?.role || '').toLowerCase() === 'admin';
+  const isAdmin = isAuthorizedAdminUser(currentUser);
 
   useEffect(() => {
     if (!isOpen) return;

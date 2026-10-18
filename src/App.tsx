@@ -29,7 +29,7 @@ import { OnboardingModal } from './components/OnboardingModal';
 import { ContentProtectionShield } from './components/ContentProtectionShield';
 import { ClassLeaderboardModal } from './components/leaderboard/ClassLeaderboardModal';
 import { AdminControlCenterModal } from './components/admin/AdminControlCenterModal';
-import { authApi } from './services/authApi';
+import { authApi, isAuthorizedAdminUser } from './services/authApi';
 import { lmsApi } from './services/lmsApi';
 import { UserProfile } from './types/auth';
 import { SessionLockEntity } from './types/lms';
@@ -76,6 +76,10 @@ export default function App() {
   const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState<boolean>(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
 
+  const isUserAdmin = (user: UserProfile | null): boolean => {
+    return isAuthorizedAdminUser(user);
+  };
+
   const refreshCurriculumLocks = () => {
     lmsApi.fetchCurriculumLocks().then((res) => {
       if (res?.locks) {
@@ -87,10 +91,18 @@ export default function App() {
   useEffect(() => {
     const saved = authApi.getSavedUser();
     if (saved) {
+      if (isAuthorizedAdminUser(saved)) {
+        saved.role = 'admin';
+      }
       setCurrentUser(saved);
     }
     authApi.fetchCurrentUser().then((u) => {
-      if (u) setCurrentUser(u);
+      if (u) {
+        if (isAuthorizedAdminUser(u)) {
+          u.role = 'admin';
+        }
+        setCurrentUser(u);
+      }
     });
   }, []);
 
@@ -101,7 +113,7 @@ export default function App() {
   }, [currentUser]);
 
   const isSessionLocked = (sessionNum: number): boolean => {
-    if (currentUser?.role === 'admin') return false; // Admin bypass!
+    if (isUserAdmin(currentUser)) return false; // Admin bypass!
     if (sessionNum <= 1) return false; // Sessions 0 & 1 always accessible
     const lock = sessionLocks.find((l) => l.sessionNum === sessionNum);
     return lock ? !lock.isUnlocked : false;
@@ -649,7 +661,7 @@ export default function App() {
         />
 
         {/* Admin Control Center Modal (Admin Only) */}
-        {currentUser?.role === 'admin' && (
+        {isUserAdmin(currentUser) && (
           <AdminControlCenterModal
             isOpen={isAdminModalOpen}
             onClose={() => setIsAdminModalOpen(false)}
@@ -664,7 +676,7 @@ export default function App() {
   return (
     <div className="protected-workspace min-h-[100dvh] bg-[#f5f5f2] dark:bg-[#0f1418] text-[#1c2830] dark:text-[#e8ebe9] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(31,81,99,0.08),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(111,179,198,0.06),rgba(0,0,0,0))] transition-colors flex flex-col selection:bg-[#1f5163]/20 selection:text-[#1f5163] dark:selection:bg-[#6fb3c6]/20 dark:selection:text-[#6fb3c6]">
       {/* OWJ Content Protection Shield (Anti-Copy, Anti-Print, Anti-Snipping with Smart Prompt Whitelist) */}
-      <ContentProtectionShield lang={lang} isAdmin={currentUser?.role === 'admin'} />
+      <ContentProtectionShield lang={lang} isAdmin={isUserAdmin(currentUser)} />
 
       {/* Top Header Bar */}
       <header className="sticky top-0 z-40 w-full bg-[#ffffff]/90 dark:bg-[#161e24]/90 backdrop-blur-xl border-b border-[#d9dad5]/80 dark:border-[#26333c]/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
@@ -1093,7 +1105,7 @@ export default function App() {
             </button>
 
             {/* Admin Control Center Button */}
-            {currentUser?.role === 'admin' && (
+            {isUserAdmin(currentUser) && (
               <button
                 onClick={() => setIsAdminModalOpen(true)}
                 className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30 hover:bg-purple-500/25 active:scale-[0.96] cursor-pointer shrink-0"
@@ -1757,7 +1769,7 @@ export default function App() {
         />
 
         {/* Admin Control Center Modal (Admin Only) */}
-        {currentUser?.role === 'admin' && (
+        {isUserAdmin(currentUser) && (
           <AdminControlCenterModal
             isOpen={isAdminModalOpen}
             onClose={() => setIsAdminModalOpen(false)}
