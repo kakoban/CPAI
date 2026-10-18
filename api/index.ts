@@ -9,15 +9,17 @@ const { Pool } = pg;
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || 'cpmai_default_secure_secret_key_2026_xyz';
 
+const DEFAULT_DATABASE_URL = "postgresql://neondb_owner:npg_WqTK6t1NPlyk@ep-rapid-wave-b5t3nsxc-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require";
+
 // Setup PostgreSQL connection pool for Neon (configured with Neon's serverless pooler)
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL || DEFAULT_DATABASE_URL,
   ssl: {
     rejectUnauthorized: false
   },
   max: 10,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 15000,
+  connectionTimeoutMillis: 10000,
 });
 
 app.use(express.json({ limit: '10mb' }));

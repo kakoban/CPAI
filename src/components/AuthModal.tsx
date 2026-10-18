@@ -144,7 +144,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const googleClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim();
+  const googleClientId = (
+    import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+    '507287937639-3mssmmgujlq47mro5v8lsg96sqb7ejkc.apps.googleusercontent.com'
+  ).trim();
 
   // Check if Google Identity Services script is loaded
   useEffect(() => {
@@ -902,7 +905,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div className="pt-2 border-t border-black/[0.05] dark:border-white/[0.06] flex items-center justify-between text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
                 <span className="flex items-center gap-1.5">
                   <Lock className="w-3.5 h-3.5 text-[#2f7d5b]" />
-                  <span>256-bit SSL & JWT</span>
+                  <span dir="ltr">256-bit SSL & JWT</span>
                 </span>
                 <span className="text-[10px] font-mono">OWJ Certified Security</span>
               </div>
