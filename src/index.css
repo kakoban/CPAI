@@ -142,16 +142,6 @@
   }
 }
 
-/* Screen Capture & Snipping Tool Obfuscation */
-body.screen-protected .protected-workspace,
-body.screen-protected main,
-body.screen-protected header {
-  filter: blur(50px) grayscale(100%) !important;
-  opacity: 0.03 !important;
-  pointer-events: none !important;
-  user-select: none !important;
-  transition: filter 0.05s ease, opacity 0.05s ease !important;
-}
 
 
 /* Agentify Landing Page Font and Mask Utilities */

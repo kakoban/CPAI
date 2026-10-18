@@ -229,6 +229,16 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
       'تاریخ ثبت‌نام'
     ];
 
+    const formatDate = (dateStr?: string) => {
+      if (!dateStr) return '';
+      try {
+        const d = new Date(dateStr);
+        return isNaN(d.getTime()) ? '' : d.toLocaleDateString('fa-IR');
+      } catch {
+        return '';
+      }
+    };
+
     const rows = filteredUsers.map((u) => [
       `"${u.id}"`,
       `"${u.fullName}"`,
@@ -241,7 +251,7 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
       `"${u.assessmentResult?.rawScore ?? ''}"`,
       `"${u.assessmentResult?.percentage ?? ''}%"`,
       `"${u.assessmentResult?.alignmentIndex || 'شرکت نکرده'}"`,
-      `"${new Date(u.createdAt).toLocaleDateString('fa-IR')}"`
+      `"${formatDate(u.createdAt)}"`
     ]);
 
     const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
@@ -642,7 +652,14 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
                               )}
                             </td>
                             <td className="py-3 px-4 text-center font-mono text-[11px] text-[#5d6b73]">
-                              {new Date(user.createdAt).toLocaleDateString('fa-IR')}
+                              {(() => {
+                                try {
+                                  const d = user.createdAt ? new Date(user.createdAt) : null;
+                                  return d && !isNaN(d.getTime()) ? d.toLocaleDateString('fa-IR') : '—';
+                                } catch {
+                                  return '—';
+                                }
+                              })()}
                             </td>
                           </tr>
                         ))
