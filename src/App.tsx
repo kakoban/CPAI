@@ -661,7 +661,7 @@ export default function App() {
         />
 
         {/* Admin Control Center Modal (Admin Only) */}
-        {isUserAdmin(currentUser) && (
+        {isUserAdmin(currentUser) && isAdminModalOpen && (
           <AdminControlCenterModal
             isOpen={isAdminModalOpen}
             onClose={() => setIsAdminModalOpen(false)}
@@ -1769,7 +1769,7 @@ export default function App() {
         />
 
         {/* Admin Control Center Modal (Admin Only) */}
-        {isUserAdmin(currentUser) && (
+        {isUserAdmin(currentUser) && isAdminModalOpen && (
           <AdminControlCenterModal
             isOpen={isAdminModalOpen}
             onClose={() => setIsAdminModalOpen(false)}

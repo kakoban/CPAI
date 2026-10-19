@@ -98,8 +98,6 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
     setSelectedCell(null);
   }, [selectedClassId]);
 
-  if (!isOpen) return null;
-
   const defaultClass: ClassEntity = {
     id: 'cls_master',
     code: 'CPMAI-2026',
@@ -338,6 +336,8 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
   }, [cohortUsers]);
 
   const matrix = computedMatrix.matrix;
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-5 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
