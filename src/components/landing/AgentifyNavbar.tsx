@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, User, ExternalLink, Hexagon, Film, Sliders } from 'lucide-react';
+import { ArrowRight, User, ExternalLink, Hexagon, Film, Sliders, Sparkles } from 'lucide-react';
 import { UserProfile } from '../../types/auth';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../../data/logo';
 
@@ -9,6 +9,7 @@ interface AgentifyNavbarProps {
   currentUser: UserProfile | null;
   onGoToQuiz?: () => void;
   onOpenMediaCustomizer?: () => void;
+  onReplayIntro?: () => void;
 }
 
 export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
@@ -16,7 +17,8 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
   onOpenAuth,
   currentUser,
   onGoToQuiz,
-  onOpenMediaCustomizer
+  onOpenMediaCustomizer,
+  onReplayIntro
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
@@ -117,6 +119,18 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
 
         {/* Right: User Authentication & Start Button */}
         <div className="hidden lg:flex items-center gap-3">
+          {/* AJA Brand Experience Intro Trigger */}
+          {onReplayIntro && (
+            <button
+              onClick={onReplayIntro}
+              title="Experience AJA Cinematic Brand Intro"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold text-[#0A101D] hover:bg-black/5 hover:text-cyan-700 transition-all cursor-pointer border border-cyan-400/40 bg-gradient-to-r from-cyan-50/80 to-sky-50/80 shadow-2xs group"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-600 group-hover:rotate-45 transition-transform" />
+              <span className="font-mono tracking-wider font-bold text-cyan-800">AJA INTRO</span>
+            </button>
+          )}
+
           {/* Media Customizer Trigger */}
           {onOpenMediaCustomizer && (
             <button
@@ -218,6 +232,22 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
             )}
 
             <div className="pt-2 space-y-2">
+              {onReplayIntro && (
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    onReplayIntro();
+                  }}
+                  className="w-full flex items-center justify-between py-2 text-left font-semibold text-cyan-800"
+                >
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-cyan-600" />
+                    <span>AJA Cinematic Brand Intro</span>
+                  </span>
+                  <span className="text-xs font-mono text-cyan-600">PLAY →</span>
+                </button>
+              )}
+
               {onOpenMediaCustomizer && (
                 <button
                   onClick={() => {

@@ -13,13 +13,15 @@ interface AgentifyLandingProps {
   onOpenAuth: () => void;
   currentUser: UserProfile | null;
   onGoToQuiz?: () => void;
+  onReplayIntro?: () => void;
 }
 
 export const AgentifyLanding: React.FC<AgentifyLandingProps> = ({
   onEnterApp,
   onOpenAuth,
   currentUser,
-  onGoToQuiz
+  onGoToQuiz,
+  onReplayIntro
 }) => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState<boolean>(false);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState<boolean>(false);
@@ -59,6 +61,7 @@ export const AgentifyLanding: React.FC<AgentifyLandingProps> = ({
           currentUser={currentUser}
           onGoToQuiz={onGoToQuiz}
           onOpenMediaCustomizer={() => setIsMediaModalOpen(true)}
+          onReplayIntro={onReplayIntro}
         />
 
         {/* Video / Canvas Background (Absolute) */}

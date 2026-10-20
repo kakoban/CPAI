@@ -29,6 +29,7 @@ import { OnboardingModal } from './components/OnboardingModal';
 import { ContentProtectionShield } from './components/ContentProtectionShield';
 import { ClassLeaderboardModal } from './components/leaderboard/ClassLeaderboardModal';
 import { AdminControlCenterModal } from './components/admin/AdminControlCenterModal';
+import { AjaBrandIntro } from './components/intro/AjaBrandIntro';
 import { authApi, isAuthorizedAdminUser } from './services/authApi';
 import { lmsApi } from './services/lmsApi';
 import { UserProfile } from './types/auth';
@@ -66,6 +67,8 @@ export default function App() {
   const [page, setPage] = useState<AppPage>('landing');
   const [lang, setLang] = useState<Language>('fa');
   const [theme, setTheme] = useState<Theme>('light');
+  // AJA Cinematic Brand Intro (Unseen Studio Inspired Experience)
+  const [showBrandIntro, setShowBrandIntro] = useState<boolean>(true);
 
   // Google OAuth / GIS Authentication State
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
@@ -596,10 +599,20 @@ export default function App() {
   };
 
   // Agentify Enterprise Hero Landing Page (Pure English & Login-gated)
+  // AJA Cinematic Brand Intro (Unseen Studio Inspired Experience)
+  if (showBrandIntro) {
+    return (
+      <AjaBrandIntro
+        onComplete={() => setShowBrandIntro(false)}
+      />
+    );
+  }
+
   if (page === 'landing') {
     return (
       <>
         <AgentifyLanding
+          onReplayIntro={() => setShowBrandIntro(true)}
           onEnterApp={() => {
             if (!currentUser) {
               setIsAuthModalOpen(true);
