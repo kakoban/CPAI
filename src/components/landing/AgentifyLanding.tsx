@@ -8,6 +8,8 @@ import { LandingMediaConfig } from '../../types/media';
 import { mediaService, DEFAULT_MEDIA_CONFIG } from '../../services/mediaConfig';
 import { X, Play, BookOpen, Film, Sliders, Sparkles } from 'lucide-react';
 
+import { IndustryTrackId } from '../../types/industryTrack';
+
 interface AgentifyLandingProps {
   onEnterApp: () => void;
   onOpenAuth: () => void;
@@ -15,6 +17,9 @@ interface AgentifyLandingProps {
   onGoToQuiz?: () => void;
   onReplayIntro?: () => void;
   onOpenBookModal?: () => void;
+  currentTrack?: IndustryTrackId;
+  onSelectTrack?: (track: IndustryTrackId) => void;
+  onOpenTrackModal?: () => void;
 }
 
 export const AgentifyLanding: React.FC<AgentifyLandingProps> = ({
@@ -23,7 +28,10 @@ export const AgentifyLanding: React.FC<AgentifyLandingProps> = ({
   currentUser,
   onGoToQuiz,
   onReplayIntro,
-  onOpenBookModal
+  onOpenBookModal,
+  currentTrack,
+  onSelectTrack,
+  onOpenTrackModal
 }) => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState<boolean>(false);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState<boolean>(false);
@@ -65,6 +73,9 @@ export const AgentifyLanding: React.FC<AgentifyLandingProps> = ({
           onOpenMediaCustomizer={() => setIsMediaModalOpen(true)}
           onReplayIntro={onReplayIntro}
           onOpenBookModal={onOpenBookModal}
+          currentTrack={currentTrack}
+          onSelectTrack={onSelectTrack}
+          onOpenTrackModal={onOpenTrackModal}
         />
 
         {/* Video / Canvas Background (Absolute) */}

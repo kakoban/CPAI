@@ -31,6 +31,14 @@ import { ClassLeaderboardModal } from './components/leaderboard/ClassLeaderboard
 import { AdminControlCenterModal } from './components/admin/AdminControlCenterModal';
 import { AjaBrandIntro } from './components/intro/AjaBrandIntro';
 import { LlmForHumansBookModal } from './components/book/LlmForHumansBookModal';
+import {
+  IndustryTrackId,
+  getSavedIndustryTrack,
+  saveIndustryTrack,
+  INDUSTRY_TRACKS
+} from './types/industryTrack';
+import { IndustryTrackSwitcher } from './components/industry/IndustryTrackSwitcher';
+import { IndustryTrackSelectorModal } from './components/industry/IndustryTrackSelectorModal';
 import { authApi, isAuthorizedAdminUser } from './services/authApi';
 import { lmsApi } from './services/lmsApi';
 import { UserProfile } from './types/auth';
@@ -80,6 +88,20 @@ export default function App() {
   const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState<boolean>(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
   const [isBookModalOpen, setIsBookModalOpen] = useState<boolean>(false);
+
+  // Industry Track State (Civil & Infrastructure vs Oil, Gas & Petrochemicals)
+  const [industryTrack, setIndustryTrack] = useState<IndustryTrackId>(() => getSavedIndustryTrack());
+  const [isIndustryModalOpen, setIsIndustryModalOpen] = useState<boolean>(false);
+
+  const handleSelectIndustryTrack = (track: IndustryTrackId) => {
+    setIndustryTrack(track);
+    saveIndustryTrack(track);
+    showToast(
+      lang === 'fa'
+        ? `حوزه تخصصی به «${INDUSTRY_TRACKS[track].shortTitleFa}» تغییر یافت.`
+        : `Industry track switched to "${INDUSTRY_TRACKS[track].shortTitleEn}".`
+    );
+  };
 
   const isUserAdmin = (user: UserProfile | null): boolean => {
     return isAuthorizedAdminUser(user);
@@ -616,6 +638,9 @@ export default function App() {
         <AgentifyLanding
           onReplayIntro={() => setShowBrandIntro(true)}
           onOpenBookModal={() => setIsBookModalOpen(true)}
+          currentTrack={industryTrack}
+          onSelectTrack={handleSelectIndustryTrack}
+          onOpenTrackModal={() => setIsIndustryModalOpen(true)}
           onEnterApp={() => {
             if (!currentUser) {
               setIsAuthModalOpen(true);
@@ -690,6 +715,14 @@ export default function App() {
           isOpen={isBookModalOpen}
           onClose={() => setIsBookModalOpen(false)}
         />
+
+        {/* Industry Track Selector Modal */}
+        <IndustryTrackSelectorModal
+          isOpen={isIndustryModalOpen}
+          onClose={() => setIsIndustryModalOpen(false)}
+          currentTrack={industryTrack}
+          onSelectTrack={handleSelectIndustryTrack}
+        />
       </>
     );
   }
@@ -722,13 +755,21 @@ export default function App() {
             </div>
             <div className="flex flex-col shrink-0 min-w-max">
               <span className="font-extrabold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9] group-hover:text-[#1f5163] dark:group-hover:text-[#6fb3c6] transition-colors whitespace-nowrap">
-                {lang === 'fa' ? 'ع©طھط§ط¨ ع©ط§ط± CPMAI' : 'CPMAI Workbook'}
+                {lang === 'fa' ? 'کتاب کار CPMAI' : 'CPMAI Workbook'}
               </span>
               <span className="text-[10px] text-[#5d6b73] dark:text-[#9aa8b0] whitespace-nowrap">
-                {lang === 'fa' ? 'ظ…ط´ط§ظˆط±ط§ظ† ظ…ط¯غŒط±غŒطھ ع©ط³ط¨ ظˆ ع©ط§ط± ط§ظˆط¬' : 'OWJ Business Council'}
+                {lang === 'fa' ? 'مشاوران مدیریت کسب و کار اوج' : 'OWJ Business Council'}
               </span>
             </div>
           </a>
+
+          {/* Industry Track Switcher in Workspace Header */}
+          <IndustryTrackSwitcher
+            currentTrack={industryTrack}
+            onSelectTrack={handleSelectIndustryTrack}
+            onOpenSelectorModal={() => setIsIndustryModalOpen(true)}
+            className="shrink-0 hidden lg:inline-flex"
+          />
 
           {/* Page Navigation Segmented Control */}
           <div className="flex-1 min-w-0 flex items-center p-1.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-inner overflow-x-auto gap-1">
@@ -1289,6 +1330,7 @@ export default function App() {
               setPage(0);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1306,6 +1348,7 @@ export default function App() {
               setPage('quiz');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1334,6 +1377,7 @@ export default function App() {
               setPage(2);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1402,6 +1446,7 @@ export default function App() {
               setPage(3);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1419,6 +1464,7 @@ export default function App() {
               setPage(4);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1436,6 +1482,7 @@ export default function App() {
               setPage(5);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1453,6 +1500,7 @@ export default function App() {
               setPage(6);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1470,6 +1518,7 @@ export default function App() {
               setPage(7);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1487,6 +1536,7 @@ export default function App() {
               setPage(8);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1504,6 +1554,7 @@ export default function App() {
               setPage(9);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1521,6 +1572,7 @@ export default function App() {
               setPage(10);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1538,6 +1590,7 @@ export default function App() {
               setPage(11);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1555,6 +1608,7 @@ export default function App() {
               setPage(12);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1572,6 +1626,7 @@ export default function App() {
               setPage(13);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1589,6 +1644,7 @@ export default function App() {
               setPage(14);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1606,6 +1662,7 @@ export default function App() {
               setPage(15);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1623,6 +1680,7 @@ export default function App() {
               setPage(16);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1640,6 +1698,7 @@ export default function App() {
               setPage(17);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1657,6 +1716,7 @@ export default function App() {
               setPage(18);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1674,6 +1734,7 @@ export default function App() {
               setPage(19);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1691,6 +1752,7 @@ export default function App() {
               setPage(20);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1708,6 +1770,7 @@ export default function App() {
               setPage(21);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1721,6 +1784,7 @@ export default function App() {
               setPage(20);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            industryTrack={industryTrack}
           />
         )}
           </>
@@ -1813,6 +1877,14 @@ export default function App() {
         <LlmForHumansBookModal
           isOpen={isBookModalOpen}
           onClose={() => setIsBookModalOpen(false)}
+        />
+
+        {/* Industry Track Selector Modal */}
+        <IndustryTrackSelectorModal
+          isOpen={isIndustryModalOpen}
+          onClose={() => setIsIndustryModalOpen(false)}
+          currentTrack={industryTrack}
+          onSelectTrack={handleSelectIndustryTrack}
         />
       </main>
     </div>

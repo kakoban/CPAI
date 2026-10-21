@@ -44,6 +44,7 @@ import { ENGINEERING_CONTRACTS } from '../data/engineering_sample_contracts';
 import { Page0EngineeringMasterclass } from './Page0EngineeringMasterclass';
 import { NotebookLmWorkshop } from './NotebookLmWorkshop';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../data/logo';
+import { IndustryTrackId } from '../types/industryTrack';
 
 interface Page0Props {
   lang: Language;
@@ -51,6 +52,7 @@ interface Page0Props {
   onChangeContent: (val: string) => void;
   onGoToPage1: () => void;
   onOpenQuiz?: () => void;
+  industryTrack?: IndustryTrackId;
 }
 
 interface PromptItem {
@@ -71,7 +73,8 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   content,
   onChangeContent,
   onGoToPage1,
-  onOpenQuiz
+  onOpenQuiz,
+  industryTrack = 'CIVIL_INFRA'
 }) => {
   const [activeTab, setActiveTab] = useState<
     | 'all'
@@ -95,6 +98,16 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   const [selectedContractId, setSelectedContractId] = useState<string>('metro_tunnel_contract');
   const [contractCopied, setContractCopied] = useState(false);
   const [instructionCopiedId, setInstructionCopiedId] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (industryTrack === 'ENERGY_PETRO') {
+      setSelectedDatasetId('oil_gas_pipeline_ndt');
+      setSelectedContractId('oil_gas_epc_contract');
+    } else {
+      setSelectedDatasetId('metro_station_tbm');
+      setSelectedContractId('metro_tunnel_contract');
+    }
+  }, [industryTrack]);
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);

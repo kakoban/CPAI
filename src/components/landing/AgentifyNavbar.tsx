@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { ArrowRight, User, ExternalLink, Hexagon, Film, Sliders, Sparkles, BookOpen } from 'lucide-react';
 import { UserProfile } from '../../types/auth';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../../data/logo';
+import { IndustryTrackId } from '../../types/industryTrack';
+import { IndustryTrackSwitcher } from '../industry/IndustryTrackSwitcher';
 
 interface AgentifyNavbarProps {
   onEnterApp: () => void;
@@ -11,6 +13,9 @@ interface AgentifyNavbarProps {
   onOpenMediaCustomizer?: () => void;
   onReplayIntro?: () => void;
   onOpenBookModal?: () => void;
+  currentTrack?: IndustryTrackId;
+  onSelectTrack?: (track: IndustryTrackId) => void;
+  onOpenTrackModal?: () => void;
 }
 
 export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
@@ -20,7 +25,10 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
   onGoToQuiz,
   onOpenMediaCustomizer,
   onReplayIntro,
-  onOpenBookModal
+  onOpenBookModal,
+  currentTrack,
+  onSelectTrack,
+  onOpenTrackModal
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
@@ -124,7 +132,17 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
         </nav>
 
         {/* Right: User Authentication & Start Button */}
-        <div className="hidden lg:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-2.5">
+          {/* Industry Track Switcher */}
+          {currentTrack && onSelectTrack && (
+            <IndustryTrackSwitcher
+              currentTrack={currentTrack}
+              onSelectTrack={onSelectTrack}
+              onOpenSelectorModal={onOpenTrackModal}
+              className="hidden xl:inline-flex"
+            />
+          )}
+
           {/* LLM Book Modal Trigger */}
           {onOpenBookModal && (
             <button
@@ -250,6 +268,18 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
             )}
 
             <div className="pt-2 space-y-2">
+              {currentTrack && onSelectTrack && (
+                <div className="pb-2 mb-2 border-b border-gray-100 flex flex-col gap-1.5">
+                  <span className="text-[11px] font-semibold text-gray-500 text-right">حوزه تخصصی مگاپروژه‌ها:</span>
+                  <IndustryTrackSwitcher
+                    currentTrack={currentTrack}
+                    onSelectTrack={onSelectTrack}
+                    onOpenSelectorModal={onOpenTrackModal}
+                    className="w-full justify-between"
+                  />
+                </div>
+              )}
+
               {onOpenBookModal && (
                 <button
                   onClick={() => {
