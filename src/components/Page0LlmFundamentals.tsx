@@ -43,6 +43,7 @@ import { ENGINEERING_DATASETS } from '../data/engineering_sample_datasets';
 import { ENGINEERING_CONTRACTS } from '../data/engineering_sample_contracts';
 import { Page0EngineeringMasterclass } from './Page0EngineeringMasterclass';
 import { NotebookLmWorkshop } from './NotebookLmWorkshop';
+import { PetroClaudeArtifactSimulator, CLAUDE_PETRO_SYSTEM_PROMPT } from './PetroClaudeArtifactSimulator';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../data/logo';
 import { IndustryTrackId } from '../types/industryTrack';
 
@@ -91,7 +92,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   >('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [sandboxCopied, setSandboxCopied] = useState(false);
-  const [activePromptExample, setActivePromptExample] = useState<'rcto' | 'bad_good'>('rcto');
+  const [activePromptExample, setActivePromptExample] = useState<'rcto' | 'bad_good' | 'claude_petro'>('rcto');
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>('metro_station_tbm');
   const [csvCopied, setCsvCopied] = useState(false);
   const [promptWithDataCopiedId, setPromptWithDataCopiedId] = useState<string | null>(null);
@@ -103,6 +104,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     if (industryTrack === 'ENERGY_PETRO') {
       setSelectedDatasetId('oil_gas_pipeline_ndt');
       setSelectedContractId('oil_gas_epc_contract');
+      setActivePromptExample('claude_petro');
     } else {
       setSelectedDatasetId('metro_station_tbm');
       setSelectedContractId('metro_tunnel_contract');
@@ -131,6 +133,18 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   };
 
   const PROMPT_LIBRARY: PromptItem[] = [
+    {
+      id: 'claude_petro_artifact_library',
+      titleFa: 'پرامپت ساخت آرتیفکت چت‌بات پالایشگاه در کلود (Claude 3.5 Artifact)',
+      titleEn: 'Claude 3.5 Interactive React Artifact - Oil & Gas Refinery Assistant',
+      categoryFa: 'صنایع نفت، گاز و پتروشیمی',
+      categoryEn: 'Oil, Gas & Petrochemical',
+      descriptionFa: 'دستور مهندسی‌شده با فرمول RCTO و دیتای ساخت‌یافته SCADA جهت تولید یک مینی‌اپلیکیشن تعاملی پایش تجهیزات و پرمیت‌های کار گرم در کلود.',
+      descriptionEn: 'Engineered prompt with RCTO and SCADA telemetry to generate an interactive React monitoring and PTW permit assistant in Claude Artifacts.',
+      promptFa: CLAUDE_PETRO_SYSTEM_PROMPT,
+      promptEn: `You are a Lead Cognitive Process Engineer for an Oil, Gas & Petrochemical Refinery following PMI-CPMAI standards. Build an interactive React Artifact acting as a Cognitive Control Room Co-Pilot using grounded SCADA telemetry data...`,
+      targetTools: ['Claude 3.5 Sonnet', 'Anthropic Artifacts', 'ChatGPT 4o Canvas']
+    },
     {
       id: 'meeting_summary',
       titleFa: 'خلاصه‌سازی جلسه و استخراج اکشن‌آیتم‌ها',
@@ -937,31 +951,119 @@ Tasks:
                 {lang === 'fa' ? 'مقایسه عینی: پرامپت ضعیف در برابر پرامپت حرفه‌ای' : 'Side-by-Side: Weak vs. High-Performance Prompt'}
               </span>
 
-              <div className="flex items-center gap-1 bg-[#f4f4f1] dark:bg-[#12171b] p-1 rounded-lg text-xs">
+              <div className="flex items-center gap-1 bg-[#f4f4f1] dark:bg-[#12171b] p-1 rounded-lg text-xs overflow-x-auto no-scrollbar">
                 <button
                   onClick={() => setActivePromptExample('rcto')}
-                  className={`px-2.5 py-1 rounded-md transition-colors ${
+                  className={`px-2.5 py-1 rounded-md transition-colors whitespace-nowrap ${
                     activePromptExample === 'rcto'
                       ? 'bg-[#ffffff] dark:bg-[#1a2228] text-[#1f5163] dark:text-[#6fb3c6] font-semibold shadow-2xs'
                       : 'text-[#5d6b73] dark:text-[#9aa8b0]'
                   }`}
                 >
-                  {lang === 'fa' ? 'نمونه ایمیل پیگیری' : 'Follow-up Email'}
+                  {lang === 'fa' ? 'نمونه ۱: ایمیل پیگیری' : 'Example 1: Follow-up'}
                 </button>
                 <button
                   onClick={() => setActivePromptExample('bad_good')}
-                  className={`px-2.5 py-1 rounded-md transition-colors ${
+                  className={`px-2.5 py-1 rounded-md transition-colors whitespace-nowrap ${
                     activePromptExample === 'bad_good'
                       ? 'bg-[#ffffff] dark:bg-[#1a2228] text-[#1f5163] dark:text-[#6fb3c6] font-semibold shadow-2xs'
                       : 'text-[#5d6b73] dark:text-[#9aa8b0]'
                   }`}
                 >
-                  {lang === 'fa' ? 'نمونه استراتژی بازاریابی' : 'Marketing Strategy'}
+                  {lang === 'fa' ? 'نمونه ۲: استراتژی بازاریابی' : 'Example 2: Marketing'}
+                </button>
+                <button
+                  onClick={() => setActivePromptExample('claude_petro')}
+                  className={`px-3 py-1 rounded-md transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                    activePromptExample === 'claude_petro'
+                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold shadow-xs'
+                      : 'text-cyan-700 dark:text-cyan-400 hover:text-cyan-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>
+                    {lang === 'fa'
+                      ? 'نمونه ۳ (کارگاه پیشرفته): چت‌بات آرتیفکت کلود (نفت و گاز)'
+                      : 'Example 3 (Advanced): Claude Artifact (Oil & Gas)'}
+                  </span>
                 </button>
               </div>
             </div>
 
-            {activePromptExample === 'rcto' ? (
+            {activePromptExample === 'claude_petro' ? (
+              <div className="space-y-6">
+                {/* Side-by-side prompt analysis */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Bad Prompt */}
+                  <div className="p-4 rounded-xl bg-[#fdf2f2] dark:bg-[#2a1715] border border-[#f87171]/40 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-[#b91c1c] dark:text-[#f87171] flex items-center gap-1">
+                        <span>✕</span>
+                        <span>{lang === 'fa' ? 'پرامپت ضعیف و فاقد ساختار آرتیفکت' : 'Weak / Casual Prompt'}</span>
+                      </span>
+                    </div>
+                    <div className="p-3 rounded-lg bg-white dark:bg-[#1a1515] font-mono text-xs text-[#b91c1c] dark:text-[#fca5a5]">
+                      «یک چت‌بات برای پالایشگاه نفت و گاز بساز که وضعیت سنسورها را بگوید.»
+                    </div>
+                    <p className="text-[11px] text-[#7f1d1d] dark:text-[#fca5a5] leading-relaxed">
+                      {lang === 'fa'
+                        ? 'فاجعه و نقص: هیچ دیتاستی ارائه نشده، سقف آلارم و خطوط قرمز معلوم نیست، هیچ کامپوننت تعاملی یا آرتیفکتی تولید نمی‌شود و مدل فقط یک متن کلیشه‌ای با درصد بالای توهم تحویل می‌دهد.'
+                        : 'Failure: No grounded telemetry, no alarm thresholds, no React artifact schema; model hallucinates generic paragraphs.'}
+                    </p>
+                  </div>
+
+                  {/* Engineered Claude Artifact Prompt */}
+                  <div className="p-4 rounded-xl bg-[#ecfdf5] dark:bg-[#10241b] border border-[#34d399]/40 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-[#047857] dark:text-[#34d399] flex items-center gap-1">
+                        <span>✓</span>
+                        <span>{lang === 'fa' ? 'پرامپت مهندسی‌شده RCTO ویژه Claude Artifact' : 'Engineered Claude Artifact RCTO Prompt'}</span>
+                      </span>
+                      <button
+                        onClick={() => copyToClipboard(CLAUDE_PETRO_SYSTEM_PROMPT, 'demo_petro_prompt')}
+                        className="text-[10px] font-semibold text-[#047857] dark:text-[#34d399] hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        {copiedId === 'demo_petro_prompt' ? (
+                          <>
+                            <Check className="w-3 h-3 text-[#059669]" />
+                            <span>{lang === 'fa' ? 'کپی شد' : 'Copied'}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3" />
+                            <span>{lang === 'fa' ? 'کپی پرامپت کلود' : 'Copy Prompt'}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <div className="p-3 rounded-lg bg-white dark:bg-[#132b20] font-mono text-xs text-[#065f46] dark:text-[#a7f3d0] leading-relaxed">
+                      <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6]">[Role]</span> مهندس ارشد فرآیند و سیستم‌های شناختی اتاق کنترل پالایشگاه نفت و پتروشیمی (استاندارد PMI-CPMAI).<br />
+                      <span className="font-bold text-[#00738c] dark:text-[#6ee7b7]">[Context]</span> دیتای ساخت‌یافته SCADA (توربوکمپرسور C-101 با اخطار ارتعاش 7.4mm/s، برج T-204، فلرینگ FL-01 با نرخ 465kg/h، پرمیت کار گرم PTW-8821).<br />
+                      <span className="font-bold text-[#b87333] dark:text-[#e0a96d]">[Task]</span> تولید یک آرتیفکت تعاملی React با داشبورد وضعیت و چت‌بات پاسخگویی اضطراری شیفت کاری.<br />
+                      <span className="font-bold text-[#2f7d5b] dark:text-[#63c496]">[Output]</span> کامپوننت React با Tailwind و Lucide، کارت‌های وضعیت سنسورها با پالس نوری، ۴ سناریوی آماده و پاسخ‌های بدون توهم.
+                    </div>
+                    <p className="text-[11px] text-[#065f46] dark:text-[#6ee7b7] leading-relaxed">
+                      {lang === 'fa'
+                        ? 'مزیت: مدل در کلود یک مینی‌اپلیکیشن تعاملی زنده و کاربردی رندر می‌کند که فوراً توسط مهندسان اتاق کنترل قابل استفاده است.'
+                        : 'Advantage: Claude immediately renders an interactive React mini-application in the Artifact window.'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Live Interactive Artifact Demo */}
+                <div className="pt-2">
+                  <div className="flex items-center gap-2 mb-3 text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9]">
+                    <Sparkles className="w-4 h-4 text-cyan-500" />
+                    <span>
+                      {lang === 'fa'
+                        ? 'شبیه‌ساز زنده خروجی آرتیفکت کلود (تست تعاملی با دیتای فرضی نفت و گاز):'
+                        : 'Live Claude Artifact Interactive Output (Grounded with Petrochemical Mock Data):'}
+                    </span>
+                  </div>
+                  <PetroClaudeArtifactSimulator lang={lang} />
+                </div>
+              </div>
+            ) : activePromptExample === 'rcto' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Bad Prompt */}
                 <div className="p-4 rounded-xl bg-[#fdf2f2] dark:bg-[#2a1715] border border-[#f87171]/40 space-y-2">

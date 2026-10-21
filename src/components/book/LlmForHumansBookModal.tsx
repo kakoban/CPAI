@@ -27,6 +27,7 @@ import {
 import { LLM_FOR_HUMANS_CHAPTERS, LlmChapter } from '../../data/llmForHumansData';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../../data/logo';
 import ajaLogoImg from '../../assets/aja_logo_transparent.png';
+import { PetroClaudeArtifactSimulator } from '../PetroClaudeArtifactSimulator';
 
 interface LlmForHumansBookModalProps {
   isOpen: boolean;
@@ -605,6 +606,17 @@ export const LlmForHumansBookModal: React.FC<LlmForHumansBookModalProps> = ({
                     )}
                   </article>
                 ))}
+
+                {/* Live Claude Artifact Petrochemical Simulator for Chapter 5 */}
+                {currentChapter.id === 'ch5' && (
+                  <div className="pt-2 space-y-3">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-900 dark:text-white">
+                      <Sparkles className="w-4 h-4 text-cyan-500" />
+                      <span>کارگاه عملی و شبیه‌ساز زنده: آرتیفکت‌های تعاملی Claude در صنعت نفت و گاز</span>
+                    </div>
+                    <PetroClaudeArtifactSimulator lang="fa" />
+                  </div>
+                )}
               </div>
 
               {/* Executive Attribution Footer Card */}
