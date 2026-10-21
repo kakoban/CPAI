@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, User, ExternalLink, Hexagon, Film, Sliders, Sparkles } from 'lucide-react';
+import { ArrowRight, User, ExternalLink, Hexagon, Film, Sliders, Sparkles, BookOpen } from 'lucide-react';
 import { UserProfile } from '../../types/auth';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../../data/logo';
 
@@ -10,6 +10,7 @@ interface AgentifyNavbarProps {
   onGoToQuiz?: () => void;
   onOpenMediaCustomizer?: () => void;
   onReplayIntro?: () => void;
+  onOpenBookModal?: () => void;
 }
 
 export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
@@ -18,7 +19,8 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
   currentUser,
   onGoToQuiz,
   onOpenMediaCustomizer,
-  onReplayIntro
+  onReplayIntro,
+  onOpenBookModal
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
@@ -34,6 +36,10 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
   };
 
   const navLinks = [
+    {
+      label: '📚 LLM به زبان آدمیزاد',
+      onClick: () => onOpenBookModal?.()
+    },
     {
       label: 'CPMAI Methodology',
       onClick: () => handleProtectedAction(onEnterApp)
@@ -119,6 +125,18 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
 
         {/* Right: User Authentication & Start Button */}
         <div className="hidden lg:flex items-center gap-3">
+          {/* LLM Book Modal Trigger */}
+          {onOpenBookModal && (
+            <button
+              onClick={onOpenBookModal}
+              title="کتابچه جامع: مدل‌های زبانی بزرگ (LLM) به زبان آدمیزاد"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold text-[#0A101D] hover:bg-black/5 hover:text-emerald-700 transition-all cursor-pointer border border-emerald-500/30 bg-gradient-to-r from-emerald-50/90 to-teal-50/90 shadow-2xs group"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-emerald-600 group-hover:scale-110 transition-transform" />
+              <span className="font-bold text-emerald-800">LLM به زبان آدمیزاد</span>
+            </button>
+          )}
+
           {/* AJA Brand Experience Intro Trigger */}
           {onReplayIntro && (
             <button
@@ -232,6 +250,22 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
             )}
 
             <div className="pt-2 space-y-2">
+              {onOpenBookModal && (
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    onOpenBookModal();
+                  }}
+                  className="w-full flex items-center justify-between py-2 text-left font-semibold text-emerald-800"
+                >
+                  <span className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-emerald-600" />
+                    <span>کتابچه: LLM به زبان آدمیزاد</span>
+                  </span>
+                  <span className="text-xs font-mono text-emerald-600">مطالعه →</span>
+                </button>
+              )}
+
               {onReplayIntro && (
                 <button
                   onClick={() => {
