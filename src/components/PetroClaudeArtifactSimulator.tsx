@@ -564,7 +564,7 @@ export const PetroClaudeArtifactSimulator: React.FC<PetroClaudeArtifactSimulator
             </button>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#080d12] border border-white/10 font-mono text-xs text-cyan-300 leading-relaxed overflow-x-auto whitespace-pre-wrap max-h-[460px] custom-scrollbar" dir="ltr">
+          <div className="p-4 rounded-2xl bg-[#080d12] border border-white/10 font-sans text-xs text-cyan-100 leading-relaxed overflow-x-auto whitespace-pre-wrap max-h-[460px] custom-scrollbar select-all" dir="rtl">
             {CLAUDE_PETRO_SYSTEM_PROMPT}
           </div>
         </div>

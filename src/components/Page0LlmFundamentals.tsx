@@ -135,15 +135,27 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   const PROMPT_LIBRARY: PromptItem[] = [
     {
       id: 'claude_petro_artifact_library',
-      titleFa: 'پرامپت ساخت آرتیفکت چت‌بات پالایشگاه در کلود (Claude 3.5 Artifact)',
-      titleEn: 'Claude 3.5 Interactive React Artifact - Oil & Gas Refinery Assistant',
+      titleFa: 'دستیار هوشمند اتاق کنترل و پایش پالایشگاه (Claude Artifact)',
+      titleEn: 'Cognitive Control Room Co-Pilot (Claude Artifact)',
       categoryFa: 'صنایع نفت، گاز و پتروشیمی',
       categoryEn: 'Oil, Gas & Petrochemical',
-      descriptionFa: 'دستور مهندسی‌شده با فرمول RCTO و دیتای ساخت‌یافته SCADA جهت تولید یک مینی‌اپلیکیشن تعاملی پایش تجهیزات و پرمیت‌های کار گرم در کلود.',
-      descriptionEn: 'Engineered prompt with RCTO and SCADA telemetry to generate an interactive React monitoring and PTW permit assistant in Claude Artifacts.',
-      promptFa: CLAUDE_PETRO_SYSTEM_PROMPT,
-      promptEn: `You are a Lead Cognitive Process Engineer for an Oil, Gas & Petrochemical Refinery following PMI-CPMAI standards. Build an interactive React Artifact acting as a Cognitive Control Room Co-Pilot using grounded SCADA telemetry data...`,
-      targetTools: ['Claude 3.5 Sonnet', 'Anthropic Artifacts', 'ChatGPT 4o Canvas']
+      descriptionFa: 'پرامپت استاندارد RCTO برای ساخت داشبورد تعاملی مانیتورینگ ارتعاش تجهیزات و پرمیت‌های کار گرم در کلود.',
+      descriptionEn: 'Standard RCTO prompt to generate an interactive monitoring dashboard and PTW permits assistant in Claude.',
+      promptFa: `تو مهندس ارشد فرآیند و سیستم‌های شناختی اتاق کنترل پالایشگاه نفت و پتروشیمی با استاندارد PMI-CPMAI هستی [Role].
+
+زمینه (Context):
+دیتای تله‌متری توربوکمپرسور بازگردانی C-101 (اخطار ارتعاش 7.4mm/s)، برج تفکیک دی‌بوتانایزر T-204 (پایدار)، سیستم فلرینگ FL-01 (نرخ 465kg/h در ۹۳٪ سقف مجاز) و پرمیت کار گرم فعال PTW-8821 در Zone 1 را در اختیار داری.
+
+دستور کار (Task):
+یک آرتیفکت تعاملی React بساز که کارت‌های سنسور زنده را با نشانگرهای هشدار نمایش دهد و به عنوان دستیار اتاق کنترل به سوالات اضطراری شیفت کاری پاسخ دهد.
+
+قالب خروجی (Output):
+کامپوننت واکنش‌گرا با Tailwind CSS، دکمه‌های سناریویی آماده، و پاسخ‌های بدون توهم استنادشده به دیتای فوق.`,
+      promptEn: `You are a Lead Cognitive Process Engineer for an Oil & Gas Refinery following PMI-CPMAI standards [Role].
+Context: C-101 Recycle Compressor has vibration warning (7.4 mm/s), T-204 Debutanizer column is normal, FL-01 flaring rate is 465 kg/h (93% limit), and PTW-8821 hot work permit is active in Zone 1.
+Task: Build an interactive React Artifact displaying live telemetry cards and an engineering assistant chatbot for shift operations.
+Output: Clean responsive component with Tailwind CSS, status indicators, and zero hallucinations.`,
+      targetTools: ['Claude 3.5', 'Artifacts']
     },
     {
       id: 'meeting_summary',
@@ -1002,7 +1014,7 @@ Tasks:
                         <span>{lang === 'fa' ? 'پرامپت ضعیف و فاقد ساختار آرتیفکت' : 'Weak / Casual Prompt'}</span>
                       </span>
                     </div>
-                    <div className="p-3 rounded-lg bg-white dark:bg-[#1a1515] font-mono text-xs text-[#b91c1c] dark:text-[#fca5a5]">
+                    <div className="p-3 rounded-lg bg-white dark:bg-[#1a1515] font-sans text-xs text-[#b91c1c] dark:text-[#fca5a5] leading-relaxed">
                       «یک چت‌بات برای پالایشگاه نفت و گاز بساز که وضعیت سنسورها را بگوید.»
                     </div>
                     <p className="text-[11px] text-[#7f1d1d] dark:text-[#fca5a5] leading-relaxed">
@@ -1036,11 +1048,11 @@ Tasks:
                         )}
                       </button>
                     </div>
-                    <div className="p-3 rounded-lg bg-white dark:bg-[#132b20] font-mono text-xs text-[#065f46] dark:text-[#a7f3d0] leading-relaxed">
-                      <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6]">[Role]</span> مهندس ارشد فرآیند و سیستم‌های شناختی اتاق کنترل پالایشگاه نفت و پتروشیمی (استاندارد PMI-CPMAI).<br />
-                      <span className="font-bold text-[#00738c] dark:text-[#6ee7b7]">[Context]</span> دیتای ساخت‌یافته SCADA (توربوکمپرسور C-101 با اخطار ارتعاش 7.4mm/s، برج T-204، فلرینگ FL-01 با نرخ 465kg/h، پرمیت کار گرم PTW-8821).<br />
-                      <span className="font-bold text-[#b87333] dark:text-[#e0a96d]">[Task]</span> تولید یک آرتیفکت تعاملی React با داشبورد وضعیت و چت‌بات پاسخگویی اضطراری شیفت کاری.<br />
-                      <span className="font-bold text-[#2f7d5b] dark:text-[#63c496]">[Output]</span> کامپوننت React با Tailwind و Lucide، کارت‌های وضعیت سنسورها با پالس نوری، ۴ سناریوی آماده و پاسخ‌های بدون توهم.
+                    <div className="p-3 rounded-lg bg-white dark:bg-[#132b20] font-sans text-xs text-[#065f46] dark:text-[#a7f3d0] leading-relaxed">
+                      <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6] font-mono">[Role]</span> مهندس ارشد فرآیند و سیستم‌های شناختی اتاق کنترل پالایشگاه نفت و پتروشیمی (استاندارد PMI-CPMAI).<br />
+                      <span className="font-bold text-[#00738c] dark:text-[#6ee7b7] font-mono">[Context]</span> دیتای ساخت‌یافته SCADA (توربوکمپرسور C-101 با اخطار ارتعاش 7.4mm/s، برج T-204، فلرینگ FL-01 با نرخ 465kg/h، پرمیت کار گرم PTW-8821).<br />
+                      <span className="font-bold text-[#b87333] dark:text-[#e0a96d] font-mono">[Task]</span> تولید یک آرتیفکت تعاملی React با داشبورد وضعیت و چت‌بات پاسخگویی اضطراری شیفت کاری.<br />
+                      <span className="font-bold text-[#2f7d5b] dark:text-[#63c496] font-mono">[Output]</span> کامپوننت React با Tailwind و Lucide، کارت‌های وضعیت سنسورها با پالس نوری، ۴ سناریوی آماده و پاسخ‌های بدون توهم.
                     </div>
                     <p className="text-[11px] text-[#065f46] dark:text-[#6ee7b7] leading-relaxed">
                       {lang === 'fa'
@@ -1073,7 +1085,7 @@ Tasks:
                       <span>{lang === 'fa' ? 'پرامپت ضعیف و مبهم (نتیجه کلی و کم‌فایده)' : 'Weak / Vague Prompt'}</span>
                     </span>
                   </div>
-                  <div className="p-3 rounded-lg bg-white dark:bg-[#1a1515] font-mono text-xs text-[#b91c1c] dark:text-[#fca5a5]">
+                  <div className="p-3 rounded-lg bg-white dark:bg-[#1a1515] font-sans text-xs text-[#b91c1c] dark:text-[#fca5a5] leading-relaxed">
                     «یک ایمیل برای پیگیری جلسه با مشتری بنویس.»
                   </div>
                   <p className="text-[11px] text-[#7f1d1d] dark:text-[#fca5a5] leading-relaxed">
@@ -1112,11 +1124,11 @@ Tasks:
                       )}
                     </button>
                   </div>
-                  <div className="p-3 rounded-lg bg-white dark:bg-[#132b20] font-mono text-xs text-[#065f46] dark:text-[#a7f3d0] leading-relaxed">
-                    <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6]">[Role]</span> تو دستیار ارشد ارتباطات سازمانی هستی.<br />
-                    <span className="font-bold text-[#00738c] dark:text-[#6ee7b7]">[Context]</span> دیروز جلسه‌ای با شرکت الف درباره قرارداد پشتیبانی سرور داشتیم و منتظر تایید بودجه هستیم.<br />
-                    <span className="font-bold text-[#b87333] dark:text-[#e0a96d]">[Task]</span> ایمیلی مؤدبانه برای پیگیری بنویس و یادآوری کن تایید تا ۵شنبه شامل ۱۰٪ تخفیف می‌شود.<br />
-                    <span className="font-bold text-[#2f7d5b] dark:text-[#63c496]">[Output]</span> حداکثر ۲ پاراگراف، لحن رسمی و صمیمی، همراه با موضوع ایمیل جذاب.
+                  <div className="p-3 rounded-lg bg-white dark:bg-[#132b20] font-sans text-xs text-[#065f46] dark:text-[#a7f3d0] leading-relaxed">
+                    <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6] font-mono">[Role]</span> تو دستیار ارشد ارتباطات سازمانی هستی.<br />
+                    <span className="font-bold text-[#00738c] dark:text-[#6ee7b7] font-mono">[Context]</span> دیروز جلسه‌ای با شرکت الف درباره قرارداد پشتیبانی سرور داشتیم و منتظر تایید بودجه هستیم.<br />
+                    <span className="font-bold text-[#b87333] dark:text-[#e0a96d] font-mono">[Task]</span> ایمیلی مؤدبانه برای پیگیری بنویس و یادآوری کن تایید تا ۵شنبه شامل ۱۰٪ تخفیف می‌شود.<br />
+                    <span className="font-bold text-[#2f7d5b] dark:text-[#63c496] font-mono">[Output]</span> حداکثر ۲ پاراگراف، لحن رسمی و صمیمی، همراه با موضوع ایمیل جذاب.
                   </div>
                   <p className="text-[11px] text-[#065f46] dark:text-[#6ee7b7] leading-relaxed">
                     {lang === 'fa'
@@ -1134,7 +1146,7 @@ Tasks:
                       <span>{lang === 'fa' ? 'پرامپت ضعیف' : 'Weak Prompt'}</span>
                     </span>
                   </div>
-                  <div className="p-3 rounded-lg bg-white dark:bg-[#1a1515] font-mono text-xs text-[#b91c1c] dark:text-[#fca5a5]">
+                  <div className="p-3 rounded-lg bg-white dark:bg-[#1a1515] font-sans text-xs text-[#b91c1c] dark:text-[#fca5a5] leading-relaxed">
                     «برای شرکت ما یک استراتژی بازاریابی بنویس.»
                   </div>
                   <p className="text-[11px] text-[#7f1d1d] dark:text-[#fca5a5]">
@@ -1172,11 +1184,11 @@ Tasks:
                       )}
                     </button>
                   </div>
-                  <div className="p-3 rounded-lg bg-white dark:bg-[#132b20] font-mono text-xs text-[#065f46] dark:text-[#a7f3d0] leading-relaxed">
-                    <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6]">[Role]</span> تو مدیر بازاریابی رشد B2B SaaS هستی.<br />
-                    <span className="font-bold text-[#00738c] dark:text-[#6ee7b7]">[Context]</span> نرم‌افزار ابری برای فروشگاه‌ها داریم با بودجه محدود ماهانه.<br />
-                    <span className="font-bold text-[#b87333] dark:text-[#e0a96d]">[Task]</span> ۳ کانال جذب لید کم‌هزینه را مشخص کن.<br />
-                    <span className="font-bold text-[#2f7d5b] dark:text-[#63c496]">[Output]</span> در قالب جدول با عناوین: کانال | اقدام اجرایی | شاخص CAC.
+                  <div className="p-3 rounded-lg bg-white dark:bg-[#132b20] font-sans text-xs text-[#065f46] dark:text-[#a7f3d0] leading-relaxed">
+                    <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6] font-mono">[Role]</span> تو مدیر بازاریابی رشد B2B SaaS هستی.<br />
+                    <span className="font-bold text-[#00738c] dark:text-[#6ee7b7] font-mono">[Context]</span> نرم‌افزار ابری برای فروشگاه‌ها داریم با بودجه محدود ماهانه.<br />
+                    <span className="font-bold text-[#b87333] dark:text-[#e0a96d] font-mono">[Task]</span> ۳ کانال جذب لید کم‌هزینه را مشخص کن.<br />
+                    <span className="font-bold text-[#2f7d5b] dark:text-[#63c496] font-mono">[Output]</span> در قالب جدول با عناوین: کانال | اقدام اجرایی | شاخص CAC.
                   </div>
                   <p className="text-[11px] text-[#065f46] dark:text-[#6ee7b7] leading-relaxed">
                     {lang === 'fa'
@@ -1222,26 +1234,27 @@ Tasks:
                   className="rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] p-5 shadow-xs flex flex-col justify-between hover:border-[#1f5163] dark:hover:border-[#6fb3c6] transition-all space-y-4"
                 >
                   <div className="space-y-2.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <span className="inline-block px-2 py-0.5 rounded text-[10px] font-semibold bg-[#e3eef1] dark:bg-[#1e2a30] text-[#1f5163] dark:text-[#6fb3c6] mb-1">
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#e3eef1] dark:bg-[#1e2a30] text-[#1f5163] dark:text-[#6fb3c6]">
                           {lang === 'fa' ? item.categoryFa : item.categoryEn}
                         </span>
-                        <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9] leading-snug">
-                          {lang === 'fa' ? item.titleFa : item.titleEn}
-                        </h3>
+
+                        <div className="flex flex-wrap items-center gap-1">
+                          {item.targetTools.map((tool) => (
+                            <span
+                              key={tool}
+                              className="text-[9px] px-1.5 py-0.5 rounded bg-[#f4f4f1] dark:bg-[#12171b] text-[#5d6b73] dark:text-[#9aa8b0] border border-[#d9dad5]/40 dark:border-[#2d3942]/40 font-mono"
+                            >
+                              {tool}
+                            </span>
+                          ))}
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-1 shrink-0">
-                        {item.targetTools.map((tool) => (
-                          <span
-                            key={tool}
-                            className="text-[10px] px-1.5 py-0.5 rounded bg-[#f4f4f1] dark:bg-[#12171b] text-[#5d6b73] dark:text-[#9aa8b0] border border-[#d9dad5]/40 dark:border-[#2d3942]/40"
-                          >
-                            {tool}
-                          </span>
-                        ))}
-                      </div>
+                      <h3 className="font-bold text-sm sm:text-base text-[#1c2830] dark:text-[#e8ebe9] leading-snug">
+                        {lang === 'fa' ? item.titleFa : item.titleEn}
+                      </h3>
                     </div>
 
                     <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
@@ -1249,7 +1262,7 @@ Tasks:
                     </p>
 
                     <div className="relative rounded-lg bg-[#f8f9fa] dark:bg-[#12171b] border border-[#d9dad5]/70 dark:border-[#2d3942]/70 p-3 max-h-44 overflow-y-auto">
-                      <pre className="text-[11px] font-mono text-[#1c2830] dark:text-[#e8ebe9] whitespace-pre-wrap leading-relaxed">
+                      <pre className="text-xs font-sans text-[#1c2830] dark:text-[#e8ebe9] whitespace-pre-wrap leading-relaxed select-all">
                         {activePromptText}
                       </pre>
                     </div>
