@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Language, Theme } from './types/cpmai';
 import { Page0LlmFundamentals } from './components/Page0LlmFundamentals';
 import { Page1BusinessUnderstanding } from './components/Page1BusinessUnderstanding';
@@ -88,8 +88,6 @@ export default function App() {
   const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState<boolean>(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
   const [isBookModalOpen, setIsBookModalOpen] = useState<boolean>(false);
-
-  // Industry Track State (Civil & Infrastructure vs Oil, Gas & Petrochemicals)
   const [industryTrack, setIndustryTrack] = useState<IndustryTrackId>(() => getSavedIndustryTrack());
   const [isIndustryModalOpen, setIsIndustryModalOpen] = useState<boolean>(false);
 
@@ -348,8 +346,8 @@ export default function App() {
       root.setAttribute('data-theme', 'light');
     }
     document.title = lang === 'fa'
-      ? 'ع©طھط§ط¨ ع©ط§ط± CPMAI آ· ظپط§ط² ط§ظˆظ„ (ط¯ط±ع© ع©ط³ط¨â€Œظˆع©ط§ط±) | ظ…ط´ط§ظˆط±ط§ظ† ظ…ط¯غŒط±غŒطھ ع©ط³ط¨ ظˆ ع©ط§ط± ط§ظˆط¬'
-      : 'CPMAI Workbook آ· Phase I: Business Understanding | OWJ Business Council';
+      ? 'کتاب کار CPMAI · فاز اول (درک کسب‌وکار) | مشاوران مدیریت کسب و کار اوج'
+      : 'CPMAI Workbook · Phase I: Business Understanding | OWJ Business Council';
   }, [lang, theme]);
 
   const showToast = (msg: string) => {
@@ -362,14 +360,14 @@ export default function App() {
     refreshCurriculumLocks();
     const levelName =
       updatedUser.aiLevel === 'beginner'
-        ? (lang === 'fa' ? 'ظ…ظ‚ط¯ظ…ط§طھغŒ' : 'Beginner')
+        ? (lang === 'fa' ? 'مقدماتی' : 'Beginner')
         : updatedUser.aiLevel === 'intermediate'
-        ? (lang === 'fa' ? 'ظ…طھظˆط³ط·' : 'Intermediate')
-        : (lang === 'fa' ? 'ظ¾غŒط´ط±ظپطھظ‡' : 'Advanced');
+        ? (lang === 'fa' ? 'متوسط' : 'Intermediate')
+        : (lang === 'fa' ? 'پیشرفته' : 'Advanced');
 
     showToast(
       lang === 'fa'
-        ? `ط§ط·ظ„ط§ط¹ط§طھ ط¨ط§ ظ…ظˆظپظ‚غŒطھ ط«ط¨طھ ط´ط¯. ط¢ط²ظ…ظˆظ† ط³ط·ط­â€Œط³ظ†ط¬غŒ ظ…طھظ†ط§ط³ط¨ ط¨ط§ ط³ط·ط­ ${levelName} ط¨ط±ط§غŒ ط´ظ…ط§ ط¢ظ…ط§ط¯ظ‡ ط§ط³طھ.`
+        ? `اطلاعات با موفقیت ثبت شد. آزمون سطح‌سنجی متناسب با سطح ${levelName} برای شما آماده است.`
         : `Profile saved. Placement quiz calibrated to ${levelName} track is ready!`
     );
     setPage('quiz');
@@ -382,167 +380,167 @@ export default function App() {
     setPage('landing');
     showToast(
       lang === 'fa'
-        ? 'ط¨ط§ ظ…ظˆظپظ‚غŒطھ ط§ط² ط­ط³ط§ط¨ ط®ظˆط¯ ط®ط§ط±ط¬ ط´ط¯غŒط¯.'
+        ? 'با موفقیت از حساب خود خارج شدید.'
         : 'Signed out successfully.'
     );
   };
 
   const handleCopyAll = () => {
     let fullText = lang === 'fa'
-      ? `=== ع©طھط§ط¨ ع©ط§ط± CPMAI: ظپط§ط² ط§ظˆظ„ ط¯ط±ع© ع©ط³ط¨â€Œظˆع©ط§ط± ===\nظ…ط´ط§ظˆط±ط§ظ† ظ…ط¯غŒط±غŒطھ ع©ط³ط¨ ظˆ ع©ط§ط± ط§ظˆط¬ (owjbc.com)\n\n`
+      ? `=== کتاب کار CPMAI: فاز اول درک کسب‌وکار ===\nمشاوران مدیریت کسب و کار اوج (owjbc.com)\n\n`
       : `=== CPMAI Workbook: Phase I Business Understanding ===\nOWJ Business Council (owjbc.com)\n\n`;
 
     // Page 0
     if (page0Content.trim()) {
       fullText += lang === 'fa'
-        ? `--- طµظپط­ظ‡ غ°: ظ¾غŒط´â€Œظ†ظˆغŒط³ ع©ط§ط±ع¯ط§ظ‡ ظ¾ط±ط§ظ…ظ¾طھ LLM ---\n${page0Content}\n\n`
+        ? `--- صفحه ۰: پیش‌نویس کارگاه پرامپت LLM ---\n${page0Content}\n\n`
         : `--- Page 0: LLM Prompt Sandbox Draft ---\n${page0Content}\n\n`;
     }
 
     // Page 1
-    fullText += lang === 'fa' ? `--- طµظپط­ظ‡ غ±: ط§ظ‡ط¯ط§ظپ ع©ط³ط¨â€Œظˆع©ط§ط± ---\n` : `--- Page 1: Determine Business Objectives ---\n`;
-    fullText += `${lang === 'fa' ? 'ط¯ط§ط³طھط§ظ† ع©ط§ط±ط¨ط± ط§ط³ظ¾ط±غŒظ†طھ:' : 'Sprint User Story:'} ${story || 'N/A'}\n\n`;
-    fullText += `${lang === 'fa' ? 'ظ¾ط³â€Œط²ظ…غŒظ†ظ‡ ع©ط³ط¨â€Œظˆع©ط§ط±:' : 'Background:'}\n${bg || 'N/A'}\n\n`;
-    fullText += `${lang === 'fa' ? 'ظ‡ط¯ظپ ط§طµظ„غŒ ع©ط³ط¨â€Œظˆع©ط§ط±:' : 'Primary Business Objective:'}\n${obj || 'N/A'}\n\n`;
-    fullText += `${lang === 'fa' ? 'ظ¾ط±ط³ط´â€Œظ‡ط§غŒ ع©ط³ط¨â€Œظˆع©ط§ط±غŒ ظ…ط±طھط¨ط·:' : 'Related Business Questions:'}\n`;
+    fullText += lang === 'fa' ? `--- صفحه ۱: اهداف کسب‌وکار ---\n` : `--- Page 1: Determine Business Objectives ---\n`;
+    fullText += `${lang === 'fa' ? 'داستان کاربر اسپرینت:' : 'Sprint User Story:'} ${story || 'N/A'}\n\n`;
+    fullText += `${lang === 'fa' ? 'پس‌زمینه کسب‌وکار:' : 'Background:'}\n${bg || 'N/A'}\n\n`;
+    fullText += `${lang === 'fa' ? 'هدف اصلی کسب‌وکار:' : 'Primary Business Objective:'}\n${obj || 'N/A'}\n\n`;
+    fullText += `${lang === 'fa' ? 'پرسش‌های کسب‌وکاری مرتبط:' : 'Related Business Questions:'}\n`;
     if (qs.length > 0) {
       qs.forEach((q, i) => {
         fullText += `  ${i + 1}. ${q}\n`;
       });
     } else {
-      fullText += `  (ظ…ظˆط±ط¯غŒ ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ)\n`;
+      fullText += `  (موردی ثبت نشده است)\n`;
     }
 
     // Page 2
     fullText += `\n` + (lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ²: ط­ظ„ ع†ظ‡ ظ…ط³ط¦ظ„ظ‡â€Œط§غŒ ط¨ط§ ظ‡ظˆط´ ظ…طµظ†ظˆط¹غŒ ط¯ط± ط§غŒظ† طھع©ط±ط§ط±طں ---\nWhat problem are you solving with AI in this iteration?\n\n`
+      ? `--- صفحه ۲: حل چه مسئله‌ای با هوش مصنوعی در این تکرار؟ ---\nWhat problem are you solving with AI in this iteration?\n\n`
       : `--- Page 2: What problem are you solving with AI in this iteration? ---\n\n`);
-    fullText += (page2Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)') + `\n\n`;
+    fullText += (page2Content || '(محتوایی در بوم ثبت نشده است / No content entered)') + `\n\n`;
 
     // Page 3
     fullText += lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ³: ظ…ط¹غŒط§ط±ظ‡ط§غŒ ظ…ظˆظپظ‚غŒطھ ع©ط³ط¨â€Œظˆع©ط§ط± ط¯ط± ط§غŒظ† طھع©ط±ط§ط± ---\nWhat are the objective measures of success for this project iteration?\n\n`
+      ? `--- صفحه ۳: معیارهای موفقیت کسب‌وکار در این تکرار ---\nWhat are the objective measures of success for this project iteration?\n\n`
       : `--- Page 3: Determine Business Success Criteria ---\nWhat are the objective measures of success for this project iteration?\n\n`;
-    fullText += (page3Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)') + `\n\n`;
+    fullText += (page3Content || '(محتوایی در بوم ثبت نشده است / No content entered)') + `\n\n`;
 
     // Page 4
     fullText += lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ´: طھط­ظ„غŒظ„ ظ‡ط²غŒظ†ظ‡-ظپط§غŒط¯ظ‡ ظˆ ط¨ظˆط¯ط¬ظ‡ (ط§ط³ظ„ط§غŒط¯ غ±غ´) ---\nSubtask: Cost-Benefit Analysis\nWhat is the cost and time budget for this project?\n\n`
+      ? `--- صفحه ۴: تحلیل هزینه-فایده و بودجه (اسلاید ۱۴) ---\nSubtask: Cost-Benefit Analysis\nWhat is the cost and time budget for this project?\n\n`
       : `--- Page 4: Subtask: Cost-Benefit Analysis (Slide 14) ---\nWhat is the cost and time budget for this project?\n\n`;
-    fullText += (page4Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)') + `\n\n`;
+    fullText += (page4Content || '(محتوایی در بوم ثبت نشده است / No content entered)') + `\n\n`;
 
     // Page 5
     fullText += lang === 'fa'
-      ? `--- طµظپط­ظ‡ غµ: ط¨ط±ط¢ظˆط±ط¯ ظ†ط±ط® ط¨ط§ط²ع¯ط´طھ ط³ط±ظ…ط§غŒظ‡ (ROI) ظ¾ط±ظˆعکظ‡ (ط§ط³ظ„ط§غŒط¯ غ±غµ) ---\nWhat is the expected ROI for this project?\n\n`
+      ? `--- صفحه ۵: برآورد نرخ بازگشت سرمایه (ROI) پروژه (اسلاید ۱۵) ---\nWhat is the expected ROI for this project?\n\n`
       : `--- Page 5: Expected ROI for this project (Slide 15) ---\nWhat is the expected ROI for this project?\n\n`;
-    fullText += (page5Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)') + `\n\n`;
+    fullText += (page5Content || '(محتوایی در بوم ثبت نشده است / No content entered)') + `\n\n`;
 
     // Page 6
     fullText += lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ¶: ط§ظ„ط²ط§ظ…ط§طھ ظ¾ط±ظˆعکظ‡â€Œظ‡ط§غŒ ط´ظ†ط§ط®طھغŒ ظˆ ط®ط· ظ…ط¨ظ†ط§غŒ ط§ع©طھط´ط§ظپغŒ (ط§ط³ظ„ط§غŒط¯ غ±غ¶) ---\nTask Group: Cognitive Project Requirements / Task: Cognitive Requirements\n\n`
+      ? `--- صفحه ۶: الزامات پروژه‌های شناختی و خط مبنای اکتشافی (اسلاید ۱۶) ---\nTask Group: Cognitive Project Requirements / Task: Cognitive Requirements\n\n`
       : `--- Page 6: Task Group: Cognitive Project Requirements / Task: Cognitive Requirements (Slide 16) ---\n\n`;
-    fullText += (page6Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)') + `\n\n`;
+    fullText += (page6Content || '(محتوایی در بوم ثبت نشده است / No content entered)') + `\n\n`;
 
     // Page 7
     fullText += lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ·: ع†ط±ط§ ط¨ط±ط§غŒ ط§غŒظ† ظ¾ط±ظˆعکظ‡ ط¨ظ‡ غŒع© ط±ط§ظ‡â€Œط­ظ„ ظ‡ظˆط´ ظ…طµظ†ظˆط¹غŒ ظ†غŒط§ط² ط§ط³طھطں (ط§ط³ظ„ط§غŒط¯ غ±غ·) ---\nWhy is an AI solution needed for this project?\n\n`
+      ? `--- صفحه ۷: چرا برای این پروژه به یک راه‌حل هوش مصنوعی نیاز است؟ (اسلاید ۱۷) ---\nWhy is an AI solution needed for this project?\n\n`
       : `--- Page 7: Why is an AI solution needed for this project? (Slide 17) ---\n\n`;
-    fullText += (page7Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)') + `\n\n`;
+    fullText += (page7Content || '(محتوایی در بوم ثبت نشده است / No content entered)') + `\n\n`;
 
     // Page 8
     fullText += lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ¸: ظ…ط¤ظ„ظپظ‡â€Œظ‡ط§غŒ ط؛غŒط±ط´ظ†ط§ط®طھغŒ ظˆ ط¬ط§غŒع¯ط²غŒظ†â€Œظ‡ط§غŒ ط§طھظˆظ…ط§ط³غŒظˆظ† (ط§ط³ظ„ط§غŒط¯ غ±غ¸) ---\nTask: Cognitive Requirements\nظ¾ط±ط³ط´ غ±: What are the noncognitive (non-AI) portions of this project that will be used in conjunction with the cognitive components?\nظ¾ط±ط³ط´ غ²: Are non-cognitive automation alternatives possible for this iteration? If so, why are they not being used for this project iteration?\n\n`
+      ? `--- صفحه ۸: مؤلفه‌های غیرشناختی و جایگزین‌های اتوماسیون (اسلاید ۱۸) ---\nTask: Cognitive Requirements\nپرسش ۱: What are the noncognitive (non-AI) portions of this project that will be used in conjunction with the cognitive components?\nپرسش ۲: Are non-cognitive automation alternatives possible for this iteration? If so, why are they not being used for this project iteration?\n\n`
       : `--- Page 8: Noncognitive Portions & Automation Alternatives (Slide 18) ---\nTask: Cognitive Requirements\nQuestion 1: What are the noncognitive (non-AI) portions of this project that will be used in conjunction with the cognitive components?\nQuestion 2: Are non-cognitive automation alternatives possible for this iteration? If so, why are they not being used for this project iteration?\n\n`;
-    fullText += (page8Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)') + `\n\n`;
+    fullText += (page8Content || '(محتوایی در بوم ثبت نشده است / No content entered)') + `\n\n`;
 
     // Page 9
     fullText += lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ¹: ط§ظ‡ط¯ط§ظپ ط´ظ†ط§ط®طھغŒ ظ¾ط±ظˆعکظ‡ (ط§ط³ظ„ط§غŒط¯ غ±غ¹) ---\nTask Group: Cognitive Project Requirements\nTask: Cognitive Requirements\nCognitive objectives: Enumerate the specific objectives\n\n`
+      ? `--- صفحه ۹: اهداف شناختی پروژه (اسلاید ۱۹) ---\nTask Group: Cognitive Project Requirements\nTask: Cognitive Requirements\nCognitive objectives: Enumerate the specific objectives\n\n`
       : `--- Page 9: Cognitive Objectives (Slide 19) ---\nTask Group: Cognitive Project Requirements\nTask: Cognitive Requirements\nCognitive objectives: Enumerate the specific objectives\n\n`;
-    fullText += (page9Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)') + `\n\n`;
+    fullText += (page9Content || '(محتوایی در بوم ثبت نشده است / No content entered)') + `\n\n`;
 
     // Page 10
     fullText += lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ±غ°: ظ†طھط§غŒط¬ ظˆ ط¯ط³طھط§ظˆط±ط¯ظ‡ط§غŒ ط´ظ†ط§ط®طھغŒ (ط§ط³ظ„ط§غŒط¯ غ²غ°) ---\nTask Group: Cognitive Project Requirements\nTask: Cognitive Requirements\nCognitive outcomes: Detail specific outcomes, criteria & subjective judgments\n\n`
+      ? `--- صفحه ۱۰: نتایج و دستاوردهای شناختی (اسلاید ۲۰) ---\nTask Group: Cognitive Project Requirements\nTask: Cognitive Requirements\nCognitive outcomes: Detail specific outcomes, criteria & subjective judgments\n\n`
       : `--- Page 10: Cognitive Outcomes (Slide 20) ---\nTask Group: Cognitive Project Requirements\nTask: Cognitive Requirements\nCognitive outcomes: Detail specific outcomes, criteria & subjective judgments\n\n`;
-    fullText += (page10Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)') + '\n\n';
+    fullText += (page10Content || '(محتوایی در بوم ثبت نشده است / No content entered)') + '\n\n';
 
     // Page 11
     fullText += lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ±غ±: ظ…ط¹غŒط§ط±ظ‡ط§غŒ ظ…ظˆظپظ‚غŒطھ ظ‡ظˆط´ ظ…طµظ†ظˆط¹غŒ (ط§ط³ظ„ط§غŒط¯ غ²غ±) ---\nTask Group: Cognitive Project Requirements\nTask: Cognitive Requirements / AI Success Criteria\nAI success criteria: Criteria for success, unique capabilities, superiority dimensions & satisfying skeptics\n\n`
+      ? `--- صفحه ۱۱: معیارهای موفقیت هوش مصنوعی (اسلاید ۲۱) ---\nTask Group: Cognitive Project Requirements\nTask: Cognitive Requirements / AI Success Criteria\nAI success criteria: Criteria for success, unique capabilities, superiority dimensions & satisfying skeptics\n\n`
       : `--- Page 11: AI Success Criteria (Slide 21) ---\nTask Group: Cognitive Project Requirements\nTask: Cognitive Requirements / AI Success Criteria\nAI success criteria: Criteria for success, unique capabilities, superiority dimensions & satisfying skeptics\n\n`;
-    fullText += (page11Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)') + '\n\n';
+    fullText += (page11Content || '(محتوایی در بوم ثبت نشده است / No content entered)') + '\n\n';
 
     // Page 12
     fullText += lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ±غ²: ط§ظ„ع¯ظˆظ‡ط§غŒ ظ‡ظˆط´ ظ…طµظ†ظˆط¹غŒ (ط§ط³ظ„ط§غŒط¯ غ²غ²) ---\nTask Group: Cognitive Project Requirements\nTask: Cognitive Requirements / AI Patterns (Figure 2: The Seven Patterns of AI)\nAI Patterns: Which patterns used, determination rationale & similar leverageable assets\n\n`
+      ? `--- صفحه ۱۲: الگوهای هوش مصنوعی (اسلاید ۲۲) ---\nTask Group: Cognitive Project Requirements\nTask: Cognitive Requirements / AI Patterns (Figure 2: The Seven Patterns of AI)\nAI Patterns: Which patterns used, determination rationale & similar leverageable assets\n\n`
       : `--- Page 12: AI Patterns (Slide 22) ---\nTask Group: Cognitive Project Requirements\nTask: Cognitive Requirements / AI Patterns (Figure 2: The Seven Patterns of AI)\nAI Patterns: Which patterns used, determination rationale & similar leverageable assets\n\n`;
-    fullText += (page12Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)') + '\n\n';
+    fullText += (page12Content || '(محتوایی در بوم ثبت نشده است / No content entered)') + '\n\n';
 
     // Page 13
     fullText += lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ±غ³: طھط¹غŒغŒظ† ط§ظ„ع¯ظˆظ‡ط§غŒ ظ¾ط±ظˆعکظ‡ (ط§ط³ظ„ط§غŒط¯ غ²غ³) ---\nTask Group: Cognitive Project Requirements\nTask: Cognitive Requirements / Which patterns are being used in this project?\nAI Patterns Breakdown: Primary & secondary patterns, pipeline synergy, scope elimination & toolkits\n\n`
+      ? `--- صفحه ۱۳: تعیین الگوهای پروژه (اسلاید ۲۳) ---\nTask Group: Cognitive Project Requirements\nTask: Cognitive Requirements / Which patterns are being used in this project?\nAI Patterns Breakdown: Primary & secondary patterns, pipeline synergy, scope elimination & toolkits\n\n`
       : `--- Page 13: Which Patterns are Being Used (Slide 23) ---\nTask Group: Cognitive Project Requirements\nTask: Cognitive Requirements / Which patterns are being used in this project?\nAI Patterns Breakdown: Primary & secondary patterns, pipeline synergy, scope elimination & toolkits\n\n`;
-    fullText += (page13Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)') + '\n\n';
+    fullText += (page13Content || '(محتوایی در بوم ثبت نشده است / No content entered)') + '\n\n';
 
     // Page 14
     fullText += lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ±غ´: ط§ط±ط²غŒط§ط¨غŒ ظˆط¶ط¹غŒطھ â€” ظ†غŒط§ط²ظ…ظ†ط¯غŒâ€Œظ‡ط§غŒ ظ…ظ†ط§ط¨ط¹ ظˆ ط²ظ…ط§ظ†â€Œط¨ظ†ط¯غŒ (ط§ط³ظ„ط§غŒط¯ غ²غ´) ---\nTask Group: Assess Situation\nTask: Resource Requirements & Task: Schedule Requirements\nResources: Personnel/Skills, Compute/GPU hardware, Software/Data stack, Budget\nSchedule: Agile sprint cadence, CPMAI 6-phase stage-gates, Hard deadlines, Critical path dependencies\n\n`
-      : `--- Page 14: Assess Situation â€” Resource & Schedule Requirements (Slide 24) ---\nTask Group: Assess Situation\nTask: Resource Requirements & Task: Schedule Requirements\nResources: Personnel/Skills, Compute/GPU hardware, Software/Data stack, Budget\nSchedule: Agile sprint cadence, CPMAI 6-phase stage-gates, Hard deadlines, Critical path dependencies\n\n`;
-    fullText += (page14Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)') + '\n\n';
+      ? `--- صفحه ۱۴: ارزیابی وضعیت — نیازمندی‌های منابع و زمان‌بندی (اسلاید ۲۴) ---\nTask Group: Assess Situation\nTask: Resource Requirements & Task: Schedule Requirements\nResources: Personnel/Skills, Compute/GPU hardware, Software/Data stack, Budget\nSchedule: Agile sprint cadence, CPMAI 6-phase stage-gates, Hard deadlines, Critical path dependencies\n\n`
+      : `--- Page 14: Assess Situation — Resource & Schedule Requirements (Slide 24) ---\nTask Group: Assess Situation\nTask: Resource Requirements & Task: Schedule Requirements\nResources: Personnel/Skills, Compute/GPU hardware, Software/Data stack, Budget\nSchedule: Agile sprint cadence, CPMAI 6-phase stage-gates, Hard deadlines, Critical path dependencies\n\n`;
+    fullText += (page14Content || '(محتوایی در بوم ثبت نشده است / No content entered)') + '\n\n';
 
     // Page 15
     fullText += lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ±غµ: ط³غŒط§ظ‡ظ‡ ظ…ظ†ط§ط¨ط¹ ظپظ†ط§ظˆط±غŒ ظˆ ظ…ظ‡ط§ط±طھâ€Œظ‡ط§غŒ ظ…ظˆط±ط¯ ظ†غŒط§ط² (ط§ط³ظ„ط§غŒط¯ غ²غµ) ---\nTask Group: Assess Situation\nTask: Resource Requirements â€” Technology Resources & Skills Inventory\nTechnology: Hardware, AI/NLP Frameworks, Cloud Hosting, APIs & CI/CD\nSkills: Core ML/NLP, Solutions Architecture, Domain SME, Agile PM, Skill Gaps\n\n`
-      : `--- Page 15: Technology Resources & Skills Inventory (Slide 25) ---\nTask Group: Assess Situation\nTask: Resource Requirements â€” Technology Resources & Skills Inventory\nTechnology: Hardware, AI/NLP Frameworks, Cloud Hosting, APIs & CI/CD\nSkills: Core ML/NLP, Solutions Architecture, Domain SME, Agile PM, Skill Gaps\n\n`;
-    fullText += page15Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)';
+      ? `--- صفحه ۱۵: سیاهه منابع فناوری و مهارت‌های مورد نیاز (اسلاید ۲۵) ---\nTask Group: Assess Situation\nTask: Resource Requirements — Technology Resources & Skills Inventory\nTechnology: Hardware, AI/NLP Frameworks, Cloud Hosting, APIs & CI/CD\nSkills: Core ML/NLP, Solutions Architecture, Domain SME, Agile PM, Skill Gaps\n\n`
+      : `--- Page 15: Technology Resources & Skills Inventory (Slide 25) ---\nTask Group: Assess Situation\nTask: Resource Requirements — Technology Resources & Skills Inventory\nTechnology: Hardware, AI/NLP Frameworks, Cloud Hosting, APIs & CI/CD\nSkills: Core ML/NLP, Solutions Architecture, Domain SME, Agile PM, Skill Gaps\n\n`;
+    fullText += page15Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
 
     // Page 16
     fullText += '\n\n' + (lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ±غ¶: ط§ظ„ط²ط§ظ…ط§طھ ط²ظ…ط§ظ†â€Œط¨ظ†ط¯غŒ ظˆ ظˆط§ط¨ط³طھع¯غŒâ€Œظ‡ط§غŒ ظ¾ط±ظˆعکظ‡ (ط§ط³ظ„ط§غŒط¯ غ²غ¶) ---\nTask Group: Assess Situation\nTask: Schedule Requirements\nSchedule: 4-Month MVP, 2-to-4-week agile sprints, pilot testing\nConstraints: Budget < $1M, API dependencies, CCPA data permissions\n\n`
+      ? `--- صفحه ۱۶: الزامات زمان‌بندی و وابستگی‌های پروژه (اسلاید ۲۶) ---\nTask Group: Assess Situation\nTask: Schedule Requirements\nSchedule: 4-Month MVP, 2-to-4-week agile sprints, pilot testing\nConstraints: Budget < $1M, API dependencies, CCPA data permissions\n\n`
       : `--- Page 16: Task: Schedule Requirements (Slide 26) ---\nTask Group: Assess Situation\nTask: Schedule Requirements\nSchedule: 4-Month MVP, 2-to-4-week agile sprints, pilot testing\nConstraints: Budget < $1M, API dependencies, CCPA data permissions\n\n`);
-    fullText += page16Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)';
+    fullText += page16Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
 
     // Page 17
     fullText += '\n\n' + (lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ±غ·: ظ…ط­ط¯ظˆط¯غŒطھâ€Œظ‡ط§غŒ طھع©ظ…غŒظ„غŒ ظˆ ظ…ظ‚ط§ط¯غŒط± ط¹ظ…ظ„ع©ط±ط¯ ظ…ط¯ظ„ (ط§ط³ظ„ط§غŒط¯ غ²غ·) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable Model Performance Values\nConstraints: Budget limits, data volume/noise, legacy API rate limits, CCPA privacy, seasonal peak freeze\nPerformance: Probabilistic error awareness & baseline thresholds\n\n`
+      ? `--- صفحه ۱۷: محدودیت‌های تکمیلی و مقادیر عملکرد مدل (اسلاید ۲۷) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable Model Performance Values\nConstraints: Budget limits, data volume/noise, legacy API rate limits, CCPA privacy, seasonal peak freeze\nPerformance: Probabilistic error awareness & baseline thresholds\n\n`
       : `--- Page 17: Project Constraints & Model Performance Values (Slide 27) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable Model Performance Values\nConstraints: Budget limits, data volume/noise, legacy API rate limits, CCPA privacy, seasonal peak freeze\nPerformance: Probabilistic error awareness & baseline thresholds\n\n`);
-    fullText += page17Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)';
+    fullText += page17Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
 
     // Page 18
     fullText += '\n\n' + (lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ±غ¸: ظ…ط§طھط±غŒط³ ط¯ط±ظ‡ظ…â€Œط±غŒط®طھع¯غŒ ظˆ ظ…ظ‚ط§ط¯غŒط± ظ‚ط§ط¨ظ„ ظ‚ط¨ظˆظ„ ط¹ظ…ظ„ع©ط±ط¯ ظ…ط¯ظ„ (ط§ط³ظ„ط§غŒط¯ غ²غ¸) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable Model Performance Values (Figure 3 Confusion Matrix)\nArtifacts: Accuracy, Precision, Recall, F1 Score, Max False Positive Rate\n\n`
+      ? `--- صفحه ۱۸: ماتریس درهم‌ریختگی و مقادیر قابل قبول عملکرد مدل (اسلاید ۲۸) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable Model Performance Values (Figure 3 Confusion Matrix)\nArtifacts: Accuracy, Precision, Recall, F1 Score, Max False Positive Rate\n\n`
       : `--- Page 18: Confusion Matrix & Model Performance Values (Slide 28) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable Model Performance Values (Figure 3 Confusion Matrix)\nArtifacts: Accuracy, Precision, Recall, F1 Score, Max False Positive Rate\n\n`);
-    fullText += page18Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)';
+    fullText += page18Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
 
     // Page 19
     fullText += '\n\n' + (lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ±غ¹: ط³ظ†ط¬ظ‡â€Œظ‡ط§غŒ ظ…ط·ظ„ظˆط¨ ط¹ظ…ظ„ع©ط±ط¯ ظˆ ط­ط³ط§ط³غŒطھâ€Œظ‡ط§ (ط§ط³ظ„ط§غŒط¯ غ²غ¹) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable Model Performance Values (Slide 29)\nArtifact: Maximum Acceptable False Negative Rate (FNR)\nQ1: Desired / Required Performance Metrics\nQ2: Sensitivities to False Positives/Negatives & GenAI Inaccuracies\n\n`
+      ? `--- صفحه ۱۹: سنجه‌های مطلوب عملکرد و حساسیت‌ها (اسلاید ۲۹) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable Model Performance Values (Slide 29)\nArtifact: Maximum Acceptable False Negative Rate (FNR)\nQ1: Desired / Required Performance Metrics\nQ2: Sensitivities to False Positives/Negatives & GenAI Inaccuracies\n\n`
       : `--- Page 19: Desired Performance Metrics & Sensitivities (Slide 29) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable Model Performance Values (Slide 29)\nArtifact: Maximum Acceptable False Negative Rate (FNR)\nQ1: Desired / Required Performance Metrics\nQ2: Sensitivities to False Positives/Negatives & GenAI Inaccuracies\n\n`);
-    fullText += page19Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)';
+    fullText += page19Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
 
     // Page 20
     fullText += '\n\n' + (lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ²غ°: ظ…ظ‚ط§ط¯غŒط± ظ‚ط§ط¨ظ„ ظ‚ط¨ظˆظ„ ط³ظ†ط¬ظ‡â€Œظ‡ط§غŒ ع©ظ„غŒط¯غŒ ط¹ظ…ظ„ع©ط±ط¯ ع©ط³ط¨â€Œظˆع©ط§ط± (ط§ط³ظ„ط§غŒط¯ غ³غ°) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable KPI Performance Values (Slide 30)\nArtifacts: Required Business KPIs (Efficiency, CSAT, Error Reduction, Revenue)\nFinancial ROI & Cost Savings Estimation\n\n`
+      ? `--- صفحه ۲۰: مقادیر قابل قبول سنجه‌های کلیدی عملکرد کسب‌وکار (اسلاید ۳۰) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable KPI Performance Values (Slide 30)\nArtifacts: Required Business KPIs (Efficiency, CSAT, Error Reduction, Revenue)\nFinancial ROI & Cost Savings Estimation\n\n`
       : `--- Page 20: Acceptable Business KPI Performance Values (Slide 30) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable KPI Performance Values (Slide 30)\nArtifacts: Required Business KPIs (Efficiency, CSAT, Error Reduction, Revenue)\nFinancial ROI & Cost Savings Estimation\n\n`);
-    fullText += page20Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)';
+    fullText += page20Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
 
     // Page 21
     fullText += '\n\n' + (lang === 'fa'
-      ? `--- طµظپط­ظ‡ غ²غ±: ط³ظ†ط¬ظ‡â€Œظ‡ط§غŒ ع©ظ„غŒط¯غŒ ط¹ظ…ظ„ع©ط±ط¯ ظپظ†ط§ظˆط±غŒ (ط§ط³ظ„ط§غŒط¯ غ³غ±) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable KPI Performance Values â€” Required Technology KPIs (Slide 31)\nArtifacts: Latency SLAs, Cloud FinOps, Throughput, Error Rates, High Availability\n\n`
-      : `--- Page 21: Required Technology KPIs (Slide 31) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable KPI Performance Values â€” Required Technology KPIs (Slide 31)\nArtifacts: Latency SLAs, Cloud FinOps, Throughput, Error Rates, High Availability\n\n`);
-    fullText += page21Content || '(ظ…ط­طھظˆط§غŒغŒ ط¯ط± ط¨ظˆظ… ط«ط¨طھ ظ†ط´ط¯ظ‡ ط§ط³طھ / No content entered)';
+      ? `--- صفحه ۲۱: سنجه‌های کلیدی عملکرد فناوری (اسلاید ۳۱) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable KPI Performance Values — Required Technology KPIs (Slide 31)\nArtifacts: Latency SLAs, Cloud FinOps, Throughput, Error Rates, High Availability\n\n`
+      : `--- Page 21: Required Technology KPIs (Slide 31) ---\nTask Group: AI System Performance and Operation\nTask: Acceptable KPI Performance Values — Required Technology KPIs (Slide 31)\nArtifacts: Latency SLAs, Cloud FinOps, Throughput, Error Rates, High Availability\n\n`);
+    fullText += page21Content || '(محتوایی در بوم ثبت نشده است / No content entered)';
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(fullText).then(() => {
-        showToast(lang === 'fa' ? 'ظ¾ط§ط³ط®â€Œظ‡ط§غŒ ظ‡ط± غ²غ± طµظپط­ظ‡ ع©ظ¾غŒ ط´ط¯!' : 'Workbook answers for all 21 pages copied!');
+        showToast(lang === 'fa' ? 'پاسخ‌های هر ۲۱ صفحه کپی شد!' : 'Workbook answers for all 21 pages copied!');
       });
     }
   };
 
   const handleReset = () => {
     const confirmMsg = lang === 'fa'
-      ? 'ط¢غŒط§ ط§ط² ظ¾ط§ع© ع©ط±ط¯ظ† طھظ…ط§ظ… ظ¾ط§ط³ط®â€Œظ‡ط§غŒ ظˆط§ط±ط¯ط´ط¯ظ‡ ط¯ط± ع©طھط§ط¨ ع©ط§ط± ط§ط·ظ…غŒظ†ط§ظ† ط¯ط§ط±غŒط¯طں'
+      ? 'آیا از پاک کردن تمام پاسخ‌های واردشده در کتاب کار اطمینان دارید؟'
       : 'Clear all responses in the workbook?';
     if (!window.confirm(confirmMsg)) return;
 
@@ -568,7 +566,7 @@ export default function App() {
     setPage15Content('');
     setPage16Content('');
     setPage17Content('');
-    showToast(lang === 'fa' ? 'طھظ…ط§ظ… ظ¾ط§ط³ط®â€Œظ‡ط§ ظ¾ط§ع© ط´ط¯ظ†ط¯' : 'Workbook reset');
+    showToast(lang === 'fa' ? 'تمام پاسخ‌ها پاک شدند' : 'Workbook reset');
   };
 
   const handleSyncToCloud = async () => {
@@ -609,14 +607,14 @@ export default function App() {
 
       if (res.ok) {
         setCloudStatus('synced');
-        showToast(lang === 'fa' ? 'âœ“ ط§ط·ظ„ط§ط¹ط§طھ ط¨ط§ ظ¾ط§غŒع¯ط§ظ‡ ط¯ط§ط¯ظ‡ Neon ظ‡ظ…ع¯ط§ظ…â€Œط³ط§ط²غŒ ط´ط¯.' : 'âœ“ Synced with Neon PostgreSQL cloud database.');
+        showToast(lang === 'fa' ? '✓ اطلاعات با پایگاه داده Neon همگام‌سازی شد.' : '✓ Synced with Neon PostgreSQL cloud database.');
       } else {
         setCloudStatus('error');
-        showToast(lang === 'fa' ? 'ط®ط·ط§ ط¯ط± ط§ط±طھط¨ط§ط· ط¨ط§ ط³ط±ظˆط± ط§ط¨ط±غŒ' : 'Failed to sync with cloud database');
+        showToast(lang === 'fa' ? 'خطا در ارتباط با سرور ابری' : 'Failed to sync with cloud database');
       }
     } catch {
       setCloudStatus('error');
-      showToast(lang === 'fa' ? 'ط®ط·ط§ ط¯ط± ط§طھطµط§ظ„ ط¨ظ‡ ط§غŒظ†طھط±ظ†طھ غŒط§ ظ¾ط§غŒع¯ط§ظ‡ ط¯ط§ط¯ظ‡' : 'Network/database connection error');
+      showToast(lang === 'fa' ? 'خطا در اتصال به اینترنت یا پایگاه داده' : 'Network/database connection error');
     } finally {
       setIsSyncing(false);
     }
@@ -671,7 +669,7 @@ export default function App() {
             setCurrentUser(user);
             showToast(
               lang === 'fa'
-                ? `ط®ظˆط´ ط¢ظ…ط¯غŒط¯طŒ ${user.displayName || user.email}`
+                ? `خوش آمدید، ${user.displayName || user.email}`
                 : `Welcome, ${user.displayName || user.email}`
             );
             if (user.isOnboarded) {
@@ -710,6 +708,7 @@ export default function App() {
             lang={lang}
           />
         )}
+
         {/* LLM For Humans Book Modal */}
         <LlmForHumansBookModal
           isOpen={isBookModalOpen}
@@ -768,7 +767,7 @@ export default function App() {
             currentTrack={industryTrack}
             onSelectTrack={handleSelectIndustryTrack}
             onOpenSelectorModal={() => setIsIndustryModalOpen(true)}
-            className="shrink-0 hidden lg:inline-flex"
+            className="shrink-0 hidden md:inline-flex"
           />
 
           {/* Page Navigation Segmented Control */}
@@ -780,20 +779,10 @@ export default function App() {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-[0.96] shrink-0 border bg-[#2563EB]/10 dark:bg-[#2563EB]/15 text-[#2563EB] dark:text-[#60A5FA] border-[#2563EB]/30 hover:bg-[#2563EB]/20 cursor-pointer"
-              title={lang === 'fa' ? 'ط¨ط§ط²ع¯ط´طھ ط¨ظ‡ طµظپط­ظ‡ ظ…ط¹ط±ظپغŒ ظˆ ظ„ظ†ط¯غŒظ†ع¯' : 'Return to Agentify Landing Page'}
+              title={lang === 'fa' ? 'بازگشت به صفحه معرفی و لندینگ' : 'Return to Agentify Landing Page'}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ ظ„ظ†ط¯غŒظ†ع¯' : 'Landing'}</span>
-            </button>
-
-            {/* LLM For Humans Book Modal Trigger */}
-            <button
-              onClick={() => setIsBookModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-[0.96] shrink-0 border bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20 cursor-pointer shadow-xs"
-              title={lang === 'fa' ? 'کتابچه جامع: مدل‌هاي زباني بزرگ (LLM) به زبان آدميزاد' : 'LLMs for Humans Executive Digest'}
-            >
-              <BookOpen className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>{lang === 'fa' ? '?? کتابچه LLM به زبان آدميزاد' : '?? LLMs for Humans'}</span>
+              <span>{lang === 'fa' ? 'صفحه لندینگ' : 'Landing'}</span>
             </button>
 
             {/* Entry Assessment: Readiness Placement Quiz */}
@@ -809,7 +798,17 @@ export default function App() {
               }`}
             >
               <Target className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'ًںژ¯ ط¢ط²ظ…ظˆظ† ط³ط·ط­â€Œط³ظ†ط¬غŒ (ظˆط±ظˆط¯)' : 'ًںژ¯ Readiness Quiz'}</span>
+              <span>{lang === 'fa' ? '🎯 آزمون سطح‌سنجی (ورود)' : '🎯 Readiness Quiz'}</span>
+            </button>
+
+            {/* LLM For Humans Book Modal Trigger */}
+            <button
+              onClick={() => setIsBookModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-[0.96] shrink-0 border bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20 cursor-pointer shadow-xs"
+              title={lang === 'fa' ? 'کتابچه جامع: مدل‌های زبانی بزرگ (LLM) به زبان آدمیزاد' : 'LLMs for Humans Executive Digest'}
+            >
+              <BookOpen className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>{lang === 'fa' ? '📚 کتابچه LLM به زبان آدمیزاد' : '📚 LLMs for Humans'}</span>
             </button>
 
             {/* Page 0: LLM Fundamentals & Prompting Toolkit */}
@@ -825,7 +824,7 @@ export default function App() {
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-[#fbbf24]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ°: ط¬ط¹ط¨ظ‡â€Œط§ط¨ط²ط§ط± ظˆ ظ…ط¨ط§ظ†غŒ LLM' : 'Page 0: LLM Toolkit'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۰: جعبه‌ابزار و مبانی LLM' : 'Page 0: LLM Toolkit'}</span>
             </button>
 
             <button
@@ -840,7 +839,7 @@ export default function App() {
               }`}
             >
               <BookOpen className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ±: ط¯ط±ع© ع©ط³ط¨â€Œظˆع©ط§ط±' : 'Page 1'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۱: درک کسب‌وکار' : 'Page 1'}</span>
             </button>
 
             <button
@@ -855,7 +854,7 @@ export default function App() {
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ²: ط­ظ„ ظ…ط³ط¦ظ„ظ‡' : 'Page 2'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۲: حل مسئله' : 'Page 2'}</span>
               {isSessionLocked(2) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -871,7 +870,7 @@ export default function App() {
               }`}
             >
               <Award className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ³: ظ…ط¹غŒط§ط±ظ‡ط§غŒ ظ…ظˆظپظ‚غŒطھ' : 'Page 3'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۳: معیارهای موفقیت' : 'Page 3'}</span>
               {isSessionLocked(3) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -887,7 +886,7 @@ export default function App() {
               }`}
             >
               <DollarSign className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ´: ظ‡ط²غŒظ†ظ‡-ظپط§غŒط¯ظ‡' : 'Page 4: Budget'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۴: هزینه-فایده' : 'Page 4: Budget'}</span>
               {isSessionLocked(4) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -903,7 +902,7 @@ export default function App() {
               }`}
             >
               <TrendingUp className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غµ: ط¨ط±ط¢ظˆط±ط¯ ROI (غ±غµ)' : 'Page 5 (Expected ROI)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۵: برآورد ROI (۱۵)' : 'Page 5 (Expected ROI)'}</span>
               {isSessionLocked(5) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -919,7 +918,7 @@ export default function App() {
               }`}
             >
               <Brain className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ¶: ط§ظ„ط²ط§ظ…ط§طھ ط´ظ†ط§ط®طھغŒ (غ±غ¶)' : 'Page 6 (Cognitive Req.)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۶: الزامات شناختی (۱۶)' : 'Page 6 (Cognitive Req.)'}</span>
               {isSessionLocked(6) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -935,7 +934,7 @@ export default function App() {
               }`}
             >
               <Cpu className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ·: ع†ط±ط§ AIطں (غ±غ·)' : 'Page 7 (Why AI?)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۷: چرا AI؟ (۱۷)' : 'Page 7 (Why AI?)'}</span>
               {isSessionLocked(7) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -951,7 +950,7 @@ export default function App() {
               }`}
             >
               <Layers className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ¸: ط¨ط®ط´â€Œظ‡ط§غŒ ط؛غŒط±ط´ظ†ط§ط®طھغŒ (غ±غ¸)' : 'Page 8 (Noncognitive Parts)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۸: بخش‌های غیرشناختی (۱۸)' : 'Page 8 (Noncognitive Parts)'}</span>
               {isSessionLocked(8) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -967,7 +966,7 @@ export default function App() {
               }`}
             >
               <Target className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ¹: ط§ظ‡ط¯ط§ظپ ط´ظ†ط§ط®طھغŒ (غ±غ¹)' : 'Page 9 (Cognitive Obj.)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۹: اهداف شناختی (۱۹)' : 'Page 9 (Cognitive Obj.)'}</span>
               {isSessionLocked(9) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -983,7 +982,7 @@ export default function App() {
               }`}
             >
               <Gauge className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ±غ°: ظ†طھط§غŒط¬ ط´ظ†ط§ط®طھغŒ (غ²غ°)' : 'Page 10 (Cognitive Outcomes)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۱۰: نتایج شناختی (۲۰)' : 'Page 10 (Cognitive Outcomes)'}</span>
               {isSessionLocked(10) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -999,7 +998,7 @@ export default function App() {
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ±غ±: ظ…ط¹غŒط§ط±ظ‡ط§غŒ ظ…ظˆظپظ‚غŒطھ AI (غ²غ±)' : 'Page 11 (AI Success Criteria)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۱۱: معیارهای موفقیت AI (۲۱)' : 'Page 11 (AI Success Criteria)'}</span>
               {isSessionLocked(11) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -1015,7 +1014,7 @@ export default function App() {
               }`}
             >
               <Network className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ±غ²: ط§ظ„ع¯ظˆظ‡ط§غŒ ظ‡ظˆط´ ظ…طµظ†ظˆط¹غŒ (غ²غ²)' : 'Page 12 (AI Patterns)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۱۲: الگوهای هوش مصنوعی (۲۲)' : 'Page 12 (AI Patterns)'}</span>
               {isSessionLocked(12) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -1031,7 +1030,7 @@ export default function App() {
               }`}
             >
               <Workflow className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ±غ³: طھط¹غŒغŒظ† ط§ظ„ع¯ظˆظ‡ط§ (غ²غ³)' : 'Page 13 (Which Patterns)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۱۳: تعیین الگوها (۲۳)' : 'Page 13 (Which Patterns)'}</span>
               {isSessionLocked(13) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -1047,7 +1046,7 @@ export default function App() {
               }`}
             >
               <Calendar className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ±غ´: ط§ط±ط²غŒط§ط¨غŒ ظˆط¶ط¹غŒطھ (غ²غ´)' : 'Page 14 (Assess Situation)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۱۴: ارزیابی وضعیت (۲۴)' : 'Page 14 (Assess Situation)'}</span>
               {isSessionLocked(14) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -1063,7 +1062,7 @@ export default function App() {
               }`}
             >
               <HardDrive className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ±غµ: ظپظ†ط§ظˆط±غŒ ظˆ ظ…ظ‡ط§ط±طھâ€Œظ‡ط§ (غ²غµ)' : 'Page 15 (Tech & Skills)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۱۵: فناوری و مهارت‌ها (۲۵)' : 'Page 15 (Tech & Skills)'}</span>
               {isSessionLocked(15) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -1079,7 +1078,7 @@ export default function App() {
               }`}
             >
               <Clock className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ±غ¶: ط²ظ…ط§ظ†â€Œط¨ظ†ط¯غŒ (غ²غ¶)' : 'Page 16 (Schedule)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۱۶: زمان‌بندی (۲۶)' : 'Page 16 (Schedule)'}</span>
               {isSessionLocked(16) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -1095,7 +1094,7 @@ export default function App() {
               }`}
             >
               <Gauge className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ±غ·: ظ…ط­ط¯ظˆط¯غŒطھâ€Œظ‡ط§ ظˆ ط¹ظ…ظ„ع©ط±ط¯ (غ²غ·)' : 'Page 17 (Constraints & Performance)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۱۷: محدودیت‌ها و عملکرد (۲۷)' : 'Page 17 (Constraints & Performance)'}</span>
               {isSessionLocked(17) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -1111,7 +1110,7 @@ export default function App() {
               }`}
             >
               <Calculator className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ±غ¸: ط³ظ†ط¬ظ‡â€Œظ‡ط§ ظˆ ظ…ط§طھط±غŒط³ (غ²غ¸)' : 'Page 18 (Metrics)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۱۸: سنجه‌ها و ماتریس (۲۸)' : 'Page 18 (Metrics)'}</span>
               {isSessionLocked(18) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -1127,7 +1126,7 @@ export default function App() {
               }`}
             >
               <Bot className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ±غ¹: ط³ظ†ط¬ظ‡â€Œظ‡ط§ ظˆ ط­ط³ط§ط³غŒطھâ€Œظ‡ط§ (غ²غ¹)' : 'Page 19 (Sensitivities)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۱۹: سنجه‌ها و حساسیت‌ها (۲۹)' : 'Page 19 (Sensitivities)'}</span>
               {isSessionLocked(19) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -1143,7 +1142,7 @@ export default function App() {
               }`}
             >
               <TrendingUp className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ²غ°: ط³ظ†ط¬ظ‡â€Œظ‡ط§غŒ KPI ع©ط³ط¨â€Œظˆع©ط§ط± (غ³غ°)' : 'Page 20 (Business KPIs)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۲۰: سنجه‌های KPI کسب‌وکار (۳۰)' : 'Page 20 (Business KPIs)'}</span>
               {isSessionLocked(20) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
 
@@ -1159,7 +1158,7 @@ export default function App() {
               }`}
             >
               <Server className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'طµظپط­ظ‡ غ²غ±: ط³ظ†ط¬ظ‡â€Œظ‡ط§غŒ ظپظ†ط§ظˆط±غŒ (غ³غ±)' : 'Page 21 (Tech KPIs)'}</span>
+              <span>{lang === 'fa' ? 'صفحه ۲۱: سنجه‌های فناوری (۳۱)' : 'Page 21 (Tech KPIs)'}</span>
               {isSessionLocked(21) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
             </button>
           </div>
@@ -1170,10 +1169,10 @@ export default function App() {
             <button
               onClick={() => setIsLeaderboardModalOpen(true)}
               className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20 active:scale-[0.96] cursor-pointer shrink-0"
-              title={lang === 'fa' ? 'ط¬ط¯ظˆظ„ ط±طھط¨ظ‡â€Œط¨ظ†ط¯غŒ ط±ظ‚ط§ط¨طھغŒ ظ‡ظ…â€Œط¯ظˆط±ظ‡â€Œط§غŒâ€Œظ‡ط§ (Class Leaderboard)' : 'Class Leaderboard'}
+              title={lang === 'fa' ? 'جدول رتبه‌بندی رقابتی هم‌دوره‌ای‌ها (Class Leaderboard)' : 'Class Leaderboard'}
             >
               <Trophy className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{lang === 'fa' ? 'ط±طھط¨ظ‡â€Œط¨ظ†ط¯غŒ ع©ظ„ط§ط³' : 'Leaderboard'}</span>
+              <span className="hidden sm:inline">{lang === 'fa' ? 'رتبه‌بندی کلاس' : 'Leaderboard'}</span>
             </button>
 
             {/* Admin Control Center Button */}
@@ -1181,10 +1180,10 @@ export default function App() {
               <button
                 onClick={() => setIsAdminModalOpen(true)}
                 className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30 hover:bg-purple-500/25 active:scale-[0.96] cursor-pointer shrink-0"
-                title={lang === 'fa' ? 'ظ…ط±ع©ط² ظپط±ظ…ط§ظ†ط¯ظ‡غŒ ظ…ط¯غŒط±غŒطھ ط¯ظˆط±ظ‡ (Admin Control Center)' : 'Admin Control Center'}
+                title={lang === 'fa' ? 'مرکز فرماندهی مدیریت دوره (Admin Control Center)' : 'Admin Control Center'}
               >
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">{lang === 'fa' ? 'ظ¾ظ†ظ„ ظ…ط¯غŒط±غŒطھ' : 'Admin Panel'}</span>
+                <span className="hidden md:inline">{lang === 'fa' ? 'پنل مدیریت' : 'Admin Panel'}</span>
               </button>
             )}
 
@@ -1193,7 +1192,7 @@ export default function App() {
               <button
                 onClick={() => setIsAuthModalOpen(true)}
                 className="flex items-center gap-1.5 p-1 pe-2.5 rounded-xl border border-[#2f7d5b]/30 bg-[#2f7d5b]/10 hover:bg-[#2f7d5b]/20 transition-all text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] cursor-pointer"
-                title={lang === 'fa' ? 'ط­ط³ط§ط¨ ع©ط§ط±ط¨ط±غŒ' : 'User Account'}
+                title={lang === 'fa' ? 'حساب کاربری' : 'User Account'}
               >
                 {currentUser.avatarUrl ? (
                   <img
@@ -1233,18 +1232,18 @@ export default function App() {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                   />
                 </svg>
-                <span>{lang === 'fa' ? 'ظˆط±ظˆط¯ / ط¹ط¶ظˆغŒطھ' : 'Sign In'}</span>
+                <span>{lang === 'fa' ? 'ورود / عضویت' : 'Sign In'}</span>
               </button>
             )}
 
             {/* Copy All Answers */}
             <button
               onClick={handleCopyAll}
-              title={lang === 'fa' ? 'ع©ظ¾غŒ طھظ…ط§ظ… ظ¾ط§ط³ط®â€Œظ‡ط§' : 'Copy All Answers'}
+              title={lang === 'fa' ? 'کپی تمام پاسخ‌ها' : 'Copy All Answers'}
               className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#1f5163] transition-colors"
             >
               <Copy className="w-3.5 h-3.5 text-[#1f5163] dark:text-[#6fb3c6]" />
-              <span className="hidden sm:inline">{lang === 'fa' ? 'ع©ظ¾غŒ ظ¾ط§ط³ط®â€Œظ‡ط§' : 'Copy'}</span>
+              <span className="hidden sm:inline">{lang === 'fa' ? 'کپی پاسخ‌ها' : 'Copy'}</span>
             </button>
 
             {/* Print / PDF Protection */}
@@ -1252,11 +1251,11 @@ export default function App() {
               onClick={() => {
                 showToast(
                   lang === 'fa'
-                    ? 'ًںڑ« ط®ط±ظˆط¬غŒ PDF ظˆ ع†ط§ظ¾ ظ…طھط¯ظˆظ„ظˆعکغŒ ط¨ظ‡ ط¯ظ„غŒظ„ ط­ظ‚ظˆظ‚ ع©ظ¾غŒâ€Œط±ط§غŒطھ ط§ظˆط¬ ظ…ط³ط¯ظˆط¯ ط§ط³طھ. ط¨ط±ط§غŒ ط°ط®غŒط±ظ‡ ع©ط§ط± ط®ظˆط¯طŒ ط§ط² ط¯ع©ظ…ظ‡ آ«ع©ظ¾غŒ ظ¾ط§ط³ط®â€Œظ‡ط§آ» ط§ط³طھظپط§ط¯ظ‡ ع©ظ†غŒط¯.'
-                    : 'ًںڑ« Printing methodology to PDF is restricted by OWJ Copyright. Use "Copy Answers" for your work.'
+                    ? '🚫 خروجی PDF و چاپ متدولوژی به دلیل حقوق کپی‌رایت اوج مسدود است. برای ذخیره کار خود، از دکمه «کپی پاسخ‌ها» استفاده کنید.'
+                    : '🚫 Printing methodology to PDF is restricted by OWJ Copyright. Use "Copy Answers" for your work.'
                 );
               }}
-              title={lang === 'fa' ? 'ط­ظپط§ط¸طھ ع©ظ¾غŒâ€Œط±ط§غŒطھ ع†ط§ظ¾' : 'Print Protected'}
+              title={lang === 'fa' ? 'حفاظت کپی‌رایت چاپ' : 'Print Protected'}
               className="p-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:bg-[#f4f4f1] dark:hover:bg-[#12171b] cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5 opacity-60" />
@@ -1270,20 +1269,20 @@ export default function App() {
                 } else {
                   showToast(
                     lang === 'fa'
-                      ? 'ًں›،ï¸ڈ ط³ظ¾ط± ط¶ط¯ ط§ط³ع©ط±غŒظ†â€Œط´ط§طھ ظˆ ع©ظ¾غŒâ€Œط±ط§غŒطھ ط§ظˆط¬ ظپط¹ط§ظ„ ط§ط³طھ.'
-                      : 'ًں›،ï¸ڈ OWJ Anti-Screenshot Guard is active.'
+                      ? '🛡️ سپر ضد اسکرین‌شات و کپی‌رایت اوج فعال است.'
+                      : '🛡️ OWJ Anti-Screenshot Guard is active.'
                   );
                 }
               }}
               title={
                 lang === 'fa'
-                  ? 'ط³ظ¾ط± ط¶ط¯ ط§ط³ع©ط±غŒظ†â€Œط´ط§طھ ظˆ ع©ظ¾غŒâ€Œط±ط§غŒطھ ط§ظˆط¬ (ظپط¹ط§ظ„) - ط¨ط±ط§غŒ طھط³طھ ع©ظ„غŒع© ظپط±ظ…ط§غŒغŒط¯'
+                  ? 'سپر ضد اسکرین‌شات و کپی‌رایت اوج (فعال) - برای تست کلیک فرمایید'
                   : 'OWJ Anti-Screenshot & Copyright Guard (Active) - Click to test'
               }
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-[0.96] transition-all cursor-pointer text-xs font-semibold shrink-0"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span className="hidden lg:inline">{lang === 'fa' ? 'ط³ظ¾ط± ع©ظ¾غŒâ€Œط±ط§غŒطھ' : 'Protected'}</span>
+              <span className="hidden lg:inline">{lang === 'fa' ? 'سپر کپی‌رایت' : 'Protected'}</span>
             </button>
 
             {/* Language Switch */}
@@ -1292,7 +1291,7 @@ export default function App() {
               className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#1f5163] transition-colors"
             >
               <Globe className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'English' : 'ظپط§ط±ط³غŒ'}</span>
+              <span>{lang === 'fa' ? 'English' : 'فارسی'}</span>
             </button>
 
             {/* Theme Toggle */}
@@ -1330,7 +1329,6 @@ export default function App() {
               setPage(0);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1377,7 +1375,6 @@ export default function App() {
               setPage(2);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1391,13 +1388,13 @@ export default function App() {
                 </div>
                 <div className="space-y-2">
                   <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
-                    ظ…ط­طھظˆط§غŒ ط¢ظ…ظˆط²ط´غŒ ظ‚ط·ط±ظ‡â€Œط§غŒ (Curriculum Drip Gating)
+                    محتوای آموزشی قطره‌ای (Curriculum Drip Gating)
                   </span>
                   <h3 className="text-lg font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                    ط¯ط³طھط±ط³غŒ ط¨ظ‡ ط¬ظ„ط³ظ‡ {page} ط¯ط± ط­ط§ظ„ ط­ط§ط¶ط± ظ‚ظپظ„ ط§ط³طھ
+                    دسترسی به جلسه {page} در حال حاضر قفل است
                   </h3>
                   <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] max-w-md mx-auto leading-relaxed">
-                    ط¬ظ‡طھ ظ‡ظ…ع¯ط§ظ…غŒ غŒط§ط¯ع¯غŒط±غŒ ط¯ط± ع©ط§ط±ع¯ط§ظ‡ ظˆ ط·ط¨ظ‚ ظ…طھط¯ظˆظ„ظˆعکغŒ ط§ط³طھظ‚ط±ط§ط± CPMAIطŒ ط§غŒظ† ط¬ظ„ط³ظ‡ ظ¾ط³ ط§ط² طھط¯ط±غŒط³ ط§ط³طھط§ط¯ ط¯ط± ع©ظ„ط§ط³ ط¨ط§ط² ط®ظˆط§ظ‡ط¯ ط´ط¯.
+                    جهت همگامی یادگیری در کارگاه و طبق متدولوژی استقرار CPMAI، این جلسه پس از تدریس استاد در کلاس باز خواهد شد.
                   </p>
                 </div>
 
@@ -1409,7 +1406,7 @@ export default function App() {
                     }}
                     className="px-5 py-2.5 rounded-xl bg-[#2f7d5b] hover:bg-[#256347] text-white font-bold text-xs transition-all shadow-xs cursor-pointer"
                   >
-                    ط¨ط§ط²ع¯ط´طھ ط¨ظ‡ ط¬ظ„ط³ظ‡ غ± (ط¯ط±ع© ع©ط³ط¨â€Œظˆع©ط§ط±)
+                    بازگشت به جلسه ۱ (درک کسب‌وکار)
                   </button>
                   <button
                     onClick={() => {
@@ -1418,13 +1415,13 @@ export default function App() {
                     }}
                     className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-all shadow-xs cursor-pointer"
                   >
-                    ط´ط±ع©طھ ط¯ط± ط¢ط²ظ…ظˆظ† ط³ط·ط­â€Œط³ظ†ط¬غŒ
+                    شرکت در آزمون سطح‌سنجی
                   </button>
                   <button
                     onClick={() => setIsLeaderboardModalOpen(true)}
                     className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition-all shadow-xs cursor-pointer"
                   >
-                    ظ…ط´ط§ظ‡ط¯ظ‡ ط¬ط¯ظˆظ„ ط±طھط¨ظ‡â€Œط¨ظ†ط¯غŒ ع©ظ„ط§ط³ ًںڈ†
+                    مشاهده جدول رتبه‌بندی کلاس 🏆
                   </button>
                 </div>
               </div>
@@ -1446,7 +1443,6 @@ export default function App() {
               setPage(3);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1464,7 +1460,6 @@ export default function App() {
               setPage(4);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1482,7 +1477,6 @@ export default function App() {
               setPage(5);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1500,7 +1494,6 @@ export default function App() {
               setPage(6);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1518,7 +1511,6 @@ export default function App() {
               setPage(7);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1536,7 +1528,6 @@ export default function App() {
               setPage(8);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1554,7 +1545,6 @@ export default function App() {
               setPage(9);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1572,7 +1562,6 @@ export default function App() {
               setPage(10);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1590,7 +1579,6 @@ export default function App() {
               setPage(11);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1608,7 +1596,6 @@ export default function App() {
               setPage(12);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1626,7 +1613,6 @@ export default function App() {
               setPage(13);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1644,7 +1630,6 @@ export default function App() {
               setPage(14);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1662,7 +1647,6 @@ export default function App() {
               setPage(15);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1680,7 +1664,6 @@ export default function App() {
               setPage(16);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1698,7 +1681,6 @@ export default function App() {
               setPage(17);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1716,7 +1698,6 @@ export default function App() {
               setPage(18);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1734,7 +1715,6 @@ export default function App() {
               setPage(19);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1752,7 +1732,6 @@ export default function App() {
               setPage(20);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1770,7 +1749,6 @@ export default function App() {
               setPage(21);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
 
@@ -1784,7 +1762,6 @@ export default function App() {
               setPage(20);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            industryTrack={industryTrack}
           />
         )}
           </>
@@ -1795,22 +1772,22 @@ export default function App() {
           <div className="flex items-center gap-4 flex-wrap">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-[#2f7d5b]" />
-              <span>{lang === 'fa' ? 'ظ¾ط§ط³ط®â€Œظ‡ط§غŒ ط´ظ…ط§ ط±ظˆغŒ ظ‡ظ…غŒظ† ط¯ط³طھع¯ط§ظ‡ ط°ط®غŒط±ظ‡ ظ…غŒâ€Œط´ظˆط¯.' : 'Your answers automatically save on this device.'}</span>
+              <span>{lang === 'fa' ? 'پاسخ‌های شما روی همین دستگاه ذخیره می‌شود.' : 'Your answers automatically save on this device.'}</span>
             </span>
 
             <button
               onClick={handleSyncToCloud}
               disabled={isSyncing}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#2f7d5b]/10 hover:bg-[#2f7d5b]/20 text-[#2f7d5b] dark:text-[#52b788] border border-[#2f7d5b]/30 transition-colors cursor-pointer text-xs font-medium"
-              title={lang === 'fa' ? 'ظ‡ظ…ع¯ط§ظ…â€Œط³ط§ط²غŒ ظˆ ط°ط®غŒط±ظ‡ ظ¾ط§ط³ط®â€Œظ‡ط§ ط¯ط± ظ¾ط§غŒع¯ط§ظ‡ ط¯ط§ط¯ظ‡ ط§ط¨ط±غŒ Neon' : 'Sync and save responses to Neon Cloud Database'}
+              title={lang === 'fa' ? 'همگام‌سازی و ذخیره پاسخ‌ها در پایگاه داده ابری Neon' : 'Sync and save responses to Neon Cloud Database'}
             >
               <Cloud className="w-3.5 h-3.5" />
               <span>
                 {isSyncing
-                  ? (lang === 'fa' ? 'ط¯ط± ط­ط§ظ„ ط°ط®غŒط±ظ‡ ط§ط¨ط±غŒ...' : 'Syncing to cloud...')
+                  ? (lang === 'fa' ? 'در حال ذخیره ابری...' : 'Syncing to cloud...')
                   : cloudStatus === 'synced'
-                  ? (lang === 'fa' ? 'âœ“ ظ‡ظ…ع¯ط§ظ… ط¨ط§ ط¯غŒطھط§ط¨غŒط³ ط§ط¨ط±غŒ ظ†ط¦ظˆظ†' : 'âœ“ Synced with Neon DB')
-                  : (lang === 'fa' ? 'ط°ط®غŒط±ظ‡ ط¯ط± ظ¾ط§غŒع¯ط§ظ‡ ط¯ط§ط¯ظ‡ ط§ط¨ط±غŒ ظ†ط¦ظˆظ†' : 'Save to Neon Cloud DB')}
+                  ? (lang === 'fa' ? '✓ همگام با دیتابیس ابری نئون' : '✓ Synced with Neon DB')
+                  : (lang === 'fa' ? 'ذخیره در پایگاه داده ابری نئون' : 'Save to Neon Cloud DB')}
               </span>
             </button>
           </div>
@@ -1820,7 +1797,7 @@ export default function App() {
             className="flex items-center gap-1 text-[#b3432f] hover:underline cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>{lang === 'fa' ? 'ظ¾ط§ع© ع©ط±ط¯ظ† ع©ظ„ ع©طھط§ط¨ ع©ط§ط±' : 'Clear all'}</span>
+            <span>{lang === 'fa' ? 'پاک کردن کل کتاب کار' : 'Clear all'}</span>
           </button>
         </div>
 
@@ -1837,7 +1814,7 @@ export default function App() {
             setCurrentUser(user);
             showToast(
               lang === 'fa'
-                ? `ط®ظˆط´ ط¢ظ…ط¯غŒط¯طŒ ${user.displayName || user.email}`
+                ? `خوش آمدید، ${user.displayName || user.email}`
                 : `Welcome, ${user.displayName || user.email}`
             );
           }}
