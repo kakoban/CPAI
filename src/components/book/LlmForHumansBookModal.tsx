@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { LLM_FOR_HUMANS_CHAPTERS, LlmChapter } from '../../data/llmForHumansData';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../../data/logo';
+import ajaLogoImg from '../../assets/aja_logo_transparent.png';
 
 interface LlmForHumansBookModalProps {
   isOpen: boolean;
@@ -169,21 +170,51 @@ export const LlmForHumansBookModal: React.FC<LlmForHumansBookModalProps> = ({
           {/* Header Bar */}
           <header className="shrink-0 h-16 sm:h-20 px-4 sm:px-8 border-b border-black/[0.08] dark:border-white/[0.08] bg-white/80 dark:bg-[#161e26]/80 backdrop-blur-xl flex items-center justify-between gap-4">
             
-            {/* Title & Badge */}
-            <div className="flex items-center gap-3.5">
-              <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-cyan-600 via-sky-600 to-blue-600 text-white shadow-md shadow-cyan-500/20 shrink-0">
-                <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
+            {/* Title & Dual-Brand Medallion */}
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="flex items-center gap-2 shrink-0">
+                {/* AJA 3D Luminous Emblem */}
+                <div
+                  className="relative group cursor-pointer"
+                  title="نشان هوش مصنوعی و سیستم‌های شناختی AJA (ابوالفضل جعفری اصل)"
+                >
+                  <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-cyan-600/25 via-sky-500/15 to-blue-600/25 p-1.5 border border-cyan-500/40 flex items-center justify-center shadow-md shadow-cyan-500/20 backdrop-blur-md group-hover:border-cyan-400 group-hover:shadow-cyan-400/40 group-hover:scale-105 transition-all duration-300">
+                    <img
+                      src={ajaLogoImg}
+                      alt="AJA Logo"
+                      className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(56,189,248,0.7)]"
+                    />
+                  </div>
+                  {/* Active Pulse Ring */}
+                  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-cyan-400 ring-2 ring-white dark:ring-[#161e26] animate-pulse" />
+                </div>
+
+                {/* OWJ Business Council Logo */}
+                <div
+                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white dark:bg-[#1a232d] p-1.5 border border-black/[0.08] dark:border-white/[0.1] flex items-center justify-center shadow-xs cursor-pointer hover:border-blue-400 transition-colors"
+                  title="شورای کسب‌وکار اوج (OWJ Business Council)"
+                >
+                  <img
+                    src={OWJ_LOGO}
+                    alt="OWJ Logo"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = OWJ_LOGO_FALLBACK;
+                    }}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
               </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20">
+
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-mono text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30 shrink-0">
                     EXECUTIVE DIGEST
                   </span>
-                  <span className="text-[11px] text-gray-500 dark:text-gray-400 font-mono hidden md:inline">
-                    شورای کسب‌وکار اوج · CPMAI
+                  <span className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 font-mono hidden md:inline truncate">
+                    شورای کسب‌وکار اوج · معماری اختصاصی AJA
                   </span>
                 </div>
-                <h2 className="text-sm sm:text-lg font-black tracking-tight text-[#0f172a] dark:text-white">
+                <h2 className="text-xs sm:text-base md:text-lg font-black tracking-tight text-[#0f172a] dark:text-white truncate">
                   مدل‌های زبانی بزرگ (LLM) به زبان آدمیزاد
                 </h2>
               </div>
@@ -358,10 +389,35 @@ export const LlmForHumansBookModal: React.FC<LlmForHumansBookModalProps> = ({
                 )}
               </div>
 
-              {/* Sidebar Footer info */}
-              <div className="p-3 border-t border-black/[0.06] dark:border-white/[0.06] bg-black/[0.01] dark:bg-white/[0.01] text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between">
-                <span>توسعه‌یافته در اکوسیستم اوج</span>
-                <span className="font-mono text-[10px] text-cyan-600">PMI-CPMAI</span>
+              {/* Sidebar Footer: Collaborative Brand Medallion */}
+              <div className="p-3.5 border-t border-black/[0.08] dark:border-white/[0.08] bg-gradient-to-b from-transparent to-black/[0.02] dark:to-white/[0.02]">
+                <div className="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.07] hover:border-cyan-500/30 transition-all">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="relative group shrink-0">
+                      <img
+                        src={ajaLogoImg}
+                        alt="AJA Logo"
+                        className="w-7 h-7 object-contain filter drop-shadow-[0_0_8px_rgba(56,189,248,0.5)] group-hover:scale-110 transition-transform"
+                      />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[11px] font-black text-gray-900 dark:text-gray-100 leading-tight truncate">
+                        AJA × OWJ Council
+                      </span>
+                      <span className="text-[9px] font-mono text-cyan-600 dark:text-cyan-400">
+                        مرکز تعالی هوش مصنوعی
+                      </span>
+                    </div>
+                  </div>
+                  <img
+                    src={OWJ_LOGO}
+                    alt="OWJ Logo"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = OWJ_LOGO_FALLBACK;
+                    }}
+                    className="w-6 h-6 object-contain rounded-lg bg-white/90 dark:bg-gray-800 p-0.5 border border-black/10 shrink-0"
+                  />
+                </div>
               </div>
             </aside>
 
@@ -371,7 +427,14 @@ export const LlmForHumansBookModal: React.FC<LlmForHumansBookModalProps> = ({
               {/* Chapter Header Card */}
               <div className="relative p-6 sm:p-8 rounded-3xl bg-gradient-to-bl from-cyan-500/10 via-sky-500/5 to-transparent border border-cyan-500/20 dark:border-cyan-400/20 overflow-hidden shadow-xs">
                 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-cyan-500/15">
+                {/* Holographic 3D AJA Watermark Background */}
+                <img
+                  src={ajaLogoImg}
+                  alt="AJA Watermark"
+                  className="absolute -left-10 -bottom-10 sm:-left-6 sm:-top-8 w-44 h-44 sm:w-64 sm:h-64 object-contain opacity-10 dark:opacity-15 pointer-events-none filter drop-shadow-[0_0_35px_rgba(56,189,248,0.4)] -rotate-12 select-none"
+                />
+
+                <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-cyan-500/15">
                   <div className="flex items-center gap-3">
                     <span className="px-3 py-1 rounded-xl bg-cyan-500 text-white text-xs font-mono font-bold tracking-wider shadow-xs">
                       فصل شماره {currentChapter.number}
@@ -407,13 +470,32 @@ export const LlmForHumansBookModal: React.FC<LlmForHumansBookModalProps> = ({
                   </div>
                 </div>
 
-                <div className="pt-4 space-y-2">
+                <div className="relative z-10 pt-4 space-y-3">
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
                     {currentChapter.titleFa}
                   </h1>
                   <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed font-light">
                     {currentChapter.subtitleFa}
                   </p>
+
+                  {/* Executive Attribution Badges */}
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-500/10 dark:bg-cyan-500/15 border border-cyan-500/25 text-[11px] font-mono text-cyan-800 dark:text-cyan-200">
+                      <img src={ajaLogoImg} alt="AJA" className="w-3.5 h-3.5 object-contain" />
+                      <span>تدوین و انطباق فنی: مهندس ابوالفضل جعفری اصل (AJA) · PMI-CPMAI</span>
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 text-[11px] font-mono text-blue-800 dark:text-blue-200">
+                      <img
+                        src={OWJ_LOGO}
+                        alt="OWJ"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = OWJ_LOGO_FALLBACK;
+                        }}
+                        className="w-3.5 h-3.5 object-contain rounded-full bg-white/90 p-0.5"
+                      />
+                      <span>شورای کسب‌وکار اوج (OWJ Council)</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -523,6 +605,40 @@ export const LlmForHumansBookModal: React.FC<LlmForHumansBookModalProps> = ({
                     )}
                   </article>
                 ))}
+              </div>
+
+              {/* Executive Attribution Footer Card */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-cyan-500/5 via-sky-500/5 to-blue-500/5 border border-cyan-500/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 p-1.5 flex items-center justify-center shrink-0 shadow-xs">
+                    <img
+                      src={ajaLogoImg}
+                      alt="AJA Emblem"
+                      className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]"
+                    />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-xs sm:text-sm">
+                      مرجع کاربردی مدل‌های زبانی بزرگ (LLM) برای مدیران و مهندسان سازمانی
+                    </h4>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                      طراحی و ارائه شده تحت چارچوب تخصصی شورای کسب‌وکار اوج و استاندارد جهانی PMI-CPMAI
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2.5 shrink-0">
+                  <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20">
+                    AJA COGNITIVE SYSTEMS
+                  </span>
+                  <img
+                    src={OWJ_LOGO}
+                    alt="OWJ"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = OWJ_LOGO_FALLBACK;
+                    }}
+                    className="w-8 h-8 object-contain rounded-xl bg-white dark:bg-gray-800 p-1 border border-black/10 shrink-0"
+                  />
+                </div>
               </div>
 
               {/* Chapter Footer Navigation */}
