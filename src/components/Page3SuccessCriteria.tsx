@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Language } from '../types/cpmai';
-import { IndustryTrackId } from '../types/industryTrack';
+import { IndustryTrackId, DisciplineId } from '../types/industryTrack';
+import { getDisciplineMetadata, getDisciplineExampleContent } from '../data/disciplineExamplesRegistry';
 import { ArrowLeft, ArrowRight, Lightbulb, FileText, Check, Copy, RotateCcw } from 'lucide-react';
 
 interface Page3Props {
   lang: Language;
   industryTrack?: IndustryTrackId;
+  disciplineId?: DisciplineId;
   content: string;
   onChangeContent: (val: string) => void;
   onGoToPage2: () => void;
@@ -15,6 +17,7 @@ interface Page3Props {
 export const Page3SuccessCriteria: React.FC<Page3Props> = ({
   lang,
   industryTrack = 'CIVIL_INFRA',
+  disciplineId,
   content,
   onChangeContent,
   onGoToPage2,
@@ -22,17 +25,19 @@ export const Page3SuccessCriteria: React.FC<Page3Props> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const isPetro = industryTrack === 'ENERGY_PETRO';
+  const discMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
+  const discContent = disciplineId ? getDisciplineExampleContent(disciplineId) : null;
 
   const t = {
     en: {
-      badge: `CPMAI Phase I · Page 3 of 5 (${isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
+      badge: `CPMAI Phase I · Page 3 of 5 (${discMeta ? discMeta.titleEn : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       subtaskH: 'Subtask: Determine Business Success Criteria',
       criteriaLabel: 'Business success criteria:',
       criteriaText: 'Describe the criteria for a successful or useful outcome of the project from the business point of view. This might be quite specific and able to be measured objectively, for example, reduction of customer attrition to a certain level, or it might be general and subjective, such as “give useful insights into the relationships.” In the latter case, it should be indicated who makes the subjective judgment.',
       slideTitle: 'What are the objective measures of success for this project iteration?',
       promptHint: 'Identify specific, measurable business success metrics for this iteration, distinguishing between objective quantitative KPIs and subjective qualitative judgments.',
       templateBtn: 'Insert Criteria Template',
-      exampleBtn: isPetro ? 'Fill Refinery Fouling Success Criteria' : 'Fill Urban Metro TBM Success Criteria',
+      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} Success Criteria` : isPetro ? 'Fill Refinery Fouling Success Criteria' : 'Fill Urban Metro TBM Success Criteria',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
       copiedToast: 'Copied to clipboard!',
@@ -47,7 +52,7 @@ export const Page3SuccessCriteria: React.FC<Page3Props> = ({
       tip4: 'Keep the success criteria calibrated strictly to THIS iteration scope, avoiding premature promises for future sprints.'
     },
     fa: {
-      badge: `فاز اول CPMAI · صفحه ۳ از ۵ (${isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
+      badge: `فاز اول CPMAI · صفحه ۳ از ۵ (${discMeta ? discMeta.titleFa : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
       subtaskH: 'زیروظیفه: تعیین معیارهای موفقیت کسب‌وکار (Subtask: Determine Business Success Criteria)',
       criteriaLabel: 'معیارهای موفقیت کسب‌وکار (Business success criteria):',
       criteriaText: isPetro
@@ -56,7 +61,7 @@ export const Page3SuccessCriteria: React.FC<Page3Props> = ({
       slideTitle: 'What are the objective measures of success for this project iteration?',
       promptHint: 'معیارهای عینی و سنجش‌پذیر موفقیت تجاری را برای این تکرار پروژه مشخص کنید و بین شاخص‌های کمّی و ارزیابی‌های کیفی تفکیک قائل شوید.',
       templateBtn: 'درج قالب استاندارد معیارها',
-      exampleBtn: isPetro ? 'پر کردن با نمونه پالایشگاهی (معیارهای موفقیت)' : 'پر کردن با نمونه مگاپروژه احداث مترو (معیارهای موفقیت)',
+      exampleBtn: discMeta ? `پر کردن با معیارهای ${discMeta.shortTitleFa}` : isPetro ? 'پر کردن با نمونه پالایشگاهی (معیارهای موفقیت)' : 'پر کردن با نمونه مگاپروژه احداث مترو (معیارهای موفقیت)',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
       copiedToast: 'متن بوم در کلیپ‌بورد کپی شد!',
@@ -163,8 +168,28 @@ export const Page3SuccessCriteria: React.FC<Page3Props> = ({
 ۳. آستانه پذیرش حداقلی برای پیشروی:
 - در صورتی که خطای پیش‌بینی ضریب حرارتی بالای ۷٪ باشد، پیشنهادهای مدل در وضعیت غیرفعال (Shadow Mode) قرار گرفته و تیم به فاز ۳ برای اصلاح موازنه جرم و انرژی بازمی‌گردد.`;
 
-    const selectedEn = isPetro ? exampleEnPetro : exampleEnCivil;
-    const selectedFa = isPetro ? exampleFaPetro : exampleFaCivil;
+    let selectedEn = isPetro ? exampleEnPetro : exampleEnCivil;
+    let selectedFa = isPetro ? exampleFaPetro : exampleFaCivil;
+
+    if (discContent) {
+      selectedEn = `Business Success Criteria: ${discContent.titleEn}
+
+1. Objective (Quantitative) Success Measures:
+${discContent.successCriteriaEn.map((sc, i) => `- Criterion ${i + 1}: ${sc}`).join('\n')}
+
+2. Financial Viability Milestone:
+- ${discContent.costBenefitSummaryEn}
+- Expected Amortization: ${discContent.roiEstimateEn}`;
+
+      selectedFa = `معیارهای موفقیت کسب‌وکار: ${discContent.titleFa}
+
+۱. معیارهای عینی و کمّی موفقیت:
+${discContent.successCriteriaFa.map((sc, i) => `- معیار شماره ${i + 1}: ${sc}`).join('\n')}
+
+۲. نقطه عطف بازدهی مالی:
+- ${discContent.costBenefitSummaryFa}
+- دوره بازگشت سرمایه: ${discContent.roiEstimateFa}`;
+    }
 
     onChangeContent(lang === 'fa' ? selectedFa : selectedEn);
   };

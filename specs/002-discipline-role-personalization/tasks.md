@@ -7,8 +7,8 @@
 
 **Purpose**: تعریف تایپ‌های استاندارد ۱۶ دیسیپلین و رده‌های سازمانی
 
-- [ ] T001 [P] تعریف `DisciplineId`، `DisciplineMetadata`، و `EngineeringRoleId` در `src/types/industryTrack.ts`
-- [ ] T002 [P] پیاده‌سازی متدهای خواندن و ذخیره دیسیپلین و رده کاربر (`getSavedDiscipline`, `saveDiscipline`, `getSavedRole`, `saveRole`) در `src/types/industryTrack.ts`
+- [x] T001 [P] تعریف `DisciplineId`، `DisciplineMetadata`، و `EngineeringRoleId` در `src/types/industryTrack.ts`
+- [x] T002 [P] پیاده‌سازی متدهای خواندن و ذخیره دیسیپلین و رده کاربر (`getSavedDiscipline`, `saveDiscipline`, `getSavedRole`, `saveRole`) در `src/types/industryTrack.ts`
 
 ---
 
@@ -16,8 +16,8 @@
 
 **Purpose**: ایجاد رجیستری متمرکز داده‌های ۱۶ دیسیپلین با شاخص‌های OBS دو هلدینگ
 
-- [ ] T003 ایجاد ماژول `src/data/disciplineExamplesRegistry.ts` شامل متادیتای کامل ۱۶ دیسیپلین (۸ دیسیپلین عمران و ۸ دیسیپلین پتروشیمی)
-- [ ] T004 پیاده‌سازی متد `getDisciplineExampleContent(disciplineId, roleId)` برای واکشی سناریو، صورت مسئله، معیارهای موفقیت و تحلیل ROI متناظر هر دیسیپلین
+- [x] T003 ایجاد ماژول `src/data/disciplineExamplesRegistry.ts` شامل متادیتای کامل ۱۶ دیسیپلین (۸ دیسیپلین عمران و ۸ دیسیپلین پتروشیمی)
+- [x] T004 پیاده‌سازی متد `getDisciplineExampleContent(disciplineId, roleId)` برای واکشی سناریو، صورت مسئله، معیارهای موفقیت و تحلیل ROI متناظر هر دیسیپلین
 
 **Checkpoint**: پایه داده‌های دیسیپلین‌ها آماده شد — ورود به پیاده‌سازی UI و یکپارچه‌سازی
 
@@ -27,10 +27,10 @@
 
 **Goal**: امکان انتخاب سریع دیسیپلین و رده سازمانی در UI با ماندگاری در مرورگر
 
-- [ ] T005 [P] [US1] ساخت کامپوننت `src/components/industry/DisciplineSelectorModal.tsx` با قابلیت نمایش کارت‌های تفکیک‌شده دیسیپلین‌ها، آیکون‌ها و شاخص‌های OBS
-- [ ] T006 [P] [US1] ساخت کامپوننت `src/components/industry/DisciplineBadge.tsx` برای نمایش برچسب دیسیپلین فعال در هدر و نوار ابزار با قابلیت باز کردن مودال انتخاب
-- [ ] T007 [US1] یکپارچه‌سازی استیت دیسیپلین و رده در `src/App.tsx` و اتصال سوئیچر دامنه‌ها به تغییر هماهنگ دیسیپلین
-- [ ] T008 [US1] درج `DisciplineBadge` در هدر اصلی و نوار بالای کارگاه
+- [x] T005 [P] [US1] ساخت کامپوننت `src/components/industry/DisciplineSelectorModal.tsx` با قابلیت نمایش کارت‌های تفکیک‌شده دیسیپلین‌ها، آیکون‌ها و شاخص‌های OBS
+- [x] T006 [P] [US1] ساخت کامپوننت `src/components/industry/DisciplineBadge.tsx` برای نمایش برچسب دیسیپلین فعال در هدر و نوار ابزار با قابلیت باز کردن مودال انتخاب
+- [x] T007 [US1] یکپارچه‌سازی استیت دیسیپلین و رده در `src/App.tsx` و اتصال سوئیچر دامنه‌ها به تغییر هماهنگ دیسیپلین
+- [x] T008 [US1] درج `DisciplineBadge` در هدر اصلی و نوار بالای کارگاه
 
 **Checkpoint**: کاربر می‌تواند دیسیپلین و رده خود را انتخاب کند و وضعیت در بالای صفحه نمایان است.
 
@@ -40,9 +40,9 @@
 
 **Goal**: تزریق محتوای سفارشی به صفحات ۲۲گانه بر اساس دیسیپلین فعال
 
-- [ ] T009 [US2] اتصال کامپوننت‌های `Page1BusinessUnderstanding.tsx` و `Page2ProblemIteration.tsx` به `activeDiscipline` و نمایش خودکار مسائل همان واحد (پایپینگ، TBM، کلیم، فرآیند)
-- [ ] T010 [US2] اتصال کامپوننت‌های `Page3SuccessCriteria.tsx`، `Page4CostBenefit.tsx` و `Page5ExpectedRoi.tsx` به شاخص‌های کمّی بومی دیسیپلین
-- [ ] T011 [US2] به‌روزرسانی متن دکمه‌های «پر کردن نمونه» متناسب با نام دیسیپلین انتخاب‌شده
+- [x] T009 [US2] اتصال کامپوننت‌های `Page1BusinessUnderstanding.tsx` و `Page2ProblemIteration.tsx` به `activeDiscipline` و نمایش خودکار مسائل همان واحد (پایپینگ، TBM، کلیم، فرآیند)
+- [x] T010 [US2] اتصال کامپوننت‌های `Page3SuccessCriteria.tsx`، `Page4CostBenefit.tsx` و `Page5ExpectedRoi.tsx` به شاخص‌های کمّی بومی دیسیپلین
+- [x] T011 [US2] به‌روزرسانی متن دکمه‌های «پر کردن نمونه» متناسب با نام دیسیپلین انتخاب‌شده
 
 **Checkpoint**: تمام مثال‌های صفحات به صورت بلادرنگ مطابق دیسیپلین انتخابی مهندس کاستومایز می‌شوند.
 
@@ -61,6 +61,6 @@
 
 **Purpose**: اعتبارسنجی صفر خطای کامپایلر و پایداری عملکرد
 
-- [ ] T014 اجرای `npm run lint` (`tsc --noEmit`) و اطمینان از تایپ ۱۰۰٪ معتبر
-- [ ] T015 اجرای `npm run build` و اعتبارسنجی باندهای خروجی
-- [ ] T016 اجرای سناریوی تست [quickstart.md](./quickstart.md)
+- [x] T014 اجرای `npm run lint` (`tsc --noEmit`) و اطمینان از تایپ ۱۰۰٪ معتبر
+- [x] T015 اجرای `npm run build` و اعتبارسنجی باندهای خروجی
+- [x] T016 اجرای سناریوی تست [quickstart.md](./quickstart.md)

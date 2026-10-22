@@ -166,6 +166,110 @@ export const saveIndustryTrack = (track: IndustryTrackId): void => {
   }
 };
 
+export type CivilDisciplineId =
+  | 'civil_tbm_tunnel'
+  | 'civil_stations_natm'
+  | 'civil_precast_segment'
+  | 'civil_track_systems'
+  | 'civil_highways_bridges'
+  | 'civil_technical_claims'
+  | 'civil_geotech_monitoring'
+  | 'civil_heavy_fleet';
+
+export type PetroDisciplineId =
+  | 'petro_process_safety'
+  | 'petro_piping_layout'
+  | 'petro_mechanical_heavy'
+  | 'petro_electrical_inst'
+  | 'petro_civil_structure'
+  | 'petro_procurement_expediting'
+  | 'petro_qaqc_ndt'
+  | 'petro_commissioning_pcc';
+
+export type DisciplineId = CivilDisciplineId | PetroDisciplineId;
+
+export type EngineeringRoleId =
+  | 'director'            // مدیر طرح / مدیر ارشد پروژه
+  | 'lead_superintendent' // سرپرست دیسیپلین / رئیس کارگاه
+  | 'technical_engineer'  // مهندس دفتر فنی / کنترل پروژه / ناظر
+  | 'site_operator';      // اپراتور / جنرال فورمن / بازرس کیفی
+
+export interface DisciplineMetadata {
+  id: DisciplineId;
+  trackId: IndustryTrackId;
+  titleFa: string;
+  titleEn: string;
+  shortTitleFa: string;
+  shortTitleEn: string;
+  iconName: string;
+  governingStandardsFa: string[];
+  governingStandardsEn: string[];
+  performanceMetricsFa: string[];
+  performanceMetricsEn: string[];
+  descriptionFa: string;
+  descriptionEn: string;
+}
+
+export interface DisciplineExampleContent {
+  disciplineId: DisciplineId;
+  titleFa: string;
+  titleEn: string;
+  businessProblemFa: string;
+  businessProblemEn: string;
+  whyAiFa: string;
+  whyAiEn: string;
+  successCriteriaFa: string[];
+  successCriteriaEn: string[];
+  costBenefitSummaryFa: string;
+  costBenefitSummaryEn: string;
+  roiEstimateFa: string;
+  roiEstimateEn: string;
+}
+
+const STORAGE_KEY_DISCIPLINE = 'cpmai_selected_discipline_id';
+const STORAGE_KEY_ROLE = 'cpmai_selected_engineering_role';
+
+export const getSavedDiscipline = (track: IndustryTrackId = 'CIVIL_INFRA'): DisciplineId => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY_DISCIPLINE) as DisciplineId;
+    if (saved) {
+      if (track === 'CIVIL_INFRA' && saved.startsWith('civil_')) return saved;
+      if (track === 'ENERGY_PETRO' && saved.startsWith('petro_')) return saved;
+    }
+  } catch {
+    // LocalStorage error
+  }
+  return track === 'ENERGY_PETRO' ? 'petro_process_safety' : 'civil_tbm_tunnel';
+};
+
+export const saveDiscipline = (disciplineId: DisciplineId): void => {
+  try {
+    localStorage.setItem(STORAGE_KEY_DISCIPLINE, disciplineId);
+  } catch {
+    // LocalStorage error
+  }
+};
+
+export const getSavedRole = (): EngineeringRoleId => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY_ROLE) as EngineeringRoleId;
+    if (saved && ['director', 'lead_superintendent', 'technical_engineer', 'site_operator'].includes(saved)) {
+      return saved;
+    }
+  } catch {
+    // LocalStorage error
+  }
+  return 'technical_engineer';
+};
+
+export const saveRole = (role: EngineeringRoleId): void => {
+  try {
+    localStorage.setItem(STORAGE_KEY_ROLE, role);
+  } catch {
+    // LocalStorage error
+  }
+};
+
 export interface DomainExampleArtifact {
   backgroundFa: string;
   backgroundEn: string;

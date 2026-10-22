@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Language } from '../types/cpmai';
-import { IndustryTrackId } from '../types/industryTrack';
+import { IndustryTrackId, DisciplineId } from '../types/industryTrack';
 import { getDomainPhaseExample } from '../data/domainTrackExamples';
+import { getDisciplineMetadata } from '../data/disciplineExamplesRegistry';
 import { ArrowLeft, ArrowRight, Plus, Trash2, Lightbulb, Check } from 'lucide-react';
 
 interface Page1Props {
   lang: Language;
   industryTrack?: IndustryTrackId;
+  disciplineId?: DisciplineId;
   read: boolean;
   onToggleRead: (val: boolean) => void;
   story: string;
@@ -27,6 +29,7 @@ interface Page1Props {
 export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
   lang,
   industryTrack = 'CIVIL_INFRA',
+  disciplineId,
   read,
   onToggleRead,
   story,
@@ -48,10 +51,11 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
 
   const domainEx = getDomainPhaseExample(1, industryTrack);
   const isPetro = industryTrack === 'ENERGY_PETRO';
+  const discMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
 
   const t = {
     en: {
-      badge: `CPMAI Phase I · Page 1 of 5 (${isPetro ? 'Oil, Gas & Petrochemical Track' : 'Civil Megaproject Track'})`,
+      badge: `CPMAI Phase I · Page 1 of 5 (${discMeta ? discMeta.titleEn : isPetro ? 'Oil, Gas & Petrochemical Track' : 'Civil Megaproject Track'})`,
       h1: 'CPMAI Phase I: Business Understanding',
       p1: 'The first phase of a CPMAI process is gaining a thorough understanding of the business and organizational objectives and other factors that will determine whether the project is worth undertaking, and the conditions under which it will be a success. The Business Understanding phase focuses on understanding the project objectives and requirements from a business perspective, then converting this knowledge into an AI and cognitive project problem definition and a preliminary plan designed to achieve the objectives.',
       p2: 'As mentioned earlier, since we are doing CPMAI in the context of agile, the business understanding for the particular CPMAI project is relevant to the specific sprint or iteration you are currently in, and should tie very closely to the user story that is relevant for that iteration. In a CPMAI project, it is possible for a single sprint iteration to encompass all of the CPMAI phases, but it is also possible for a CPMAI project to span multiple sprints or iterations, which means that the business understanding will be relevant to that particular iteration’s user story.',
@@ -84,7 +88,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       rm: 'Remove',
       exBtnShow: 'Show Example',
       exBtnHide: 'Hide Example',
-      exTitle: isPetro ? 'Oil & Gas Primary Objective Example:' : 'Civil Megaproject Primary Objective Example:',
+      exTitle: discMeta ? `${discMeta.shortTitleEn} Objective Example:` : isPetro ? 'Oil & Gas Primary Objective Example:' : 'Civil Megaproject Primary Objective Example:',
       exText: domainEx.artifacts.primaryObjectiveEn,
       quizTitle: 'Check Your Understanding',
       quizDesc: 'Select an option to see instant feedback and explanation.',
@@ -114,7 +118,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
         : 'Circular 4311 claim mitigation is a related contractual risk question. Optimizer tuning is a model training task.'
     },
     fa: {
-      badge: `فاز اول CPMAI · صفحه ۱ از ۵ (${isPetro ? 'حوزه تخصصی نفت، گاز و پتروشیمی' : 'حوزه تخصصی مگاپروژه‌های عمرانی و راه'})`,
+      badge: `فاز اول CPMAI · صفحه ۱ از ۵ (${discMeta ? discMeta.titleFa : isPetro ? 'حوزه تخصصی نفت، گاز و پتروشیمی' : 'حوزه تخصصی مگاپروژه‌های عمرانی و راه'})`,
       h1: 'CPMAI Phase I: Business Understanding',
       p1: 'نخستین فاز فرایند CPMAI، دستیابی به درکی کامل از اهداف کسب‌وکار و سازمان و عوامل دیگری است که تعیین می‌کنند آیا پروژه ارزش اجرا دارد و در چه شرایطی موفق خواهد بود. تمرکز فاز درک کسب‌وکار بر شناخت اهداف و الزامات پروژه از دیدگاه کسب‌وکار است و سپس تبدیل این دانش به تعریف مسئله برای پروژه هوش مصنوعی و یک برنامه اولیه برای رسیدن به اهداف.',
       p2: 'چون CPMAI را در بستر چابک (Agile) اجرا می‌کنیم، درک کسب‌وکار به اسپرینت یا تکرار مشخصی که در آن هستید مربوط است و باید ارتباط نزدیکی با داستان کاربر (User Story) همان تکرار داشته باشد. ممکن است یک اسپرینت همه فازهای CPMAI را پوشش دهد، یا یک پروژه چند اسپرینت را در بر بگیرد که در این حالت درک کسب‌وکار به داستان کاربر همان تکرار گره می‌خورد.',
@@ -147,7 +151,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       rm: 'حذف',
       exBtnShow: 'نمایش مثال',
       exBtnHide: 'پنهان‌سازی مثال',
-      exTitle: isPetro ? 'نمونه هدف اصلی (نفت و گاز):' : 'نمونه هدف اصلی (مگاپروژه عمرانی):',
+      exTitle: discMeta ? `نمونه هدف اصلی (${discMeta.shortTitleFa}):` : isPetro ? 'نمونه هدف اصلی (نفت و گاز):' : 'نمونه هدف اصلی (مگاپروژه عمرانی):',
       exText: domainEx.artifacts.primaryObjectiveFa,
       quizTitle: 'بررسی فهم مطالب (Quiz)',
       quizDesc: 'یک گزینه را انتخاب کنید تا بلافاصله بازخورد و استدلال را ببینید.',

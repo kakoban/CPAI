@@ -33,12 +33,21 @@ import { AjaBrandIntro } from './components/intro/AjaBrandIntro';
 import { LlmForHumansBookModal } from './components/book/LlmForHumansBookModal';
 import {
   IndustryTrackId,
+  DisciplineId,
+  EngineeringRoleId,
   getSavedIndustryTrack,
   saveIndustryTrack,
+  getSavedDiscipline,
+  saveDiscipline,
+  getSavedRole,
+  saveRole,
   INDUSTRY_TRACKS
 } from './types/industryTrack';
 import { IndustryTrackSwitcher } from './components/industry/IndustryTrackSwitcher';
 import { IndustryTrackSelectorModal } from './components/industry/IndustryTrackSelectorModal';
+import { DisciplineSelectorModal } from './components/industry/DisciplineSelectorModal';
+import { DisciplineBadge } from './components/industry/DisciplineBadge';
+import { getDisciplineMetadata } from './data/disciplineExamplesRegistry';
 import { authApi, isAuthorizedAdminUser } from './services/authApi';
 import { lmsApi } from './services/lmsApi';
 import { UserProfile } from './types/auth';
@@ -90,15 +99,37 @@ export default function App() {
   const [isBookModalOpen, setIsBookModalOpen] = useState<boolean>(false);
   const [industryTrack, setIndustryTrack] = useState<IndustryTrackId>(() => getSavedIndustryTrack());
   const [isIndustryModalOpen, setIsIndustryModalOpen] = useState<boolean>(false);
+  const [activeDiscipline, setActiveDiscipline] = useState<DisciplineId>(() => getSavedDiscipline(getSavedIndustryTrack()));
+  const [activeRole, setActiveRole] = useState<EngineeringRoleId>(() => getSavedRole());
+  const [isDisciplineModalOpen, setIsDisciplineModalOpen] = useState<boolean>(false);
 
   const handleSelectIndustryTrack = (track: IndustryTrackId) => {
     setIndustryTrack(track);
     saveIndustryTrack(track);
+    const fallbackDisc = getSavedDiscipline(track);
+    setActiveDiscipline(fallbackDisc);
+    saveDiscipline(fallbackDisc);
     showToast(
       lang === 'fa'
         ? `حوزه تخصصی به «${INDUSTRY_TRACKS[track].shortTitleFa}» تغییر یافت.`
         : `Industry track switched to "${INDUSTRY_TRACKS[track].shortTitleEn}".`
     );
+  };
+
+  const handleSelectDiscipline = (disc: DisciplineId) => {
+    setActiveDiscipline(disc);
+    saveDiscipline(disc);
+    const meta = getDisciplineMetadata(disc);
+    showToast(
+      lang === 'fa'
+        ? `دیسیپلین تخصصی به «${meta.shortTitleFa}» تنظیم شد.`
+        : `Discipline updated to "${meta.shortTitleEn}".`
+    );
+  };
+
+  const handleSelectRole = (role: EngineeringRoleId) => {
+    setActiveRole(role);
+    saveRole(role);
   };
 
   const isUserAdmin = (user: UserProfile | null): boolean => {
@@ -722,6 +753,18 @@ export default function App() {
           currentTrack={industryTrack}
           onSelectTrack={handleSelectIndustryTrack}
         />
+
+        {/* Discipline & Role Selector Modal */}
+        <DisciplineSelectorModal
+          isOpen={isDisciplineModalOpen}
+          onClose={() => setIsDisciplineModalOpen(false)}
+          currentTrack={industryTrack}
+          currentDiscipline={activeDiscipline}
+          currentRole={activeRole}
+          onSelectDiscipline={handleSelectDiscipline}
+          onSelectRole={handleSelectRole}
+          lang={lang}
+        />
       </>
     );
   }
@@ -762,13 +805,22 @@ export default function App() {
             </div>
           </a>
 
-          {/* Industry Track Switcher in Workspace Header */}
-          <IndustryTrackSwitcher
-            currentTrack={industryTrack}
-            onSelectTrack={handleSelectIndustryTrack}
-            onOpenSelectorModal={() => setIsIndustryModalOpen(true)}
-            className="shrink-0 hidden md:inline-flex"
-          />
+          {/* Industry Track & Discipline Badges in Workspace Header */}
+          <div className="flex items-center gap-2 shrink-0 hidden md:flex">
+            <IndustryTrackSwitcher
+              currentTrack={industryTrack}
+              onSelectTrack={handleSelectIndustryTrack}
+              onOpenSelectorModal={() => setIsIndustryModalOpen(true)}
+              className="shrink-0"
+            />
+            <DisciplineBadge
+              currentTrack={industryTrack}
+              currentDiscipline={activeDiscipline}
+              onClick={() => setIsDisciplineModalOpen(true)}
+              lang={lang}
+              className="shrink-0"
+            />
+          </div>
 
           {/* Page Navigation Segmented Control */}
           <div className="flex-1 min-w-0 flex items-center p-1.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-inner overflow-x-auto gap-1">
@@ -1355,6 +1407,7 @@ export default function App() {
           <Page1BusinessUnderstanding
             lang={lang}
             industryTrack={industryTrack}
+            disciplineId={activeDiscipline}
             read={read}
             onToggleRead={setRead}
             story={story}
@@ -1435,6 +1488,7 @@ export default function App() {
           <Page2ProblemIteration
             lang={lang}
             industryTrack={industryTrack}
+            disciplineId={activeDiscipline}
             content={page2Content}
             onChangeContent={setPage2Content}
             onGoToPage1={() => {
@@ -1453,6 +1507,7 @@ export default function App() {
           <Page3SuccessCriteria
             lang={lang}
             industryTrack={industryTrack}
+            disciplineId={activeDiscipline}
             content={page3Content}
             onChangeContent={setPage3Content}
             onGoToPage2={() => {
@@ -1471,6 +1526,7 @@ export default function App() {
           <Page4CostBenefit
             lang={lang}
             industryTrack={industryTrack}
+            disciplineId={activeDiscipline}
             content={page4Content}
             onChangeContent={setPage4Content}
             onGoToPage3={() => {
@@ -1489,6 +1545,7 @@ export default function App() {
           <Page5ExpectedRoi
             lang={lang}
             industryTrack={industryTrack}
+            disciplineId={activeDiscipline}
             content={page5Content}
             onChangeContent={setPage5Content}
             onGoToPage4={() => {
@@ -1867,6 +1924,18 @@ export default function App() {
           onClose={() => setIsIndustryModalOpen(false)}
           currentTrack={industryTrack}
           onSelectTrack={handleSelectIndustryTrack}
+        />
+
+        {/* Discipline & Role Selector Modal */}
+        <DisciplineSelectorModal
+          isOpen={isDisciplineModalOpen}
+          onClose={() => setIsDisciplineModalOpen(false)}
+          currentTrack={industryTrack}
+          currentDiscipline={activeDiscipline}
+          currentRole={activeRole}
+          onSelectDiscipline={handleSelectDiscipline}
+          onSelectRole={handleSelectRole}
+          lang={lang}
         />
       </main>
     </div>

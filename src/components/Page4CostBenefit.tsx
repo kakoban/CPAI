@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Language } from '../types/cpmai';
-import { IndustryTrackId } from '../types/industryTrack';
+import { IndustryTrackId, DisciplineId } from '../types/industryTrack';
+import { getDisciplineMetadata, getDisciplineExampleContent } from '../data/disciplineExamplesRegistry';
 import { ArrowLeft, ArrowRight, Lightbulb, Calculator, Check, Copy, RotateCcw, DollarSign, Clock, TrendingUp, FileText } from 'lucide-react';
 
 interface Page4Props {
   lang: Language;
   industryTrack?: IndustryTrackId;
+  disciplineId?: DisciplineId;
   content: string;
   onChangeContent: (val: string) => void;
   onGoToPage3: () => void;
@@ -15,6 +17,7 @@ interface Page4Props {
 export const Page4CostBenefit: React.FC<Page4Props> = ({
   lang,
   industryTrack = 'CIVIL_INFRA',
+  disciplineId,
   content,
   onChangeContent,
   onGoToPage3,
@@ -23,6 +26,8 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
   const [copied, setCopied] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
   const isPetro = industryTrack === 'ENERGY_PETRO';
+  const discMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
+  const discContent = disciplineId ? getDisciplineExampleContent(disciplineId) : null;
 
   // Structured breakdown states for the interactive calculator
   const [costPersonnel, setCostPersonnel] = useState(isPetro ? '95000' : '85000');
@@ -38,7 +43,7 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
 
   const t = {
     en: {
-      badge: `CPMAI Phase I · Page 4 of 5 (${isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
+      badge: `CPMAI Phase I · Page 4 of 5 (${discMeta ? discMeta.titleEn : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       subtaskH: 'Subtask: Cost-Benefit Analysis',
       costsAndBenefitsLabel: 'Costs and benefits:',
       costsAndBenefitsText:
@@ -47,7 +52,7 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
       promptHint:
         'Specify the financial budget, resource costs (talent, cloud/GPU, data, maintenance), project schedule/time budget, and quantifiable financial return (cost reduction, revenue uplift, risk avoidance).',
       templateBtn: 'Insert Cost-Benefit Template',
-      exampleBtn: isPetro ? 'Fill Refinery Preheat Cost-Benefit Example' : 'Fill Metro TBM Cost-Benefit Example',
+      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} Cost-Benefit Example` : isPetro ? 'Fill Refinery Preheat Cost-Benefit Example' : 'Fill Metro TBM Cost-Benefit Example',
       calcToggleBtn: 'Interactive Financial ROI Estimator',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
@@ -87,7 +92,7 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
       promptHint:
         'بودجه مالی، هزینه‌های منابع (متخصصان، زیرساخت ابری و پردازش GPU، تأمین داده، نگهداری)، بودجه زمانی و زمان‌بندی پروژه و بازدهی مالی سنجش‌پذیر (کاهش هزینه، درآمد افزایشی، جلوگیری از زیان) را ثبت نمایید.',
       templateBtn: 'درج قالب تحلیل هزینه-فایده و بودجه',
-      exampleBtn: isPetro ? 'پر کردن با نمونه پالایشگاهی (هزینه-فایده)' : 'پر کردن با نمونه مگاپروژه احداث مترو (هزینه-فایده)',
+      exampleBtn: discMeta ? `پر کردن با تحلیل هزینه-فایده ${discMeta.shortTitleFa}` : isPetro ? 'پر کردن با نمونه پالایشگاهی (هزینه-فایده)' : 'پر کردن با نمونه مگاپروژه احداث مترو (هزینه-فایده)',
       calcToggleBtn: 'ماشین‌حساب تعاملی برآورد ROI و بودجه',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
@@ -287,8 +292,28 @@ With an upfront investment of $160,000 delivering $3,650,000 in annual thermal a
 ۴. جمع‌بندی مقایسه هزینه-فایده:
 پروژه با هزینه ۱۶۰,۰۰۰ دلار و منفعت سالانه ۳,۶۵۰,۰۰۰ دلار، نرخ بازگشت سرمایه ۲,۱۸۱٪ و دوره بازگشت کمتر از ۱ ماه دارد و از منظر متدولوژی CPMAI یک سرمایه‌گذاری استراتژیک فوق‌العاده است.`;
 
-    const selectedEn = isPetro ? exampleEnPetro : exampleEnCivil;
-    const selectedFa = isPetro ? exampleFaPetro : exampleFaCivil;
+    let selectedEn = isPetro ? exampleEnPetro : exampleEnCivil;
+    let selectedFa = isPetro ? exampleFaPetro : exampleFaCivil;
+
+    if (discContent) {
+      selectedEn = `Project Cost-Benefit Analysis: ${discContent.titleEn}
+
+1. Estimated Investment Budget:
+${discContent.costBenefitSummaryEn}
+
+2. Projected Financial Dividends & ROI:
+- ${discContent.roiEstimateEn}
+- Focus Area: Mitigating critical failure modes and accelerating project turnover.`;
+
+      selectedFa = `تحلیل هزینه-فایده و بودجه پروژه: ${discContent.titleFa}
+
+۱. برآورد بودجه سرمایه‌گذاری و منافع:
+${discContent.costBenefitSummaryFa}
+
+۲. نرخ بازگشت سرمایه و بازدهی مالی:
+- ${discContent.roiEstimateFa}
+- تمرکز اصلی: رفع گلوگاه‌های اجرایی و تضمین سرعت تحویل پروژه.`;
+    }
 
     onChangeContent(lang === 'fa' ? selectedFa : selectedEn);
   };

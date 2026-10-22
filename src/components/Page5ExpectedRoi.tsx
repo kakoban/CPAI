@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Language } from '../types/cpmai';
-import { IndustryTrackId } from '../types/industryTrack';
+import { IndustryTrackId, DisciplineId } from '../types/industryTrack';
+import { getDisciplineMetadata, getDisciplineExampleContent } from '../data/disciplineExamplesRegistry';
 import { ArrowLeft, ArrowRight, Lightbulb, Calculator, Check, Copy, RotateCcw, TrendingUp, Percent, DollarSign, Target, FileText } from 'lucide-react';
 
 interface Page5Props {
   lang: Language;
   industryTrack?: IndustryTrackId;
+  disciplineId?: DisciplineId;
   content: string;
   onChangeContent: (val: string) => void;
   onGoToPage4: () => void;
@@ -15,6 +17,7 @@ interface Page5Props {
 export const Page5ExpectedRoi: React.FC<Page5Props> = ({
   lang,
   industryTrack = 'CIVIL_INFRA',
+  disciplineId,
   content,
   onChangeContent,
   onGoToPage4,
@@ -23,6 +26,8 @@ export const Page5ExpectedRoi: React.FC<Page5Props> = ({
   const [copied, setCopied] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
   const isPetro = industryTrack === 'ENERGY_PETRO';
+  const discMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
+  const discContent = disciplineId ? getDisciplineExampleContent(disciplineId) : null;
 
   // Sensitivity analysis inputs
   const [investmentCost, setInvestmentCost] = useState(isPetro ? '160000' : '135000');
@@ -32,12 +37,12 @@ export const Page5ExpectedRoi: React.FC<Page5Props> = ({
 
   const t = {
     en: {
-      badge: `CPMAI Phase I · Page 5 of 5 (${isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
+      badge: `CPMAI Phase I · Page 5 of 5 (${discMeta ? discMeta.titleEn : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       slideBanner: 'What is the expected ROI for this project?',
       promptHint:
         'Calculate and articulate the expected Return on Investment (ROI) for this cognitive iteration. Include quantified financial ROI, payback period, strategic/non-monetary dividends, and risk/adoption sensitivity assumptions.',
       templateBtn: 'Insert CPMAI ROI Template',
-      exampleBtn: isPetro ? 'Fill Refinery Fouling ROI Example' : 'Fill Metro TBM Subsidence ROI Example',
+      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} ROI Example` : isPetro ? 'Fill Refinery Fouling ROI Example' : 'Fill Metro TBM Subsidence ROI Example',
       calcToggleBtn: 'Interactive ROI & Sensitivity Tool',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
@@ -69,12 +74,12 @@ export const Page5ExpectedRoi: React.FC<Page5Props> = ({
       months: 'months'
     },
     fa: {
-      badge: `فاز اول CPMAI · صفحه ۵ از ۵ (${isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
+      badge: `فاز اول CPMAI · صفحه ۵ از ۵ (${discMeta ? discMeta.titleFa : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
       slideBanner: 'What is the expected ROI for this project?',
       promptHint:
         'نرخ بازگشت سرمایه (ROI) مورد انتظار برای این تکرار هوش مصنوعی را محاسبه و تبیین کنید. شامل درصد بازگشت مالی، دوره بازگشت سرمایه (Payback Period)، مزایای استراتژیک غیرمالی و تحلیل حساسیت نرخ پذیرش سازمانی.',
       templateBtn: 'درج قالب استاندارد برآورد ROI',
-      exampleBtn: isPetro ? 'پر کردن با نمونه پالایشگاهی (بازگشت سرمایه ROI)' : 'پر کردن با نمونه مگاپروژه احداث مترو (بازگشت سرمایه ROI)',
+      exampleBtn: discMeta ? `پر کردن با نمونه ROI ${discMeta.shortTitleFa}` : isPetro ? 'پر کردن با نمونه پالایشگاهی (بازگشت سرمایه ROI)' : 'پر کردن با نمونه مگاپروژه احداث مترو (بازگشت سرمایه ROI)',
       calcToggleBtn: 'ابزار تعاملی محاسبه ROI و تحلیل حساسیت',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
@@ -238,7 +243,30 @@ Even if model prediction accuracy degrades by 40% and site adoption falls to 60%
 
 ۳. تحلیل حساسیت و حاشیه امنیت:
 حتی در صورت افت ۴۰ درصدی دقت پیش‌بینی مدل و کاهش پذیرش ناظران به ۶۰ درصد، منفعت خالص پروژه بیش از ۵۸۰,۰۰۰ دلار بوده و پروژه ظرف کمتر از ۳ ماه سر‌به‌سر می‌شود که توجیه اقتصادی آن را در استاندارد CPMAI اثبات می‌کند.`;
-    onChangeContent(lang === "fa" ? selectedFa : selectedEn);
+    let finalEn = selectedEn;
+    let finalFa = selectedFa;
+
+    if (discContent) {
+      finalEn = `Detailed ROI Justification: ${discContent.titleEn}
+
+1. Investment & Payoff Summary:
+- ${discContent.costBenefitSummaryEn}
+- Expected Amortization & ROI: ${discContent.roiEstimateEn}
+
+2. Success Benchmarks:
+${discContent.successCriteriaEn.map((sc, i) => `- ${sc}`).join('\n')}`;
+
+      finalFa = `توجیه تفصیلی نرخ بازگشت سرمایه (ROI): ${discContent.titleFa}
+
+۱. خلاصه بودجه و بازدهی سرمایه‌گذاری:
+- ${discContent.costBenefitSummaryFa}
+- شاخص ROI و دوره بازگشت: ${discContent.roiEstimateFa}
+
+۲. معیارهای کلیدی ارزیابی:
+${discContent.successCriteriaFa.map((sc, i) => `- ${sc}`).join('\n')}`;
+    }
+
+    onChangeContent(lang === "fa" ? finalFa : finalEn);
   };
 
   const handleAppendCalculatorResults = () => {

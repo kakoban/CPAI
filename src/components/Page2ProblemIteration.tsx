@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Language } from '../types/cpmai';
-import { IndustryTrackId } from '../types/industryTrack';
+import { IndustryTrackId, DisciplineId } from '../types/industryTrack';
+import { getDisciplineMetadata, getDisciplineExampleContent } from '../data/disciplineExamplesRegistry';
 import { ArrowLeft, ArrowRight, Lightbulb, FileText, Check, Copy, RotateCcw } from 'lucide-react';
 
 interface Page2Props {
   lang: Language;
   industryTrack?: IndustryTrackId;
+  disciplineId?: DisciplineId;
   content: string;
   onChangeContent: (val: string) => void;
   onGoToPage1: () => void;
@@ -15,6 +17,7 @@ interface Page2Props {
 export const Page2ProblemIteration: React.FC<Page2Props> = ({
   lang,
   industryTrack = 'CIVIL_INFRA',
+  disciplineId,
   content,
   onChangeContent,
   onGoToPage1,
@@ -22,14 +25,16 @@ export const Page2ProblemIteration: React.FC<Page2Props> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const isPetro = industryTrack === 'ENERGY_PETRO';
+  const discMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
+  const discContent = disciplineId ? getDisciplineExampleContent(disciplineId) : null;
 
   const t = {
     en: {
-      badge: `CPMAI Phase I · Page 2 of 5 (${isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
+      badge: `CPMAI Phase I · Page 2 of 5 (${discMeta ? discMeta.titleEn : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       slideTitle: 'What problem are you solving with AI in this iteration?',
       promptHint: 'Write your complete problem definition for this iteration. Address the business friction, why traditional software fails, current vs future state, and scope boundaries.',
       templateBtn: 'Insert CPMAI Template',
-      exampleBtn: isPetro ? 'Fill Refinery Fouling Case Study' : 'Fill Urban Metro TBM Case Study',
+      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} Case Study` : isPetro ? 'Fill Refinery Fouling Case Study' : 'Fill Urban Metro TBM Case Study',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
       copiedToast: 'Copied to clipboard!',
@@ -43,11 +48,11 @@ export const Page2ProblemIteration: React.FC<Page2Props> = ({
       tip4: 'Explicitly define what is IN-SCOPE versus deferred to future iterations.'
     },
     fa: {
-      badge: `فاز اول CPMAI · صفحه ۲ از ۵ (${isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
+      badge: `فاز اول CPMAI · صفحه ۲ از ۵ (${discMeta ? discMeta.titleFa : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
       slideTitle: 'What problem are you solving with AI in this iteration?',
       promptHint: 'تعریف دقیق مسئله در این تکرار (اسپرینت) را بنویسید: چه اصطکاکی در کسب‌وکار رخ می‌دهد؟ چرا نرم‌افزار سنتی پاسخگو نیست؟ وضعیت فعلی در برابر مطلوب چیست و مرزهای این تکرار کجاست؟',
       templateBtn: 'درج قالب استاندارد CPMAI',
-      exampleBtn: isPetro ? 'پر کردن با نمونه پالایشگاهی (رسوب مبدل‌ها)' : 'پر کردن با نمونه مگاپروژه احداث خط مترو (TBM)',
+      exampleBtn: discMeta ? `پر کردن با نمونه ${discMeta.shortTitleFa}` : isPetro ? 'پر کردن با نمونه پالایشگاهی (رسوب مبدل‌ها)' : 'پر کردن با نمونه مگاپروژه احداث خط مترو (TBM)',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
       copiedToast: 'متن بوم در کلیپ‌بورد کپی شد!',
@@ -167,8 +172,32 @@ Crude blending variances (API gravity, sulfur, salt, and heavy metals) interact 
 - درون محدوده (In-Scope): قطار مبدل‌های پیش‌گرمایش واحد تقطیر اتمسفری (E-101 تا E-108) با تلمتری ۵ ثانیه‌ای سیستم DCS و نتایج آزمایشگاه نفت خام.
 - خارج از محدوده (Out-of-Scope): ستون‌های تقطیر در خلاء، کمپرسورهای بازیافت گاز فلر و کنترل خودکار شیرهای برقی (موکول به اسپرینت‌های ۲ و ۳).`;
 
-    const selectedEn = isPetro ? exampleEnPetro : exampleEnCivil;
-    const selectedFa = isPetro ? exampleFaPetro : exampleFaCivil;
+    let selectedEn = isPetro ? exampleEnPetro : exampleEnCivil;
+    let selectedFa = isPetro ? exampleFaPetro : exampleFaCivil;
+
+    if (discContent) {
+      selectedEn = `Iteration Problem Definition: ${discContent.titleEn}
+
+1. Business Problem:
+${discContent.businessProblemEn}
+
+2. Why AI?
+${discContent.whyAiEn}
+
+3. Cost-Benefit & ROI Impact:
+${discContent.costBenefitSummaryEn} - ${discContent.roiEstimateEn}`;
+
+      selectedFa = `تعریف مسئله این تکرار: ${discContent.titleFa}
+
+۱. صورت مسئله کسب‌وکار:
+${discContent.businessProblemFa}
+
+۲. چرا هوش مصنوعی؟
+${discContent.whyAiFa}
+
+۳. اثر مالی و بازگشت سرمایه:
+${discContent.costBenefitSummaryFa} - ${discContent.roiEstimateFa}`;
+    }
 
     onChangeContent(lang === 'fa' ? selectedFa : selectedEn);
   };
