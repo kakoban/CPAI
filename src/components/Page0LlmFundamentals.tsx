@@ -45,7 +45,11 @@ import { Page0EngineeringMasterclass } from './Page0EngineeringMasterclass';
 import { NotebookLmWorkshop } from './NotebookLmWorkshop';
 import { PetroClaudeArtifactSimulator, CLAUDE_PETRO_SYSTEM_PROMPT } from './PetroClaudeArtifactSimulator';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../data/logo';
-import { IndustryTrackId } from '../types/industryTrack';
+import { IndustryTrackId, DisciplineId } from '../types/industryTrack';
+import {
+  getDisciplineMetadata,
+  getDisciplinePromptShowcase
+} from '../data/disciplineExamplesRegistry';
 
 interface Page0Props {
   lang: Language;
@@ -54,6 +58,7 @@ interface Page0Props {
   onGoToPage1: () => void;
   onOpenQuiz?: () => void;
   industryTrack?: IndustryTrackId;
+  disciplineId?: DisciplineId;
 }
 
 interface PromptItem {
@@ -75,8 +80,15 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   onChangeContent,
   onGoToPage1,
   onOpenQuiz,
-  industryTrack = 'CIVIL_INFRA'
+  industryTrack = 'CIVIL_INFRA',
+  disciplineId
 }) => {
+  const effectiveDiscipline: DisciplineId =
+    disciplineId ||
+    (industryTrack === 'ENERGY_PETRO' ? 'petro_process_safety' : 'civil_tbm_tunnel');
+
+  const discMeta = getDisciplineMetadata(effectiveDiscipline);
+  const disciplinePromptPair = getDisciplinePromptShowcase(effectiveDiscipline);
   const [activeTab, setActiveTab] = useState<
     | 'all'
     | 'tools'
@@ -92,7 +104,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   >('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [sandboxCopied, setSandboxCopied] = useState(false);
-  const [activePromptExample, setActivePromptExample] = useState<'rcto' | 'bad_good' | 'claude_petro'>('rcto');
+  const [activePromptExample, setActivePromptExample] = useState<'discipline' | 'bad_good' | 'claude_petro'>('discipline');
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>('metro_station_tbm');
   const [csvCopied, setCsvCopied] = useState(false);
   const [promptWithDataCopiedId, setPromptWithDataCopiedId] = useState<string | null>(null);
@@ -133,6 +145,18 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   };
 
   const PROMPT_LIBRARY: PromptItem[] = [
+    {
+      id: `discipline_custom_${discMeta.id}`,
+      titleFa: `پرامپت تخصصی دیسیپلین: ${discMeta.titleFa}`,
+      titleEn: `Discipline Engineering Prompt: ${discMeta.titleEn}`,
+      categoryFa: discMeta.trackId === 'CIVIL_INFRA' ? 'مگاپروژه‌های راه و ابنیه' : 'نفت، گاز و پتروشیمی',
+      categoryEn: discMeta.trackId === 'CIVIL_INFRA' ? 'Civil & Infrastructure' : 'Oil & Gas EPCC',
+      descriptionFa: `پرامپت مهندسی‌شده RCTO با استانداردهای ${discMeta.governingStandardsFa[0]} و تحلیل شاخص‌های ${discMeta.performanceMetricsFa.slice(0, 2).join(' و ')}.`,
+      descriptionEn: `Engineered RCTO prompt customized for ${discMeta.governingStandardsEn[0]} and ${discMeta.performanceMetricsEn.slice(0, 2).join(', ')}.`,
+      promptFa: disciplinePromptPair.engineeredPromptFa,
+      promptEn: disciplinePromptPair.engineeredPromptEn,
+      targetTools: ['Claude 3.5 / 3.7', 'ChatGPT-4o', 'Gemini Pro']
+    },
     {
       id: 'claude_petro_artifact_library',
       titleFa: 'دستیار هوشمند اتاق کنترل و پایش پالایشگاه (Claude Artifact)',
@@ -965,24 +989,19 @@ Tasks:
 
               <div className="flex items-center gap-1 bg-[#f4f4f1] dark:bg-[#12171b] p-1 rounded-lg text-xs overflow-x-auto no-scrollbar">
                 <button
-                  onClick={() => setActivePromptExample('rcto')}
-                  className={`px-2.5 py-1 rounded-md transition-colors whitespace-nowrap ${
-                    activePromptExample === 'rcto'
-                      ? 'bg-[#ffffff] dark:bg-[#1a2228] text-[#1f5163] dark:text-[#6fb3c6] font-semibold shadow-2xs'
-                      : 'text-[#5d6b73] dark:text-[#9aa8b0]'
+                  onClick={() => setActivePromptExample('discipline')}
+                  className={`px-3 py-1 rounded-md transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                    activePromptExample === 'discipline'
+                      ? 'bg-[#1f5163] text-white font-bold shadow-xs'
+                      : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
                   }`}
                 >
-                  {lang === 'fa' ? 'نمونه ۱: ایمیل پیگیری' : 'Example 1: Follow-up'}
-                </button>
-                <button
-                  onClick={() => setActivePromptExample('bad_good')}
-                  className={`px-2.5 py-1 rounded-md transition-colors whitespace-nowrap ${
-                    activePromptExample === 'bad_good'
-                      ? 'bg-[#ffffff] dark:bg-[#1a2228] text-[#1f5163] dark:text-[#6fb3c6] font-semibold shadow-2xs'
-                      : 'text-[#5d6b73] dark:text-[#9aa8b0]'
-                  }`}
-                >
-                  {lang === 'fa' ? 'نمونه ۲: استراتژی بازاریابی' : 'Example 2: Marketing'}
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>
+                    {lang === 'fa'
+                      ? `پرامپت دیسیپلین شما: ${discMeta.shortTitleFa}`
+                      : `Your Discipline Prompt: ${discMeta.shortTitleEn}`}
+                  </span>
                 </button>
                 <button
                   onClick={() => setActivePromptExample('claude_petro')}
@@ -995,8 +1014,8 @@ Tasks:
                   <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                   <span>
                     {lang === 'fa'
-                      ? 'نمونه ۳ (کارگاه پیشرفته): چت‌بات آرتیفکت کلود (نفت و گاز)'
-                      : 'Example 3 (Advanced): Claude Artifact (Oil & Gas)'}
+                      ? 'چت‌بات تعاملی کلود (Claude Artifact)'
+                      : 'Claude Artifact Simulator'}
                   </span>
                 </button>
               </div>
@@ -1075,23 +1094,29 @@ Tasks:
                   <PetroClaudeArtifactSimulator lang={lang} />
                 </div>
               </div>
-            ) : activePromptExample === 'rcto' ? (
+            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Bad Prompt */}
                 <div className="p-4 rounded-xl bg-[#fdf2f2] dark:bg-[#2a1715] border border-[#f87171]/40 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-[#b91c1c] dark:text-[#f87171] flex items-center gap-1">
                       <span>✕</span>
-                      <span>{lang === 'fa' ? 'پرامپت ضعیف و مبهم (نتیجه کلی و کم‌فایده)' : 'Weak / Vague Prompt'}</span>
+                      <span>
+                        {lang === 'fa'
+                          ? `پرامپت ضعیف و مبهم در دیسیپلین ${discMeta.shortTitleFa}`
+                          : `Weak Prompt in ${discMeta.shortTitleEn}`}
+                      </span>
                     </span>
                   </div>
                   <div className="p-3 rounded-lg bg-white dark:bg-[#1a1515] font-sans text-xs text-[#b91c1c] dark:text-[#fca5a5] leading-relaxed">
-                    «یک ایمیل برای پیگیری جلسه با مشتری بنویس.»
+                    {lang === 'fa'
+                      ? disciplinePromptPair.weakPromptFa
+                      : disciplinePromptPair.weakPromptEn}
                   </div>
                   <p className="text-[11px] text-[#7f1d1d] dark:text-[#fca5a5] leading-relaxed">
                     {lang === 'fa'
-                      ? 'ایراد: نقش مشخص نیست، زمینه و محتوای جلسه معلوم نیست، لحن و طول مشخص نشده؛ نتیجه یک متن کلیشه‌ای و غیرقابل استفاده است.'
-                      : 'Flaw: Lacks persona, context, deal specifics, and constraints. Results in generic cliches.'}
+                      ? disciplinePromptPair.weakCritiqueFa
+                      : disciplinePromptPair.weakCritiqueEn}
                   </p>
                 </div>
 
@@ -1100,18 +1125,24 @@ Tasks:
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-[#047857] dark:text-[#34d399] flex items-center gap-1">
                       <span>✓</span>
-                      <span>{lang === 'fa' ? 'پرامپت فرموله شده با RCTO (نتیجه درخشان و دقیق)' : 'Engineered RCTO Prompt'}</span>
+                      <span>
+                        {lang === 'fa'
+                          ? `پرامپت مهندسی‌شده RCTO در ${discMeta.shortTitleFa}`
+                          : `Engineered RCTO Prompt (${discMeta.shortTitleEn})`}
+                      </span>
                     </span>
                     <button
                       onClick={() =>
                         copyToClipboard(
-                          `تو دستیار ارشد ارتباطات تجاری مدیرعامل هستی [Role]. دیروز جلسه‌ای با شرکت الف درباره تمدید قرارداد خدمات سرور داشتیم و قرار شد تا فردا پیش‌نویس قیمت را نهایی کنند [Context]. ایمیلی کوتاه برای پیگیری دوستانه بنویس و یادآوری کن که تایید تا پنج‌شنبه شامل ۱۰٪ تخفیف دوره پیش‌خرید می‌شود [Task]. خروجی در حداکثر ۲ پاراگراف، لحن گرم اما کاملاً رسمی سازمانی، به همراه موضوع ایمیل جذاب باشد [Output].`,
-                          'demo_rcto'
+                          lang === 'fa'
+                            ? disciplinePromptPair.engineeredPromptFa
+                            : disciplinePromptPair.engineeredPromptEn,
+                          'demo_disc_prompt'
                         )
                       }
-                      className="text-[10px] font-semibold text-[#047857] dark:text-[#34d399] hover:underline flex items-center gap-1"
+                      className="text-[10px] font-semibold text-[#047857] dark:text-[#34d399] hover:underline flex items-center gap-1 cursor-pointer"
                     >
-                      {copiedId === 'demo_rcto' ? (
+                      {copiedId === 'demo_disc_prompt' ? (
                         <>
                           <Check className="w-3 h-3 text-[#059669]" />
                           <span>{lang === 'fa' ? 'کپی شد' : 'Copied'}</span>
@@ -1119,81 +1150,33 @@ Tasks:
                       ) : (
                         <>
                           <Copy className="w-3 h-3" />
-                          <span>{lang === 'fa' ? 'کپی پرامپت' : 'Copy'}</span>
+                          <span>{lang === 'fa' ? 'کپی پرامپت دیسیپلین' : 'Copy'}</span>
                         </>
                       )}
                     </button>
                   </div>
-                  <div className="p-3 rounded-lg bg-white dark:bg-[#132b20] font-sans text-xs text-[#065f46] dark:text-[#a7f3d0] leading-relaxed">
-                    <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6] font-mono">[Role]</span> تو دستیار ارشد ارتباطات سازمانی هستی.<br />
-                    <span className="font-bold text-[#00738c] dark:text-[#6ee7b7] font-mono">[Context]</span> دیروز جلسه‌ای با شرکت الف درباره قرارداد پشتیبانی سرور داشتیم و منتظر تایید بودجه هستیم.<br />
-                    <span className="font-bold text-[#b87333] dark:text-[#e0a96d] font-mono">[Task]</span> ایمیلی مؤدبانه برای پیگیری بنویس و یادآوری کن تایید تا ۵شنبه شامل ۱۰٪ تخفیف می‌شود.<br />
-                    <span className="font-bold text-[#2f7d5b] dark:text-[#63c496] font-mono">[Output]</span> حداکثر ۲ پاراگراف، لحن رسمی و صمیمی، همراه با موضوع ایمیل جذاب.
+                  <div className="p-3 rounded-lg bg-white dark:bg-[#132b20] font-sans text-xs text-[#065f46] dark:text-[#a7f3d0] leading-relaxed space-y-1">
+                    <div>
+                      <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6] font-mono">[Role] </span>
+                      <span>{lang === 'fa' ? disciplinePromptPair.engineeredBreakdownFa.role : disciplinePromptPair.engineeredBreakdownEn.role}</span>
+                    </div>
+                    <div>
+                      <span className="font-bold text-[#00738c] dark:text-[#6ee7b7] font-mono">[Context] </span>
+                      <span>{lang === 'fa' ? disciplinePromptPair.engineeredBreakdownFa.context : disciplinePromptPair.engineeredBreakdownEn.context}</span>
+                    </div>
+                    <div>
+                      <span className="font-bold text-[#b87333] dark:text-[#e0a96d] font-mono">[Task] </span>
+                      <span>{lang === 'fa' ? disciplinePromptPair.engineeredBreakdownFa.task : disciplinePromptPair.engineeredBreakdownEn.task}</span>
+                    </div>
+                    <div>
+                      <span className="font-bold text-[#2f7d5b] dark:text-[#63c496] font-mono">[Output] </span>
+                      <span>{lang === 'fa' ? disciplinePromptPair.engineeredBreakdownFa.output : disciplinePromptPair.engineeredBreakdownEn.output}</span>
+                    </div>
                   </div>
                   <p className="text-[11px] text-[#065f46] dark:text-[#6ee7b7] leading-relaxed">
                     {lang === 'fa'
-                      ? 'مزیت: هوش مصنوعی پاسخی شخصی‌سازی شده، هدفمند و آماده ارسال در کمتر از ۵ ثانیه تحویل می‌دهد.'
-                      : 'Advantage: Produces a production-ready, highly context-aware draft ready to hit send.'}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-[#fdf2f2] dark:bg-[#2a1715] border border-[#f87171]/40 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#b91c1c] dark:text-[#f87171] flex items-center gap-1">
-                      <span>✕</span>
-                      <span>{lang === 'fa' ? 'پرامپت ضعیف' : 'Weak Prompt'}</span>
-                    </span>
-                  </div>
-                  <div className="p-3 rounded-lg bg-white dark:bg-[#1a1515] font-sans text-xs text-[#b91c1c] dark:text-[#fca5a5] leading-relaxed">
-                    «برای شرکت ما یک استراتژی بازاریابی بنویس.»
-                  </div>
-                  <p className="text-[11px] text-[#7f1d1d] dark:text-[#fca5a5]">
-                    {lang === 'fa'
-                      ? 'نتیجه: چند صفحه کلی‌گویی درباره سئو، شبکه‌های اجتماعی و ایمیل مارکتینگ بدون ذره‌ای ارتباط با حوزه فعالیت واقعی.'
-                      : 'Result: Fluffy textbook advice about social media without relevance to your business model.'}
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[#ecfdf5] dark:bg-[#10241b] border border-[#34d399]/40 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#047857] dark:text-[#34d399] flex items-center gap-1">
-                      <span>✓</span>
-                      <span>{lang === 'fa' ? 'پرامپت دقیق RCTO' : 'Engineered RCTO Prompt'}</span>
-                    </span>
-                    <button
-                      onClick={() =>
-                        copyToClipboard(
-                          `تو مدیر بازاریابی رشد (Growth Marketing Lead) در حوزه B2B SaaS هستی [Role]. ما نرم‌افزار حسابداری ابری برای فروشگاه‌های زنجیره‌ای با بودجه تبلیغات محدود (ماهانه ۳۰ میلیون تومان) عرضه می‌کنیم [Context]. سه کانال اصلی جذب لید ارگانیک و کم‌هزینه را با قیف تبدیل تحلیل کن [Task]. خروجی در قالب جدول ۳ ستونه با عناوین: [کانال جذب | گام اجرایی اسپرینت | شاخص CAC برآوردی] ارائه شود [Output].`,
-                          'demo_mkt'
-                        )
-                      }
-                      className="text-[10px] font-semibold text-[#047857] dark:text-[#34d399] hover:underline flex items-center gap-1"
-                    >
-                      {copiedId === 'demo_mkt' ? (
-                        <>
-                          <Check className="w-3 h-3 text-[#059669]" />
-                          <span>{lang === 'fa' ? 'کپی شد' : 'Copied'}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3 h-3" />
-                          <span>{lang === 'fa' ? 'کپی پرامپت' : 'Copy'}</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  <div className="p-3 rounded-lg bg-white dark:bg-[#132b20] font-sans text-xs text-[#065f46] dark:text-[#a7f3d0] leading-relaxed">
-                    <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6] font-mono">[Role]</span> تو مدیر بازاریابی رشد B2B SaaS هستی.<br />
-                    <span className="font-bold text-[#00738c] dark:text-[#6ee7b7] font-mono">[Context]</span> نرم‌افزار ابری برای فروشگاه‌ها داریم با بودجه محدود ماهانه.<br />
-                    <span className="font-bold text-[#b87333] dark:text-[#e0a96d] font-mono">[Task]</span> ۳ کانال جذب لید کم‌هزینه را مشخص کن.<br />
-                    <span className="font-bold text-[#2f7d5b] dark:text-[#63c496] font-mono">[Output]</span> در قالب جدول با عناوین: کانال | اقدام اجرایی | شاخص CAC.
-                  </div>
-                  <p className="text-[11px] text-[#065f46] dark:text-[#6ee7b7] leading-relaxed">
-                    {lang === 'fa'
-                      ? 'مزیت: خروجی کاملاً بر حسب ابعاد بودجه، مدل B2B و معیارهای قابل اندازه‌گیری تولید می‌شود.'
-                      : 'Advantage: Zero fluff; concrete tactics tailored directly to B2B constraints.'}
+                      ? `مزیت: مدل دقیقاً با ضوابط ${discMeta.governingStandardsFa[0]} و شاخص‌های دیسیپلین پاسخ می‌دهد و نیازی به رفت و برگشت نیست.`
+                      : `Advantage: The LLM complies directly with ${discMeta.governingStandardsEn[0]} and discipline KPIs with zero hallucination.`}
                   </p>
                 </div>
               </div>
@@ -2509,6 +2492,24 @@ Tasks:
               </span>
 
               <div className="flex items-center gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() =>
+                    onChangeContent(
+                      lang === 'fa'
+                        ? disciplinePromptPair.engineeredPromptFa
+                        : disciplinePromptPair.engineeredPromptEn
+                    )
+                  }
+                  className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#1f5163]/10 hover:bg-[#1f5163]/20 text-[#1f5163] dark:text-[#6fb3c6] transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <Sparkles className="w-3 h-3 text-amber-500" />
+                  <span>
+                    {lang === 'fa'
+                      ? `بارگذاری الگوی دیسیپلین ${discMeta.shortTitleFa}`
+                      : `Load ${discMeta.shortTitleEn} Template`}
+                  </span>
+                </button>
                 <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
                   {lang === 'fa'
                     ? `${content.trim().length ? content.trim().split(/\s+/).length : 0} واژه · ${content.length} کاراکتر`

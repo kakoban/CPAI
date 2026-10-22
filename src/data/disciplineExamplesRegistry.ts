@@ -646,3 +646,49 @@ export function getDisciplineExampleContent(
 export function getDisciplinesByTrack(trackId: IndustryTrackId): DisciplineMetadata[] {
   return Object.values(DISCIPLINE_REGISTRY).filter((d) => d.trackId === trackId);
 }
+
+export interface DisciplinePromptPair {
+  weakPromptFa: string;
+  weakPromptEn: string;
+  weakCritiqueFa: string;
+  weakCritiqueEn: string;
+  engineeredPromptFa: string;
+  engineeredPromptEn: string;
+  engineeredBreakdownFa: { role: string; context: string; task: string; output: string };
+  engineeredBreakdownEn: { role: string; context: string; task: string; output: string };
+}
+
+export function getDisciplinePromptShowcase(disciplineId: DisciplineId): DisciplinePromptPair {
+  const meta = getDisciplineMetadata(disciplineId);
+  const content = getDisciplineExampleContent(disciplineId);
+
+  return {
+    weakPromptFa: `«یک گزارش و تحلیل درباره وضعیت ${meta.titleFa} برای من بنویس.»`,
+    weakPromptEn: `"Write a report and analysis about ${meta.titleEn}."`,
+    weakCritiqueFa: `ایراد پرامپت: فاقد نقش، فاقد داده‌های سنسوری و استانداردهای مرجع (${meta.governingStandardsFa[0]}) و بدون خروجی ساختاریافته. نتیجه متنی کلی و توهم‌آمیز خواهد بود.`,
+    weakCritiqueEn: `Flaw: Lacks role persona, operational metrics (${meta.performanceMetricsEn[0]}), reference standards, and output constraints. Yields generic textbook fluff.`,
+    engineeredPromptFa: `تو مهندس ارشد و هماهنگ‌کننده تخصصی در واحد ${meta.titleFa} بر مبنای استاندارد ${meta.governingStandardsFa[0]} هستی [Role].
+در حال حاضر با چالش عملیاتی روبرو هستیم: ${content.businessProblemFa} [Context].
+داده‌های ورودی و پارامترهای تلمتری بر اساس شاخص‌های [${meta.performanceMetricsFa.join(' | ')}] در اختیار توست.
+وظیفه تو این است که ریشه بروز خطا را واکاوی کرده و راهکار پیشگیرانه کاهش ریسک را پیشنهاد دهی [Task].
+خروجی باید در یک جدول ۴ ستونه با عناوین [عامل بحرانی | حد مجاز استاندارد | انحراف فعلی | اقدام اصلاحی شیفت] بدون زیاده‌گویی استخراج شود [Output].`,
+    engineeredPromptEn: `You are a Lead Specialist in ${meta.titleEn} adhering to ${meta.governingStandardsEn[0]} [Role].
+Operational Context: ${content.businessProblemEn} [Context].
+Input telemetry encompasses key metrics: [${meta.performanceMetricsEn.join(' | ')}].
+Your task is to analyze root causes and formulate risk mitigation protocols [Task].
+Output format must be a structured 4-column Markdown table: [Critical Anomaly | Engineering Limit | Current Deviation | Shift Action Plan] with zero preamble [Output].`,
+    engineeredBreakdownFa: {
+      role: `مهندس ارشد ${meta.shortTitleFa} منطبق بر ${meta.governingStandardsFa[0]}`,
+      context: content.businessProblemFa.slice(0, 100) + '...',
+      task: `واکاوی ریشه انحرافات ${meta.performanceMetricsFa[0]} و تدوین برنامه اقدام`,
+      output: `جدول ۴ ستونه: [عامل بحرانی | حد استاندارد | انحراف | اقدام اصلاحی]`
+    },
+    engineeredBreakdownEn: {
+      role: `Lead Specialist in ${meta.shortTitleEn} (${meta.governingStandardsEn[0]})`,
+      context: content.businessProblemEn.slice(0, 100) + '...',
+      task: `Analyze root anomalies in ${meta.performanceMetricsEn[0]} and prescribe shift actions`,
+      output: `4-column Markdown table: [Anomaly | Standard Limit | Deviation | Action Plan]`
+    }
+  };
+}
+
