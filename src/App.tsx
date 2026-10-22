@@ -777,38 +777,54 @@ export default function App() {
       <ContentProtectionShield lang={lang} isAdmin={isUserAdmin(currentUser)} />
 
       {/* Top Header Bar */}
-      <header className="sticky top-0 z-40 w-full bg-[#ffffff]/90 dark:bg-[#161e24]/90 backdrop-blur-xl border-b border-[#d9dad5]/80 dark:border-[#26333c]/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-        <div className="w-full max-w-[1700px] mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-3 sm:gap-4">
-          {/* Brand & Organization */}
-          <a
-            href="https://owjbc.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2.5 group shrink-0 select-none cursor-pointer"
-          >
-            <div className="bg-[#ffffff] p-1.5 rounded-xl border border-black/[0.08] dark:border-white/[0.12] shadow-[0_2px_8px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.03] group-hover:scale-105 group-hover:shadow-md transition-all duration-200 shrink-0 flex items-center justify-center">
-              <img
-                src={OWJ_LOGO}
-                alt="OWJ Business Council"
-                className="h-8 w-auto min-w-[50px] max-w-[90px] object-contain shrink-0"
-                referrerPolicy="no-referrer"
-                onError={(e) => {
-                  e.currentTarget.src = OWJ_LOGO_FALLBACK;
-                }}
-              />
-            </div>
-            <div className="flex flex-col shrink-0 min-w-max">
-              <span className="font-extrabold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9] group-hover:text-[#1f5163] dark:group-hover:text-[#6fb3c6] transition-colors whitespace-nowrap">
-                {lang === 'fa' ? 'کتاب کار CPMAI' : 'CPMAI Workbook'}
+      <header className="sticky top-0 z-40 w-full bg-[#ffffff]/95 dark:bg-[#161e24]/95 backdrop-blur-xl border-b border-[#d9dad5]/80 dark:border-[#26333c]/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+        <div className="w-full max-w-[1750px] mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-3 flex-nowrap">
+          {/* Section 1: Hamburger Menu + Brand */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* Sidebar Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen((prev) => !prev)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.05] hover:bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] transition-all cursor-pointer shrink-0 shadow-2xs"
+              title={lang === 'fa' ? 'فهرست سرفصل‌های کارگاه و جلسات ۲۲گانه' : 'Toggle Curriculum Sidebar'}
+            >
+              <Menu className="w-4 h-4 shrink-0" />
+              <span className="text-xs font-bold whitespace-nowrap">
+                {lang === 'fa' ? 'فهرست جلسات ☰' : 'Curriculum ☰'}
               </span>
-              <span className="text-[10px] text-[#5d6b73] dark:text-[#9aa8b0] whitespace-nowrap">
-                {lang === 'fa' ? 'مشاوران مدیریت کسب و کار اوج' : 'OWJ Business Council'}
-              </span>
-            </div>
-          </a>
+            </button>
 
-          {/* Industry Track & Discipline Badges in Workspace Header */}
-          <div className="flex items-center gap-2 shrink-0 hidden md:flex">
+            {/* Brand & Organization */}
+            <a
+              href="https://owjbc.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 group shrink-0 select-none cursor-pointer"
+            >
+              <div className="bg-[#ffffff] p-1 rounded-xl border border-black/[0.08] dark:border-white/[0.12] shadow-xs group-hover:scale-105 transition-all shrink-0 flex items-center justify-center">
+                <img
+                  src={OWJ_LOGO}
+                  alt="OWJ"
+                  className="h-7 w-auto min-w-[45px] max-w-[80px] object-contain shrink-0"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    e.currentTarget.src = OWJ_LOGO_FALLBACK;
+                  }}
+                />
+              </div>
+              <div className="hidden md:flex flex-col shrink-0">
+                <span className="font-extrabold text-xs text-[#1c2830] dark:text-[#e8ebe9] whitespace-nowrap">
+                  {lang === 'fa' ? 'کتاب کار CPMAI' : 'CPMAI Workbook'}
+                </span>
+                <span className="text-[10px] text-[#5d6b73] dark:text-[#9aa8b0] whitespace-nowrap">
+                  {lang === 'fa' ? 'مشاوران مدیریت اوج' : 'OWJ Business Council'}
+                </span>
+              </div>
+            </a>
+          </div>
+
+          {/* Section 2: Active Track & Discipline Center Pill */}
+          <div className="flex items-center gap-2 shrink-0 min-w-0">
             <IndustryTrackSwitcher
               currentTrack={industryTrack}
               onSelectTrack={handleSelectIndustryTrack}
@@ -820,91 +836,31 @@ export default function App() {
               currentDiscipline={activeDiscipline}
               onClick={() => setIsDisciplineModalOpen(true)}
               lang={lang}
-              className="shrink-0"
+              className="shrink-0 hidden sm:inline-flex"
             />
           </div>
 
-          {/* Clean Central Nav trigger for Sidebar Navigation */}
-          <div className="flex-1 min-w-0 flex items-center justify-center gap-2 px-2">
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.09] transition-all text-xs font-bold cursor-pointer group shadow-2xs"
-              title={lang === "fa" ? "فهرست سرفصل‌های کارگاه و جلسات ۲۲گانه" : "Open Curriculum Sidebar"}
-            >
-              <Menu className="w-4 h-4 text-[#1f5163] dark:text-[#6fb3c6] group-hover:scale-110 transition-transform" />
-              <span className="text-[#1c2830] dark:text-[#e8ebe9]">
-                {page === "quiz"
-                  ? (lang === "fa" ? "🎯 آزمون سطح‌سنجی" : "🎯 Quiz")
-                  : page === 0
-                  ? (lang === "fa" ? "صفحه ۰: کارگاه مبانی LLM" : "Page 0: LLM Workshop")
-                  : (lang === "fa" ? `جلسه ${page} از ۲۱` : `Session ${page} of 21`)}
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6]">
-                {lang === "fa" ? "فهرست جلسات ☰" : "Curriculum ☰"}
-              </span>
-            </button>
-
-            {/* Quick Fast Jumpers for Landing & Page 0 */}
-            <div className="hidden xl:flex items-center gap-1.5">
-              <button
-                onClick={() => {
-                  setPage("landing");
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                className="px-2.5 py-1 rounded-lg text-xs font-semibold text-[#2563EB] hover:bg-[#2563EB]/10 transition-all cursor-pointer"
-              >
-                {lang === "fa" ? "لندینگ" : "Landing"}
-              </button>
-              <button
-                onClick={() => {
-                  setPage(0);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                  page === 0
-                    ? "bg-[#1f5163] text-white shadow-2xs"
-                    : "text-[#1f5163] dark:text-[#6fb3c6] hover:bg-[#1f5163]/10"
-                }`}
-              >
-                {lang === "fa" ? "کارگاه پرامپت (۰)" : "Prompt Workshop (0)"}
-              </button>
-              <button
-                onClick={() => {
-                  setPage("quiz");
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                  page === "quiz"
-                    ? "bg-[#2f7d5b] text-white shadow-2xs"
-                    : "text-[#2f7d5b] dark:text-[#52b788] hover:bg-[#2f7d5b]/10"
-                }`}
-              >
-                {lang === "fa" ? "آزمون ورودی" : "Quiz"}
-              </button>
-            </div>
-          </div>
-
-          {/* Tools & Utilities */}
+          {/* Section 3: Tools & Utilities */}
           <div className="flex items-center gap-1.5 shrink-0">
             {/* Class Leaderboard Button */}
             <button
               onClick={() => setIsLeaderboardModalOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20 active:scale-[0.96] cursor-pointer shrink-0"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20 active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
               title={lang === 'fa' ? 'جدول رتبه‌بندی رقابتی هم‌دوره‌ای‌ها (Class Leaderboard)' : 'Class Leaderboard'}
             >
-              <Trophy className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{lang === 'fa' ? 'رتبه‌بندی کلاس' : 'Leaderboard'}</span>
+              <Trophy className="w-3.5 h-3.5 shrink-0 text-amber-500" />
+              <span className="hidden lg:inline whitespace-nowrap">{lang === 'fa' ? 'رتبه‌بندی' : 'Leaderboard'}</span>
             </button>
 
             {/* Admin Control Center Button */}
             {isUserAdmin(currentUser) && (
               <button
                 onClick={() => setIsAdminModalOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30 hover:bg-purple-500/25 active:scale-[0.96] cursor-pointer shrink-0"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30 hover:bg-purple-500/25 active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
                 title={lang === 'fa' ? 'مرکز فرماندهی مدیریت دوره (Admin Control Center)' : 'Admin Control Center'}
               >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">{lang === 'fa' ? 'پنل مدیریت' : 'Admin Panel'}</span>
+                <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden lg:inline whitespace-nowrap">{lang === 'fa' ? 'پنل مدیریت' : 'Admin'}</span>
               </button>
             )}
 
@@ -912,114 +868,47 @@ export default function App() {
             {currentUser ? (
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-1.5 p-1 pe-2.5 rounded-xl border border-[#2f7d5b]/30 bg-[#2f7d5b]/10 hover:bg-[#2f7d5b]/20 transition-all text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] cursor-pointer"
+                className="flex items-center gap-1.5 p-1 pe-2 rounded-xl border border-[#2f7d5b]/30 bg-[#2f7d5b]/10 hover:bg-[#2f7d5b]/20 transition-all text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] cursor-pointer shrink-0 whitespace-nowrap"
                 title={lang === 'fa' ? 'حساب کاربری' : 'User Account'}
               >
                 {currentUser.avatarUrl ? (
                   <img
                     src={currentUser.avatarUrl}
                     alt={currentUser.displayName}
-                    className="w-5 h-5 rounded-lg object-cover border border-white dark:border-[#161e24]"
+                    className="w-5 h-5 rounded-lg object-cover border border-white dark:border-[#161e24] shrink-0"
                   />
                 ) : (
-                  <div className="w-5 h-5 rounded-lg bg-[#2f7d5b] text-white flex items-center justify-center text-[10px] font-mono">
+                  <div className="w-5 h-5 rounded-lg bg-[#2f7d5b] text-white flex items-center justify-center text-[10px] font-mono shrink-0">
                     {currentUser.displayName.charAt(0)}
                   </div>
                 )}
-                <span className="hidden md:inline max-w-28 truncate text-[11px]">
+                <span className="hidden xl:inline max-w-24 truncate text-[11px]">
                   {currentUser.displayName}
                 </span>
               </button>
             ) : (
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-gradient-to-r from-[#1f5163] to-[#00738c] hover:from-[#163c4a] hover:to-[#0f4c5c] text-white shadow-xs hover:shadow-md transition-all active:scale-[0.96] cursor-pointer shrink-0"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-gradient-to-r from-[#1f5163] to-[#00738c] hover:from-[#163c4a] hover:to-[#0f4c5c] text-white shadow-xs transition-all active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
               >
-                <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
-                  <path
-                    fill="#fff"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#fff"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#fff"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                  />
-                  <path
-                    fill="#fff"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                  />
-                </svg>
-                <span>{lang === 'fa' ? 'ورود / عضویت' : 'Sign In'}</span>
+                <span>{lang === 'fa' ? 'ورود' : 'Sign In'}</span>
               </button>
             )}
 
-            {/* Copy All Answers */}
-            <button
-              onClick={handleCopyAll}
-              title={lang === 'fa' ? 'کپی تمام پاسخ‌ها' : 'Copy All Answers'}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#1f5163] transition-colors"
-            >
-              <Copy className="w-3.5 h-3.5 text-[#1f5163] dark:text-[#6fb3c6]" />
-              <span className="hidden sm:inline">{lang === 'fa' ? 'کپی پاسخ‌ها' : 'Copy'}</span>
-            </button>
-
-            {/* Print / PDF Protection */}
-            <button
-              onClick={() => {
-                showToast(
-                  lang === 'fa'
-                    ? '🚫 خروجی PDF و چاپ متدولوژی به دلیل حقوق کپی‌رایت اوج مسدود است. برای ذخیره کار خود، از دکمه «کپی پاسخ‌ها» استفاده کنید.'
-                    : '🚫 Printing methodology to PDF is restricted by OWJ Copyright. Use "Copy Answers" for your work.'
-                );
-              }}
-              title={lang === 'fa' ? 'حفاظت کپی‌رایت چاپ' : 'Print Protected'}
-              className="p-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:bg-[#f4f4f1] dark:hover:bg-[#12171b] cursor-pointer"
-            >
-              <Printer className="w-3.5 h-3.5 opacity-60" />
-            </button>
-
-            {/* Anti-Screenshot Shield Status & Test */}
-            <button
-              onClick={() => {
-                if (typeof (window as any).__triggerScreenShield === 'function') {
-                  (window as any).__triggerScreenShield();
-                } else {
-                  showToast(
-                    lang === 'fa'
-                      ? '🛡️ سپر ضد اسکرین‌شات و کپی‌رایت اوج فعال است.'
-                      : '🛡️ OWJ Anti-Screenshot Guard is active.'
-                  );
-                }
-              }}
-              title={
-                lang === 'fa'
-                  ? 'سپر ضد اسکرین‌شات و کپی‌رایت اوج (فعال) - برای تست کلیک فرمایید'
-                  : 'OWJ Anti-Screenshot & Copyright Guard (Active) - Click to test'
-              }
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 active:scale-[0.96] transition-all cursor-pointer text-xs font-semibold shrink-0"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span className="hidden lg:inline">{lang === 'fa' ? 'سپر کپی‌رایت' : 'Protected'}</span>
-            </button>
-
             {/* Language Switch */}
             <button
-              onClick={() => setLang(prev => (prev === 'fa' ? 'en' : 'fa'))}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#1f5163] transition-colors"
+              onClick={() => setLang((prev) => (prev === 'fa' ? 'en' : 'fa'))}
+              className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#1f5163] transition-colors shrink-0 whitespace-nowrap"
             >
-              <Globe className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'English' : 'فارسی'}</span>
+              <Globe className="w-3.5 h-3.5 shrink-0" />
+              <span>{lang === 'fa' ? 'EN' : 'فا'}</span>
             </button>
 
             {/* Theme Toggle */}
             <button
-              onClick={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
+              onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
               title="Theme"
-              className="p-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:bg-[#f4f4f1] dark:hover:bg-[#12171b]"
+              className="p-1.5 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:bg-[#f4f4f1] dark:hover:bg-[#12171b] shrink-0"
             >
               {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
             </button>
