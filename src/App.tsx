@@ -869,14 +869,15 @@ export default function App() {
                 setPage(0);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-150 active:scale-[0.96] shrink-0 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-[0.96] shrink-0 border whitespace-nowrap cursor-pointer ${
                 page === 0
-                  ? 'bg-gradient-to-r from-[#1f5163] to-[#0f4c5c] text-white shadow-xs'
-                  : 'text-[#1f5163] dark:text-[#6fb3c6] hover:bg-[#e3eef1] dark:hover:bg-[#1e2a30]'
+                  ? 'bg-gradient-to-r from-[#1f5163] to-[#0f4c5c] text-white border-transparent shadow-xs ring-2 ring-[#1f5163]/30'
+                  : 'bg-[#1f5163]/10 dark:bg-[#6fb3c6]/10 text-[#1f5163] dark:text-[#6fb3c6] border-[#1f5163]/25 hover:bg-[#1f5163]/20'
               }`}
+              title={lang === 'fa' ? 'کارگاه کاربردی مبانی مدل‌های زبانی، پرامپت‌نویسی RCTO و شبیه‌سازها' : 'Applied LLM Fundamentals & Prompting Toolkit'}
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#fbbf24]" />
-              <span>{lang === 'fa' ? 'صفحه ۰: جعبه‌ابزار و مبانی LLM' : 'Page 0: LLM Toolkit'}</span>
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>{lang === 'fa' ? 'صفحه ۰: کارگاه پرامپت و مبانی LLM' : 'Page 0: LLM Workshop'}</span>
             </button>
 
             <button
@@ -884,7 +885,7 @@ export default function App() {
                 setPage(1);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
                 page === 1
                   ? 'bg-[#ffffff] dark:bg-[#1a2228] text-[#1f5163] dark:text-[#6fb3c6] shadow-xs font-semibold'
                   : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
@@ -899,7 +900,7 @@ export default function App() {
                 setPage(2);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
                 page === 2
                   ? 'bg-[#00738c] text-white shadow-xs font-semibold'
                   : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
@@ -915,7 +916,7 @@ export default function App() {
                 setPage(3);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
                 page === 3
                   ? 'bg-[#b87333] text-white shadow-xs font-semibold'
                   : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
@@ -931,7 +932,7 @@ export default function App() {
                 setPage(4);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
                 page === 4
                   ? 'bg-[#1f5163] text-white shadow-xs font-semibold'
                   : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
