@@ -135,6 +135,7 @@ function getAutoSlotCode(): string {
   const slot = Math.floor(now.getUTCHours() / 2);
   return `${yyyy}${mm}${dd}_SLOT${slot}`;
 }
+const getCohortTimeWindowSlot = getAutoSlotCode;
 
 async function getOrCreateClass(client: any, rawCode?: string, title?: string) {
   const code = (rawCode && rawCode.trim()) ? rawCode.trim().toUpperCase() : getAutoSlotCode();

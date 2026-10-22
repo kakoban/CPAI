@@ -11,6 +11,7 @@ export interface ClassEntity {
   code: string;
   title: string;
   isLeaderboardVisible: boolean;
+  studentCount?: number;
   createdAt: string;
 }
 

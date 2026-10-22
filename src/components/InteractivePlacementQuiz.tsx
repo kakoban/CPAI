@@ -246,13 +246,19 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
   const trackLabelFa: Record<AiFamiliarityLevel, string> = {
     beginner: 'مقدماتی (Beginner)',
     intermediate: 'متوسط (Intermediate)',
-    advanced: 'پیشرفته (Advanced)'
+    advanced: 'پیشرفته (Advanced)',
+    BEGINNER: 'مقدماتی (Beginner)',
+    INTERMEDIATE: 'متوسط (Intermediate)',
+    ADVANCED: 'پیشرفته (Advanced)'
   };
 
   const trackLabelEn: Record<AiFamiliarityLevel, string> = {
     beginner: 'Beginner Track',
     intermediate: 'Intermediate Track',
-    advanced: 'Advanced Track'
+    advanced: 'Advanced Track',
+    BEGINNER: 'Beginner Track',
+    INTERMEDIATE: 'Intermediate Track',
+    ADVANCED: 'Advanced Track'
   };
 
   const handleCopyReport = () => {

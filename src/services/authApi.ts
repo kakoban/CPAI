@@ -320,10 +320,6 @@ class AuthService {
 
     return { success: false, error: 'User session not found' };
   }
-
-  logout(): void {
-    this.clearAuth();
-  }
 }
 
 export const authApi = new AuthService();

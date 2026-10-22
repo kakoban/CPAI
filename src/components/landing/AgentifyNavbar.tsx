@@ -258,7 +258,7 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
                   key={idx}
                   onClick={() => {
                     setIsMobileMenuOpen(false);
-                    item.onClick();
+                    item.onClick?.();
                   }}
                   className="text-left py-2 hover:text-[#2563EB] transition-colors border-b border-gray-100"
                 >

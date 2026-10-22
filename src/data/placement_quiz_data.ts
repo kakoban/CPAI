@@ -7,7 +7,10 @@ export type QuizCategory =
   | 'rag_notebooklm'
   | 'git_governance'
   | 'metrics_evaluation'
-  | 'enterprise_megaprojects';
+  | 'enterprise_megaprojects'
+  | 'git_github'
+  | 'llm_fundamentals'
+  | 'security_apis';
 
 export interface QuizQuestion {
   id: number;
