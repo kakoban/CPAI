@@ -165,3 +165,35 @@ export const saveIndustryTrack = (track: IndustryTrackId): void => {
     // LocalStorage error
   }
 };
+
+export interface DomainExampleArtifact {
+  backgroundFa: string;
+  backgroundEn: string;
+  primaryObjectiveFa: string;
+  primaryObjectiveEn: string;
+  relatedQuestionsFa: string[];
+  relatedQuestionsEn: string[];
+  sampleDatasetTitleFa?: string;
+  sampleDatasetTitleEn?: string;
+  sampleContractClauseFa?: string;
+  sampleContractClauseEn?: string;
+}
+
+export interface DomainPhaseExample {
+  phaseId: number;
+  subtaskId?: number;
+  trackId: IndustryTrackId;
+  titleFa: string;
+  titleEn: string;
+  exampleNoteFa: string;
+  exampleNoteEn: string;
+  artifacts: DomainExampleArtifact;
+  quizScenarioFa?: string;
+  quizScenarioEn?: string;
+}
+
+export type DomainTrackExamplesRegistry = Record<
+  IndustryTrackId,
+  Record<number, DomainPhaseExample>
+>;
+

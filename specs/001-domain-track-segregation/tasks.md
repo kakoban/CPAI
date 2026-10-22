@@ -7,7 +7,7 @@
 
 **Purpose**: آماده‌سازی تایپ‌ها و اینترفیس‌های داده‌ای
 
-- [ ] T001 [P] تکمیل تایپ‌های `DomainPhaseExample` و `DomainTrackExamplesRegistry` در `src/types/industryTrack.ts`
+- [x] T001 [P] تکمیل تایپ‌های `DomainPhaseExample` و `DomainTrackExamplesRegistry` در `src/types/industryTrack.ts`
 
 ---
 
@@ -15,8 +15,8 @@
 
 **Purpose**: ایجاد مخزن متمرکز داده‌های معتبر و جایگزینی مثال‌های بانکی
 
-- [ ] T002 ایجاد ماژول `src/data/domainTrackExamples.ts` شامل مثال‌های واقعی مترو، تونل‌سازی TBM، نشریه ۴۳۱۱ برای `CIVIL_INFRA` و برج تقطیر، P&ID، SCADA و فلرینگ برای `ENERGY_PETRO`
-- [ ] T003 پیاده‌سازی متدهای کمکی `getDomainPhaseContent` و `getDomainExampleNote` در `src/data/domainTrackExamples.ts`
+- [x] T002 ایجاد ماژول `src/data/domainTrackExamples.ts` شامل مثال‌های واقعی مترو، تونل‌سازی TBM، نشریه ۴۳۱۱ برای `CIVIL_INFRA` و برج تقطیر، P&ID، SCADA و فلرینگ برای `ENERGY_PETRO`
+- [x] T003 پیاده‌سازی متدهای کمکی `getDomainPhaseContent` و `getDomainExampleNote` در `src/data/domainTrackExamples.ts`
 
 **Checkpoint**: پایه داده‌های دامنه‌ای آماده شد — ورود به پیاده‌سازی داستان‌های کاربر
 
@@ -26,11 +26,11 @@
 
 **Goal**: بازتاب آنی مثال‌های نفت‌وگاز یا عمران در فازهای CPMAI و صفحات کلیدی متناسب با انتخاب کاربر
 
-- [ ] T004 [US1] یکپارچه‌سازی `src/data/cpmaiPhases.ts` با متد دریافت مثال‌های متناظر با دامنه
-- [ ] T005 [US1] انتقال `industryTrack` از `src/App.tsx` به کامپوننت `PhaseView.tsx` و نمایش کارت سناریوی پیش‌فرض هر دامنه
-- [ ] T006 [US1] تزریق `industryTrack` به `src/components/Page1BusinessUnderstanding.tsx` و جایگزینی مثال‌های بانکی/خودپرداز با مثال‌های اختصاصی هر دامنه
-- [ ] T007 [US1] تزریق `industryTrack` به صفحات `Page2ProblemIteration.tsx` تا `Page5ExpectedRoi.tsx` جهت نمایش مسائل و ROI بومی هر صنعت
-- [ ] T008 [US1] تست تعاملی سوئیچر دامنه در ناوبری و هدر جهت اطمینان از تغییر بلادرنگ متون
+- [x] T004 [US1] یکپارچه‌سازی `src/data/cpmaiPhases.ts` با متد دریافت مثال‌های متناظر با دامنه
+- [x] T005 [US1] انتقال `industryTrack` از `src/App.tsx` به کامپوننت `PhaseView.tsx` و نمایش کارت سناریوی پیش‌فرض هر دامنه
+- [x] T006 [US1] تزریق `industryTrack` به `src/components/Page1BusinessUnderstanding.tsx` و جایگزینی مثال‌های بانکی/خودپرداز با مثال‌های اختصاصی هر دامنه
+- [x] T007 [US1] تزریق `industryTrack` به صفحات `Page2ProblemIteration.tsx` تا `Page5ExpectedRoi.tsx` جهت نمایش مسائل و ROI بومی هر صنعت
+- [x] T008 [US1] تست تعاملی سوئیچر دامنه در ناوبری و هدر جهت اطمینان از تغییر بلادرنگ متون
 
 **Checkpoint**: داستان کاربر ۱ تکمیل شد و MVP تفکیک دامنه‌ها فعال است.
 
@@ -40,8 +40,8 @@
 
 **Goal**: نمایش مستقل اسناد، قراردادها و دیتاست‌ها در کارگاه NotebookLM و کتابخانه پرامپت
 
-- [ ] T009 [P] [US2] تفکیک قراردادهای نمونه در `src/data/engineering_sample_contracts.ts` (نشریه ۴۳۱۱ عمرانی در برابر قراردادهای EPC نفت و گاز)
-- [ ] T010 [P] [US2] تفکیک دیتاست‌های نمونه در `src/data/engineering_sample_datasets.ts` (داده‌های ژئوتکنیک و نشست زمین در برابر تلمتری سنسورهای فشار و دما)
+- [x] T009 [P] [US2] تفکیک قراردادهای نمونه در `src/data/engineering_sample_contracts.ts` (نشریه ۴۳۱۱ عمرانی در برابر قراردادهای EPC نفت و گاز)
+- [x] T010 [P] [US2] تفکیک دیتاست‌های نمونه در `src/data/engineering_sample_datasets.ts` (داده‌های ژئوتکنیک و نشست زمین در برابر تلمتری سنسورهای فشار و دما)
 - [ ] T011 [P] [US2] تفکیک اسناد نمونه کارگاه NotebookLM در `src/data/notebooklm_sample_documents.ts`
 - [ ] T012 [US2] به‌روزرسانی `src/components/NotebookLmWorkshop.tsx` جهت فیلتر و رندر اسناد بر پایه دامنه فعال
 
@@ -54,7 +54,7 @@
 **Goal**: انطباق سناریوهای کوییز تعیین سطح با زبان فنی رشته شرکت‌کننده
 
 - [ ] T013 [US3] دسته‌بندی و الصاق تگ دامنه به سوالات سناریومحور در `src/data/placement_quiz_data.ts`
-- [ ] T014 [US3] ارتقای کارنامه در `src/components/InteractivePlacementQuiz.tsx` جهت نمایش نشان و ارزیابی در حوزه مهندسی مربوطه
+- [x] T014 [US3] ارتقای کارنامه در `src/components/InteractivePlacementQuiz.tsx` جهت نمایش نشان و ارزیابی در حوزه مهندسی مربوطه
 
 **Checkpoint**: هر سه داستان کاربر کاملاً کارکردی هستند.
 
@@ -64,6 +64,6 @@
 
 **Purpose**: اطمینان از سلامت کامل بیلد، تایپ‌ها و تجربه کاربری
 
-- [ ] T015 بررسی کامل خطاهای تایپ‌اسکریپت با اجرای `npm run lint` (`tsc --noEmit`)
-- [ ] T016 بیلد نهایی پروژه با `npm run build` و اطمینان از عدم شکست باندهای استاتیک
-- [ ] T017 اجرای چک‌لیست اعتبارسنجی [quickstart.md](./quickstart.md)
+- [x] T015 بررسی کامل خطاهای تایپ‌اسکریپت با اجرای `npm run lint` (`tsc --noEmit`)
+- [x] T016 بیلد نهایی پروژه با `npm run build` و اطمینان از عدم شکست باندهای استاتیک
+- [x] T017 اجرای چک‌لیست اعتبارسنجی [quickstart.md](./quickstart.md)

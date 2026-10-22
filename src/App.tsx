@@ -1354,6 +1354,7 @@ export default function App() {
         {page === 1 && (
           <Page1BusinessUnderstanding
             lang={lang}
+            industryTrack={industryTrack}
             read={read}
             onToggleRead={setRead}
             story={story}
@@ -1433,6 +1434,7 @@ export default function App() {
             {page === 2 && (
           <Page2ProblemIteration
             lang={lang}
+            industryTrack={industryTrack}
             content={page2Content}
             onChangeContent={setPage2Content}
             onGoToPage1={() => {
@@ -1450,6 +1452,7 @@ export default function App() {
         {page === 3 && (
           <Page3SuccessCriteria
             lang={lang}
+            industryTrack={industryTrack}
             content={page3Content}
             onChangeContent={setPage3Content}
             onGoToPage2={() => {
@@ -1467,6 +1470,7 @@ export default function App() {
         {page === 4 && (
           <Page4CostBenefit
             lang={lang}
+            industryTrack={industryTrack}
             content={page4Content}
             onChangeContent={setPage4Content}
             onGoToPage3={() => {
@@ -1484,6 +1488,7 @@ export default function App() {
         {page === 5 && (
           <Page5ExpectedRoi
             lang={lang}
+            industryTrack={industryTrack}
             content={page5Content}
             onChangeContent={setPage5Content}
             onGoToPage4={() => {

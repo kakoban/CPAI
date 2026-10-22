@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Language } from '../types/cpmai';
+import { IndustryTrackId } from '../types/industryTrack';
 import { ArrowLeft, ArrowRight, Lightbulb, FileText, Check, Copy, RotateCcw } from 'lucide-react';
 
 interface Page2Props {
   lang: Language;
+  industryTrack?: IndustryTrackId;
   content: string;
   onChangeContent: (val: string) => void;
   onGoToPage1: () => void;
@@ -12,20 +14,22 @@ interface Page2Props {
 
 export const Page2ProblemIteration: React.FC<Page2Props> = ({
   lang,
+  industryTrack = 'CIVIL_INFRA',
   content,
   onChangeContent,
   onGoToPage1,
   onGoToPage3
 }) => {
   const [copied, setCopied] = useState(false);
+  const isPetro = industryTrack === 'ENERGY_PETRO';
 
   const t = {
     en: {
-      badge: 'CPMAI Phase I · Page 2 of 5 (Slide 12)',
+      badge: `CPMAI Phase I · Page 2 of 5 (${isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       slideTitle: 'What problem are you solving with AI in this iteration?',
       promptHint: 'Write your complete problem definition for this iteration. Address the business friction, why traditional software fails, current vs future state, and scope boundaries.',
       templateBtn: 'Insert CPMAI Template',
-      exampleBtn: 'Fill Retail Banking Churn Example',
+      exampleBtn: isPetro ? 'Fill Refinery Fouling Case Study' : 'Fill Urban Metro TBM Case Study',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
       copiedToast: 'Copied to clipboard!',
@@ -39,11 +43,11 @@ export const Page2ProblemIteration: React.FC<Page2Props> = ({
       tip4: 'Explicitly define what is IN-SCOPE versus deferred to future iterations.'
     },
     fa: {
-      badge: 'فاز اول CPMAI · صفحه ۲ از ۵ (اسلاید ۱۲ کتاب کار)',
+      badge: `فاز اول CPMAI · صفحه ۲ از ۵ (${isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
       slideTitle: 'What problem are you solving with AI in this iteration?',
       promptHint: 'تعریف دقیق مسئله در این تکرار (اسپرینت) را بنویسید: چه اصطکاکی در کسب‌وکار رخ می‌دهد؟ چرا نرم‌افزار سنتی پاسخگو نیست؟ وضعیت فعلی در برابر مطلوب چیست و مرزهای این تکرار کجاست؟',
       templateBtn: 'درج قالب استاندارد CPMAI',
-      exampleBtn: 'پر کردن با نمونه موردی بانکداری خرد',
+      exampleBtn: isPetro ? 'پر کردن با نمونه پالایشگاهی (رسوب مبدل‌ها)' : 'پر کردن با نمونه مگاپروژه احداث خط مترو (TBM)',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
       copiedToast: 'متن بوم در کلیپ‌بورد کپی شد!',
@@ -99,39 +103,74 @@ export const Page2ProblemIteration: React.FC<Page2Props> = ({
   };
 
   const handleInsertExample = () => {
-    const exampleEn = `Iteration Problem Definition: Retail Banking High-Value Churn Prediction
+    const exampleEnCivil = `Iteration Problem Definition: Urban Metro TBM Ground Subsidence Prediction
 
 1. Business Problem:
-The bank experiences a monthly 1.2% attrition rate among high-value retail deposit holders migrating to digital neo-banks. Currently, branch managers receive no warning until an account cancellation request is formally filed.
+Mechanized tunneling (TBM) beneath dense urban sectors poses severe risks of unexpected surface ground settlement, causing structural cracking in heritage buildings and ruptures in municipal gas mains. Contractor delays and damage claims under Circular 4311 (Clause 30) currently exceed $1.8M per incident.
 
 2. Why AI?
-Customer defection is driven by subtle, multi-variable behavior shifts (reduced app logins, gradual transaction drops, bill-pay diversion, customer service friction). Traditional static If-Then thresholds only trigger when balances have already dropped to zero, when it is too late to retain the customer. A probabilistic predictive classification model is required to spot early warning patterns across 24 months of multi-channel data.
+Soil-structure interaction in heterogeneous alluvial layers is highly non-linear. Static geotechnical formulas and empirical Peck curves fail to account for dynamic cutterhead speed, foam injection rates, and face pressure fluctuations. A temporal deep learning model (Bi-LSTM / PINN) is required to learn complex relationships across high-frequency machine telemetry and ground monitoring sensors.
 
 3. Current State vs. Desired Future State:
-- Current: Passive and reactive. Customer calls after closing the account. Retention save rate <5%.
-- Future State in this Sprint: Proactive prediction flagging at-risk accounts 30 days prior to departure, delivering a prioritized list of top churn drivers to relationship managers with an anticipated 12% churn reduction.
+- Current State: Reactive daily surveyor pin readings taken after subsidence has already occurred. Emergency stops halt excavation for 14+ days.
+- Future State in this Sprint: 48-hour proactive settlement forecasting ahead of the TBM drive with alerts embedded in the engineering supervision dashboard, maintaining settlement under the 2mm threshold.
 
 4. Iteration Scoping (Sprint 1):
-- IN-SCOPE: Individual retail checking accounts with balances > $10,000 using 24-month historical transaction and digital channel data.
-- OUT-OF-SCOPE: Commercial/business accounts, automated retention incentive bots, and call-center audio sentiment (deferred to Sprint 2 and 3).`;
+- IN-SCOPE: Section 1 of Metro Line 10 (4.2 km drive, alluvial sand/gravel stratum) using real-time TBM #1 telemetry and borehole inclinometers.
+- OUT-OF-SCOPE: Station deep excavation shoring and segmental lining crack vision analysis (deferred to Sprints 2 & 3).`;
 
-    const exampleFa = `تعریف مسئله این تکرار: پیش‌بینی ریزش مشتریان ارزشمند بانکداری خرد
+    const exampleFaCivil = `تعریف مسئله این تکرار: پیش‌بینی نشست سطحی زمین در حفاری مکانیزه مترو (TBM)
 
 ۱. صورت مسئله کسب‌وکار:
-بانک ماهانه ۱.۲٪ از مشتریان سپرده‌گذار باارزش خود را به دلیل مهاجرت به نئوبانک‌های دیجیتال از دست می‌دهد. در حال حاضر، شعب هیچ دیدگاهی نسبت به کاهش تعامل مشتریان ندارند تا زمانی که مشتری درخواست بستن حساب را ثبت می‌کند.
+حفاری مکانیزه تونل مترو در زیر بافت مسکونی و متراکم شهری، با خطر فرونشست ناگهانی زمین و شکست خطوط گاز و آب مواجه است. توقف‌های اضطراری کارگاه و ادعای تاخیرات مجاز پیمانکار بر اساس ماده ۳۰ نشریه ۴۳۱۱ (شرایط عمومی پیمان) خسارت سنگین زمانی و ریالی به پروژه تحمیل می‌کند.
 
 ۲. چرا هوش مصنوعی؟
-رفتار ترک مشتری ترکیبی چندمتغیره از نشانه‌های رفتاری ظریف است (کاهش تدریجی دفعات ورود به همراه بانک، افت تراکنش‌های کارت، جابه‌جایی پرداخت قبوض و نارضایتی در تیکت‌ها). قوانین سنتی شرطی (If-Then) تنها زمانی فعال می‌شوند که موجودی حساب صفر شده باشد که برای حفظ مشتری دیر است. یک الگوی طبقه‌بندی احتمالاتی (تحلیل پیش‌بینانه) برای کشف زودهنگام این الگو در تاریخچه ۲۴ ماهه مورد نیاز است.
+رفتار ژئوتکنیکی آبرفت‌های ناهمگن شهری در برابر چرخش کله‌حفار و فشار پیشانی کاملاً غیرخطی است. فرمول‌های استاتیک خاک و منحنی‌های تجربی پک (Peck) قادر به تطبیق با نوسانات دبی تزریق فوم، گشتاور و فشار هیدرولیکی نیستند. یک مدل یادگیری عمیق زمانی (Bi-LSTM) برای کشف زودهنگام همبستگی‌های پنهان تلمتری دستگاه با نرخ فرونشست مورد نیاز است.
 
 ۳. وضعیت فعلی در برابر وضعیت مطلوب در این تکرار:
-- وضعیت فعلی: اقدام منفعلانه و دیرهنگام پس از ثبت انصراف، با نرخ ماندگاری زیر ۵٪.
-- وضعیت مطلوب در این اسپرینت: پیش‌بینی خودکار هفتگی که ۳۰ روز قبل از خروج، هشدارهای حساب‌های پرریسک را همراه با ۳ علت اصلی به داشبورد CRM شعبه تزریق می‌کند تا نرخ ماندگاری ۱۲٪ افزایش یابد.
+- وضعیت فعلی: قرائت دستی روزانه پین‌های نقشه‌برداری که پس از وقوع فرونشست متوجه آسیب می‌شوند و کارگاه را ۲ هفته متوقف می‌کنند.
+- وضعیت مطلوب در این اسپرینت: پیش‌بینی ۴۸ ساعته پروفیل نشست با خطای کمتر از ۲ میلی‌متر و ارسال هشدار خودکار به اتاق هدایت TBM جهت بازتنظیم پارامترهای پیشانی قبل از عبور از زیر لوله‌های گاز.
 
 ۴. مرزبندی محدوده این تکرار (اسپرینت ۱):
-- درون محدوده (In-Scope): مشتریان حقیقی حساب جاری با موجودی بالای ۱۰ میلیون تومان بر اساس داده‌های ۲۴ ماهه تراکنش‌ها و درگاه‌های دیجیتال.
-- خارج از محدوده (Out-of-Scope): حساب‌های حقوقی و تجاری، ربات‌های ارسال خودکار پیامک و تحلیل صوت مکالمات مرکز تماس (موکول به اسپرینت‌های ۲ و ۳).`;
+- درون محدوده (In-Scope): قطعه اول تونل خط ۱۰ به طول ۴.۲ کیلومتر در لایه آبرفتی با تلمتری لحظه‌ای دستگاه TBM شماره ۱ و داده‌های گمانه‌های مانیتورینگ.
+- خارج از محدوده (Out-of-Scope): پایش تصویری ترک‌خوردگی سگمنت‌ها و دیوارهای سازه نگهبان ایستگاه‌ها (موکول به اسپرینت‌های ۲ و ۳).`;
 
-    onChangeContent(lang === 'fa' ? exampleFa : exampleEn);
+    const exampleEnPetro = `Iteration Problem Definition: Crude Preheat Train Fouling & Flaring Mitigation
+
+1. Business Problem:
+Severe thermal fouling and asphaltene deposition in atmospheric crude distillation preheat exchangers forces furnace firing increases, causing unplanned throughput cuts and emergency flaring events totaling over $3.2M in annual profit losses.
+
+2. Why AI?
+Crude blending variances (API gravity, sulfur, salt, and heavy metals) interact dynamically with skin temperatures. First-principles heat transfer equations cannot model non-linear fouling kinetics under fluctuating throughput without manual lab recalibration. A machine learning model is required to estimate continuous fouling resistance (Rf) in real-time.
+
+3. Current State vs. Desired Future State:
+- Current State: Run-to-failure or reactive cleaning triggered after furnace limits are reached, resulting in emergency shutdowns and heavy flaring.
+- Future State in this Sprint: 60-day predictive trajectory of heat transfer coefficient (U-value) degradation, enabling scheduled bypass descaling without plant trips and saving $1.4M in furnace fuel.
+
+4. Iteration Scoping (Sprint 1):
+- IN-SCOPE: CDU Train-A heat exchangers (E-101 through E-108) with 5-second DCS historian telemetry and daily crude laboratory assays.
+- OUT-OF-SCOPE: Vacuum distillation columns, flare gas recovery compressor modeling, and automated valve setpoint actuation (deferred to Sprints 2 & 3).`;
+
+    const exampleFaPetro = `تعریف مسئله این تکرار: پیش‌بینی رسوب‌گرفتگی مبدل‌های پیش‌گرمایش و کاهش مشعل‌سوزی پالایشگاه
+
+۱. صورت مسئله کسب‌وکار:
+رسوب تدریجی و کک‌گرفتگی (Fouling) در مبدل‌های حرارتی واحد تقطیر اتمسفری، دمای ورودی به کوره را کاهش داده و مصرف سوخت و انتشار کربن را بالا می‌برد. افت شدید راندمان حرارتی منجر به شات‌دان ناخواسته و مشعل‌سوزی (Flaring) اضطراری با زیان سالانه بیش از ۳ میلیون دلار می‌شود.
+
+۲. چرا هوش مصنوعی؟
+تغییرات مداوم در کیفیت خوراک ورودی (گرانروی API، درصد آسفالتین و نمک) با دمای پوسته لوله‌ها برهم‌کنش پیچیده دارد. معادلات صلب ترمودینامیکی بدون آزمایش‌های آزمایشگاهی روزانه قادر به محاسبه بلادرنگ نرخ تشکیل رسوب نیستند. مدل یادگیری ماشین هیبریدی (XGBoost ترکیب‌شده با سینتیک رسوب) برای برآورد مقاومت رسوب (Rf) بر پایه داده‌های سنسوری DCS ضروری است.
+
+۳. وضعیت فعلی در برابر وضعیت مطلوب در این تکرار:
+- وضعیت فعلی: کارکرد تا مرز توقف (Run-to-failure) و شستشوی اضطراری با توقف چندروزه واحد و سوزاندن گازهای باارزش در مشعل.
+- وضعیت مطلوب در این اسپرینت: پیش‌بینی ۶۰ روزه افت ضریب انتقال حرارت (U-value) و تعیین زمان بهینه تمیزکاری مبدل‌ها بدون توقف خط تولید، با صرفه‌جویی ۱.۴ میلیون دلاری در سوخت کوره.
+
+۴. مرزبندی محدوده این تکرار (اسپرینت ۱):
+- درون محدوده (In-Scope): قطار مبدل‌های پیش‌گرمایش واحد تقطیر اتمسفری (E-101 تا E-108) با تلمتری ۵ ثانیه‌ای سیستم DCS و نتایج آزمایشگاه نفت خام.
+- خارج از محدوده (Out-of-Scope): ستون‌های تقطیر در خلاء، کمپرسورهای بازیافت گاز فلر و کنترل خودکار شیرهای برقی (موکول به اسپرینت‌های ۲ و ۳).`;
+
+    const selectedEn = isPetro ? exampleEnPetro : exampleEnCivil;
+    const selectedFa = isPetro ? exampleFaPetro : exampleFaCivil;
+
+    onChangeContent(lang === 'fa' ? selectedFa : selectedEn);
   };
 
   const handleCopy = () => {

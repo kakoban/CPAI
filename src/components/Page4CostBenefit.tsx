@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Language } from '../types/cpmai';
+import { IndustryTrackId } from '../types/industryTrack';
 import { ArrowLeft, ArrowRight, Lightbulb, Calculator, Check, Copy, RotateCcw, DollarSign, Clock, TrendingUp, FileText } from 'lucide-react';
 
 interface Page4Props {
   lang: Language;
+  industryTrack?: IndustryTrackId;
   content: string;
   onChangeContent: (val: string) => void;
   onGoToPage3: () => void;
@@ -12,6 +14,7 @@ interface Page4Props {
 
 export const Page4CostBenefit: React.FC<Page4Props> = ({
   lang,
+  industryTrack = 'CIVIL_INFRA',
   content,
   onChangeContent,
   onGoToPage3,
@@ -19,22 +22,23 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
+  const isPetro = industryTrack === 'ENERGY_PETRO';
 
   // Structured breakdown states for the interactive calculator
-  const [costPersonnel, setCostPersonnel] = useState('75000');
-  const [costCompute, setCostCompute] = useState('18000');
-  const [costData, setCostData] = useState('12000');
-  const [costOps, setCostOps] = useState('15000');
+  const [costPersonnel, setCostPersonnel] = useState(isPetro ? '95000' : '85000');
+  const [costCompute, setCostCompute] = useState(isPetro ? '25000' : '20000');
+  const [costData, setCostData] = useState(isPetro ? '20000' : '15000');
+  const [costOps, setCostOps] = useState(isPetro ? '20000' : '15000');
 
-  const [benefitSavings, setBenefitSavings] = useState('140000');
-  const [benefitRevenue, setBenefitRevenue] = useState('320000');
-  const [benefitRisk, setBenefitRisk] = useState('80000');
+  const [benefitSavings, setBenefitSavings] = useState(isPetro ? '1400000' : '650000');
+  const [benefitRevenue, setBenefitRevenue] = useState(isPetro ? '1800000' : '750000');
+  const [benefitRisk, setBenefitRisk] = useState(isPetro ? '450000' : '300000');
 
-  const [timeWeeks, setTimeWeeks] = useState('14');
+  const [timeWeeks, setTimeWeeks] = useState(isPetro ? '16' : '14');
 
   const t = {
     en: {
-      badge: 'CPMAI Phase I · Page 4 of 5 (Slide 14)',
+      badge: `CPMAI Phase I · Page 4 of 5 (${isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       subtaskH: 'Subtask: Cost-Benefit Analysis',
       costsAndBenefitsLabel: 'Costs and benefits:',
       costsAndBenefitsText:
@@ -43,7 +47,7 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
       promptHint:
         'Specify the financial budget, resource costs (talent, cloud/GPU, data, maintenance), project schedule/time budget, and quantifiable financial return (cost reduction, revenue uplift, risk avoidance).',
       templateBtn: 'Insert Cost-Benefit Template',
-      exampleBtn: 'Fill Retail Banking Churn Budget Example',
+      exampleBtn: isPetro ? 'Fill Refinery Preheat Cost-Benefit Example' : 'Fill Metro TBM Cost-Benefit Example',
       calcToggleBtn: 'Interactive Financial ROI Estimator',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
@@ -74,7 +78,7 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
       weeks: 'weeks'
     },
     fa: {
-      badge: 'فاز اول CPMAI · صفحه ۴ از ۵ (اسلاید ۱۴ کتاب کار)',
+      badge: `فاز اول CPMAI · صفحه ۴ از ۵ (${isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
       subtaskH: 'زیروظیفه: تحلیل هزینه-فایده (Subtask: Cost-Benefit Analysis)',
       costsAndBenefitsLabel: 'هزینه‌ها و منافع (Costs and benefits):',
       costsAndBenefitsText:
@@ -83,7 +87,7 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
       promptHint:
         'بودجه مالی، هزینه‌های منابع (متخصصان، زیرساخت ابری و پردازش GPU، تأمین داده، نگهداری)، بودجه زمانی و زمان‌بندی پروژه و بازدهی مالی سنجش‌پذیر (کاهش هزینه، درآمد افزایشی، جلوگیری از زیان) را ثبت نمایید.',
       templateBtn: 'درج قالب تحلیل هزینه-فایده و بودجه',
-      exampleBtn: 'پر کردن با نمونه موردی بانکداری خرد',
+      exampleBtn: isPetro ? 'پر کردن با نمونه پالایشگاهی (هزینه-فایده)' : 'پر کردن با نمونه مگاپروژه احداث مترو (هزینه-فایده)',
       calcToggleBtn: 'ماشین‌حساب تعاملی برآورد ROI و بودجه',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
@@ -187,55 +191,106 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
   };
 
   const handleInsertExample = () => {
-    const exampleEn = `Project Cost-Benefit Analysis: High-Value Retail Checking Account Churn Model
+    const exampleEnCivil = `Project Cost-Benefit Analysis: Urban Metro TBM Ground Subsidence Forecasting
 
-1. Project Cost Budget: $120,000 total investment
-- Specialized ML Engineering & Data Science (2 FT resources x 3.5 months): $75,000
-- Dedicated Cloud GPU instances (AWS g5.2xlarge for hyperparameter search & embeddings): $18,000
-- Enterprise Lakehouse connector setup & legacy mainframe data extract: $12,000
-- Observability stack, feature store licenses & runbook development: $15,000
+1. Project Cost Budget: $135,000 total iteration investment
+- Lead Geotechnical AI Specialist & MLOps Engineer (3.5 months): $85,000
+- High-rate IoT telemetry & borehole sensor ingestion infrastructure: $20,000
+- Historic TBM drive telemetry extraction & 3D BIM spatial mapping: $15,000
+- Tunnel site edge server appliance (Class 1 Div 2 safe) & runbook: $15,000
 
 2. Project Time Budget & Phased Schedule: 14 Calendar Weeks
-- Phase II (Data Understanding): Weeks 1-3 [Sign-off on 24-month historical deposit schema]
-- Phase III (Data Preparation): Weeks 4-7 [Leakage-free time-split datasets & feature catalog]
-- Phase IV (Model Development): Weeks 8-11 [XGBoost vs LightGBM benchmarking]
-- Phase V (Model Evaluation Gate): Weeks 12-13 [Simulated uplift test & fairness audit]
-- Phase VI (Pilot Operationalization): Week 14 [Integration with 15 branch CRM dashboards]
+- Phase II (Data Understanding): Weeks 1-3 [TBM ring telemetry & inclinometer database sync]
+- Phase III (Data Preparation): Weeks 4-7 [Spatial-temporal feature engineering & chainage alignment]
+- Phase IV (Model Development): Weeks 8-11 [Bi-LSTM vs Physics-Informed Neural Network benchmarks]
+- Phase V (Evaluation Decision Gate): Weeks 12-13 [Simulated crossing test with Lead Consultant]
+- Phase VI (Pilot Operationalization): Week 14 [Deployment in TBM #1 navigation cabin]
 
 3. Quantified Potential Business Benefits (Annualized):
-- Retained Core Deposits: $1,850,000 retained balance yielding ~$320,000 in net interest margin.
-- Call Center Defection Handling Savings: 4,200 hours saved across branch staff = $140,000.
-- Customer Reacquisition Cost Avoidance: Preventing defection avoids $80,000 in promotional onboarding spending.
-- Total Gross Annual Financial Benefit: $540,000
+- Work Stoppage Avoidance: Preventing two 14-day emergency TBM shutdowns saves $650,000 in heavy plant idle costs.
+- Circular 4311 Claim Defense: Eliminating contractor delay disputes (Clause 30) mitigates $750,000 in direct claims.
+- Utility Rupture Liability Avoidance: Proactive alert suppresses $300,000 in pressurized municipal gas line risk.
+- Total Gross Annual Financial Benefit: $1,700,000
 
 4. Definitive Cost-Benefit Conclusion:
-With a one-time iteration cost of $120,000 generating $540,000 in year-one value, the project produces an ROI of 350% and breaks even in 2.7 months. The project is firmly economically viable under CPMAI standards.`;
+With an iteration cost of $135,000 yielding $1.7M in year-one risk and delay savings, the project produces an ROI of 1,159% and pays for itself within 1.1 months. It is exceptionally viable under CPMAI standards.`;
 
-    const exampleFa = `تحلیل هزینه-فایده و بودجه پروژه: مدل هوش مصنوعی پیش‌بینی ریزش مشتریان بانکداری خرد
+    const exampleFaCivil = `تحلیل هزینه-فایده و بودجه پروژه: سامانه هوش مصنوعی پیش‌بینی نشست زمین در حفاری مکانیزه مترو
 
-۱. بودجه هزینه‌ای پروژه: ۱۲۰,۰۰۰ دلار (کل سرمایه‌گذاری اسپرینت)
-- تیم فنی متخصص (متخصص داده و مهندس ML برای ۳.۵ ماه): ۷۵,۰۰۰ دلار
-- زیرساخت پردازش ابری و سرورهای گرافیکی GPU: ۱۸,۰۰۰ دلار
-- استخراج داده‌های تاریخی ۲۴ ماه گذشته از سامانه‌های بانکی: ۱۲,۰۰۰ دلار
-- ابزارهای پایش MLOps، ذخیره‌گاه ویژگی‌ها (Feature Store) و استقرار: ۱۵,۰۰۰ دلار
+۱. بودجه هزینه‌ای پروژه: ۱۳۵,۰۰۰ دلار (سرمایه‌گذاری کل اسپرینت)
+- تیم فنی متخصص (متخصص ارشد هوش مصنوعی ژئوتکنیک و مهندس MLOps برای ۳.۵ ماه): ۸۵,۰۰۰ دلار
+- زیرساخت جمع‌آوری داده‌های IoT سنسورهای ابزار دقیق گمانه‌ها: ۲۰,۰۰۰ دلار
+- استخراج تاریخچه لاگ‌های TBM و انطباق با مدل سه‌بعدی BIM: ۱۵,۰۰۰ دلار
+- تجهیز سرور لبه (Edge Server) صنعتی در اتاق کنترل کارگاهی و تدوین راهنمای عملیات: ۱۵,۰۰۰ دلار
 
 ۲. بودجه زمانی و نقاط عطف متدولوژی: ۱۴ هفته کاری
-- فاز ۲ (درک داده‌ها): هفته‌های ۱ تا ۳ [تایید ساختار داده‌های تاریخی ۲۴ ماهه]
-- فاز ۳ (آماده‌سازی داده‌ها): هفته‌های ۴ تا ۷ [جداسازی بدون نشت داده و مهندسی متغیرها]
-- فاز ۴ (توسعه مدل): هفته‌های ۸ تا ۱۱ [مقایسه الگوریتم‌های درخت تقویت‌شده با مدل پایه]
-- فاز ۵ (ارزیابی نتایج و گیت تصمیم‌گیری): هفته‌های ۱۲ تا ۱۳ [آزمون ارزش تجاری و بازبینی سوگیری]
-- فاز ۶ (استقرار پایلوت): هفته ۱۴ [اتصال به داشبورد CRM در ۱۵ شعبه منتخب]
+- فاز ۲ (درک داده‌ها): هفته‌های ۱ تا ۳ [اتصال و همگام‌سازی تلمتری پیشروی TBM با پین‌های نقشه‌برداری]
+- فاز ۳ (آماده‌سازی داده‌ها): هفته‌های ۴ تا ۷ [مهندسی ویژگی‌های مکانی-زمانی و ایستگاه‌بندی محور تونل]
+- فاز ۴ (توسعه مدل): هفته‌های ۸ تا ۱۱ [توسعه شبکه عصبی Bi-LSTM و اعتبارسنجی با خطای کمتر از ۱ میلی‌متر]
+- فاز ۵ (ارزیابی نتایج و گیت تصمیم‌گیری): هفته‌های ۱۲ تا ۱۳ [آزمون شبیه‌سازی عبور از زیر مجاری آب با مهندس مشاور]
+- فاز ۶ (استقرار پایلوت): هفته ۱۴ [استقرار بر خط در اتاق اپراتور TBM شماره ۱]
 
 ۳. منافع بالقوه تجاری بر حسب معیارهای مالی (سالانه):
-- حفظ مانده سپرده‌های بانکی: حفظ ۱.۸۵ میلیون دلار سپرده معادل ۳۲۰,۰۰۰ دلار سود تسهیلاتی حاصله.
-- صرفه‌جویی زمان کارکنان شعب در فرآیندهای سنتی ریزش: ۱۴۰,۰۰۰ دلار معادل ۴,۲۰۰ ساعت کاری.
-- اجتناب از هزینه جذب مجدد مشتریان ازدست‌رفته: ۸۰,۰۰۰ دلار صرفه‌جویی در تبلیغات جذب.
-- کل منافع مالی سال اول: ۵۴۰,۰۰۰ دلار
+- جلوگیری از توقف عملیات TBM: پیشگیری از دو توقف اضطراری ۱۴ روزه = ۶۵۰,۰۰۰ دلار صرفه‌جویی در هزینه خواب ماشین‌آلات.
+- دفاع در برابر ادعاهای تاخیرات پیمانکار: حذف ادعای تاخیرات مجاز ماده ۳۰ نشریه ۴۳۱۱ = ۷۵۰,۰۰۰ دلار صرفه‌جویی در دعاوی مالی.
+- پیشگیری از خسارت تخریب تاسیسات زیرسطحی: حذف ریسک حوادث انفجار لوله‌های گاز = ۳۰۰,۰۰۰ دلار.
+- کل منافع مالی سال اول: ۱,۷۰۰,۰۰۰ دلار (بیش از ۸۵ میلیارد تومان)
 
 ۴. جمع‌بندی مقایسه هزینه-فایده:
-پروژه با هزینه ۱۲۰,۰۰۰ دلار و منفعت سالانه ۵۴۰,۰۰۰ دلار، نرخ بازگشت سرمایه ۳۵۰٪ و دوره بازگشت کمتر از ۳ ماه ایجاد می‌کند. بنابراین اجرای آن از منظر متدولوژی CPMAI کاملاً دارای توجیه اقتصادی و تجاری است.`;
+پروژه با هزینه ۱۳۵,۰۰۰ دلار و منفعت سالانه ۱,۷۰۰,۰۰۰ دلار، نرخ بازگشت سرمایه ۱,۱۵۹٪ و دوره بازگشت کمتر از ۱.۵ ماه دارد و طبق متدولوژی CPMAI دارای توجیه اقتصادی ممتاز است.`;
 
-    onChangeContent(lang === 'fa' ? exampleFa : exampleEn);
+    const exampleEnPetro = `Project Cost-Benefit Analysis: Crude Preheat Train Fouling & Flaring Mitigation
+
+1. Project Cost Budget: $160,000 total iteration investment
+- Industrial Chemical Process AI Engineers (2 FT resources x 4 months): $95,000
+- Isolated Level-3 OT edge compute & real-time historian interfaces: $25,000
+- 36-month DCS telemetry ingestion & mass-energy reconciliation pipeline: $20,000
+- Industrial cybersecurity hardening (IEC 62443 compliance) & HAZOP review: $20,000
+
+2. Project Time Budget & Phased Schedule: 16 Calendar Weeks
+- Phase II (Data Understanding): Weeks 1-3 [Audit 12k DCS sensor tags & GC lab assay sync]
+- Phase III (Data Preparation): Weeks 4-8 [Mass-energy reconciliation & clean U-value calculation]
+- Phase IV (Model Development): Weeks 9-12 [Hybrid Ebert-Panchal kinetics + XGBoost training]
+- Phase V (Evaluation Decision Gate): Weeks 13-14 [HAZOP process safety review with Operations Chief]
+- Phase VI (Pilot Operationalization): Weeks 15-16 [CCR supervisory screen integration & APC link]
+
+3. Quantified Potential Business Benefits (Annualized):
+- Furnace Fuel Gas Conservation: 3.2% thermal efficiency recovery saves $1,400,000 in fuel gas annually.
+- Unplanned Shutdown & Flaring Prevention: Eliminating 1 emergency plant turnaround avoids $1,800,000 in flaring losses.
+- Exchanger Tube Lifespan Extension: Optimal descaling reduces mechanical stress, saving $450,000 in retubing capex.
+- Total Gross Annual Financial Benefit: $3,650,000
+
+4. Definitive Cost-Benefit Conclusion:
+With an upfront investment of $160,000 delivering $3,650,000 in annual thermal and operational savings, the project yields an ROI of 2,181% and amortizes within 16 days. The economic justification is overwhelmingly verified.`;
+
+    const exampleFaPetro = `تحلیل هزینه-فایده و بودجه پروژه: سامانه هوش مصنوعی پیش‌بینی رسوب مبدل‌ها و کاهش مشعل‌سوزی پالایشگاه
+
+۱. بودجه هزینه‌ای پروژه: ۱۶۰,۰۰۰ دلار (سرمایه‌گذاری کل اسپرینت)
+- تیم فنی متخصص (مهندسان ارشد هوش مصنوعی فرآیندهای نفت و پتروشیمی برای ۴ ماه): ۹۵,۰۰۰ دلار
+- سرورهای لبه پردازش امن در شبکه OT پالایشگاه و درگاه‌های OSIsoft PI: ۲۵,۰۰۰ دلار
+- استخراج تاریخچه ۳۶ ماهه دیتای DCS و پایپ‌لاین موازنه جرم و انرژی: ۲۰,۰۰۰ دلار
+- استانداردهای امنیت صنعتی IEC 62443، ممیزی ایمنی HAZOP و راهنمای عملیات: ۲۰,۰۰۰ دلار
+
+۲. بودجه زمانی و نقاط عطف متدولوژی: ۱۶ هفته کاری
+- فاز ۲ (درک داده‌ها): هفته‌های ۱ تا ۳ [ممیزی تگ‌های حرارتی و فشار DCS و انطباق با آزمایش‌های نفت خام]
+- فاز ۳ (آماده‌سازی داده‌ها): هفته‌های ۴ تا ۸ [اعتبارسنجی موازنه جرم و انرژی و محاسبه ضریب تمیز انتقال حرارت]
+- فاز ۴ (توسعه مدل): هفته‌های ۹ تا ۱۲ [ترکیب معادلات سینتیک رسوب با مدل‌های گرادیان بوستینگ]
+- فاز ۵ (ارزیابی نتایج و گیت تصمیم‌گیری): هفته‌های ۱۳ تا ۱۴ [جلسه ممیزی ایمنی HAZOP با رئیس بهره‌برداری]
+- فاز ۶ (استقرار پایلوت): هفته‌های ۱۵ تا ۱۶ [اتصال به اتاق کنترل مرکزی پالایشگاه و سامانه APC]
+
+۳. منافع بالقوه تجاری بر حسب معیارهای مالی (سالانه):
+- صرفه‌جویی در سوخت کوره: بهبود ۳.۲ درصدی راندمان حرارتی = ۱,۴۰۰,۰۰۰ دلار صرفه‌جویی سالانه در گاز سوخت.
+- پیشگیری از شات‌دان و مشعل‌سوزی: جلوگیری از یک توقف ناخواسته پالایشگاه = ۱,۸۰۰,۰۰۰ دلار حفظ تولید و کاهش فلرینگ.
+- افزایش طول عمر لوله‌های مبدل: کاهش شوک‌های دمایی = ۴۵۰,۰۰۰ دلار صرفه‌جویی در تعمیرات اساسی.
+- کل منافع مالی سال اول: ۳,۶۵۰,۰۰۰ دلار (بیش از ۱۸۰ میلیارد تومان)
+
+۴. جمع‌بندی مقایسه هزینه-فایده:
+پروژه با هزینه ۱۶۰,۰۰۰ دلار و منفعت سالانه ۳,۶۵۰,۰۰۰ دلار، نرخ بازگشت سرمایه ۲,۱۸۱٪ و دوره بازگشت کمتر از ۱ ماه دارد و از منظر متدولوژی CPMAI یک سرمایه‌گذاری استراتژیک فوق‌العاده است.`;
+
+    const selectedEn = isPetro ? exampleEnPetro : exampleEnCivil;
+    const selectedFa = isPetro ? exampleFaPetro : exampleFaCivil;
+
+    onChangeContent(lang === 'fa' ? selectedFa : selectedEn);
   };
 
   const handleAppendCalculatorResults = () => {

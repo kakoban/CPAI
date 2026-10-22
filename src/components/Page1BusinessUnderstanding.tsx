@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Language } from '../types/cpmai';
+import { IndustryTrackId } from '../types/industryTrack';
+import { getDomainPhaseExample } from '../data/domainTrackExamples';
 import { ArrowLeft, ArrowRight, Plus, Trash2, Lightbulb, Check } from 'lucide-react';
 
 interface Page1Props {
   lang: Language;
+  industryTrack?: IndustryTrackId;
   read: boolean;
   onToggleRead: (val: boolean) => void;
   story: string;
@@ -23,6 +26,7 @@ interface Page1Props {
 
 export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
   lang,
+  industryTrack = 'CIVIL_INFRA',
   read,
   onToggleRead,
   story,
@@ -42,9 +46,12 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
   const [newQ, setNewQ] = useState('');
   const [showExample, setShowExample] = useState(false);
 
+  const domainEx = getDomainPhaseExample(1, industryTrack);
+  const isPetro = industryTrack === 'ENERGY_PETRO';
+
   const t = {
     en: {
-      badge: 'CPMAI Phase I · Page 1 of 5 (Slide 11)',
+      badge: `CPMAI Phase I · Page 1 of 5 (${isPetro ? 'Oil, Gas & Petrochemical Track' : 'Civil Megaproject Track'})`,
       h1: 'CPMAI Phase I: Business Understanding',
       p1: 'The first phase of a CPMAI process is gaining a thorough understanding of the business and organizational objectives and other factors that will determine whether the project is worth undertaking, and the conditions under which it will be a success. The Business Understanding phase focuses on understanding the project objectives and requirements from a business perspective, then converting this knowledge into an AI and cognitive project problem definition and a preliminary plan designed to achieve the objectives.',
       p2: 'As mentioned earlier, since we are doing CPMAI in the context of agile, the business understanding for the particular CPMAI project is relevant to the specific sprint or iteration you are currently in, and should tie very closely to the user story that is relevant for that iteration. In a CPMAI project, it is possible for a single sprint iteration to encompass all of the CPMAI phases, but it is also possible for a CPMAI project to span multiple sprints or iterations, which means that the business understanding will be relevant to that particular iteration’s user story.',
@@ -56,25 +63,29 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       artTitle: 'Task Artifacts',
       artBg: 'Background: Record the information known about the organization’s business situation at the beginning of the project.',
       artObj: 'Business objectives: Describe the customer’s primary objective from a business perspective. In addition to the primary business objective, there are typically other related business questions that the customer would like to address.',
-      artEx: 'For example, the primary business goal might be to keep current customers by predicting when they are prone to move to a competitor. Examples of related business questions are “How does the primary channel used (e.g., ATM, branch visit, internet) affect whether customers stay or go?” or “Will lower ATM fees significantly reduce the number of high-value customers who leave?”',
+      artEx: domainEx.exampleNoteEn,
       readChk: 'I have read and understood this phase overview',
       wsTitle: 'Worksheet: Your Project Artifacts',
       wsDesc: 'Fill these in for your own project or case study iteration.',
       storyL: 'Sprint User Story',
-      storyHint: 'Which user story does this iteration serve?',
-      storyPh: 'As a [role], I want [goal] so that [benefit]...',
+      storyHint: isPetro
+        ? 'e.g. As a refinery process lead, I want 60-day fouling forecasts so that I can schedule heat exchanger descaling without emergency shutdowns.'
+        : 'e.g. As a metro project director, I want 48-hour ground settlement predictions so that I can adjust TBM foam injection and prevent utility damage.',
+      storyPh: isPetro
+        ? 'As a [Refinery Unit Lead], I want [Fouling Prediction] so that [Avoid Flaring & Emergency Trips]...'
+        : 'As a [Metro Tunnel Engineer], I want [Ground Subsidence Early Warning] so that [Prevent Utility Ruptures & Delay Claims]...',
       bgL: 'Background',
-      bgHint: 'What do we know about the organization’s business situation right now?',
+      bgHint: domainEx.artifacts.backgroundEn,
       objL: 'Primary Business Objective',
-      objHint: 'One sentence, written from the business point of view, not technology.',
+      objHint: domainEx.artifacts.primaryObjectiveEn,
       rqL: 'Related Business Questions',
       rqHint: 'Add each specific question the customer also wants answered.',
       add: 'Add Question',
       rm: 'Remove',
       exBtnShow: 'Show Example',
       exBtnHide: 'Hide Example',
-      exTitle: 'Primary Objective Example:',
-      exText: 'Keep current customers by predicting when they are likely to move to a competitor. Related questions explore ATM fees and branch usage impact.',
+      exTitle: isPetro ? 'Oil & Gas Primary Objective Example:' : 'Civil Megaproject Primary Objective Example:',
+      exText: domainEx.artifacts.primaryObjectiveEn,
       quizTitle: 'Check Your Understanding',
       quizDesc: 'Select an option to see instant feedback and explanation.',
       nextPageBtn: 'Next Page: What problem are you solving with AI in this iteration?',
@@ -84,12 +95,26 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       q2: 'In an agile CPMAI project, business understanding should tie most closely to what?',
       q2Options: ['The final product vision only', 'The vendor’s contract', 'The user story for the current sprint or iteration'],
       q2Why: 'Business understanding is relevant to the specific sprint or iteration, and ties to its user story.',
-      q3: 'Which one is a related business question rather than the primary objective?',
-      q3Options: ['Will lower ATM fees significantly reduce the number of high-value customers who leave?', 'Keep current customers by predicting when they might leave', 'Choose the neural network architecture'],
-      q3Why: 'Related questions explore factors around the main retention goal. Choosing neural architecture is an engineering task.'
+      q3: isPetro
+        ? 'Which one is a related business/operational question rather than the primary objective?'
+        : 'Which one is a related contractual/operational question rather than the primary objective?',
+      q3Options: isPetro
+        ? [
+            'How does feed sulfur variance impact descaling intervals?',
+            'Forecast heat exchanger fouling to prevent unscheduled shutdowns',
+            'Select CNN convolutional kernel size'
+          ]
+        : [
+            'Does TBM foam injection telemetry mitigate Circular 4311 delay claims?',
+            'Forecast surface ground settlement above mechanized tunnel drives',
+            'Select the Adam optimizer learning rate'
+          ],
+      q3Why: isPetro
+        ? 'Feed sulfur variance is a business exploration factor around fouling mitigation. Neural hyperparameters are purely engineering tasks.'
+        : 'Circular 4311 claim mitigation is a related contractual risk question. Optimizer tuning is a model training task.'
     },
     fa: {
-      badge: 'فاز اول CPMAI · صفحه ۱ از ۵ (اسلاید ۱۱ کتاب کار)',
+      badge: `فاز اول CPMAI · صفحه ۱ از ۵ (${isPetro ? 'حوزه تخصصی نفت، گاز و پتروشیمی' : 'حوزه تخصصی مگاپروژه‌های عمرانی و راه'})`,
       h1: 'CPMAI Phase I: Business Understanding',
       p1: 'نخستین فاز فرایند CPMAI، دستیابی به درکی کامل از اهداف کسب‌وکار و سازمان و عوامل دیگری است که تعیین می‌کنند آیا پروژه ارزش اجرا دارد و در چه شرایطی موفق خواهد بود. تمرکز فاز درک کسب‌وکار بر شناخت اهداف و الزامات پروژه از دیدگاه کسب‌وکار است و سپس تبدیل این دانش به تعریف مسئله برای پروژه هوش مصنوعی و یک برنامه اولیه برای رسیدن به اهداف.',
       p2: 'چون CPMAI را در بستر چابک (Agile) اجرا می‌کنیم، درک کسب‌وکار به اسپرینت یا تکرار مشخصی که در آن هستید مربوط است و باید ارتباط نزدیکی با داستان کاربر (User Story) همان تکرار داشته باشد. ممکن است یک اسپرینت همه فازهای CPMAI را پوشش دهد، یا یک پروژه چند اسپرینت را در بر بگیرد که در این حالت درک کسب‌وکار به داستان کاربر همان تکرار گره می‌خورد.',
@@ -101,25 +126,29 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       artTitle: 'مستندات خروجی وظیفه (Task Artifacts)',
       artBg: 'پس‌زمینه (Background): اطلاعاتی را که در آغاز پروژه درباره وضعیت کسب‌وکار سازمان می‌دانید ثبت کنید.',
       artObj: 'اهداف کسب‌وکار (Business objectives): هدف اصلی مشتری را از دیدگاه کسب‌وکار توصیف کنید. علاوه بر هدف اصلی، پرسش‌های کسب‌وکاری مرتبطی را که مشتری می‌خواهد به آن‌ها پاسخ داده شود فهرست کنید.',
-      artEx: 'مثال: هدف اصلی ممکن است نگه‌داشتن مشتریان فعلی با پیش‌بینی زمان احتمال رفتن به رقیب باشد. نمونه پرسش‌های مرتبط: «کانال اصلی مورد استفاده (خودپرداز، شعبه، اینترنت) چگونه بر ماندن یا رفتن مشتری اثر می‌گذارد؟» یا «آیا کاهش کارمزد خودپرداز، تعداد مشتریان باارزش ترک‌کننده را به طور معناداری کم می‌کند؟»',
+      artEx: domainEx.exampleNoteFa,
       readChk: 'این بخش را مطالعه کردم و اهداف آن را درک نمودم',
       wsTitle: 'برگه تمرین: مستندات پروژه شما',
       wsDesc: 'این بخش‌ها را برای پروژه یا مطالعه موردی خود تکمیل کنید.',
       storyL: 'داستان کاربر اسپرینت (Sprint User Story)',
-      storyHint: 'این تکرار یا اسپرینت به کدام داستان کاربر خدمت می‌کند؟',
-      storyPh: 'به‌عنوان [نقش]، می‌خواهم [هدف] تا [فایده و ارزش کسب‌وکار]...',
+      storyHint: isPetro
+        ? 'مثال: به عنوان سرپرست فرآیند پالایشگاه، می‌خواهم پیش‌بینی ۶۰ روزه رسوب مبدل‌ها را دریافت کنم تا برنامه شستشو را بدون توقف خط تولید تنظیم نمایم.'
+        : 'مثال: به عنوان مدیر پروژه مترو، می‌خواهم پیش‌بینی ۴۸ ساعته نشست معابر را دریافت کنم تا پارامترهای حفاری TBM را تغییر دهم و از آسیب به لوله‌های گاز و ادعای تاخیرات جلوگیری شود.',
+      storyPh: isPetro
+        ? 'به عنوان [رئیس بهره‌برداری پالایشگاه]، می‌خواهم [پیش‌بینی رسوب مبدل‌ها] را داشته باشم تا [از شات‌دان و فلرینگ اضطراری پیشگیری شود]...'
+        : 'به عنوان [مدیر پروژه احداث مترو]، می‌خواهم [پیش‌بینی ۴۸ ساعته فرونشست زمین] را داشته باشم تا [از آسیب به لوله‌های گاز و ادعای تاخیرات نشریه ۴۳۱۱ جلوگیری شود]...',
       bgL: 'پس‌زمینه (Background)',
-      bgHint: 'اکنون درباره وضعیت کسب‌وکار سازمان چه می‌دانیم؟',
+      bgHint: domainEx.artifacts.backgroundFa,
       objL: 'هدف اصلی کسب‌وکار (Primary Business Objective)',
-      objHint: 'یک جمله، از دیدگاه کسب‌وکار (نه نام الگوریتم‌های هوش مصنوعی).',
+      objHint: domainEx.artifacts.primaryObjectiveFa,
       rqL: 'پرسش‌های کسب‌وکاری مرتبط (Related Business Questions)',
       rqHint: 'هر پرسش فرعی را که مشتری می‌خواهد به آن پاسخ داده شود اضافه کنید.',
       add: 'افزودن پرسش',
       rm: 'حذف',
       exBtnShow: 'نمایش مثال',
       exBtnHide: 'پنهان‌سازی مثال',
-      exTitle: 'نمونه هدف اصلی:',
-      exText: 'نگه‌داشتن مشتریان فعلی با پیش‌بینی زمانی که احتمالاً به رقیب می‌روند. پرسش‌های مرتبط اثر کارمزد و کانال‌های بانکی را بررسی می‌کنند.',
+      exTitle: isPetro ? 'نمونه هدف اصلی (نفت و گاز):' : 'نمونه هدف اصلی (مگاپروژه عمرانی):',
+      exText: domainEx.artifacts.primaryObjectiveFa,
       quizTitle: 'بررسی فهم مطالب (Quiz)',
       quizDesc: 'یک گزینه را انتخاب کنید تا بلافاصله بازخورد و استدلال را ببینید.',
       nextPageBtn: 'صفحه بعد: در این تکرار چه مسئله‌ای را با هوش مصنوعی حل می‌کنید؟',
@@ -129,9 +158,23 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       q2: 'در یک پروژه CPMAI چابک، درک کسب‌وکار باید بیش از همه به چه چیزی مرتبط باشد؟',
       q2Options: ['فقط چشم‌انداز نهایی محصول', 'قرارداد فروشنده', 'داستان کاربر اسپرینت یا تکرار جاری'],
       q2Why: 'درک کسب‌وکار به اسپرینت یا تکرار مشخصی مربوط است و باید با داستان کاربر آن پیوند بخورد.',
-      q3: 'کدام مورد یک پرسش کسب‌وکاری مرتبط است، نه هدف اصلی؟',
-      q3Options: ['آیا کاهش کارمزد خودپرداز، تعداد مشتریان باارزش ترک‌کننده را به‌طور معناداری کم می‌کند؟', 'نگه‌داشتن مشتریان با پیش‌بینی زمان رفتنشان', 'انتخاب معماری شبکه عصبی'],
-      q3Why: 'پرسش‌های مرتبط عوامل پیرامون هدف اصلی را می‌کاوند. انتخاب معماری شبکه عصبی یک وظیفه فنی مهندسی است.'
+      q3: isPetro
+        ? 'کدام مورد یک پرسش فرآیندی مرتبط است، نه هدف اصلی؟'
+        : 'کدام مورد یک پرسش قراردادی مرتبط است، نه هدف اصلی؟',
+      q3Options: isPetro
+        ? [
+            'آیا نوسان درصد گوگرد و گرانروی API خوراک بر فواصل تمیزکاری مبدل‌ها موثر است؟',
+            'پیش‌بینی نرخ رسوب‌گرفتگی مبدل‌ها جهت کاهش مشعل‌سوزی پالایشگاه',
+            'انتخاب اندازه کرنل در شبکه عصبی کانولوشنی'
+          ]
+        : [
+            'آیا تغییر پارامتر تزریق فوم TBM از ادعای تاخیرات پیمانکار طبق ماده ۳۰ نشریه ۴۳۱۱ پیشگیری می‌کند؟',
+            'پیش‌بینی فرونشست سطحی معابر شهری بالای تاج تونل مکانیزه',
+            'انتخاب نرخ یادگیری در الگوریتم بهینه‌ساز Adam'
+          ],
+      q3Why: isPetro
+        ? 'بررسی اثر کیفیت خوراک یک پرسش عملیاتی کلیدی است؛ هدف اصلی پیش‌بینی رسوب است و انتخاب لایه‌های عصبی یک وظیفه کدنویسی است.'
+        : 'مسئله ماده ۳۰ نشریه ۴۳۱۱ یک پرسش ریسک قراردادی است؛ هدف اصلی پیش‌بینی نشست است و پارامتر بهینه‌ساز یک وظیفه فنی یادگیری ماشین است.'
     }
   }[lang];
 

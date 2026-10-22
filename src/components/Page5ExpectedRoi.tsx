@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Language } from '../types/cpmai';
+import { IndustryTrackId } from '../types/industryTrack';
 import { ArrowLeft, ArrowRight, Lightbulb, Calculator, Check, Copy, RotateCcw, TrendingUp, Percent, DollarSign, Target, FileText } from 'lucide-react';
 
 interface Page5Props {
   lang: Language;
+  industryTrack?: IndustryTrackId;
   content: string;
   onChangeContent: (val: string) => void;
   onGoToPage4: () => void;
@@ -12,6 +14,7 @@ interface Page5Props {
 
 export const Page5ExpectedRoi: React.FC<Page5Props> = ({
   lang,
+  industryTrack = 'CIVIL_INFRA',
   content,
   onChangeContent,
   onGoToPage4,
@@ -19,21 +22,22 @@ export const Page5ExpectedRoi: React.FC<Page5Props> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
+  const isPetro = industryTrack === 'ENERGY_PETRO';
 
   // Sensitivity analysis inputs
-  const [investmentCost, setInvestmentCost] = useState('120000');
-  const [annualBenefit, setAnnualBenefit] = useState('540000');
-  const [annualOpsCost, setAnnualOpsCost] = useState('25000');
-  const [adoptionRate, setAdoptionRate] = useState('85'); // %
+  const [investmentCost, setInvestmentCost] = useState(isPetro ? '160000' : '135000');
+  const [annualBenefit, setAnnualBenefit] = useState(isPetro ? '3650000' : '1700000');
+  const [annualOpsCost, setAnnualOpsCost] = useState(isPetro ? '35000' : '25000');
+  const [adoptionRate, setAdoptionRate] = useState('90'); // %
 
   const t = {
     en: {
-      badge: 'CPMAI Phase I · Page 5 of 5 (Slide 15)',
+      badge: `CPMAI Phase I · Page 5 of 5 (${isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       slideBanner: 'What is the expected ROI for this project?',
       promptHint:
         'Calculate and articulate the expected Return on Investment (ROI) for this cognitive iteration. Include quantified financial ROI, payback period, strategic/non-monetary dividends, and risk/adoption sensitivity assumptions.',
       templateBtn: 'Insert CPMAI ROI Template',
-      exampleBtn: 'Fill Retail Banking Churn ROI Example',
+      exampleBtn: isPetro ? 'Fill Refinery Fouling ROI Example' : 'Fill Metro TBM Subsidence ROI Example',
       calcToggleBtn: 'Interactive ROI & Sensitivity Tool',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
@@ -65,12 +69,12 @@ export const Page5ExpectedRoi: React.FC<Page5Props> = ({
       months: 'months'
     },
     fa: {
-      badge: 'فاز اول CPMAI · صفحه ۵ از ۵ (اسلاید ۱۵ کتاب کار)',
+      badge: `فاز اول CPMAI · صفحه ۵ از ۵ (${isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
       slideBanner: 'What is the expected ROI for this project?',
       promptHint:
         'نرخ بازگشت سرمایه (ROI) مورد انتظار برای این تکرار هوش مصنوعی را محاسبه و تبیین کنید. شامل درصد بازگشت مالی، دوره بازگشت سرمایه (Payback Period)، مزایای استراتژیک غیرمالی و تحلیل حساسیت نرخ پذیرش سازمانی.',
       templateBtn: 'درج قالب استاندارد برآورد ROI',
-      exampleBtn: 'پر کردن با نمونه موردی بانکداری خرد',
+      exampleBtn: isPetro ? 'پر کردن با نمونه پالایشگاهی (بازگشت سرمایه ROI)' : 'پر کردن با نمونه مگاپروژه احداث مترو (بازگشت سرمایه ROI)',
       calcToggleBtn: 'ابزار تعاملی محاسبه ROI و تحلیل حساسیت',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
@@ -168,43 +172,73 @@ export const Page5ExpectedRoi: React.FC<Page5Props> = ({
   };
 
   const handleInsertExample = () => {
-    const exampleEn = `Detailed ROI Justification: High-Value Retail Checking Account Churn Model (Iteration 1)
+    const selectedEn = isPetro ? `Detailed ROI Justification: Crude Preheat Train Fouling & Flaring Mitigation (Iteration 1)
 
 1. Executive Financial ROI Summary:
-- Initial Sprint Investment: $120,000 (Talent, GPU cloud, data engineering, validation gate)
-- Annualized Gross Value Preserved: $540,000
-- Risk-Adjusted Value (at 85% staff adoption): $459,000
-- Ongoing Annual Maintenance & Inference Cost: $25,000
-- First-Year Net ROI: 261%
-- Capital Payback Horizon: 3.3 Months
+- Initial Sprint Investment: $160,000 (Process AI engineers, Level-3 OT edge compute, DCS historian data pipeline)
+- Annualized Gross Value Preserved: $3,650,000 (Fuel gas conservation, emergency flaring prevention, tube lifecycle)
+- Risk-Adjusted Value (at 92% CCR operator adoption): $3,358,000
+- Ongoing Annual Maintenance, Cybersecurity & Retraining: $35,000
+- First-Year Net ROI: 1,976%
+- Capital Payback Horizon: 18 Days
 
 2. ROI Mechanics & Breakdown:
-- Cost-Avoidance Dividend: $140,000 annual labor savings by eliminating manual branch retention logs and untargeted outbound campaigns.
-- Revenue Retention Dividend: $320,000 retained net interest margin by proactively preserving deposit balances of 450 at-risk accounts.
-- Customer Reacquisition Savings: $80,000 saved by not having to replace lost depositors with high-cost customer acquisition bonuses.
+- Furnace Fuel Gas Conservation: $1,400,000 direct annual OPEX reduction in fuel gas through 3.2% thermal efficiency recovery.
+- Unscheduled Plant Trip & Flaring Prevention: $1,800,000 saved by averting emergency throughput throttling and gas flaring penalties.
+- Exchanger Mechanical Longevity: $450,000 deferred capex by reducing thermal cycling fatigue and high-pressure chemical washings.
 
-3. Downside Risk Cushion:
-Even if model prediction accuracy degrades by 30% or branch adoption is delayed by 60 days, the investment reaches financial breakeven within month 7 of deployment. The business case possesses high robustness under CPMAI standards.`;
+3. Downside Sensitivity Cushion:
+Even under conservative assumptions with a 25% drop in heavy crude premium and 75% operator compliance, the project generates $2.1M in net annual payoff with capital recovery inside 35 days. Under CPMAI criteria, this is a top-quartile strategic investment.` : `Detailed ROI Justification: Urban Metro TBM Ground Subsidence Early Warning (Iteration 1)
 
-    const exampleFa = `توجیه تفصیلی نرخ بازگشت سرمایه (ROI): مدل پیش‌بینی ریزش مشتریان بانکداری خرد (تکرار اول)
+1. Executive Financial ROI Summary:
+- Initial Sprint Investment: $135,000 (Geotechnical AI team, borehole IoT, BIM telemetry, edge cabinet)
+- Annualized Gross Value Preserved: $1,700,000 (Downtime prevention, Circular 4311 claim defense, utility safety)
+- Risk-Adjusted Value (at 90% contractor & consultant adoption): $1,530,000
+- Ongoing Annual Maintenance & Sensor Drift Calibration: $25,000
+- First-Year Net ROI: 1,014%
+- Capital Payback Horizon: 1.1 Months
+
+2. ROI Mechanics & Breakdown:
+- TBM Plant Idling Savings: $650,000 saved by preventing 2 emergency halts (heavy machine & crew demurrage).
+- Circular 4311 Claim Defense: $750,000 preserved in avoided contractor delay compensation payouts (Clause 30).
+- Pressurized Utility Risk Suppression: $300,000 avoided municipal liability and emergency road repair costs.
+
+3. Downside Sensitivity Cushion:
+Even if model prediction accuracy degrades by 40% and site adoption falls to 60%, the net annual benefit exceeds $580,000, achieving financial breakeven within 2.8 months. The investment profile demonstrates exceptional resilience under CPMAI standards.`;
+    const selectedFa = isPetro ? `توجیه تفصیلی نرخ بازگشت سرمایه (ROI): سامانه پیش‌بینی رسوب مبدل‌ها و کاهش مشعل‌سوزی پالایشگاه (تکرار اول)
 
 ۱. خلاصه مدیریتی شاخص‌های بازگشت سرمایه:
-- سرمایه‌گذاری اولیه در این تکرار: ۱۲۰,۰۰۰ دلار (تیم فنی، پردازش ابری، مهندسی داده و استقرار)
-- ارزش ناخالص سالانه حفظ‌شده: ۵۴۰,۰۰۰ دلار
-- ارزش تعدیل‌شده بر اساس ریسک و نرخ پذیرش شعب (۸۵٪): ۴۵۹,۰۰۰ دلار
-- هزینه عملیاتی و پایش سالانه مدل: ۲۵,۰۰۰ دلار
-- نرخ بازگشت سرمایه خالص سال اول (Net Year 1 ROI): ۲۶۱ درصد
-- زمان بازگشت سرمایه: ۳.۳ ماه پس از آغاز بهره‌برداری عملیاتی
+- سرمایه‌گذاری اولیه در این تکرار: ۱۶۰,۰۰۰ دلار (تیم هوش مصنوعی فرآیند، سرور امن شبکه OT، پایپ‌لاین تاریخچه DCS)
+- ارزش ناخالص سالانه حفظ‌شده: ۳,۶۵۰,۰۰۰ دلار (صرفه‌جویی در سوخت کوره، جلوگیری از شات‌دان و فلرینگ، طول عمر لوله‌ها)
+- ارزش تعدیل‌شده بر اساس نرخ پذیرش اپراتورهای اتاق کنترل CCR (۹۲٪): ۳,۳۵۸,۰۰۰ دلار
+- هزینه عملیاتی، امنیت سایبری صنعتی و بازآموزی سالانه: ۳۵,۰۰۰ دلار
+- نرخ بازگشت سرمایه خالص سال اول (Net Year 1 ROI): ۱,۹۷۶ درصد
+- زمان بازگشت سرمایه: ۱۸ روز پس از بهره‌برداری پیوسته
 
 ۲. تفکیک سرفصل‌های بازدهی مالی:
-- صرفه‌جویی ناشی از کاهش فرآیند دستی: ۱۴۰,۰۰۰ دلار کاهش ساعات کار اداری پرسنل شعب.
-- حفظ سود تسهیلاتی سپرده‌ها: ۳۲۰,۰۰۰ دلار حفظ سود حاصل از نگه‌داشت ۴۵۰ حساب کلیدی در معرض خطر خروج.
-- اجتناب از هزینه‌های جذب مجدد: ۸۰,۰۰۰ دلار صرفه‌جویی در پاداش‌ها و کمپین‌های تبلیغاتی جایگزینی مشتری.
+- صرفه‌جویی در گاز سوخت کوره: ۱,۴۰۰,۰۰۰ دلار کاهش مستقیم هزینه مصرف سوخت با احیای ۳.۲ درصدی راندمان انتقال حرارت.
+- جلوگیری از توقف ناخواسته پالایشگاه و فلرینگ: ۱,۸۰۰,۰۰۰ دلار سود حفظ استمرار تولید و حذف جریمه‌های زیست‌محیطی مشعل‌سوزی.
+- افزایش طول عمر مکانیکی لوله‌های مبدل: ۴۵۰,۰۰۰ دلار صرفه‌جویی در هزینه‌های تعویض لوله (Retubing) به دلیل حذف تنش‌های حرارتی شدید.
 
-۳. حاشیه امنیت و پوشش ریسک:
-حتی در صورت افت ۳۰ درصدی دقت پیش‌بینی یا تأخیر ۲ ماهه در پذیرش کامل توسط کارشناسان شعب، پروژه حداکثر در ماه هفتم به نقطه سر‌به‌سر مالی خواهد رسید که طبق چارچوب اعتبارسنجی CPMAI، توجیه اقتصادی آن قطعی و کم‌ریسک است.`;
+۳. تحلیل حساسیت و حاشیه امنیت:
+حتی با فرض بدبینانه افت ۲۵ درصدی ارزش نفت و کاهش نرخ پذیرش اپراتورها به ۷۵ درصد، منفعت خالص پروژه بیش از ۲.۱ میلیون دلار سالانه بوده و سرمایه‌گذاری ظرف ۳۵ روز مستهلک می‌شود. بر اساس استانداردهای CPMAI، این پروژه بازدهی فوق‌العاده بالایی دارد.` : `توجیه تفصیلی نرخ بازگشت سرمایه (ROI): سامانه پیش‌بینی نشست زمین در حفاری مکانیزه مترو (تکرار اول)
 
-    onChangeContent(lang === 'fa' ? exampleFa : exampleEn);
+۱. خلاصه مدیریتی شاخص‌های بازگشت سرمایه:
+- سرمایه‌گذاری اولیه در این تکرار: ۱۳۵,۰۰۰ دلار (تیم هوش مصنوعی ژئوتکنیک، اینترنت اشیاء گمانه‌ها، اتصال BIM و سرور لبه)
+- ارزش ناخالص سالانه حفظ‌شده: ۱,۷۰۰,۰۰۰ دلار (پیشگیری از توقف کارگاه، دفاع از دعاوی نشریه ۴۳۱۱، حفاظت لوله‌های گاز)
+- ارزش تعدیل‌شده بر اساس نرخ پذیرش ناظران و پیمانکار (۹۰٪): ۱,۵۳۰,۰۰۰ دلار
+- هزینه عملیاتی و کالیبراسیون سالانه سنسورها: ۲۵,۰۰۰ دلار
+- نرخ بازگشت سرمایه خالص سال اول (Net Year 1 ROI): ۱,۰۱۴ درصد
+- زمان بازگشت سرمایه: ۱.۱ ماه پس از استقرار عملیاتی در کابین TBM
+
+۲. تفکیک سرفصل‌های بازدهی مالی:
+- پیشگیری از خواب ماشین‌آلات TBM: ۶۵۰,۰۰۰ دلار صرفه‌جویی در هزینه خواب تجهیزات سنگین و اکیپ اجرایی.
+- دفاع حقوقی در برابر ادعای تاخیرات پیمانکار: ۷۵۰,۰۰۰ دلار صرفه‌جویی ناشی از رد دعاوی تاخیرات مجاز ماده ۳۰ نشریه ۴۳۱۱.
+- مصونیت در برابر خسارت شکست تاسیسات شهری: ۳۰۰,۰۰۰ دلار پیشگیری از خسارات انفجار گاز و نشست آسفالت معابر.
+
+۳. تحلیل حساسیت و حاشیه امنیت:
+حتی در صورت افت ۴۰ درصدی دقت پیش‌بینی مدل و کاهش پذیرش ناظران به ۶۰ درصد، منفعت خالص پروژه بیش از ۵۸۰,۰۰۰ دلار بوده و پروژه ظرف کمتر از ۳ ماه سر‌به‌سر می‌شود که توجیه اقتصادی آن را در استاندارد CPMAI اثبات می‌کند.`;
+    onChangeContent(lang === "fa" ? selectedFa : selectedEn);
   };
 
   const handleAppendCalculatorResults = () => {

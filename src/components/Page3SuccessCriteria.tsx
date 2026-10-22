@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Language } from '../types/cpmai';
+import { IndustryTrackId } from '../types/industryTrack';
 import { ArrowLeft, ArrowRight, Lightbulb, FileText, Check, Copy, RotateCcw } from 'lucide-react';
 
 interface Page3Props {
   lang: Language;
+  industryTrack?: IndustryTrackId;
   content: string;
   onChangeContent: (val: string) => void;
   onGoToPage2: () => void;
@@ -12,23 +14,25 @@ interface Page3Props {
 
 export const Page3SuccessCriteria: React.FC<Page3Props> = ({
   lang,
+  industryTrack = 'CIVIL_INFRA',
   content,
   onChangeContent,
   onGoToPage2,
   onGoToPage4
 }) => {
   const [copied, setCopied] = useState(false);
+  const isPetro = industryTrack === 'ENERGY_PETRO';
 
   const t = {
     en: {
-      badge: 'CPMAI Phase I · Page 3 of 5 (Slide 13)',
+      badge: `CPMAI Phase I · Page 3 of 5 (${isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       subtaskH: 'Subtask: Determine Business Success Criteria',
       criteriaLabel: 'Business success criteria:',
       criteriaText: 'Describe the criteria for a successful or useful outcome of the project from the business point of view. This might be quite specific and able to be measured objectively, for example, reduction of customer attrition to a certain level, or it might be general and subjective, such as “give useful insights into the relationships.” In the latter case, it should be indicated who makes the subjective judgment.',
       slideTitle: 'What are the objective measures of success for this project iteration?',
       promptHint: 'Identify specific, measurable business success metrics for this iteration, distinguishing between objective quantitative KPIs and subjective qualitative judgments.',
       templateBtn: 'Insert Criteria Template',
-      exampleBtn: 'Fill Retail Banking Churn Example',
+      exampleBtn: isPetro ? 'Fill Refinery Fouling Success Criteria' : 'Fill Urban Metro TBM Success Criteria',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
       copiedToast: 'Copied to clipboard!',
@@ -43,14 +47,16 @@ export const Page3SuccessCriteria: React.FC<Page3Props> = ({
       tip4: 'Keep the success criteria calibrated strictly to THIS iteration scope, avoiding premature promises for future sprints.'
     },
     fa: {
-      badge: 'فاز اول CPMAI · صفحه ۳ از ۵ (اسلاید ۱۳ کتاب کار)',
+      badge: `فاز اول CPMAI · صفحه ۳ از ۵ (${isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
       subtaskH: 'زیروظیفه: تعیین معیارهای موفقیت کسب‌وکار (Subtask: Determine Business Success Criteria)',
       criteriaLabel: 'معیارهای موفقیت کسب‌وکار (Business success criteria):',
-      criteriaText: 'معیارهای یک نتیجه موفق یا سودمند از دیدگاه کسب‌وکار را توصیف کنید. این معیارها ممکن است کاملاً مشخص و به صورت عینی قابل اندازه‌گیری باشند؛ برای مثال، کاهش ریزش مشتری به یک سطح معین (مانند کاهش ۱۰ درصدی). یا ممکن است کلی و کیفی/ذهنی باشند، مانند «ارائه بینش‌های مفید در روابط با مشتریان». در حالت دوم، باید مشخص شود چه کسی این قضاوت کیفی و ذهنی را انجام می‌دهد.',
+      criteriaText: isPetro
+        ? 'معیارهای یک نتیجه موفق یا سودمند از دیدگاه پالایشگاه و بهره‌برداری را توصیف کنید؛ مانند کاهش مشعل‌سوزی، جلوگیری از شات‌دان و افزایش راندمان حرارتی.'
+        : 'معیارهای یک نتیجه موفق از دیدگاه مگاپروژه عمرانی و کارفرما را توصیف کنید؛ مانند کنترل نشست زیر ۲ میلی‌متر، حذف توقف TBM و کاهش ادعاهای تاخیرات نشریه ۴۳۱۱.',
       slideTitle: 'What are the objective measures of success for this project iteration?',
       promptHint: 'معیارهای عینی و سنجش‌پذیر موفقیت تجاری را برای این تکرار پروژه مشخص کنید و بین شاخص‌های کمّی و ارزیابی‌های کیفی تفکیک قائل شوید.',
       templateBtn: 'درج قالب استاندارد معیارها',
-      exampleBtn: 'پر کردن با نمونه موردی بانکداری خرد',
+      exampleBtn: isPetro ? 'پر کردن با نمونه پالایشگاهی (معیارهای موفقیت)' : 'پر کردن با نمونه مگاپروژه احداث مترو (معیارهای موفقیت)',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
       copiedToast: 'متن بوم در کلیپ‌بورد کپی شد!',
@@ -59,8 +65,8 @@ export const Page3SuccessCriteria: React.FC<Page3Props> = ({
       prevPageBtn: 'صفحه قبل: در این تکرار چه مسئله‌ای را با هوش مصنوعی حل می‌کنید؟',
       nextPageBtn: 'صفحه بعد: تحلیل هزینه-فایده و بودجه (اسلاید ۱۴)',
       tipsTitle: 'راهنمای کلیدی متدولوژی CPMAI برای معیارهای موفقیت کسب‌وکار:',
-      tip1: 'معیارهای کسب‌وکار، معیارهای فنی هوش مصنوعی (مانند دقت یا F1-score) نیستند؛ بلکه باید ارزش ملموس سازمانی (ریال، زمان، رضایت) را بازتاب دهند.',
-      tip2: 'معیارهای عینی باید دارای هدف کمّی مشخص و افق زمانی باشند (مانند کاهش ۱۲ درصدی ریزش ظرف ۶ ماه).',
+      tip1: 'معیارهای کسب‌وکار، معیارهای فنی هوش مصنوعی (مانند دقت یا F1-score) نیستند؛ بلکه باید ارزش ملموس سازمانی (ریال، زمان، کاهش ریسک) را بازتاب دهند.',
+      tip2: 'معیارهای عینی باید دارای هدف کمّی مشخص و افق زمانی باشند (مانند کاهش ۸۰ درصدی ادعاهای تاخیرات پیمانکار یا کاهش ۳ میلیون دلاری مشعل‌سوزی).',
       tip3: 'برای معیارهای کیفی و ذهنی (مانند "ارائه بینش سودمند") باید صریحاً ذی‌نفع ارزیابی‌کننده تعیین شود.',
       tip4: 'معیارها را دقیقاً متناسب با محدوده همین تکرار بسنجید و از وعده‌های زودرس برای اسپرینت‌های آینده پرهیز کنید.'
     }
@@ -97,37 +103,70 @@ export const Page3SuccessCriteria: React.FC<Page3Props> = ({
   };
 
   const handleInsertExample = () => {
-    const exampleEn = `Business Success Criteria: Retail Banking Churn Iteration (Sprint 1)
+    const exampleEnCivil = `Business Success Criteria: Urban Metro TBM Ground Subsidence Iteration (Sprint 1)
 
 1. Objective (Quantitative) Measures of Success:
-- Attrition Rate Reduction: Reduce monthly customer defection among high-value checking accounts from the current 1.2% baseline to <=1.0% (a net 15% reduction in churn rate).
-- Financial Impact: Retain an estimated $1.85M in core deposits over the first 6 months across pilot branches.
-- Campaign Conversion: Proactive retention outreach based on AI alerts achieves >=12% retention save rate (compared to current passive <5% recovery rate).
-- Timeliness & SLA: High-risk customer predictions delivered to branch CRM systems every Monday morning prior to 08:00 AM with <2 seconds dashboard load latency.
+- Geotechnical Boundary Control: Keep maximum ground settlement above the TBM crown strictly below 2.0 mm across all intersecting municipal utility crossings.
+- Contractual Delay Mitigation: Reduce contractor delay claims and work stoppages under Circular 4311 (Clause 30) by >=80%, preventing an estimated $1.4M in dispute costs.
+- Prediction Horizon & Latency: Continuous 48-hour settlement predictions refreshed every 15 minutes with dashboard telemetry latency under 500ms.
+- Model Precision Target: Mean Absolute Error (MAE) of settlement forecasting < 0.8 mm validated against real surveyor pin readings.
 
 2. Subjective (Qualitative) Measures of Success:
-- Decision Support Utility: Branch relationship managers report that the top-3 explanatory churn drivers provided for each flagged customer provide actionable context during consultation calls.
-- Designated Evaluator: Regional Branch Operations Director, assessed via a bi-weekly qualitative review panel.
+- Engineering Usability: Resident supervisory engineers and TBM superintendents confirm that the real-time subsidence risk heatmaps provide actionable guidance for cutterhead torque and bentonite face pressure adjustments.
+- Designated Evaluator: Metro Line Technical Project Director & Lead Geotechnical Consultant.
 
 3. Minimum Acceptable Gate Threshold:
-- If churn reduction is <8% after 90 days, the iteration triggers a CPMAI Phase III data refinement cycle before wider network rollout.`;
+- If settlement prediction error exceeds 1.5 mm in initial drive testing, the team iterates on spatial-temporal feature engineering in Phase III before tunneling beneath pressurized gas mains.`;
 
-    const exampleFa = `معیارهای موفقیت کسب‌وکار: تکرار پیش‌بینی ریزش مشتریان بانکداری خرد (اسپرینت ۱)
+    const exampleFaCivil = `معیارهای موفقیت کسب‌وکار: تکرار پیش‌بینی نشست زمین در حفاری مکانیزه مترو (اسپرینت ۱)
 
 ۱. معیارهای عینی و کمّی موفقیت برای این تکرار (Objective Measures):
-- نرخ کاهش ریزش مشتریان: کاهش نرخ ریزش ماهانه حساب‌های جاری باارزش از خط مبنای ۱.۲٪ فعلی به کمتر از ۱.۰٪ (معادل کاهش خالص ۱۵ درصدی در نرخ خروج).
-- ارزش مالی محافظت‌شده: حفظ حداقل ۱.۸۵ میلیارد تومان از منابع پایدار سپرده‌های خرد ظرف ۶ ماه اول در شعب پایلوت.
-- نرخ اثربخشی تماس‌های نگهداشت: دستیابی به حداقل ۱۲٪ ماندگاری مشتریان پس از تماس فعالانه کارشناسان (در مقایسه با نرخ زیر ۵٪ در فرآیند منفعل فعلی).
-- دسترس‌پذیری عملیاتی: تزریق خودکار کارت امتیازی مشتریان پرریسک به سامانه CRM شعب در صبح هر شنبه پیش از ساعت ۸:۰۰ صبح با تاخیر نمایش کمتر از ۲ ثانیه.
+- کنترل حدود مجاز ژئوتکنیکی: حفظ حداکثر فرونشست سطح زمین بالای تاج تونل زیر ۲.۰ میلی‌متر در تقاطع با خطوط لوله گاز و انتقال آب شهری.
+- کاهش ادعاهای قراردادی تاخیرات: کاهش حداقل ۸۰ درصدی توقف‌های کارگاهی و ادعای تاخیرات مجاز پیمانکار تحت ماده ۳۰ نشریه ۴۳۱۱ (صرفه‌جویی ۱.۴ میلیارد تومانی در خسارات پروژه).
+- افق زمانی و تاخیر پیش‌بینی: تولید مداوم نقشه پیش‌بینی نشست با افق ۴۸ ساعت قبل از پیشروی و تازه‌سازی هر ۱۵ دقیقه یکبار با تاخیر نمایش کمتر از ۵۰۰ میلی‌ثانیه.
+- دقت پیش‌بینی مدل: خطای میانگین قدرمطلق (MAE) کمتر از ۰.۸ میلی‌متر در مقایسه با قرائت‌های واقعی پین‌های نقشه‌برداری.
 
 ۲. معیارهای کیفی و ذهنی موفقیت (Subjective Criteria):
-- مطلوبیت تصمیم‌یاری: کارشناسان و روسای شعب اعلام کنند که سه دلیل اصلی ارائه شده برای ریسک ریزش هر مشتری در مکالمه تلفنی واقعاً کارآمد و قابل‌استفاده است.
-- مرجع قضاوت کیفی: مدیر امور شعب منطقه و رئیس اداره نگهداری مشتریان، ارزیابی‌شده در جلسه بازنگری دوهفته‌یک‌بار.
+- کارآمدی تصمیم‌یاری کارگاهی: مهندسان ناظر مقیم و سرپرست کارگاه تایید کنند که هشدارهای نشست، تصمیم‌گیری درباره تغییر پارامتر تزریق فوم و فشار پیشانی TBM را به شکل عملیاتی ممکن می‌سازد.
+- مرجع قضاوت کیفی: مدیر فنی مگاپروژه احداث خط مترو و سرناظر ژئوتکنیک مهندس مشاور.
 
 ۳. آستانه پذیرش حداقلی برای پیشروی:
-- در صورتی که کاهش ریزش پس از ۹۰ روز به کمتر از ۸٪ برسد، طبق متدولوژی CPMAI تیم به فاز ۳ (آماده‌سازی داده‌ها) بازمی‌گردد تا متغیرهای رفتاری جدیدی اضافه شوند.`;
+- در صورتی که خطای پیش‌بینی نشست در قطعه آزمایشی بالای ۱.۵ میلی‌متر باشد، پیشروی به زیر بافت فرسوده متوقف شده و تیم به فاز ۳ برای مهندسی ویژگی‌های لایه‌های زمین‌شناسی بازمی‌گردد.`;
 
-    onChangeContent(lang === 'fa' ? exampleFa : exampleEn);
+    const exampleEnPetro = `Business Success Criteria: Crude Preheat Train Fouling & Flaring Mitigation (Sprint 1)
+
+1. Objective (Quantitative) Measures of Success:
+- Flaring & Fuel Cost Reduction: Cut emergency flaring emissions and furnace firing overconsumption by $2.4M annually through early descaling schedule optimization.
+- Descaling Lead Time: Issue automated descaling advisories at least 45 days before the preheat train hydraulic pressure drop breaches the 3.5 bar critical threshold.
+- Thermal Coefficient Accuracy: Achieve Mean Absolute Percentage Error (MAPE) < 4.5% in forecasting the overall heat transfer coefficient (U-value) degradation curve across 60 days.
+- Availability & Telemetry Uptime: 99.8% uptime on Level-3 OT network integration with DCS OSIsoft PI data tags.
+
+2. Subjective (Qualitative) Measures of Success:
+- Operational Safety Alignment: Central Control Room (CCR) board operators and process engineers confirm that model advisory setpoints strictly respect equipment metallurgical creep limits and plant HAZOP safety matrices.
+- Designated Evaluator: Refinery Chief Process Operations Superintendent and Senior Asset Integrity Lead.
+
+3. Minimum Acceptable Gate Threshold:
+- If U-value prediction MAPE exceeds 7% after 30 days of real-time monitoring, model retraining with updated crude assay properties is enforced before issuing autonomous advisory alerts.`;
+
+    const exampleFaPetro = `معیارهای موفقیت کسب‌وکار: تکرار پیش‌بینی رسوب‌گرفتگی مبدل‌ها و کاهش مشعل‌سوزی پالایشگاه (اسپرینت ۱)
+
+۱. معیارهای عینی و کمّی موفقیت برای این تکرار (Objective Measures):
+- صرفه‌جویی مالی در سوخت و فلرینگ: کاهش مصرف گاز سوخت کوره و پیشگیری از مشعل‌سوزی اضطراری حداقل به ارزش ۲.۴ میلیون دلار در سال از طریق بهینه‌سازی توالی شستشوی مبدل‌ها.
+- افق زمانی هشدار شستشو: صدور هشدار تمیزکاری مبدل‌ها حداقل ۴۵ روز پیش از رسیدن افت فشار هیدرولیکی به حد بحرانی ۳.۵ بار.
+- دقت محاسباتی مدل: دستیابی به خطای درصد میانگین (MAPE) کمتر از ۴.۵٪ در پیش‌بینی منحنی افت ضریب انتقال حرارت (U-value) در بازه ۶۰ روزه آینده.
+- پایداری اتصال صنعتی: آپ‌تایم ۹۹.۸٪ سامانه بر بستر شبکه صنعتی اتوماسیون (DCS) پالایشگاه.
+
+۲. معیارهای کیفی و ذهنی موفقیت (Subjective Criteria):
+- انطباق با اصول ایمنی فرآیند: بهره‌برداران اتاق کنترل مرکزی (CCR) و مهندسان فرآیند تایید کنند که نقاط کاری پیشنهادی مدل با حدود ایمنی متالورژیکی لوله‌ها و استانداردهای HAZOP مطابقت کامل دارد.
+- مرجع قضاوت کیفی: رئیس بهره‌برداری پالایشگاه و سرپرست مهندسی ایمنی فرآیند و دارایی‌های فیزیکی.
+
+۳. آستانه پذیرش حداقلی برای پیشروی:
+- در صورتی که خطای پیش‌بینی ضریب حرارتی بالای ۷٪ باشد، پیشنهادهای مدل در وضعیت غیرفعال (Shadow Mode) قرار گرفته و تیم به فاز ۳ برای اصلاح موازنه جرم و انرژی بازمی‌گردد.`;
+
+    const selectedEn = isPetro ? exampleEnPetro : exampleEnCivil;
+    const selectedFa = isPetro ? exampleFaPetro : exampleFaCivil;
+
+    onChangeContent(lang === 'fa' ? selectedFa : selectedEn);
   };
 
   const handleCopy = () => {

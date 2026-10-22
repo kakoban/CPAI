@@ -262,10 +262,26 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
   };
 
   const handleCopyReport = () => {
-    const reportText = `🏆 کارنامه رسمی آزمون سطح‌سنجی هوش مصنوعی و گیت‌هاب
+    const isCandidatePetro =
+      (candidateSpecialty || '').includes('نفت') ||
+      (candidateSpecialty || '').includes('گاز') ||
+      (candidateSpecialty || '').includes('پتروشیمی') ||
+      (candidateSpecialty || '').toLowerCase().includes('petro') ||
+      (candidateSpecialty || '').toLowerCase().includes('oil');
+
+    const domainTrackBadgeFa = isCandidatePetro
+      ? 'حوزه تخصصی ارزیابی‌شده: صنایع نفت، گاز، پالایش و پتروشیمی'
+      : 'حوزه تخصصی ارزیابی‌شده: مگاپروژه‌های عمرانی، راه، ترابری و ابنیه کلان';
+
+    const domainTrackBadgeEn = isCandidatePetro
+      ? 'Evaluated Industry Track: Oil, Gas & Petrochemical Engineering'
+      : 'Evaluated Industry Track: Mega Civil & Transportation Infrastructure';
+
+    const reportText = `🏆 کارنامه رسمی آزمون سطح‌سنجی هوش مصنوعی و مهندسی
 مشاوران مدیریت کسب و کار اوج (OWJ)
 نام شرکت‌کننده: ${candidateDisplayName}
 تخصص / رشته مهندسی: ${candidateSpecialty}
+${lang === 'fa' ? domainTrackBadgeFa : domainTrackBadgeEn}
 ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوالات آزمون: ${trackLabelFa[selectedTrack]}
 امتیاز کل: ${currentScore} از ${totalQuestions} (${Math.round((currentScore / totalQuestions) * 100)}%)
 سطح احراز شده: ${lang === 'fa' ? currentResultLevel.titleFa : currentResultLevel.titleEn}
