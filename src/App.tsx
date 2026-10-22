@@ -47,6 +47,7 @@ import { IndustryTrackSwitcher } from './components/industry/IndustryTrackSwitch
 import { IndustryTrackSelectorModal } from './components/industry/IndustryTrackSelectorModal';
 import { DisciplineSelectorModal } from './components/industry/DisciplineSelectorModal';
 import { DisciplineBadge } from './components/industry/DisciplineBadge';
+import { WorkspaceSidebar } from './components/navigation/WorkspaceSidebar';
 import { getDisciplineMetadata } from './data/disciplineExamplesRegistry';
 import { authApi, isAuthorizedAdminUser } from './services/authApi';
 import { lmsApi } from './services/lmsApi';
@@ -54,7 +55,7 @@ import { UserProfile } from './types/auth';
 import { SessionLockEntity } from './types/lms';
 import { Footer } from './components/Footer';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from './data/logo';
-import { Clock, Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud, Calculator, Bot, Server, Sparkles, Trophy, Lock, Unlock, GraduationCap } from 'lucide-react';
+import { Clock, Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud, Calculator, Bot, Server, Sparkles, Trophy, Lock, Unlock, GraduationCap, Menu, PanelLeftClose } from 'lucide-react';
 
 export type AppPage = 'landing' | 'quiz' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21;
 
@@ -102,6 +103,7 @@ export default function App() {
   const [activeDiscipline, setActiveDiscipline] = useState<DisciplineId>(() => getSavedDiscipline(getSavedIndustryTrack()));
   const [activeRole, setActiveRole] = useState<EngineeringRoleId>(() => getSavedRole());
   const [isDisciplineModalOpen, setIsDisciplineModalOpen] = useState<boolean>(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
   const handleSelectIndustryTrack = (track: IndustryTrackId) => {
     setIndustryTrack(track);
@@ -822,398 +824,64 @@ export default function App() {
             />
           </div>
 
-          {/* Page Navigation Segmented Control */}
-          <div className="flex-1 min-w-0 flex items-center p-1.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-inner overflow-x-auto gap-1">
-            {/* Landing Page Gateway */}
+          {/* Clean Central Nav trigger for Sidebar Navigation */}
+          <div className="flex-1 min-w-0 flex items-center justify-center gap-2 px-2">
             <button
-              onClick={() => {
-                setPage('landing');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-[0.96] shrink-0 border bg-[#2563EB]/10 dark:bg-[#2563EB]/15 text-[#2563EB] dark:text-[#60A5FA] border-[#2563EB]/30 hover:bg-[#2563EB]/20 cursor-pointer"
-              title={lang === 'fa' ? 'بازگشت به صفحه معرفی و لندینگ' : 'Return to Agentify Landing Page'}
+              onClick={() => setIsSidebarOpen(true)}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.09] transition-all text-xs font-bold cursor-pointer group shadow-2xs"
+              title={lang === "fa" ? "فهرست سرفصل‌های کارگاه و جلسات ۲۲گانه" : "Open Curriculum Sidebar"}
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'صفحه لندینگ' : 'Landing'}</span>
+              <Menu className="w-4 h-4 text-[#1f5163] dark:text-[#6fb3c6] group-hover:scale-110 transition-transform" />
+              <span className="text-[#1c2830] dark:text-[#e8ebe9]">
+                {page === "quiz"
+                  ? (lang === "fa" ? "🎯 آزمون سطح‌سنجی" : "🎯 Quiz")
+                  : page === 0
+                  ? (lang === "fa" ? "صفحه ۰: کارگاه مبانی LLM" : "Page 0: LLM Workshop")
+                  : (lang === "fa" ? `جلسه ${page} از ۲۱` : `Session ${page} of 21`)}
+              </span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6]">
+                {lang === "fa" ? "فهرست جلسات ☰" : "Curriculum ☰"}
+              </span>
             </button>
 
-            {/* Entry Assessment: Readiness Placement Quiz */}
-            <button
-              onClick={() => {
-                setPage('quiz');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-[0.96] shrink-0 border ${
-                page === 'quiz'
-                  ? 'bg-gradient-to-r from-[#2f7d5b] to-[#1f5163] text-white border-transparent shadow-xs ring-2 ring-[#2f7d5b]/30'
-                  : 'bg-[#2f7d5b]/10 dark:bg-[#2f7d5b]/15 text-[#2f7d5b] dark:text-[#52b788] border-[#2f7d5b]/30 hover:bg-[#2f7d5b]/20'
-              }`}
-            >
-              <Target className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? '🎯 آزمون سطح‌سنجی (ورود)' : '🎯 Readiness Quiz'}</span>
-            </button>
-
-            {/* LLM For Humans Book Modal Trigger */}
-            <button
-              onClick={() => setIsBookModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-[0.96] shrink-0 border bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20 cursor-pointer shadow-xs"
-              title={lang === 'fa' ? 'کتابچه جامع: مدل‌های زبانی بزرگ (LLM) به زبان آدمیزاد' : 'LLMs for Humans Executive Digest'}
-            >
-              <BookOpen className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>{lang === 'fa' ? '📚 کتابچه LLM به زبان آدمیزاد' : '📚 LLMs for Humans'}</span>
-            </button>
-
-            {/* Page 0: LLM Fundamentals & Prompting Toolkit */}
-            <button
-              onClick={() => {
-                setPage(0);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-[0.96] shrink-0 border whitespace-nowrap cursor-pointer ${
-                page === 0
-                  ? 'bg-gradient-to-r from-[#1f5163] to-[#0f4c5c] text-white border-transparent shadow-xs ring-2 ring-[#1f5163]/30'
-                  : 'bg-[#1f5163]/10 dark:bg-[#6fb3c6]/10 text-[#1f5163] dark:text-[#6fb3c6] border-[#1f5163]/25 hover:bg-[#1f5163]/20'
-              }`}
-              title={lang === 'fa' ? 'کارگاه کاربردی مبانی مدل‌های زبانی، پرامپت‌نویسی RCTO و شبیه‌سازها' : 'Applied LLM Fundamentals & Prompting Toolkit'}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>{lang === 'fa' ? 'صفحه ۰: کارگاه پرامپت و مبانی LLM' : 'Page 0: LLM Workshop'}</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(1);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
-                page === 1
-                  ? 'bg-[#ffffff] dark:bg-[#1a2228] text-[#1f5163] dark:text-[#6fb3c6] shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'صفحه ۱: درک کسب‌وکار' : 'Page 1'}</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(2);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
-                page === 2
-                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'صفحه ۲: حل مسئله' : 'Page 2'}</span>
-              {isSessionLocked(2) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(3);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
-                page === 3
-                  ? 'bg-[#b87333] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <Award className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'صفحه ۳: معیارهای موفقیت' : 'Page 3'}</span>
-              {isSessionLocked(3) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(4);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
-                page === 4
-                  ? 'bg-[#1f5163] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <DollarSign className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'صفحه ۴: هزینه-فایده' : 'Page 4: Budget'}</span>
-              {isSessionLocked(4) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(5);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 5
-                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'صفحه ۵: برآورد ROI (۱۵)' : 'Page 5 (Expected ROI)'}</span>
-              {isSessionLocked(5) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(6);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 6
-                  ? 'bg-[#1b3a4b] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <Brain className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'صفحه ۶: الزامات شناختی (۱۶)' : 'Page 6 (Cognitive Req.)'}</span>
-              {isSessionLocked(6) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(7);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 7
-                  ? 'bg-[#0f4c5c] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <Cpu className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'صفحه ۷: چرا AI؟ (۱۷)' : 'Page 7 (Why AI?)'}</span>
-              {isSessionLocked(7) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(8);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 8
-                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'صفحه ۸: بخش‌های غیرشناختی (۱۸)' : 'Page 8 (Noncognitive Parts)'}</span>
-              {isSessionLocked(8) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(9);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 9
-                  ? 'bg-[#1b3a4b] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <Target className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'صفحه ۹: اهداف شناختی (۱۹)' : 'Page 9 (Cognitive Obj.)'}</span>
-              {isSessionLocked(9) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(10);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 10
-                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <Gauge className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'صفحه ۱۰: نتایج شناختی (۲۰)' : 'Page 10 (Cognitive Outcomes)'}</span>
-              {isSessionLocked(10) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(11);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 11
-                  ? 'bg-[#1f5163] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'صفحه ۱۱: معیارهای موفقیت AI (۲۱)' : 'Page 11 (AI Success Criteria)'}</span>
-              {isSessionLocked(11) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(12);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 12
-                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <Network className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'صفحه ۱۲: الگوهای هوش مصنوعی (۲۲)' : 'Page 12 (AI Patterns)'}</span>
-              {isSessionLocked(12) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(13);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 13
-                  ? 'bg-[#1f5163] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <Workflow className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'صفحه ۱۳: تعیین الگوها (۲۳)' : 'Page 13 (Which Patterns)'}</span>
-              {isSessionLocked(13) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(14);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 14
-                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <Calendar className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'صفحه ۱۴: ارزیابی وضعیت (۲۴)' : 'Page 14 (Assess Situation)'}</span>
-              {isSessionLocked(14) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(15);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 15
-                  ? 'bg-[#1b3a4b] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <HardDrive className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'صفحه ۱۵: فناوری و مهارت‌ها (۲۵)' : 'Page 15 (Tech & Skills)'}</span>
-              {isSessionLocked(15) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(16);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 16
-                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <Clock className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'صفحه ۱۶: زمان‌بندی (۲۶)' : 'Page 16 (Schedule)'}</span>
-              {isSessionLocked(16) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(17);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 17
-                  ? 'bg-[#1b3a4b] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <Gauge className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'صفحه ۱۷: محدودیت‌ها و عملکرد (۲۷)' : 'Page 17 (Constraints & Performance)'}</span>
-              {isSessionLocked(17) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(18);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 18
-                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <Calculator className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'صفحه ۱۸: سنجه‌ها و ماتریس (۲۸)' : 'Page 18 (Metrics)'}</span>
-              {isSessionLocked(18) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(19);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 19
-                  ? 'bg-[#1b3a4b] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <Bot className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'صفحه ۱۹: سنجه‌ها و حساسیت‌ها (۲۹)' : 'Page 19 (Sensitivities)'}</span>
-              {isSessionLocked(19) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(20);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 20
-                  ? 'bg-[#00738c] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <TrendingUp className="w-3.5 h-3.5 text-[#6ee7b7]" />
-              <span>{lang === 'fa' ? 'صفحه ۲۰: سنجه‌های KPI کسب‌وکار (۳۰)' : 'Page 20 (Business KPIs)'}</span>
-              {isSessionLocked(20) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
-
-            <button
-              onClick={() => {
-                setPage(21);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all shrink-0 ${
-                page === 21
-                  ? 'bg-[#1b3a4b] text-white shadow-xs font-semibold'
-                  : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-              }`}
-            >
-              <Server className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'صفحه ۲۱: سنجه‌های فناوری (۳۱)' : 'Page 21 (Tech KPIs)'}</span>
-              {isSessionLocked(21) && <Lock className="w-2.5 h-2.5 text-rose-500/80 shrink-0" />}
-            </button>
+            {/* Quick Fast Jumpers for Landing & Page 0 */}
+            <div className="hidden xl:flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  setPage("landing");
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="px-2.5 py-1 rounded-lg text-xs font-semibold text-[#2563EB] hover:bg-[#2563EB]/10 transition-all cursor-pointer"
+              >
+                {lang === "fa" ? "لندینگ" : "Landing"}
+              </button>
+              <button
+                onClick={() => {
+                  setPage(0);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  page === 0
+                    ? "bg-[#1f5163] text-white shadow-2xs"
+                    : "text-[#1f5163] dark:text-[#6fb3c6] hover:bg-[#1f5163]/10"
+                }`}
+              >
+                {lang === "fa" ? "کارگاه پرامپت (۰)" : "Prompt Workshop (0)"}
+              </button>
+              <button
+                onClick={() => {
+                  setPage("quiz");
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  page === "quiz"
+                    ? "bg-[#2f7d5b] text-white shadow-2xs"
+                    : "text-[#2f7d5b] dark:text-[#52b788] hover:bg-[#2f7d5b]/10"
+                }`}
+              >
+                {lang === "fa" ? "آزمون ورودی" : "Quiz"}
+              </button>
+            </div>
           </div>
 
           {/* Tools & Utilities */}
@@ -1359,14 +1027,29 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-7 lg:p-10">
-        {toastMsg && (
-          <div className="mb-4 p-3 rounded-lg bg-[#e3f2ea] text-[#2f7d5b] dark:bg-[#173025] dark:text-[#63c496] text-xs sm:text-sm font-medium flex items-center gap-2 animate-fade-in">
-            <Check className="w-4 h-4 shrink-0" />
-            <span>{toastMsg}</span>
-          </div>
-        )}
+      {/* Workspace Body Layout (Sidebar + Main Workspace Area) */}
+      <div className="flex-1 flex w-full max-w-[1750px] mx-auto relative">
+        {/* Responsive Workspace Sidebar */}
+        <WorkspaceSidebar
+          page={page}
+          onSelectPage={setPage}
+          lang={lang}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          isSessionLocked={isSessionLocked}
+          onOpenBookModal={() => setIsBookModalOpen(true)}
+          industryTrack={industryTrack}
+          disciplineId={activeDiscipline}
+        />
+
+        {/* Main Content Area */}
+        <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-7 lg:p-10 min-w-0">
+          {toastMsg && (
+            <div className="mb-4 p-3 rounded-lg bg-[#e3f2ea] text-[#2f7d5b] dark:bg-[#173025] dark:text-[#63c496] text-xs sm:text-sm font-medium flex items-center gap-2 animate-fade-in">
+              <Check className="w-4 h-4 shrink-0" />
+              <span>{toastMsg}</span>
+            </div>
+          )}
 
         {/* Readiness Placement Quiz View */}
         {page === 'quiz' && (
@@ -1939,7 +1622,8 @@ export default function App() {
           onSelectRole={handleSelectRole}
           lang={lang}
         />
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
