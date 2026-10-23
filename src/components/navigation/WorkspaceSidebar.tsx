@@ -245,6 +245,7 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [openPhases, setOpenPhases] = useState<Record<number, boolean>>({ 1: true });
+  const [openTaskGroups, setOpenTaskGroups] = useState<Record<string, boolean>>({ '1-0': true, '1-1': true });
   const [completedSessions, setCompletedSessions] = useState<Record<number, boolean>>(() => {
     try {
       const saved = localStorage.getItem('cpmai-completed-sessions');
@@ -280,6 +281,13 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
     setOpenPhases((prev) => ({
       ...prev,
       [phaseId]: !prev[phaseId]
+    }));
+  };
+
+  const toggleTaskGroup = (key: string) => {
+    setOpenTaskGroups((prev) => ({
+      ...prev,
+      [key]: !prev[key]
     }));
   };
 
@@ -512,72 +520,102 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
                   {/* Sessions Container */}
                   {isOpenPhase && (
                     <div className="p-2 pt-0 space-y-3">
-                      {/* If Phase 1: Render Task Groups */}
+                      {/* If Phase 1: Render Task Groups with Tree Branch Styling */}
                       {phase.taskGroups ? (
-                        phase.taskGroups.map((tg, tgIdx) => (
-                          <div key={tgIdx} className="space-y-1">
-                            <span className="block text-[10px] font-bold text-[#587479] dark:text-[#8ca8ab] px-2 py-0.5 border-b border-black/[0.04] dark:border-white/[0.04]">
-                              {lang === 'fa' ? tg.titleFa : tg.titleEn}
-                            </span>
-                            <ol className="relative pe-1 ps-2 space-y-0.5">
-                              {tg.sessions.map((session) => {
-                                const Icon = session.icon;
-                                const isCurrent = page === session.page;
-                                const isDone = !!completedSessions[session.page];
-                                const isLocked = isSessionLocked(session.page);
+                        phase.taskGroups.map((tg, tgIdx) => {
+                          const tgKey = `${phase.id}-${tgIdx}`;
+                          const isTgOpen = openTaskGroups[tgKey] !== false || !!searchQuery;
+                          const groupDoneCount = tg.sessions.filter((s) => completedSessions[s.page]).length;
 
-                                return (
-                                  <li key={session.page} className="relative">
-                                    <div
-                                      onClick={() => navigateTo(session.page as AppPage)}
-                                      className={`group/sess flex items-center justify-between p-1.5 rounded-lg text-start transition-all cursor-pointer ${
-                                        isCurrent
-                                          ? 'bg-[#fdf0d8] dark:bg-[#2b2412] text-[#12343b] dark:text-[#e4f0ee] font-bold shadow-2xs'
-                                          : 'hover:bg-[#eaf2f1] dark:hover:bg-[#172d31] text-[#587479] dark:text-[#8ca8ab] hover:text-[#12343b] dark:hover:text-[#e4f0ee]'
-                                      }`}
-                                    >
-                                      <div className="flex items-center gap-2 truncate">
-                                        <span
-                                          className={`w-5 h-5 rounded-full border text-[10px] font-mono font-bold flex items-center justify-center shrink-0 transition-all ${
-                                            isDone
-                                              ? 'bg-[#1e8f6b] text-white border-[#1e8f6b]'
-                                              : isCurrent
-                                              ? 'bg-[#fafdfc] dark:bg-[#0f1f22] border-[#d98a1f] text-[#d98a1f] ring-2 ring-[#d98a1f]/30'
-                                              : 'bg-[#fafdfc] dark:bg-[#0f1f22] border-[#c3d4d4] dark:border-[#274347] text-[#587479]'
+                          return (
+                            <div key={tgIdx} className="space-y-1">
+                              {/* Task Group Header (Collapsible sub-branch) */}
+                              <button
+                                type="button"
+                                onClick={() => toggleTaskGroup(tgKey)}
+                                className="w-full flex items-center justify-between px-2 py-1 rounded-md text-start transition-all hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer group/tg"
+                              >
+                                <div className="flex items-center gap-1.5 truncate">
+                                  <ChevronDown
+                                    className={`w-3 h-3 text-[#587479] transition-transform duration-200 shrink-0 ${
+                                      isTgOpen ? '' : '-rotate-90'
+                                    }`}
+                                  />
+                                  <span className="text-[11px] font-bold text-[#12343b] dark:text-[#e4f0ee] truncate">
+                                    {lang === 'fa' ? tg.titleFa : tg.titleEn}
+                                  </span>
+                                </div>
+                                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-black/5 dark:bg-white/10 text-gray-500 shrink-0">
+                                  {groupDoneCount}/{tg.sessions.length}
+                                </span>
+                              </button>
+
+                              {/* Task Group Sessions (Tree Leaves with connecting lines) */}
+                              {isTgOpen && (
+                                <ol className="relative pe-1 ps-3.5 space-y-1 ms-2 border-s-2 border-dashed border-[#c3d4d4] dark:border-[#274347]">
+                                  {tg.sessions.map((session) => {
+                                    const Icon = session.icon;
+                                    const isCurrent = page === session.page;
+                                    const isDone = !!completedSessions[session.page];
+                                    const isLocked = isSessionLocked(session.page);
+
+                                    return (
+                                      <li key={session.page} className="relative group/li">
+                                        {/* Horizontal Branch Branchlet (L-connector) */}
+                                        <div className="absolute top-3.5 -start-3.5 w-3 h-0.5 border-t-2 border-dashed border-[#c3d4d4] dark:border-[#274347] pointer-events-none" />
+
+                                        <div
+                                          onClick={() => navigateTo(session.page as AppPage)}
+                                          className={`group/sess flex items-center justify-between p-1.5 rounded-lg text-start transition-all cursor-pointer ${
+                                            isCurrent
+                                              ? 'bg-[#fdf0d8] dark:bg-[#2b2412] text-[#12343b] dark:text-[#e4f0ee] font-bold shadow-2xs'
+                                              : 'hover:bg-[#eaf2f1] dark:hover:bg-[#172d31] text-[#587479] dark:text-[#8ca8ab] hover:text-[#12343b] dark:hover:text-[#e4f0ee]'
                                           }`}
                                         >
-                                          {isDone ? <Check className="w-3 h-3 stroke-[3]" /> : session.page}
-                                        </span>
-                                        <span className="text-xs truncate">
-                                          {lang === 'fa' ? session.titleFa : session.titleEn}
-                                        </span>
-                                      </div>
+                                          <div className="flex items-center gap-2 truncate">
+                                            <span
+                                              className={`w-5 h-5 rounded-full border text-[10px] font-mono font-bold flex items-center justify-center shrink-0 transition-all ${
+                                                isDone
+                                                  ? 'bg-[#1e8f6b] text-white border-[#1e8f6b]'
+                                                  : isCurrent
+                                                  ? 'bg-[#fafdfc] dark:bg-[#0f1f22] border-[#d98a1f] text-[#d98a1f] ring-2 ring-[#d98a1f]/30'
+                                                  : 'bg-[#fafdfc] dark:bg-[#0f1f22] border-[#c3d4d4] dark:border-[#274347] text-[#587479]'
+                                              }`}
+                                            >
+                                              {isDone ? <Check className="w-3 h-3 stroke-[3]" /> : session.page}
+                                            </span>
+                                            <span className="text-xs truncate">
+                                              {lang === 'fa' ? session.titleFa : session.titleEn}
+                                            </span>
+                                          </div>
 
-                                      <div className="flex items-center gap-1 shrink-0">
-                                        {isLocked ? (
-                                          <Lock className="w-3 h-3 text-rose-500/80" />
-                                        ) : (
-                                          <button
-                                            type="button"
-                                            onClick={(e) => toggleSessionDone(session.page, e)}
-                                            title={isDone ? 'علامت‌گذاری به‌عنوان خوانده‌نشده' : 'علامت‌گذاری به‌عنوان انجام‌شده'}
-                                            className={`w-4.5 h-4.5 rounded-md border flex items-center justify-center transition-all ${
-                                              isDone
-                                                ? 'bg-[#1e8f6b] border-[#1e8f6b] text-white'
-                                                : 'opacity-0 group-hover/sess:opacity-100 border-[#c3d4d4] hover:border-[#1e8f6b] bg-white dark:bg-[#172d31]'
-                                            }`}
-                                          >
-                                            <Check className="w-2.5 h-2.5 stroke-[3]" />
-                                          </button>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </li>
-                                );
-                              })}
-                            </ol>
-                          </div>
-                        ))
+                                          <div className="flex items-center gap-1 shrink-0">
+                                            {isLocked ? (
+                                              <Lock className="w-3 h-3 text-rose-500/80" />
+                                            ) : (
+                                              <button
+                                                type="button"
+                                                onClick={(e) => toggleSessionDone(session.page, e)}
+                                                title={isDone ? 'علامت‌گذاری به‌عنوان خوانده‌نشده' : 'علامت‌گذاری به‌عنوان انجام‌شده'}
+                                                className={`w-4.5 h-4.5 rounded-md border flex items-center justify-center transition-all ${
+                                                  isDone
+                                                    ? 'bg-[#1e8f6b] border-[#1e8f6b] text-white'
+                                                    : 'opacity-0 group-hover/sess:opacity-100 border-[#c3d4d4] hover:border-[#1e8f6b] bg-white dark:bg-[#172d31]'
+                                                }`}
+                                              >
+                                                <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                              </button>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </li>
+                                    );
+                                  })}
+                                </ol>
+                              )}
+                            </div>
+                          );
+                        })
                       ) : (
                         /* Upcoming Phase Sessions (Roadmap) */
                         <ol className="relative pe-1 ps-2 space-y-0.5">
