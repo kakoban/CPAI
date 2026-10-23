@@ -168,7 +168,7 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
         </header>
 
         {/* 2-Column Body with Split Showcase Motion Pattern */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 grid grid-cols-1 md:grid-cols-[1.2fr_auto_0.8fr] gap-6 md:gap-3.5 scrollbar-thin overflow-x-hidden">
+        <div className="flex-1 overflow-y-auto px-6 py-5 grid grid-cols-1 md:grid-cols-[1.2fr_auto_0.8fr] gap-6 md:gap-3.5 no-scrollbar overflow-x-hidden">
           {/* Column 1: Disciplines (Side A - Outward shift away from divider) */}
           <section className="space-y-3">
             <div className="flex items-center gap-2">
