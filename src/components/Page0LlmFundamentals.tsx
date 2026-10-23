@@ -43,6 +43,7 @@ import { ENGINEERING_DATASETS } from '../data/engineering_sample_datasets';
 import { ENGINEERING_CONTRACTS } from '../data/engineering_sample_contracts';
 import { Page0EngineeringMasterclass } from './Page0EngineeringMasterclass';
 import { NotebookLmWorkshop } from './NotebookLmWorkshop';
+import { ClaudeEnterpriseConnectors } from './connectors/ClaudeEnterpriseConnectors';
 import { PetroClaudeArtifactSimulator, CLAUDE_PETRO_SYSTEM_PROMPT } from './PetroClaudeArtifactSimulator';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../data/logo';
 import { IndustryTrackId, DisciplineId } from '../types/industryTrack';
@@ -97,6 +98,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     | 'advanced_features'
     | 'engineering_dashboards'
     | 'contracts_and_gems'
+    | 'connectors'
     | 'notebooklm'
     | 'masterclass'
     | 'safety'
@@ -616,6 +618,16 @@ Tasks:
           {lang === 'fa' ? '۶. کارگاه قراردادها و دستیار Gems/Projects' : '6. Contracts & Gems/Projects'}
         </button>
         <button
+          onClick={() => setActiveTab('connectors')}
+          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 ${
+            activeTab === 'connectors'
+              ? 'bg-[#1a73e8] text-white font-semibold shadow-xs'
+              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+          }`}
+        >
+          {lang === 'fa' ? '۷. کانکتورهای گوگل، Slack و Notion MCP' : '7. Google, Slack & Notion Connectors'}
+        </button>
+        <button
           onClick={() => setActiveTab('notebooklm')}
           className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 ${
             activeTab === 'notebooklm'
@@ -623,7 +635,7 @@ Tasks:
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
           }`}
         >
-          {lang === 'fa' ? '۷. کارگاه Google NotebookLM (مدیران و تمرینات)' : '7. Google NotebookLM Workshop'}
+          {lang === 'fa' ? '۸. کارگاه Google NotebookLM (مدیران و تمرینات)' : '8. Google NotebookLM Workshop'}
         </button>
         <button
           onClick={() => setActiveTab('masterclass')}
@@ -2362,7 +2374,16 @@ Tasks:
         );
       })()}
 
-      {/* SECTION 7: GOOGLE NOTEBOOKLM MEGA-WORKSHOP */}
+      {/* SECTION 7: CLAUDE ENTERPRISE & GOOGLE CONNECTORS (GMAIL, DRIVE, CALENDAR, SLACK & NOTION MCP) */}
+      {(activeTab === 'all' || activeTab === 'connectors') && (
+        <ClaudeEnterpriseConnectors
+          lang={lang}
+          copyToClipboard={copyToClipboard}
+          copiedId={copiedId}
+        />
+      )}
+
+      {/* SECTION 8: GOOGLE NOTEBOOKLM MEGA-WORKSHOP */}
       {(activeTab === 'all' || activeTab === 'notebooklm') && (
         <NotebookLmWorkshop
           lang={lang}
