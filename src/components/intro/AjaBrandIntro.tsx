@@ -152,6 +152,9 @@ export const AjaBrandIntro: React.FC<AjaBrandIntroProps> = ({ onComplete }) => {
   const handleExit = useCallback(() => {
     if (isExiting) return;
     setIsExiting(true);
+    try {
+      localStorage.setItem('aja_brand_intro_seen_v2', 'true');
+    } catch {}
     playSynthesizedTone(784, 'triangle', 0.6);
     setTimeout(() => {
       onComplete();

@@ -99,7 +99,7 @@ export default function App() {
   // AJA Cinematic Brand Intro (Unseen Studio Inspired Experience)
   const [showBrandIntro, setShowBrandIntro] = useState<boolean>(() => {
     try {
-      return !sessionStorage.getItem('aja_brand_intro_seen_v2');
+      return !localStorage.getItem('aja_brand_intro_seen_v2');
     } catch {
       return false;
     }
@@ -107,7 +107,16 @@ export default function App() {
 
   // Google OAuth / GIS Authentication State
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+    try {
+      const saved = authApi.getSavedUser();
+      if (saved) {
+        if (isAuthorizedAdminUser(saved)) saved.role = 'admin';
+        return saved;
+      }
+    } catch {}
+    return null;
+  });
 
   // LMS & Cohort State
   const [sessionLocks, setSessionLocks] = useState<SessionLockEntity[]>([]);
@@ -199,9 +208,11 @@ export default function App() {
     return lock ? !lock.isUnlocked : false;
   };
 
-  // Enforce authentication: All platform features require login
+  // Enforce authentication: Login prompted only when entering deeper curriculum pages without session
   useEffect(() => {
-    if (!currentUser && page !== 'landing') {
+    // Sessions 0 and 1, plus landing & quiz are publicly viewable
+    const publicPages = ['landing', 'quiz', 0, 1];
+    if (!currentUser && !publicPages.includes(page)) {
       setPage('landing');
       setIsAuthModalOpen(true);
     }
