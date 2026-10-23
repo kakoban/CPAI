@@ -346,7 +346,7 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
           opacity: window.innerWidth >= 1024 && !isOpen ? 0 : 1,
           pointerEvents: window.innerWidth >= 1024 && !isOpen ? 'none' : 'auto'
         }}
-        className={`fixed lg:sticky inset-y-0 start-0 lg:top-16 z-50 lg:z-30 h-full lg:h-[calc(100vh-4rem)] w-[min(340px,88vw)] lg:w-auto shrink-0 glass-sidebar flex flex-col transition-all duration-300 ease-in-out ${
+        className={`fixed lg:sticky inset-y-0 start-0 lg:top-16 z-50 lg:z-30 h-full lg:h-[calc(100vh-4rem)] w-[min(340px,88vw)] lg:w-auto shrink-0 frosted-sidebar flex flex-col transition-all duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
         } ${isDragging ? 'select-none' : ''}`}
       >

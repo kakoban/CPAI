@@ -97,10 +97,10 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
         role="dialog"
         aria-modal="true"
         aria-labelledby="discipline-dialog-title"
-        className="relative w-full max-w-[960px] max-h-[90vh] flex flex-col bg-[#fafdfc]/95 dark:bg-[#0f1f22]/95 backdrop-blur-2xl rounded-2xl sm:rounded-3xl border border-white/80 dark:border-white/10 shadow-[0_24px_60px_rgba(8,30,35,0.28)] overflow-hidden text-[#12343b] dark:text-[#e4f0ee]"
+        className="relative w-full max-w-[960px] max-h-[90vh] flex flex-col frosted-glass rounded-2xl sm:rounded-3xl shadow-[0_24px_60px_rgba(8,30,35,0.28)] overflow-hidden text-[#12343b] dark:text-[#e4f0ee]"
       >
         {/* Header (Matching reference .hd) */}
-        <header className="flex items-start gap-3.5 px-6 pt-6 pb-4 border-b border-[#c3d4d4]/60 dark:border-[#274347]">
+        <header className="flex items-start gap-3.5 px-6 pt-6 pb-4 border-b border-white/60 dark:border-white/10 relative z-10">
           <div className="w-11 h-11 rounded-xl bg-[#12343b] dark:bg-[#1b3b40] text-[#f2f8f6] flex items-center justify-center shrink-0 shadow-sm">
             {currentTrack === 'CIVIL_INFRA' ? (
               <Building2 className="w-5 h-5" />
@@ -293,7 +293,7 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
         </div>
 
         {/* Footer (Matching reference .ft with summary chips + actions) */}
-        <footer className="px-6 py-4 border-t border-[#c3d4d4]/60 dark:border-[#274347] bg-[#fafdfc] dark:bg-[#0f1f22] flex flex-col sm:flex-row items-center justify-between gap-3">
+        <footer className="px-6 py-4 border-t border-white/60 dark:border-white/10 bg-transparent relative z-10 flex flex-col sm:flex-row items-center justify-between gap-3">
           {/* Summary chips */}
           <div className="flex flex-wrap items-center gap-2 text-xs">
             {selectedDiscMeta && (
