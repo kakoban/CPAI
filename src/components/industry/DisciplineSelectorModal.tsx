@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import {
   DisciplineId,
   IndustryTrackId,
@@ -26,6 +27,12 @@ interface DisciplineSelectorModalProps {
   lang?: 'fa' | 'en';
 }
 
+const spring = { type: 'spring', stiffness: 260, damping: 20, mass: 0.9 } as const;
+const springSnappy = { type: 'spring', stiffness: 420, damping: 28 } as const;
+const SHIFT = 10;
+const R_REST = 16;
+const R_HOVER = 22;
+
 export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = ({
   isOpen,
   onClose,
@@ -38,15 +45,40 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
 }) => {
   const [selectedDiscipline, setSelectedDiscipline] = useState<DisciplineId>(currentDiscipline);
   const [selectedRole, setSelectedRole] = useState<EngineeringRoleId>(currentRole);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setSelectedDiscipline(currentDiscipline);
     setSelectedRole(currentRole);
   }, [currentDiscipline, currentRole, isOpen]);
 
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   if (!isOpen) return null;
 
   const disciplines = getDisciplinesByTrack(currentTrack);
+  const isRtl = lang === 'fa';
+
+  // Side A (Disciplines, right side in RTL = +x shift):
+  const colASign = isMobile ? 0 : isRtl ? 1 : -1;
+  const colARestRadius = isMobile
+    ? '14px'
+    : isRtl
+    ? `0 ${R_REST}px ${R_REST}px 0`
+    : `${R_REST}px 0 0 ${R_REST}px`;
+
+  // Side B (Roles, left side in RTL = -x shift):
+  const colBSign = isMobile ? 0 : isRtl ? -1 : 1;
+  const colBRestRadius = isMobile
+    ? '14px'
+    : isRtl
+    ? `${R_REST}px 0 0 ${R_REST}px`
+    : `0 ${R_REST}px ${R_REST}px 0`;
 
   const roles = [
     {
@@ -135,10 +167,10 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
           </button>
         </header>
 
-        {/* 2-Column Body (Matching reference .body with grid 1.2fr 0.8fr) */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 scrollbar-thin">
-          {/* Column 1: Disciplines (7 cols on md) */}
-          <section className="md:col-span-7 space-y-3">
+        {/* 2-Column Body with Split Showcase Motion Pattern */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 grid grid-cols-1 md:grid-cols-[1.2fr_auto_0.8fr] gap-6 md:gap-3.5 scrollbar-thin overflow-x-hidden">
+          {/* Column 1: Disciplines (Side A - Outward shift away from divider) */}
+          <section className="space-y-3">
             <div className="flex items-center gap-2">
               <span
                 className={`w-4.5 h-4.5 rounded-full bg-[#1e8f6b] text-white flex items-center justify-center transition-all ${
@@ -161,10 +193,26 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
               {disciplines.map((d) => {
                 const isChecked = selectedDiscipline === d.id;
                 return (
-                  <label
+                  <motion.div
                     key={d.id}
                     onClick={() => setSelectedDiscipline(d.id)}
-                    className={`block p-3 rounded-xl border transition-all cursor-pointer relative select-none ${
+                    initial={false}
+                    style={{
+                      borderRadius: isChecked ? '18px' : colARestRadius
+                    }}
+                    whileHover={{
+                      x: colASign * SHIFT,
+                      borderRadius: `${R_HOVER}px`,
+                      boxShadow: '0 16px 32px -12px rgba(18, 52, 59, 0.28)',
+                      zIndex: 10
+                    }}
+                    whileFocus={{
+                      x: colASign * SHIFT,
+                      borderRadius: `${R_HOVER}px`
+                    }}
+                    whileTap={{ scale: 0.985 }}
+                    transition={spring}
+                    className={`block p-3.5 border transition-colors cursor-pointer relative select-none ${
                       isChecked
                         ? 'bg-[#fdf0d8] dark:bg-[#2b2412] border-[#d98a1f] dark:border-[#f0b04a] shadow-xs'
                         : 'bg-white/60 dark:bg-white/[0.03] border-[#c3d4d4] dark:border-[#274347] hover:bg-[#eaf2f1] dark:hover:bg-[#172d31]'
@@ -180,7 +228,12 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
                         }`}
                       >
                         {isChecked && (
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#d98a1f] dark:bg-[#f0b04a]" />
+                          <motion.span
+                            initial={{ scale: 0.3, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={springSnappy}
+                            className="w-2.5 h-2.5 rounded-full bg-[#d98a1f] dark:bg-[#f0b04a]"
+                          />
                         )}
                       </span>
 
@@ -217,14 +270,17 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
                         )}
                       </div>
                     </div>
-                  </label>
+                  </motion.div>
                 );
               })}
             </div>
           </section>
 
-          {/* Column 2: Roles Ladder (5 cols on md) */}
-          <section className="md:col-span-5 space-y-3">
+          {/* Vertical Dotted Divider (Split Showcase Axis) */}
+          <div className="hidden md:block self-stretch border-s-2 border-dotted border-[#c3d4d4] dark:border-[#274347] my-3 mx-1" />
+
+          {/* Column 2: Roles Ladder (Side B - Outward shift in opposite direction) */}
+          <section className="space-y-3">
             <div className="flex items-center gap-2">
               <span
                 className={`w-4.5 h-4.5 rounded-full bg-[#1e8f6b] text-white flex items-center justify-center transition-all ${
@@ -248,10 +304,26 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
                 const isLast = rIdx === roles.length - 1;
 
                 return (
-                  <label
+                  <motion.div
                     key={r.id}
                     onClick={() => setSelectedRole(r.id)}
-                    className={`block p-3 rounded-xl border transition-all cursor-pointer relative select-none ${
+                    initial={false}
+                    style={{
+                      borderRadius: isChecked ? '18px' : colBRestRadius
+                    }}
+                    whileHover={{
+                      x: colBSign * SHIFT,
+                      borderRadius: `${R_HOVER}px`,
+                      boxShadow: '0 16px 32px -12px rgba(18, 52, 59, 0.28)',
+                      zIndex: 10
+                    }}
+                    whileFocus={{
+                      x: colBSign * SHIFT,
+                      borderRadius: `${R_HOVER}px`
+                    }}
+                    whileTap={{ scale: 0.985 }}
+                    transition={spring}
+                    className={`block p-3.5 border transition-colors cursor-pointer relative select-none ${
                       isChecked
                         ? 'bg-[#fdf0d8] dark:bg-[#2b2412] border-[#d98a1f] dark:border-[#f0b04a] shadow-xs'
                         : 'bg-white/40 dark:bg-white/[0.02] border-transparent hover:bg-[#eaf2f1] dark:hover:bg-[#172d31]'
@@ -268,7 +340,12 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
                           }`}
                         >
                           {isChecked && (
-                            <span className="w-2.5 h-2.5 rounded-full bg-[#d98a1f] dark:bg-[#f0b04a]" />
+                            <motion.span
+                              initial={{ scale: 0.3, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={springSnappy}
+                              className="w-2.5 h-2.5 rounded-full bg-[#d98a1f] dark:bg-[#f0b04a]"
+                            />
                           )}
                         </span>
                         {!isLast && (
@@ -285,7 +362,7 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
                         </p>
                       </div>
                     </div>
-                  </label>
+                  </motion.div>
                 );
               })}
             </div>
