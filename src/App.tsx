@@ -822,7 +822,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#f5f5f2] dark:bg-[#0f1418] text-[#1c2830] dark:text-[#e8ebe9] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(31,81,99,0.08),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(111,179,198,0.06),rgba(0,0,0,0))] transition-colors flex flex-col selection:bg-[#1f5163]/20 selection:text-[#1f5163] dark:selection:bg-[#6fb3c6]/20 dark:selection:text-[#6fb3c6]">
+    <div className="min-h-[100dvh] bg-transparent text-[#1c2830] dark:text-[#e8ebe9] transition-colors flex flex-col selection:bg-[#1f5163]/20 selection:text-[#1f5163] dark:selection:bg-[#6fb3c6]/20 dark:selection:text-[#6fb3c6]">
       {/* OWJ Content Protection Shield (Anti-Copy, Anti-Print, Anti-Snipping with Smart Prompt Whitelist) */}
       <ContentProtectionShield lang={lang} isAdmin={isUserAdmin(currentUser)} />
 

@@ -41,6 +41,11 @@
 
   body {
     background-color: var(--bg);
+    background-image:
+      radial-gradient(38% 42% at 12% 15%, rgba(217, 138, 31, 0.42), transparent 72%),
+      radial-gradient(42% 48% at 90% 30%, rgba(30, 143, 107, 0.38), transparent 72%),
+      radial-gradient(55% 55% at 60% 100%, rgba(26, 92, 104, 0.45), transparent 72%);
+    background-attachment: fixed;
     color: var(--ink);
     font-family: var(--font-fa);
     -webkit-font-smoothing: antialiased;
@@ -101,33 +106,33 @@
 
 /* Glassmorphism sidebar & hidden scrollbar utilities matching reference HTML */
 :root {
-  --glass: rgba(250, 253, 252, 0.62);
-  --glass-line: rgba(255, 255, 255, 0.8);
-  --tile: rgba(255, 255, 255, 0.5);
-  --hover: rgba(18, 52, 59, 0.07);
-  --nowbg: rgba(253, 240, 216, 0.9);
-  --sheen: rgba(255, 255, 255, 0.32);
+  --glass: rgba(250, 253, 252, 0.52);
+  --glass-line: rgba(255, 255, 255, 0.85);
+  --tile: rgba(255, 255, 255, 0.45);
+  --hover: rgba(18, 52, 59, 0.08);
+  --nowbg: rgba(253, 240, 216, 0.85);
+  --sheen: rgba(255, 255, 255, 0.4);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --glass: rgba(15, 31, 34, 0.58);
-    --glass-line: rgba(255, 255, 255, 0.14);
+    --glass: rgba(15, 31, 34, 0.52);
+    --glass-line: rgba(255, 255, 255, 0.16);
     --tile: rgba(255, 255, 255, 0.05);
-    --hover: rgba(255, 255, 255, 0.07);
+    --hover: rgba(255, 255, 255, 0.08);
     --nowbg: rgba(66, 52, 22, 0.85);
-    --sheen: rgba(255, 255, 255, 0.07);
+    --sheen: rgba(255, 255, 255, 0.08);
   }
 }
 
 :root[data-theme="dark"],
 :root.dark {
-  --glass: rgba(15, 31, 34, 0.58);
-  --glass-line: rgba(255, 255, 255, 0.14);
+  --glass: rgba(15, 31, 34, 0.52);
+  --glass-line: rgba(255, 255, 255, 0.16);
   --tile: rgba(255, 255, 255, 0.05);
-  --hover: rgba(255, 255, 255, 0.07);
+  --hover: rgba(255, 255, 255, 0.08);
   --nowbg: rgba(66, 52, 22, 0.85);
-  --sheen: rgba(255, 255, 255, 0.07);
+  --sheen: rgba(255, 255, 255, 0.08);
 }
 
 .no-scrollbar::-webkit-scrollbar {
