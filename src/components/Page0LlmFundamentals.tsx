@@ -685,8 +685,17 @@ Tasks:
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-xl bg-[#10a37f]/10 text-[#10a37f] border border-[#10a37f]/20 flex items-center justify-center font-bold text-base shadow-xs">
-                        GPT
+                      <div className="w-10 h-10 rounded-2xl bg-[#e3f6f0] dark:bg-[#10a37f]/20 border border-[#10a37f]/30 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
+                        <svg viewBox="0 0 24 24" className="w-6 h-6 spin-gear-chatgpt" aria-label="ChatGPT">
+                          <g transform="translate(12 12)" fill="none" stroke="#10A37F" strokeWidth="1.9">
+                            <ellipse cy="-5.5" rx="3.6" ry="6.5" />
+                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(60)" />
+                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(120)" />
+                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(180)" />
+                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(240)" />
+                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(300)" />
+                          </g>
+                        </svg>
                       </div>
                       <div>
                         <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">ChatGPT</h3>
@@ -740,8 +749,23 @@ Tasks:
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-xl bg-[#d97706]/10 text-[#d97706] border border-[#d97706]/20 flex items-center justify-center font-bold text-base shadow-xs">
-                        Cl
+                      <div className="w-10 h-10 rounded-2xl bg-[#fdeee6] dark:bg-[#d97706]/20 border border-[#d97706]/30 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
+                        <svg viewBox="0 0 24 24" className="w-6 h-6 spin-gear-claude" aria-label="Claude">
+                          <g transform="translate(12 12)" stroke="#D97757" strokeWidth="2.4" strokeLinecap="round">
+                            <line y1="-3" y2="-11" />
+                            <line y1="-3" y2="-9" transform="rotate(30)" />
+                            <line y1="-3" y2="-11" transform="rotate(60)" />
+                            <line y1="-3" y2="-9" transform="rotate(90)" />
+                            <line y1="-3" y2="-11" transform="rotate(120)" />
+                            <line y1="-3" y2="-9" transform="rotate(150)" />
+                            <line y1="-3" y2="-11" transform="rotate(180)" />
+                            <line y1="-3" y2="-9" transform="rotate(210)" />
+                            <line y1="-3" y2="-11" transform="rotate(240)" />
+                            <line y1="-3" y2="-9" transform="rotate(270)" />
+                            <line y1="-3" y2="-11" transform="rotate(300)" />
+                            <line y1="-3" y2="-9" transform="rotate(330)" />
+                          </g>
+                        </svg>
                       </div>
                       <div>
                         <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">Claude</h3>
@@ -795,8 +819,17 @@ Tasks:
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-xl bg-[#1a73e8]/10 text-[#1a73e8] border border-[#1a73e8]/20 flex items-center justify-center font-bold text-base shadow-xs">
-                        Gem
+                      <div className="w-10 h-10 rounded-2xl bg-[#e8f0fe] dark:bg-[#1a73e8]/20 border border-[#1a73e8]/30 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
+                        <svg viewBox="0 0 24 24" className="w-6 h-6 spin-gear-gemini" aria-label="Gemini">
+                          <defs>
+                            <linearGradient id="gemGradPage0" x1="0" y1="0" x2="1" y2="1">
+                              <stop offset="0%" stopColor="#4285F4" />
+                              <stop offset="55%" stopColor="#9B72CB" />
+                              <stop offset="100%" stopColor="#D96570" />
+                            </linearGradient>
+                          </defs>
+                          <path fill="url(#gemGradPage0)" d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z" />
+                        </svg>
                       </div>
                       <div>
                         <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">Gemini</h3>

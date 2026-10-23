@@ -194,6 +194,40 @@
   border-color: var(--now);
 }
 
+/* Gear-like continuous rotating animations for AI model logos */
+@keyframes gear-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-gear-gemini {
+  animation: gear-spin 8s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+.spin-gear-claude {
+  animation: gear-spin 10s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+.spin-gear-chatgpt {
+  animation: gear-spin 12s linear infinite reverse;
+  transform-origin: 50% 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin-gear-gemini,
+  .spin-gear-claude,
+  .spin-gear-chatgpt {
+    animation: none;
+  }
+}
+
+
 
 
 /* -------------------------------------------------------------
