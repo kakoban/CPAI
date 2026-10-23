@@ -333,23 +333,29 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
 
       {/* Main Sidebar Element matching reference .side */}
       <aside
-        style={{ width: window.innerWidth >= 1024 ? `${sidebarWidth}px` : undefined }}
-        className={`fixed lg:sticky inset-y-0 start-0 lg:top-16 z-50 lg:z-30 h-full lg:h-[calc(100vh-4rem)] w-[min(340px,88vw)] lg:w-auto shrink-0 bg-[#f8fbfa]/95 dark:bg-[#0f1f22]/95 backdrop-blur-2xl border-inline-end border-[#c3d4d4] dark:border-[#274347] flex flex-col shadow-2xl lg:shadow-[inset_-1px_0_0_rgba(255,255,255,0.4)] transition-transform duration-300 ease-in-out ${
+        style={{
+          width: window.innerWidth >= 1024 ? (isOpen ? `${sidebarWidth}px` : '0px') : undefined,
+          opacity: window.innerWidth >= 1024 && !isOpen ? 0 : 1,
+          pointerEvents: window.innerWidth >= 1024 && !isOpen ? 'none' : 'auto'
+        }}
+        className={`fixed lg:sticky inset-y-0 start-0 lg:top-16 z-50 lg:z-30 h-full lg:h-[calc(100vh-4rem)] w-[min(340px,88vw)] lg:w-auto shrink-0 glass-sidebar flex flex-col transition-all duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
         } ${isDragging ? 'select-none' : ''}`}
       >
-        {/* Resize Grip Handle (.grip) on Desktop */}
-        <div
-          onMouseDown={() => setIsDragging(true)}
-          onDoubleClick={() => updateWidth(344, true)}
-          title={lang === 'fa' ? 'برای تغییر عرض بکشید (دوبار کلیک برای ریست)' : 'Drag to resize, double-click to reset'}
-          className="hidden lg:block absolute inset-y-0 -inset-inline-end-1 w-2.5 cursor-col-resize z-20 group/grip"
-        >
-          <div className="w-0.5 h-full bg-[#d98a1f] opacity-0 group-hover/grip:opacity-100 transition-opacity mx-auto" />
-        </div>
+        {/* Resize Grip Handle (.grip) on Desktop (visible only when open) */}
+        {isOpen && (
+          <div
+            onMouseDown={() => setIsDragging(true)}
+            onDoubleClick={() => updateWidth(344, true)}
+            title={lang === 'fa' ? 'برای تغییر عرض بکشید (دوبار کلیک برای ریست)' : 'Drag to resize, double-click to reset'}
+            className="hidden lg:block absolute inset-y-0 -inset-inline-end-1 w-2.5 cursor-col-resize z-20 group/grip"
+          >
+            <div className="w-0.5 h-full bg-[#d98a1f] opacity-0 group-hover/grip:opacity-100 transition-opacity mx-auto" />
+          </div>
+        )}
 
         {/* Top Header & Search (.top) */}
-        <div className="p-4 pb-3 border-b border-[#c3d4d4]/60 dark:border-[#274347] space-y-3">
+        <div className="p-4 pb-3 border-b border-white/60 dark:border-white/10 space-y-3">
           <div className="flex items-center justify-between gap-2">
             <div>
               <h1 className="text-sm font-extrabold text-[#12343b] dark:text-[#e4f0ee] leading-tight">
@@ -364,7 +370,8 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
 
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-[#587479] hover:bg-[#eaf2f1] dark:hover:bg-[#172d31] lg:hidden"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-[#587479] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
+              title={lang === 'fa' ? 'جمع کردن سایدبار' : 'Fold Sidebar'}
             >
               <X className="w-4 h-4" />
             </button>
@@ -377,14 +384,14 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={lang === 'fa' ? 'جستجو در جلسه‌ها...' : 'Search sessions...'}
-              className="w-full ps-8 pe-3 py-1.5 rounded-lg border border-[#c3d4d4] dark:border-[#274347] bg-[#e6eded]/60 dark:bg-[#08130f]/60 text-xs text-[#12343b] dark:text-[#e4f0ee] placeholder-[#587479] focus:outline-hidden focus:border-[#d98a1f]"
+              className="w-full ps-8 pe-3 py-1.5 rounded-lg border border-white/80 dark:border-white/10 bg-white/60 dark:bg-black/40 text-xs text-[#12343b] dark:text-[#e4f0ee] placeholder-[#587479] focus:outline-hidden focus:border-[#d98a1f]"
             />
             <Search className="w-3.5 h-3.5 text-[#587479] absolute inset-inline-start-2.5 top-2.5 pointer-events-none" />
           </div>
         </div>
 
-        {/* Scrollable Curriculum (.scroll) */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-4 scrollbar-thin">
+        {/* Scrollable Curriculum (.scroll) without default scrollbar */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-4 no-scrollbar">
           {/* Quick Start Navigation (.start) */}
           {!searchQuery && (
             <nav className="space-y-1 pb-3 border-b border-[#c3d4d4]/60 dark:border-[#274347]">
@@ -603,20 +610,20 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
           </div>
 
           {/* More Nav (.more) */}
-          <nav className="pt-3 border-t border-[#c3d4d4]/60 dark:border-[#274347] space-y-1">
+          <nav className="pt-3 border-t border-white/60 dark:border-white/10 space-y-1">
             <button
               onClick={() => {
                 onOpenBookModal();
                 if (window.innerWidth < 1024) onClose();
               }}
-              className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#587479] dark:text-[#8ca8ab] hover:bg-[#eaf2f1] dark:hover:bg-[#172d31] hover:text-[#12343b] text-start transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#587479] dark:text-[#8ca8ab] hover:bg-black/5 dark:hover:bg-white/5 hover:text-[#12343b] text-start transition-colors cursor-pointer"
             >
               <BookOpen className="w-3.5 h-3.5" />
               <span>{lang === 'fa' ? 'کتابچه LLM به زبان آدمیزاد' : 'LLM Book Digest'}</span>
             </button>
             <button
               onClick={() => navigateTo('landing')}
-              className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#587479] dark:text-[#8ca8ab] hover:bg-[#eaf2f1] dark:hover:bg-[#172d31] hover:text-[#12343b] text-start transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#587479] dark:text-[#8ca8ab] hover:bg-black/5 dark:hover:bg-white/5 hover:text-[#12343b] text-start transition-colors cursor-pointer"
             >
               <Home className="w-3.5 h-3.5" />
               <span>{lang === 'fa' ? 'صفحه لندینگ و معرفی' : 'Landing & Overview'}</span>
@@ -625,7 +632,7 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
         </div>
 
         {/* Footer with Progress Bar & Continue Action (.foot) */}
-        <footer className="p-4 border-t border-[#c3d4d4]/60 dark:border-[#274347] bg-[#f8fbfa] dark:bg-[#0f1f22] space-y-2.5">
+        <footer className="p-4 border-t border-white/60 dark:border-white/10 bg-transparent space-y-2.5">
           <div className="flex items-center justify-between text-xs text-[#587479] dark:text-[#8ca8ab]">
             <span>{lang === 'fa' ? 'پیشرفت فاز اول (درک کسب‌وکار)' : 'Phase I Progress'}</span>
             <span className="font-mono font-bold">
@@ -634,7 +641,7 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
           </div>
 
           {/* Progress Bar (.bar) */}
-          <div className="w-full h-1.5 rounded-full bg-[#c3d4d4] dark:bg-[#274347] overflow-hidden">
+          <div className="w-full h-1.5 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
             <div
               className="h-full bg-[#1e8f6b] rounded-full transition-all duration-300"
               style={{ width: `${progressPercent}%` }}

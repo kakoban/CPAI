@@ -128,7 +128,24 @@ export default function App() {
   const [activeDiscipline, setActiveDiscipline] = useState<DisciplineId>(() => getSavedDiscipline(getSavedIndustryTrack()));
   const [activeRole, setActiveRole] = useState<EngineeringRoleId>(() => getSavedRole());
   const [isDisciplineModalOpen, setIsDisciplineModalOpen] = useState<boolean>(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  // Foldable & Collapsible sidebar state (persisted across sessions)
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('cpmai_sidebar_open');
+      if (saved !== null) return saved === 'true';
+    } catch {}
+    return true; // Default open on desktop
+  });
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => {
+      const nextVal = !prev;
+      try {
+        localStorage.setItem('cpmai_sidebar_open', nextVal.toString());
+      } catch {}
+      return nextVal;
+    });
+  };
 
   const handleSelectIndustryTrack = (track: IndustryTrackId) => {
     setIndustryTrack(track);
@@ -817,13 +834,17 @@ export default function App() {
             {/* Sidebar Toggle Button */}
             <button
               type="button"
-              onClick={() => setIsSidebarOpen((prev) => !prev)}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.05] hover:bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] transition-all cursor-pointer shrink-0 shadow-2xs"
-              title={lang === 'fa' ? 'فهرست سرفصل‌های کارگاه و جلسات ۲۲گانه' : 'Toggle Curriculum Sidebar'}
+              onClick={toggleSidebar}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all cursor-pointer shrink-0 shadow-2xs ${
+                isSidebarOpen
+                  ? 'border-[#1f5163]/30 bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6]'
+                  : 'border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.05] hover:bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6]'
+              }`}
+              title={lang === 'fa' ? 'نمایش / پنهان‌سازی سایدبار سرفصل‌ها' : 'Toggle Curriculum Sidebar'}
             >
               <Menu className="w-4 h-4 shrink-0" />
               <span className="text-xs font-bold whitespace-nowrap hidden sm:inline">
-                {lang === 'fa' ? 'جلسات ☰' : 'Sessions ☰'}
+                {lang === 'fa' ? (isSidebarOpen ? 'بستن سایدبار' : 'سرفصل‌ها ☰') : (isSidebarOpen ? 'Hide Sidebar' : 'Curriculum ☰')}
               </span>
             </button>
 

@@ -99,6 +99,31 @@
   background: var(--mute);
 }
 
+/* Glassmorphism sidebar & hidden scrollbar utilities */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.glass-sidebar {
+  background: rgba(250, 253, 252, 0.65);
+  -webkit-backdrop-filter: blur(28px) saturate(1.6);
+  backdrop-filter: blur(28px) saturate(1.6);
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.6), 0 0 40px rgba(8, 30, 35, 0.08);
+}
+
+:root.dark .glass-sidebar,
+:root[data-theme="dark"] .glass-sidebar {
+  background: rgba(15, 31, 34, 0.62);
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.06), 0 0 40px rgba(0, 0, 0, 0.35);
+}
+
+
 /* -------------------------------------------------------------
    Enterprise Content & Copyright Protection Rules
    ------------------------------------------------------------- */
