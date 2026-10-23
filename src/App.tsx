@@ -83,11 +83,27 @@ const LEGACY_KEY_2 = 'cpmai-workbook-2pages-v1';
 const LEGACY_KEY = 'cpmai-wb-p1-v1';
 
 export default function App() {
-  const [page, setPage] = useState<AppPage>('landing');
+  const [page, setPage] = useState<AppPage>(() => {
+    try {
+      const savedPage = localStorage.getItem('cpmai_active_page_v1');
+      if (savedPage) {
+        if (savedPage === 'landing' || savedPage === 'quiz') return savedPage;
+        const num = parseInt(savedPage, 10);
+        if (!isNaN(num) && num >= 0 && num <= 21) return num as AppPage;
+      }
+    } catch {}
+    return 0; // Default to Page 0 LLM Toolkit
+  });
   const [lang, setLang] = useState<Language>('fa');
   const [theme, setTheme] = useState<Theme>('light');
   // AJA Cinematic Brand Intro (Unseen Studio Inspired Experience)
-  const [showBrandIntro, setShowBrandIntro] = useState<boolean>(true);
+  const [showBrandIntro, setShowBrandIntro] = useState<boolean>(() => {
+    try {
+      return !sessionStorage.getItem('aja_brand_intro_seen_v2');
+    } catch {
+      return false;
+    }
+  });
 
   // Google OAuth / GIS Authentication State
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
@@ -145,6 +161,12 @@ export default function App() {
       }
     }).catch(() => {});
   };
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('cpmai_active_page_v1', page.toString());
+    } catch {}
+  }, [page]);
 
   useEffect(() => {
     const saved = authApi.getSavedUser();
@@ -778,19 +800,19 @@ export default function App() {
 
       {/* Top Header Bar */}
       <header className="sticky top-0 z-40 w-full bg-[#ffffff]/95 dark:bg-[#161e24]/95 backdrop-blur-xl border-b border-[#d9dad5]/80 dark:border-[#26333c]/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-        <div className="w-full max-w-[1750px] mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-3 flex-nowrap">
+        <div className="w-full max-w-[1750px] mx-auto px-2 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4 flex-nowrap overflow-x-hidden">
           {/* Section 1: Hamburger Menu + Brand */}
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             {/* Sidebar Toggle Button */}
             <button
               type="button"
               onClick={() => setIsSidebarOpen((prev) => !prev)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.05] hover:bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] transition-all cursor-pointer shrink-0 shadow-2xs"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.05] hover:bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] transition-all cursor-pointer shrink-0 shadow-2xs"
               title={lang === 'fa' ? 'فهرست سرفصل‌های کارگاه و جلسات ۲۲گانه' : 'Toggle Curriculum Sidebar'}
             >
               <Menu className="w-4 h-4 shrink-0" />
-              <span className="text-xs font-bold whitespace-nowrap">
-                {lang === 'fa' ? 'فهرست جلسات ☰' : 'Curriculum ☰'}
+              <span className="text-xs font-bold whitespace-nowrap hidden sm:inline">
+                {lang === 'fa' ? 'جلسات ☰' : 'Sessions ☰'}
               </span>
             </button>
 
@@ -805,14 +827,14 @@ export default function App() {
                 <img
                   src={OWJ_LOGO}
                   alt="OWJ"
-                  className="h-7 w-auto min-w-[45px] max-w-[80px] object-contain shrink-0"
+                  className="h-7 w-auto min-w-[36px] max-w-[70px] object-contain shrink-0"
                   referrerPolicy="no-referrer"
                   onError={(e) => {
                     e.currentTarget.src = OWJ_LOGO_FALLBACK;
                   }}
                 />
               </div>
-              <div className="hidden md:flex flex-col shrink-0">
+              <div className="hidden lg:flex flex-col shrink-0">
                 <span className="font-extrabold text-xs text-[#1c2830] dark:text-[#e8ebe9] whitespace-nowrap">
                   {lang === 'fa' ? 'کتاب کار CPMAI' : 'CPMAI Workbook'}
                 </span>
@@ -824,19 +846,19 @@ export default function App() {
           </div>
 
           {/* Section 2: Active Track & Discipline Center Pill */}
-          <div className="flex items-center gap-2 shrink-0 min-w-0">
+          <div className="flex items-center gap-1.5 shrink-0 min-w-0">
             <IndustryTrackSwitcher
               currentTrack={industryTrack}
               onSelectTrack={handleSelectIndustryTrack}
               onOpenSelectorModal={() => setIsIndustryModalOpen(true)}
-              className="shrink-0"
+              className="shrink-0 scale-90 sm:scale-100 origin-right"
             />
             <DisciplineBadge
               currentTrack={industryTrack}
               currentDiscipline={activeDiscipline}
               onClick={() => setIsDisciplineModalOpen(true)}
               lang={lang}
-              className="shrink-0 hidden sm:inline-flex"
+              className="shrink-0 hidden md:inline-flex"
             />
           </div>
 
