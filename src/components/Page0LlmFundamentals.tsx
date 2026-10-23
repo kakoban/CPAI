@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Language } from '../types/cpmai';
 import {
   Sparkles,
@@ -44,7 +44,6 @@ import { ENGINEERING_CONTRACTS } from '../data/engineering_sample_contracts';
 import { Page0EngineeringMasterclass } from './Page0EngineeringMasterclass';
 import { NotebookLmWorkshop } from './NotebookLmWorkshop';
 import { ClaudeEnterpriseConnectors } from './connectors/ClaudeEnterpriseConnectors';
-import { PetroClaudeArtifactSimulator, CLAUDE_PETRO_SYSTEM_PROMPT } from './PetroClaudeArtifactSimulator';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../data/logo';
 import { IndustryTrackId, DisciplineId } from '../types/industryTrack';
 import {
@@ -106,7 +105,6 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   >('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [sandboxCopied, setSandboxCopied] = useState(false);
-  const [activePromptExample, setActivePromptExample] = useState<'discipline' | 'bad_good' | 'claude_petro'>('discipline');
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>('metro_station_tbm');
   const [csvCopied, setCsvCopied] = useState(false);
   const [promptWithDataCopiedId, setPromptWithDataCopiedId] = useState<string | null>(null);
@@ -114,11 +112,29 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   const [contractCopied, setContractCopied] = useState(false);
   const [instructionCopiedId, setInstructionCopiedId] = useState<string | null>(null);
 
+  // Auto-scroll selected tab pill into view smoothly
+  const navPillsRef = useRef<HTMLDivElement | null>(null);
+
+  const handleTabClick = (tab: typeof activeTab, e?: React.MouseEvent<HTMLButtonElement>) => {
+    setActiveTab(tab);
+    if (e?.currentTarget) {
+      e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  };
+
+  useEffect(() => {
+    if (navPillsRef.current) {
+      const activeEl = navPillsRef.current.querySelector<HTMLButtonElement>('[data-active="true"]');
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+  }, [activeTab]);
+
   React.useEffect(() => {
     if (industryTrack === 'ENERGY_PETRO') {
       setSelectedDatasetId('oil_gas_pipeline_ndt');
       setSelectedContractId('oil_gas_epc_contract');
-      setActivePromptExample('claude_petro');
     } else {
       setSelectedDatasetId('metro_station_tbm');
       setSelectedContractId('metro_tunnel_contract');
@@ -158,30 +174,6 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
       promptFa: disciplinePromptPair.engineeredPromptFa,
       promptEn: disciplinePromptPair.engineeredPromptEn,
       targetTools: ['Claude 3.5 / 3.7', 'ChatGPT-4o', 'Gemini Pro']
-    },
-    {
-      id: 'claude_petro_artifact_library',
-      titleFa: 'دستیار هوشمند اتاق کنترل و پایش پالایشگاه (Claude Artifact)',
-      titleEn: 'Cognitive Control Room Co-Pilot (Claude Artifact)',
-      categoryFa: 'صنایع نفت، گاز و پتروشیمی',
-      categoryEn: 'Oil, Gas & Petrochemical',
-      descriptionFa: 'پرامپت استاندارد RCTO برای ساخت داشبورد تعاملی مانیتورینگ ارتعاش تجهیزات و پرمیت‌های کار گرم در کلود.',
-      descriptionEn: 'Standard RCTO prompt to generate an interactive monitoring dashboard and PTW permits assistant in Claude.',
-      promptFa: `تو مهندس ارشد فرآیند و سیستم‌های شناختی اتاق کنترل پالایشگاه نفت و پتروشیمی با استاندارد PMI-CPMAI هستی [Role].
-
-زمینه (Context):
-دیتای تله‌متری توربوکمپرسور بازگردانی C-101 (اخطار ارتعاش 7.4mm/s)، برج تفکیک دی‌بوتانایزر T-204 (پایدار)، سیستم فلرینگ FL-01 (نرخ 465kg/h در ۹۳٪ سقف مجاز) و پرمیت کار گرم فعال PTW-8821 در Zone 1 را در اختیار داری.
-
-دستور کار (Task):
-یک آرتیفکت تعاملی React بساز که کارت‌های سنسور زنده را با نشانگرهای هشدار نمایش دهد و به عنوان دستیار اتاق کنترل به سوالات اضطراری شیفت کاری پاسخ دهد.
-
-قالب خروجی (Output):
-کامپوننت واکنش‌گرا با Tailwind CSS، دکمه‌های سناریویی آماده، و پاسخ‌های بدون توهم استنادشده به دیتای فوق.`,
-      promptEn: `You are a Lead Cognitive Process Engineer for an Oil & Gas Refinery following PMI-CPMAI standards [Role].
-Context: C-101 Recycle Compressor has vibration warning (7.4 mm/s), T-204 Debutanizer column is normal, FL-01 flaring rate is 465 kg/h (93% limit), and PTW-8821 hot work permit is active in Zone 1.
-Task: Build an interactive React Artifact displaying live telemetry cards and an engineering assistant chatbot for shift operations.
-Output: Clean responsive component with Tailwind CSS, status indicators, and zero hallucinations.`,
-      targetTools: ['Claude 3.5', 'Artifacts']
     },
     {
       id: 'meeting_summary',
@@ -538,18 +530,22 @@ Tasks:
         </div>
       </div>
 
-      {/* Navigation Pills (Double-Bezel Island) */}
-      <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-xs shadow-inner overflow-x-auto text-xs font-medium">
+      {/* Navigation Pills (Double-Bezel Island with Auto-Scroll to Active Pill) */}
+      <div
+        ref={navPillsRef}
+        className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-xs shadow-inner overflow-x-auto no-scrollbar scroll-smooth text-xs font-medium"
+      >
         <button
           onClick={onOpenQuiz}
-          className="px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 bg-[#2f7d5b]/10 text-[#2f7d5b] dark:text-[#52b788] hover:bg-[#2f7d5b]/20 border border-[#2f7d5b]/30 font-bold flex items-center gap-1.5"
+          className="px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap bg-[#2f7d5b]/10 text-[#2f7d5b] dark:text-[#52b788] hover:bg-[#2f7d5b]/20 border border-[#2f7d5b]/30 font-bold flex items-center gap-1.5 cursor-pointer"
         >
           <Target className="w-3.5 h-3.5" />
           <span>{lang === 'fa' ? '🎯 آزمون تعیین سطح' : '🎯 Readiness Quiz'}</span>
         </button>
         <button
-          onClick={() => setActiveTab('all')}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 ${
+          onClick={(e) => handleTabClick('all', e)}
+          data-active={activeTab === 'all'}
+          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
             activeTab === 'all'
               ? 'bg-[#1f5163] text-white font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
@@ -558,8 +554,9 @@ Tasks:
           {lang === 'fa' ? 'نمای کامل همه بخش‌ها' : 'All Sections'}
         </button>
         <button
-          onClick={() => setActiveTab('tools')}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 ${
+          onClick={(e) => handleTabClick('tools', e)}
+          data-active={activeTab === 'tools'}
+          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
             activeTab === 'tools'
               ? 'bg-[#00738c] text-white font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
@@ -568,8 +565,9 @@ Tasks:
           {lang === 'fa' ? '۱. سه غول هوش مصنوعی' : '1. Top 3 LLMs'}
         </button>
         <button
-          onClick={() => setActiveTab('prompting')}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 ${
+          onClick={(e) => handleTabClick('prompting', e)}
+          data-active={activeTab === 'prompting'}
+          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
             activeTab === 'prompting'
               ? 'bg-[#0f4c5c] text-white font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
@@ -578,8 +576,9 @@ Tasks:
           {lang === 'fa' ? '۲. فرمول طلایی RCTO' : '2. RCTO Framework'}
         </button>
         <button
-          onClick={() => setActiveTab('prompts_library')}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 ${
+          onClick={(e) => handleTabClick('prompts_library', e)}
+          data-active={activeTab === 'prompts_library'}
+          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
             activeTab === 'prompts_library'
               ? 'bg-[#b87333] text-white font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
@@ -588,8 +587,9 @@ Tasks:
           {lang === 'fa' ? '۳. کتابخانه پرامپت‌های آماده' : '3. Prompt Library'}
         </button>
         <button
-          onClick={() => setActiveTab('advanced_features')}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 ${
+          onClick={(e) => handleTabClick('advanced_features', e)}
+          data-active={activeTab === 'advanced_features'}
+          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
             activeTab === 'advanced_features'
               ? 'bg-[#1b3a4b] text-white font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
@@ -598,8 +598,9 @@ Tasks:
           {lang === 'fa' ? '۴. سیستم‌های خبره سازمانی و قراردادها (Gems & Projects)' : '4. Enterprise Systems & Contracts'}
         </button>
         <button
-          onClick={() => setActiveTab('engineering_dashboards')}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 ${
+          onClick={(e) => handleTabClick('engineering_dashboards', e)}
+          data-active={activeTab === 'engineering_dashboards'}
+          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
             activeTab === 'engineering_dashboards'
               ? 'bg-[#00738c] text-white font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
@@ -608,8 +609,9 @@ Tasks:
           {lang === 'fa' ? '۵. کارگاه داشبورد داده‌های مهندسی (مترو و نفت‌وگاز)' : '5. Engineering Data & Dashboards'}
         </button>
         <button
-          onClick={() => setActiveTab('contracts_and_gems')}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 ${
+          onClick={(e) => handleTabClick('contracts_and_gems', e)}
+          data-active={activeTab === 'contracts_and_gems'}
+          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
             activeTab === 'contracts_and_gems'
               ? 'bg-[#b87333] text-white font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
@@ -618,8 +620,9 @@ Tasks:
           {lang === 'fa' ? '۶. کارگاه قراردادها و دستیار Gems/Projects' : '6. Contracts & Gems/Projects'}
         </button>
         <button
-          onClick={() => setActiveTab('connectors')}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 ${
+          onClick={(e) => handleTabClick('connectors', e)}
+          data-active={activeTab === 'connectors'}
+          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
             activeTab === 'connectors'
               ? 'bg-[#1a73e8] text-white font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
@@ -628,8 +631,9 @@ Tasks:
           {lang === 'fa' ? '۷. کانکتورهای گوگل، Slack و Notion MCP' : '7. Google, Slack & Notion Connectors'}
         </button>
         <button
-          onClick={() => setActiveTab('notebooklm')}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 ${
+          onClick={(e) => handleTabClick('notebooklm', e)}
+          data-active={activeTab === 'notebooklm'}
+          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
             activeTab === 'notebooklm'
               ? 'bg-[#00738c] text-white font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
@@ -638,34 +642,37 @@ Tasks:
           {lang === 'fa' ? '۸. کارگاه Google NotebookLM (مدیران و تمرینات)' : '8. Google NotebookLM Workshop'}
         </button>
         <button
-          onClick={() => setActiveTab('masterclass')}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 ${
+          onClick={(e) => handleTabClick('masterclass', e)}
+          data-active={activeTab === 'masterclass'}
+          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
             activeTab === 'masterclass'
               ? 'bg-[#6d28d9] text-white font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
           }`}
         >
-          {lang === 'fa' ? '۸. مسترکلاس مهندسی با LLM' : '8. Engineering Masterclass'}
+          {lang === 'fa' ? '۹. مسترکلاس مهندسی با LLM' : '9. Engineering Masterclass'}
         </button>
         <button
-          onClick={() => setActiveTab('safety')}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 ${
+          onClick={(e) => handleTabClick('safety', e)}
+          data-active={activeTab === 'safety'}
+          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
             activeTab === 'safety'
               ? 'bg-[#8c3b2d] text-white font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
           }`}
         >
-          {lang === 'fa' ? '۹. خطوط قرمز امنیتی و توهم' : '9. Safety & Guardrails'}
+          {lang === 'fa' ? '۱۰. خطوط قرمز امنیتی و توهم' : '10. Safety & Guardrails'}
         </button>
         <button
-          onClick={() => setActiveTab('sandbox')}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 ${
+          onClick={(e) => handleTabClick('sandbox', e)}
+          data-active={activeTab === 'sandbox'}
+          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
             activeTab === 'sandbox'
               ? 'bg-[#2f7d5b] text-white font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
           }`}
         >
-          {lang === 'fa' ? '۱۰. کارگاه تست پرامپت' : '10. Prompt Sandbox'}
+          {lang === 'fa' ? '۱۱. کارگاه تست پرامپت' : '11. Prompt Sandbox'}
         </button>
       </div>
 
@@ -1026,206 +1033,92 @@ Tasks:
 
           {/* Before vs After Interactive Showcase */}
           <div className="rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] p-5 shadow-xs space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
                 <Lightbulb className="w-4 h-4 text-[#fbbf24]" />
-                {lang === 'fa' ? 'مقایسه عینی: پرامپت ضعیف در برابر پرامپت حرفه‌ای' : 'Side-by-Side: Weak vs. High-Performance Prompt'}
+                {lang === "fa" ? "مقایسه عینی: پرامپت ضعیف در برابر پرامپت مهندسی‌شده" : "Side-by-Side: Weak vs. High-Performance Prompt"}
               </span>
 
-              <div className="flex items-center gap-1 bg-[#f4f4f1] dark:bg-[#12171b] p-1 rounded-lg text-xs overflow-x-auto no-scrollbar">
-                <button
-                  onClick={() => setActivePromptExample('discipline')}
-                  className={`px-3 py-1 rounded-md transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                    activePromptExample === 'discipline'
-                      ? 'bg-[#1f5163] text-white font-bold shadow-xs'
-                      : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-                  }`}
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                  <span>
-                    {lang === 'fa'
-                      ? `پرامپت دیسیپلین شما: ${discMeta.shortTitleFa}`
-                      : `Your Discipline Prompt: ${discMeta.shortTitleEn}`}
-                  </span>
-                </button>
-                <button
-                  onClick={() => setActivePromptExample('claude_petro')}
-                  className={`px-3 py-1 rounded-md transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                    activePromptExample === 'claude_petro'
-                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold shadow-xs'
-                      : 'text-cyan-700 dark:text-cyan-400 hover:text-cyan-900 dark:hover:text-white'
-                  }`}
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  <span>
-                    {lang === 'fa'
-                      ? 'چت‌بات تعاملی کلود (Claude Artifact)'
-                      : 'Claude Artifact Simulator'}
-                  </span>
-                </button>
-              </div>
+              <span className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] self-start sm:self-auto border border-[#1f5163]/20">
+                {lang === "fa" ? `دیسیپلین شما: ${discMeta.titleFa}` : `Discipline: ${discMeta.titleEn}`}
+              </span>
             </div>
 
-            {activePromptExample === 'claude_petro' ? (
-              <div className="space-y-6">
-                {/* Side-by-side prompt analysis */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Bad Prompt */}
-                  <div className="p-4 rounded-xl bg-[#fdf2f2] dark:bg-[#2a1715] border border-[#f87171]/40 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#b91c1c] dark:text-[#f87171] flex items-center gap-1">
-                        <span>✕</span>
-                        <span>{lang === 'fa' ? 'پرامپت ضعیف و فاقد ساختار آرتیفکت' : 'Weak / Casual Prompt'}</span>
-                      </span>
-                    </div>
-                    <div className="p-3 rounded-lg bg-white dark:bg-[#1a1515] font-sans text-xs text-[#b91c1c] dark:text-[#fca5a5] leading-relaxed">
-                      «یک چت‌بات برای پالایشگاه نفت و گاز بساز که وضعیت سنسورها را بگوید.»
-                    </div>
-                    <p className="text-[11px] text-[#7f1d1d] dark:text-[#fca5a5] leading-relaxed">
-                      {lang === 'fa'
-                        ? 'فاجعه و نقص: هیچ دیتاستی ارائه نشده، سقف آلارم و خطوط قرمز معلوم نیست، هیچ کامپوننت تعاملی یا آرتیفکتی تولید نمی‌شود و مدل فقط یک متن کلیشه‌ای با درصد بالای توهم تحویل می‌دهد.'
-                        : 'Failure: No grounded telemetry, no alarm thresholds, no React artifact schema; model hallucinates generic paragraphs.'}
-                    </p>
-                  </div>
-
-                  {/* Engineered Claude Artifact Prompt */}
-                  <div className="p-4 rounded-xl bg-[#ecfdf5] dark:bg-[#10241b] border border-[#34d399]/40 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#047857] dark:text-[#34d399] flex items-center gap-1">
-                        <span>✓</span>
-                        <span>{lang === 'fa' ? 'پرامپت مهندسی‌شده RCTO ویژه Claude Artifact' : 'Engineered Claude Artifact RCTO Prompt'}</span>
-                      </span>
-                      <button
-                        onClick={() => copyToClipboard(CLAUDE_PETRO_SYSTEM_PROMPT, 'demo_petro_prompt')}
-                        className="text-[10px] font-semibold text-[#047857] dark:text-[#34d399] hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        {copiedId === 'demo_petro_prompt' ? (
-                          <>
-                            <Check className="w-3 h-3 text-[#059669]" />
-                            <span>{lang === 'fa' ? 'کپی شد' : 'Copied'}</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3 h-3" />
-                            <span>{lang === 'fa' ? 'کپی پرامپت کلود' : 'Copy Prompt'}</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                    <div className="p-3 rounded-lg bg-white dark:bg-[#132b20] font-sans text-xs text-[#065f46] dark:text-[#a7f3d0] leading-relaxed">
-                      <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6] font-mono">[Role]</span> مهندس ارشد فرآیند و سیستم‌های شناختی اتاق کنترل پالایشگاه نفت و پتروشیمی (استاندارد PMI-CPMAI).<br />
-                      <span className="font-bold text-[#00738c] dark:text-[#6ee7b7] font-mono">[Context]</span> دیتای ساخت‌یافته SCADA (توربوکمپرسور C-101 با اخطار ارتعاش 7.4mm/s، برج T-204، فلرینگ FL-01 با نرخ 465kg/h، پرمیت کار گرم PTW-8821).<br />
-                      <span className="font-bold text-[#b87333] dark:text-[#e0a96d] font-mono">[Task]</span> تولید یک آرتیفکت تعاملی React با داشبورد وضعیت و چت‌بات پاسخگویی اضطراری شیفت کاری.<br />
-                      <span className="font-bold text-[#2f7d5b] dark:text-[#63c496] font-mono">[Output]</span> کامپوننت React با Tailwind و Lucide، کارت‌های وضعیت سنسورها با پالس نوری، ۴ سناریوی آماده و پاسخ‌های بدون توهم.
-                    </div>
-                    <p className="text-[11px] text-[#065f46] dark:text-[#6ee7b7] leading-relaxed">
-                      {lang === 'fa'
-                        ? 'مزیت: مدل در کلود یک مینی‌اپلیکیشن تعاملی زنده و کاربردی رندر می‌کند که فوراً توسط مهندسان اتاق کنترل قابل استفاده است.'
-                        : 'Advantage: Claude immediately renders an interactive React mini-application in the Artifact window.'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Live Interactive Artifact Demo */}
-                <div className="pt-2">
-                  <div className="flex items-center gap-2 mb-3 text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9]">
-                    <Sparkles className="w-4 h-4 text-cyan-500" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Bad Prompt */}
+              <div className="p-4 rounded-xl bg-[#fdf2f2] dark:bg-[#2a1715] border border-[#f87171]/40 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#b91c1c] dark:text-[#f87171] flex items-center gap-1">
+                    <span>✕</span>
                     <span>
-                      {lang === 'fa'
-                        ? 'شبیه‌ساز زنده خروجی آرتیفکت کلود (تست تعاملی با دیتای فرضی نفت و گاز):'
-                        : 'Live Claude Artifact Interactive Output (Grounded with Petrochemical Mock Data):'}
+                      {lang === "fa" ? `پرامپت ضعیف و مبهم در دیسیپلین ${discMeta.shortTitleFa}` : `Weak Prompt in ${discMeta.shortTitleEn}`}
                     </span>
-                  </div>
-                  <PetroClaudeArtifactSimulator lang={lang} />
+                  </span>
                 </div>
+                <div className="p-3 rounded-lg bg-white dark:bg-[#1a1515] font-sans text-xs text-[#b91c1c] dark:text-[#fca5a5] leading-relaxed">
+                  {lang === "fa" ? disciplinePromptPair.weakPromptFa : disciplinePromptPair.weakPromptEn}
+                </div>
+                <p className="text-[11px] text-[#7f1d1d] dark:text-[#fca5a5] leading-relaxed">
+                  {lang === "fa" ? disciplinePromptPair.weakCritiqueFa : disciplinePromptPair.weakCritiqueEn}
+                </p>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Bad Prompt */}
-                <div className="p-4 rounded-xl bg-[#fdf2f2] dark:bg-[#2a1715] border border-[#f87171]/40 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#b91c1c] dark:text-[#f87171] flex items-center gap-1">
-                      <span>✕</span>
-                      <span>
-                        {lang === 'fa'
-                          ? `پرامپت ضعیف و مبهم در دیسیپلین ${discMeta.shortTitleFa}`
-                          : `Weak Prompt in ${discMeta.shortTitleEn}`}
-                      </span>
-                    </span>
-                  </div>
-                  <div className="p-3 rounded-lg bg-white dark:bg-[#1a1515] font-sans text-xs text-[#b91c1c] dark:text-[#fca5a5] leading-relaxed">
-                    {lang === 'fa'
-                      ? disciplinePromptPair.weakPromptFa
-                      : disciplinePromptPair.weakPromptEn}
-                  </div>
-                  <p className="text-[11px] text-[#7f1d1d] dark:text-[#fca5a5] leading-relaxed">
-                    {lang === 'fa'
-                      ? disciplinePromptPair.weakCritiqueFa
-                      : disciplinePromptPair.weakCritiqueEn}
-                  </p>
-                </div>
 
-                {/* Good Prompt */}
-                <div className="p-4 rounded-xl bg-[#ecfdf5] dark:bg-[#10241b] border border-[#34d399]/40 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#047857] dark:text-[#34d399] flex items-center gap-1">
-                      <span>✓</span>
-                      <span>
-                        {lang === 'fa'
-                          ? `پرامپت مهندسی‌شده RCTO در ${discMeta.shortTitleFa}`
-                          : `Engineered RCTO Prompt (${discMeta.shortTitleEn})`}
-                      </span>
+              {/* Good Prompt */}
+              <div className="p-4 rounded-xl bg-[#ecfdf5] dark:bg-[#10241b] border border-[#34d399]/40 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#047857] dark:text-[#34d399] flex items-center gap-1">
+                    <span>✓</span>
+                    <span>
+                      {lang === "fa" ? `پرامپت مهندسی‌شده RCTO در ${discMeta.shortTitleFa}` : `Engineered RCTO Prompt (${discMeta.shortTitleEn})`}
                     </span>
-                    <button
-                      onClick={() =>
-                        copyToClipboard(
-                          lang === 'fa'
-                            ? disciplinePromptPair.engineeredPromptFa
-                            : disciplinePromptPair.engineeredPromptEn,
-                          'demo_disc_prompt'
-                        )
-                      }
-                      className="text-[10px] font-semibold text-[#047857] dark:text-[#34d399] hover:underline flex items-center gap-1 cursor-pointer"
-                    >
-                      {copiedId === 'demo_disc_prompt' ? (
-                        <>
-                          <Check className="w-3 h-3 text-[#059669]" />
-                          <span>{lang === 'fa' ? 'کپی شد' : 'Copied'}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3 h-3" />
-                          <span>{lang === 'fa' ? 'کپی پرامپت دیسیپلین' : 'Copy'}</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  <div className="p-3 rounded-lg bg-white dark:bg-[#132b20] font-sans text-xs text-[#065f46] dark:text-[#a7f3d0] leading-relaxed space-y-1">
-                    <div>
-                      <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6] font-mono">[Role] </span>
-                      <span>{lang === 'fa' ? disciplinePromptPair.engineeredBreakdownFa.role : disciplinePromptPair.engineeredBreakdownEn.role}</span>
-                    </div>
-                    <div>
-                      <span className="font-bold text-[#00738c] dark:text-[#6ee7b7] font-mono">[Context] </span>
-                      <span>{lang === 'fa' ? disciplinePromptPair.engineeredBreakdownFa.context : disciplinePromptPair.engineeredBreakdownEn.context}</span>
-                    </div>
-                    <div>
-                      <span className="font-bold text-[#b87333] dark:text-[#e0a96d] font-mono">[Task] </span>
-                      <span>{lang === 'fa' ? disciplinePromptPair.engineeredBreakdownFa.task : disciplinePromptPair.engineeredBreakdownEn.task}</span>
-                    </div>
-                    <div>
-                      <span className="font-bold text-[#2f7d5b] dark:text-[#63c496] font-mono">[Output] </span>
-                      <span>{lang === 'fa' ? disciplinePromptPair.engineeredBreakdownFa.output : disciplinePromptPair.engineeredBreakdownEn.output}</span>
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-[#065f46] dark:text-[#6ee7b7] leading-relaxed">
-                    {lang === 'fa'
-                      ? `مزیت: مدل دقیقاً با ضوابط ${discMeta.governingStandardsFa[0]} و شاخص‌های دیسیپلین پاسخ می‌دهد و نیازی به رفت و برگشت نیست.`
-                      : `Advantage: The LLM complies directly with ${discMeta.governingStandardsEn[0]} and discipline KPIs with zero hallucination.`}
-                  </p>
+                  </span>
+                  <button
+                    onClick={() =>
+                      copyToClipboard(
+                        lang === "fa" ? disciplinePromptPair.engineeredPromptFa : disciplinePromptPair.engineeredPromptEn,
+                        "demo_disc_prompt"
+                      )
+                    }
+                    className="text-[10px] font-semibold text-[#047857] dark:text-[#34d399] hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    {copiedId === "demo_disc_prompt" ? (
+                      <>
+                        <Check className="w-3 h-3 text-[#059669]" />
+                        <span>{lang === "fa" ? "کپی شد" : "Copied"}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3 h-3" />
+                        <span>{lang === "fa" ? "کپی پرامپت دیسیپلین" : "Copy"}</span>
+                      </>
+                    )}
+                  </button>
                 </div>
+                <div className="p-3 rounded-lg bg-white dark:bg-[#132b20] font-sans text-xs text-[#065f46] dark:text-[#a7f3d0] leading-relaxed space-y-1">
+                  <div>
+                    <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6] font-mono">[Role] </span>
+                    <span>{lang === "fa" ? disciplinePromptPair.engineeredBreakdownFa.role : disciplinePromptPair.engineeredBreakdownEn.role}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-[#00738c] dark:text-[#6ee7b7] font-mono">[Context] </span>
+                    <span>{lang === "fa" ? disciplinePromptPair.engineeredBreakdownFa.context : disciplinePromptPair.engineeredBreakdownEn.context}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-[#b87333] dark:text-[#e0a96d] font-mono">[Task] </span>
+                    <span>{lang === "fa" ? disciplinePromptPair.engineeredBreakdownFa.task : disciplinePromptPair.engineeredBreakdownEn.task}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-[#2f7d5b] dark:text-[#63c496] font-mono">[Output] </span>
+                    <span>{lang === "fa" ? disciplinePromptPair.engineeredBreakdownFa.output : disciplinePromptPair.engineeredBreakdownEn.output}</span>
+                  </div>
+                </div>
+                <p className="text-[11px] text-[#065f46] dark:text-[#6ee7b7] leading-relaxed">
+                  {lang === "fa"
+                    ? `مزیت: مدل دقیقاً با ضوابط ${discMeta.governingStandardsFa[0]} و شاخص‌های دیسیپلین پاسخ می‌دهد و نیازی به رفت و برگشت نیست.`
+                    : `Advantage: The LLM complies directly with ${discMeta.governingStandardsEn[0]} and discipline KPIs with zero hallucination.`}
+                </p>
               </div>
-            )}
+            </div>
           </div>
         </section>
       )}
