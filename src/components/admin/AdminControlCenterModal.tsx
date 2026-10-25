@@ -281,7 +281,7 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
 
   // Toggle Single Session Lock with Optimistic UI
   const handleToggleSession = async (sessionNum: number, currentUnlocked: boolean) => {
-    const targetClassId = currentClass.id;
+    const targetClassId = selectedClassId === 'ALL' ? 'ALL' : currentClass.id;
     const nextUnlocked = !currentUnlocked;
 
     // Optimistic update
@@ -298,7 +298,7 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
 
   // Unlock All / Reset Drip with Optimistic UI
   const handleBatchSessions = async (unlockAll: boolean) => {
-    const targetClassId = currentClass.id;
+    const targetClassId = selectedClassId === 'ALL' ? 'ALL' : currentClass.id;
 
     // Optimistic update
     setOverview((prev) => ({

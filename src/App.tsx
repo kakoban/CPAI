@@ -180,13 +180,27 @@ export default function App() {
     return isAuthorizedAdminUser(user);
   };
 
+  const [adminBypassLock, setAdminBypassLock] = useState<boolean>(false);
+
   const refreshCurriculumLocks = () => {
     lmsApi.fetchCurriculumLocks().then((res) => {
-      if (res?.locks) {
+      if (res?.locks && res.locks.length > 0) {
         setSessionLocks(res.locks);
       }
     }).catch(() => {});
   };
+
+  // Run on mount and listen to lock updates
+  useEffect(() => {
+    refreshCurriculumLocks();
+    const handleUpdate = () => refreshCurriculumLocks();
+    window.addEventListener('cpmai_curriculum_locks_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('cpmai_curriculum_locks_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -213,16 +227,32 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (currentUser) {
-      refreshCurriculumLocks();
-    }
+    refreshCurriculumLocks();
   }, [currentUser]);
 
   const isSessionLocked = (sessionNum: number): boolean => {
-    if (isUserAdmin(currentUser)) return false; // Admin bypass!
     if (sessionNum <= 1) return false; // Sessions 0 & 1 always accessible
+    if (adminBypassLock && isUserAdmin(currentUser)) return false; // Explicit admin bypass only
+
+    // 1. Check in sessionLocks state
     const lock = sessionLocks.find((l) => l.sessionNum === sessionNum);
-    return lock ? !lock.isUnlocked : false;
+    if (lock) {
+      return !lock.isUnlocked;
+    }
+
+    // 2. Check local admin overrides
+    try {
+      const raw = localStorage.getItem('cpmai_admin_session_locks');
+      if (raw) {
+        const localLocks = JSON.parse(raw);
+        if (localLocks[sessionNum] !== undefined) {
+          return !localLocks[sessionNum];
+        }
+      }
+    } catch {}
+
+    // Default for sessions >= 2 is locked until explicitly unlocked by admin
+    return true;
   };
 
   // Enforce authentication: Login prompted only when entering deeper curriculum pages without session
@@ -786,7 +816,10 @@ export default function App() {
         {isUserAdmin(currentUser) && isAdminModalOpen && (
           <AdminControlCenterModal
             isOpen={isAdminModalOpen}
-            onClose={() => setIsAdminModalOpen(false)}
+            onClose={() => {
+              setIsAdminModalOpen(false);
+              refreshCurriculumLocks();
+            }}
             currentUser={currentUser}
             lang={lang}
           />
@@ -999,6 +1032,8 @@ export default function App() {
           <InteractivePlacementQuiz
             lang={lang}
             currentUser={currentUser}
+            disciplineId={activeDiscipline}
+            industryTrack={industryTrack}
             onOpenLeaderboard={() => setIsLeaderboardModalOpen(true)}
             onNavigateToPage={(targetPage) => {
               setPage(targetPage as AppPage);
@@ -1079,6 +1114,34 @@ export default function App() {
                     جهت همگامی یادگیری در کارگاه و طبق متدولوژی استقرار CPMAI، این جلسه پس از تدریس استاد در کلاس باز خواهد شد.
                   </p>
                 </div>
+
+                {/* Admin Guidance & Bypass Button */}
+                {isUserAdmin(currentUser) && (
+                  <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/25 text-right space-y-2 max-w-lg mx-auto">
+                    <div className="flex items-center gap-2 text-xs font-bold text-purple-700 dark:text-purple-300">
+                      <ShieldCheck className="w-4 h-4" />
+                      <span>پیام برای مدیر ارشد (شما):</span>
+                    </div>
+                    <p className="text-[11px] text-purple-900/80 dark:text-purple-200/80 leading-relaxed">
+                      این جلسه در حال حاضر برای دانشجویان این دوره قفل است. برای باز کردن عمومی آن به بخش «مرکز فرماندهی › مدیریت دسترسی قطره‌ای» مراجعه کنید، یا برای مشاهده موقت محتوا با مجوز ادمین دکمه زیر را بزنید.
+                    </p>
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        onClick={() => setAdminBypassLock(true)}
+                        className="flex-1 py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                        <span>مشاهده محتوا با دسترسی ویژه ادمین (Bypass)</span>
+                      </button>
+                      <button
+                        onClick={() => setIsAdminModalOpen(true)}
+                        className="py-2 px-3 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 text-purple-700 dark:text-purple-300 font-bold text-xs transition-all cursor-pointer border border-purple-500/30"
+                      >
+                        تنظیمات قفل‌ها در پنل
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
                   <button
@@ -1534,7 +1597,10 @@ export default function App() {
         {isUserAdmin(currentUser) && isAdminModalOpen && (
           <AdminControlCenterModal
             isOpen={isAdminModalOpen}
-            onClose={() => setIsAdminModalOpen(false)}
+            onClose={() => {
+              setIsAdminModalOpen(false);
+              refreshCurriculumLocks();
+            }}
             currentUser={currentUser}
             lang={lang}
           />

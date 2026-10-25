@@ -320,6 +320,7 @@ class LmsApiService {
       if (raw) localLocks = JSON.parse(raw);
       localLocks[sessionNum] = isUnlocked;
       localStorage.setItem('cpmai_admin_session_locks', JSON.stringify(localLocks));
+      window.dispatchEvent(new CustomEvent('cpmai_curriculum_locks_updated'));
     } catch {}
 
     try {
@@ -352,6 +353,7 @@ class LmsApiService {
         localLocks[s] = unlockAll ? true : (s <= 1);
       }
       localStorage.setItem('cpmai_admin_session_locks', JSON.stringify(localLocks));
+      window.dispatchEvent(new CustomEvent('cpmai_curriculum_locks_updated'));
     } catch {}
 
     try {

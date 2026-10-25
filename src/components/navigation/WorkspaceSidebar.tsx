@@ -579,6 +579,8 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
                                           className={`group/sess flex items-center justify-between p-1.5 rounded-lg text-start transition-all cursor-pointer ${
                                             isCurrent
                                               ? 'bg-[#fdf0d8] dark:bg-[#2b2412] text-[#12343b] dark:text-[#e4f0ee] font-bold shadow-2xs'
+                                              : isLocked
+                                              ? 'opacity-80 hover:bg-rose-500/5 text-[#587479] dark:text-[#8ca8ab]'
                                               : 'hover:bg-[#eaf2f1] dark:hover:bg-[#172d31] text-[#587479] dark:text-[#8ca8ab] hover:text-[#12343b] dark:hover:text-[#e4f0ee]'
                                           }`}
                                         >
@@ -589,6 +591,8 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
                                                   ? 'bg-[#1e8f6b] text-white border-[#1e8f6b]'
                                                   : isCurrent
                                                   ? 'bg-[#fafdfc] dark:bg-[#0f1f22] border-[#d98a1f] text-[#d98a1f] ring-2 ring-[#d98a1f]/30'
+                                                  : isLocked
+                                                  ? 'bg-[#fafdfc] dark:bg-[#0f1f22] border-rose-300 dark:border-rose-900/50 text-rose-500'
                                                   : 'bg-[#fafdfc] dark:bg-[#0f1f22] border-[#c3d4d4] dark:border-[#274347] text-[#587479]'
                                               }`}
                                             >
@@ -601,7 +605,10 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
 
                                           <div className="flex items-center gap-1 shrink-0">
                                             {isLocked ? (
-                                              <Lock className="w-3 h-3 text-rose-500/80" />
+                                              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-rose-500/10 border border-rose-500/25 text-[10px] text-rose-600 dark:text-rose-400 font-bold">
+                                                <Lock className="w-3 h-3 text-rose-500" />
+                                                <span className="text-[9px] hidden sm:inline">قفل</span>
+                                              </span>
                                             ) : (
                                               <button
                                                 type="button"

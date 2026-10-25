@@ -1,4 +1,6 @@
 import { AiFamiliarityLevel } from '../types/auth';
+import { IndustryTrackId, DisciplineId, getSavedIndustryTrack, getSavedDiscipline } from '../types/industryTrack';
+import { getDisciplineMetadata } from './disciplineExamplesRegistry';
 
 export type QuizCategory =
   | 'foundations_safety'
@@ -1220,3 +1222,186 @@ export const QUIZ_LEVELS: QuizResultLevel[] = [
     recommendedStartPage: 1
   }
 ];
+
+// =========================================================================
+// DISCIPLINE & INDUSTRY TRACK ADAPTATIONS (تطبیق سناریوی سوالات با دیسیپلین انتخابی)
+// =========================================================================
+
+export interface QuizQuestionAdaptation {
+  scenarioFa?: string;
+  scenarioEn?: string;
+  realWorldContextFa?: string;
+  realWorldContextEn?: string;
+  questionFa?: string;
+  questionEn?: string;
+}
+
+export const DISCIPLINE_QUIZ_ADAPTATIONS: Record<
+  'ENERGY_PETRO' | 'GENERAL_EVERYDAY',
+  Record<number, QuizQuestionAdaptation>
+> = {
+  ENERGY_PETRO: {
+    1: {
+      scenarioFa: 'در جلسه تدوین استراتژی مجتمع پتروشیمی، رئیس بهره‌برداری می‌پرسد چرا نباید همان کدهای فرترن یا اکسل‌های محاسباتی فلرینگ را هوش مصنوعی بنامیم؟',
+      scenarioEn: 'During a refinery strategy sync, the operations director asks why legacy flare calculation spreadsheets cannot be labeled as AI.',
+      realWorldContextFa: 'در صنایع پتروشیمی، یک ماکرو می‌تواند میانگین فشار برج تقطیر را حساب کند؛ اما یک مدل شناختی عوامل ناپیدا مانند رطوبت هوای محیط و ناخالصی خوراک ورودی را در رسوب کوره کشف می‌کند.',
+      realWorldContextEn: 'A spreadsheet computes distillation averages; Cognitive AI discovers latent factors like ambient air humidity and feed impurities driving furnace fouling.'
+    },
+    2: {
+      scenarioFa: 'یک مدل هوش مصنوعی در پاسخ به استعلام مهندس پایپینگ، بندی از استاندارد API 1104 یا ASME B31.3 را با لحنی بسیار مطمئن نقل می‌کند که اصلاً در استاندارد وجود ندارد.',
+      scenarioEn: 'An LLM quotes a nonexistent piping code clause from API 1104 with extreme confidence during field inspection.',
+      realWorldContextFa: 'در استعلام‌های فنی و تست‌های فشار خطوط گاز ترش، استناد به بند ناموجود استاندارد ASME یا API می‌تواند به نشتی فاجعه‌بار گاز و خسارات سنگین انسانی و مالی منجر شود.',
+      realWorldContextEn: 'In high-pressure sour gas lines, citing fabricated ASME or API clauses can cause fatal pressure breaches and catastrophic plant shutdowns.'
+    },
+    3: {
+      realWorldContextFa: 'به جای پرامپت کلی، می‌نویسیم: «در نقش مهندس ارشد ایمنی فرآیند پالایشگاه (R)، با توجه به تلمتری فشار و دمای برج الفین (C)، لاگ حوادث فلر را واکاوی کن (T) در قالب جدول ماتریس HAZOP چهار ستونه (O)».',
+      realWorldContextEn: 'Instead of vague prompts: "As Lead Process Safety Engineer (R), given distillation tower telemetry (C), analyze flare gas excursion logs (T) into a 4-column HAZOP matrix (O)".'
+    },
+    7: {
+      scenarioFa: 'پیمانکار EPC ادعا می‌کند تاخیر در تحویل نقشه‌های ایزومتریک پایپینگ و P&ID موجب توقف عملیات نصب شده و کلیم بند ۸.۴ فیدیک دارد، در حالی که گزارش لاگ‌های روزانه چیز دیگری نشان می‌دهد.',
+      scenarioEn: 'An EPC contractor claims site stoppage under FIDIC Clause 8.4 due to late piping isometric drawings, contradicting field gate logs.',
+      realWorldContextFa: 'اگر لاگ‌های ساعات کارکرد جرثقیل‌های سنگین یا ترخیص گمرکی تجهیزات کاتالیست به اشتباه ثبت شوند، خروجی پیش‌بینی ادعای پیمانکار کاملاً غلط و فاقد اعتبار حقوقی در داوری فیدیک خواهد بود.',
+      realWorldContextEn: 'If heavy crane rental logs or catalyst customs clearance dates are corrupted, claim forecasting models will collapse in FIDIC international arbitration.'
+    },
+    10: {
+      realWorldContextFa: 'در پروژه‌های پتروشیمی، برای اینکه مدل بتواند تگ‌های مختلف پایپینگ، ولوها و کلاس‌های فلنج را دقیقاً مطابق با استاندارد کدگذاری مدارک پروژه دسته‌بندی کند، چند نمونه قبلی در پرامپت قرار می‌دهیم.',
+      realWorldContextEn: 'In petrochemical engineering, few-shot prompt examples teach the LLM project-specific piping valve tags and material specification classes reliably.'
+    },
+    11: {
+      scenarioFa: 'یک سیستم هوش مصنوعی پیشنهاد خاموشی اضطراری (ESD Trip) توربوکمپرسور چند میلیون دلاری پالایشگاه به دلیل لرزش یاتاقان را به صورت خودکار صادر کرده است.',
+      scenarioEn: 'An autonomous AI system triggers an Emergency Shutdown (ESD) of a multi-million-dollar olefin compressor due to bearing vibration telemetry.',
+      realWorldContextFa: 'هوش مصنوعی می‌تواند ناهنجاری ارتعاشی کمپرسور را گزارش دهد، اما تصمیم شات‌دان واحد الفین (با هزینه توقف ۱ میلیون دلاری در روز) یا سوئیچ به کمپرسور رزرو باید با تایید رئیس بهره‌برداری باشد.',
+      realWorldContextEn: 'AI detects vibration anomalies, but executing a plant shutdown costing $1M/day requires final validation by the Chief Operations Superintendent.'
+    },
+    13: {
+      scenarioFa: 'در کارگاه پتروشیمی، تیم پیشنهاد می‌دهد بلافاصله یک مدل دیپ‌لرنینگ برای کنترل پیشرفت راه‌اندازی پلنت خریداری یا آموزش داده شود، بدون تعیین شفاف اهداف تجاری.',
+      scenarioEn: 'In a petrochemical complex, the team proposes buying deep learning packages for commissioning progress before defining measurable business ROI.',
+      realWorldContextFa: 'کتاب‌کار ۲۱ صفحه‌ای CPMAI فاز اول را به تثبیت اهداف پالایشگاه، سنجه‌های موفقیت، ROI و جایگزین‌های سنتی مهندسی اختصاص داده است.',
+      realWorldContextEn: 'Phase 1 of CPMAI requires defining business ROI, licensor performance warranties, and non-AI alternatives before any neural code is written.'
+    },
+    16: {
+      questionFa: 'در سیستم هوش مصنوعی بازرسی جوش و فیلم‌های رادیوگرافی (RT) خطوط لوله پرفشار گاز، چرا سنجه «پوشش حداکثری عیوب (High Recall)» حیاتی‌تر از «دقت خالص (Precision)» است؟',
+      questionEn: 'In an AI system inspecting pipeline radiographic weld films (RT), why is High Recall far more critical than High Precision?',
+      scenarioFa: 'مهندس ارشد بازرسی NDT متوجه می‌شود مدل گاهی سوختگی‌های جزئی سطحی را به اشتباه ترک بحرانی اعلام می‌کند (False Positive)، اما هیچ ترک عمقی خطرناکی را از قلم نمی‌اندازد.',
+      scenarioEn: 'A Senior NDT inspector notices the AI occasionally flags minor surface scratches as cracks (False Positive), but never misses a subterranean crack (False Negative).',
+      realWorldContextFa: 'در خطوط لوله انتقال هیدروکربن ترش، هزینه بازرسی مجدد یک نقطه سالم چندصد هزار تومان است، اما ندیدن یک ترک بحرانی جوش به معنای انفجار مرگبار خط در تست هیدروستاتیک است!',
+      realWorldContextEn: 'In high-pressure hydrocarbon pipelines, re-inspecting a false alarm costs minimal labor, but missing an internal weld crack causes lethal rupture in hydrotests!'
+    },
+    17: {
+      realWorldContextFa: 'جلوگیری از فقط یک حادثه تریپ اضطراری کوره یا توقف ۲ روزه خط تولید اتیلن به ارزش ۴ میلیون دلار، می‌تواند هزینه کل زیرساخت هوش مصنوعی شرکت را جبران کند.',
+      realWorldContextEn: 'Preventing a single unscheduled furnace shutdown saving $4M in olefin losses justifies the entire corporate AI engineering budget.'
+    },
+    20: {
+      scenarioFa: 'در پیش‌بینی حوادث انفجار فرآیندی یا خرابی بحرانی توربوکمپرسور که رویدادی بسیار نادر (کمتر از ۱ در ۱۰,۰۰۰ ساعت) است، چرا معیار Accuracy فریبنده است؟',
+      scenarioEn: 'In predicting catastrophic refinery compressor trips or explosion events occurring < 0.01% of operating hours, why is simple Accuracy deceptive?',
+      realWorldContextFa: 'کمپرسور گاز در ۹۹.۸٪ روزها بدون مشکل می‌چرخد. مدلی که خرابی‌های نادر خستگی محور را نبیند، حتی با ۹۹.۸٪ صحت کلی، فاجعه آتش‌سوزی در واحد تقطیر را رقم خواهد زد.',
+      realWorldContextEn: 'A gas compressor runs smoothly 99.8% of the time. A model predicting "No Failure" achieves 99.8% Accuracy while missing the catastrophe!'
+    },
+    21: {
+      scenarioFa: 'مدل هوش مصنوعی بهینه‌سازی راندمان برج الفین که در بهار عالی کار می‌کرد، با شروع گرمای تابستان دچار افت دقت شدید شده است.',
+      scenarioEn: 'An AI yield optimizer for olefin distillation towers performing well in spring experiences sudden degradation during summer heatwaves.',
+      realWorldContextFa: 'دریفت مفهومی (Concept Drift) در پتروشیمی زمانی رخ می‌دهد که دمای هوای محیط بالا می‌رود و برج‌های خنک‌کننده راندمان متفاوتی پیدا می‌کنند.',
+      realWorldContextEn: 'Concept drift occurs in refineries when ambient summer temperatures alter cooling tower heat exchange physics, invalidating spring training weights.'
+    }
+  },
+  GENERAL_EVERYDAY: {
+    1: {
+      scenarioFa: 'در جلسه برنامه‌ریزی خانه یا کسب‌وکار، یکی از اعضا می‌پرسد چرا نباید یک اکسل جمع هزینه‌ها یا نرم‌افزار حسابداری ساده را هوش مصنوعی بنامیم؟',
+      scenarioEn: 'During a household budgeting discussion, a family member asks why a spreadsheet calculating monthly expenses cannot be termed AI.',
+      realWorldContextFa: 'یک ماشین‌حساب یا اکسل می‌تواند مجموع هزینه‌های ماهانه سبد خرید را جمع بزند؛ اما هوش مصنوعی شناختی الگوی پنهان مصرف خوراکی‌ها، خریدهای هیجانی و زمان بهینه خرید اقلام قبل از گرانی را کشف می‌کند.',
+      realWorldContextEn: 'A calculator totals grocery receipts; Cognitive AI discovers hidden consumption velocity, impulse spending leaks, and optimal vacation booking windows.'
+    },
+    2: {
+      scenarioFa: 'یک مدل هوش مصنوعی در پاسخ به سوال مادر درباره داروی سرماخوردگی کودک یا مقررات رژیم غذایی، مطلبی کاملاً خیالی و غیرعلمی را با لحنی بسیار مطمئن توصیه می‌کند.',
+      scenarioEn: 'An LLM recommends an unverified dietary concoction for a toddler with supreme confidence when prompted by a parent.',
+      realWorldContextFa: 'در سلامت خانواده و تربیت فرزند، استناد به اطلاعات توهمی بدون منبع می‌تواند به سلامت کودک آسیب زده یا موجب زیان مالی و اضطراب شود.',
+      realWorldContextEn: 'In parenting and household wellness, ungrounded hallucinations can compromise child nutrition, waste money, or generate needless panic.'
+    },
+    3: {
+      realWorldContextFa: 'به جای پرامپت مبهم، می‌نویسیم: «در نقش کارشناس اقتصاد خانوار و تغذیه (R)، با توجه به این اقلام موجود در یخچال و بودجه ۵۰۰ هزار تومانی (C)، برنامه شام ۴ نفره کم‌هزینه و سالم پیشنهاد بده (T) در قالب جدول دستور پخت ۵ مرحله‌ای (O)».',
+      realWorldContextEn: 'Instead of vague prompts: "As Family Meal & Budget Specialist (R), given my fridge pantry items and 4 family members (C), generate 3 zero-waste dinners (T) in a 5-step recipe table (O)".'
+    },
+    7: {
+      scenarioFa: 'کاربر عکس فاکتورهای مخدوش و ناخوانای خرید سوپرمارکت را به مدل می‌دهد و انتظار دارد هوش مصنوعی بودجه ماه آینده را دقیق پیش‌بینی کند.',
+      scenarioEn: 'A user uploads blurry, incomplete receipts from local corner shops and expects the AI to forecast monthly household cashflow perfectly.',
+      realWorldContextFa: 'اگر پیامک‌های واریز و برداشت بانکی یا مبالغ خرید اشتباه یا ناقص به سیستم داده شوند، هوش مصنوعی سبد مصرفی خانوار را کاملاً غیرواقعی تخمین خواهد زد.',
+      realWorldContextEn: 'If bank SMS alerts or POS receipt line items contain missing prices, the household financial model produces distorted, misleading advice.'
+    },
+    10: {
+      realWorldContextFa: 'برای اینکه مدل بتواند لحن پیام‌های پیگیری طلب از دوستان، نامه‌های اداری، یا تکالیف داستانی کودک را دقیقاً مطابق با سلیقه شما تنظیم کند، قراردادن دو نمونه موفق در پرامپت معجزه می‌کند.',
+      realWorldContextEn: 'In everyday life, providing 2 example polite text messages or playful story samples enables the AI to mirror your personal conversational voice perfectly.'
+    },
+    11: {
+      scenarioFa: 'یک بات هوش مصنوعی مدیریت مالی خانواده، پیشنهاد لغو فوری بیمه تکمیلی درمان یا حراج وسایل ضروری را برای کاهش هزینه‌های جاری صادر کرده است.',
+      scenarioEn: 'An automated personal finance bot recommends cancelling essential health insurance policies to hit an artificial monthly savings target.',
+      realWorldContextFa: 'هوش مصنوعی می‌تواند مسیرهای صرفه‌جویی در هزینه را نشان دهد، اما تصمیمات حساس زندگی (سلامت، آموزش کودک یا مسکن) حتماً نیازمند قضاوت و تایید نهایی پدر و مادر است.',
+      realWorldContextEn: 'AI identifies cost optimization paths, but life decisions impacting health, education, or shelter strictly demand human parental judgment.'
+    },
+    13: {
+      scenarioFa: 'در راه‌اندازی یک پروژه شخصی یا کسب‌وکار خانگی، فرد بلافاصله یک سیستم پیچیده یادگیری ماشین می‌خرد بدون اینکه اهداف دقیق مالی و مشتریان را شفاف کرده باشد.',
+      scenarioEn: 'When launching a family business or micro-creator channel, someone buys complex AI tools before validating customer demand or target ROI.',
+      realWorldContextFa: 'متدولوژی CPMAI تاکید می‌کند قبل از هرگونه کدنویسی یا استفاده از ابزارهای پیچیده، باید هدف دقیق (مثلاً کاهش ۲۵٪ هزینه‌ها یا افزایش فروش) مشخص و سود آن سنجیده شود.',
+      realWorldContextEn: 'CPMAI mandates defining concrete value (e.g., cutting 25% grocery waste, booking lowest airfare) and measuring ROI before adopting complex tech.'
+    },
+    16: {
+      questionFa: 'در سیستم هوش مصنوعی پایش کیفیت و تاریخ انقضای مواد غذایی خانه و فروشگاه، چرا سنجه «پوشش حداکثری عیوب (High Recall)» حیاتی‌تر از «دقت خالص (Precision)» است؟',
+      questionEn: 'In an AI system detecting spoiled groceries and expired dairy in household pantries, why is High Recall more vital than High Precision?',
+      scenarioFa: 'سامانه کنترل کیفیت گاهی میوه‌های لکه‌دار سالم را به اشتباه فاسد اعلام می‌کند (False Positive)، اما هرگز گوشت یا لبنیات تاریخ‌گذشته خطرناک را سالم اعلام نمی‌کند.',
+      scenarioEn: 'A food freshness scanner occasionally flags spotted ripe fruit as spoiled (False Positive), but never passes expired dairy as safe (False Negative).',
+      realWorldContextFa: 'اگر سیستم یک سیب با پوست کدر را دورریز پیشنهاد دهد ضرر کمی دارد، اما اگر شیر فاسد را تایید کند سلامت فرزندان خانواده به خطر می‌افتد!',
+      realWorldContextEn: 'Discarding safe bruised produce costs cents, but certifying salmonella-tainted food poisons your family members!'
+    },
+    17: {
+      realWorldContextFa: 'صرفه‌جویی ماهیانه ۸ الی ۱۲ میلیون تومان با حذف دورریز غذا و خریدهای هیجانی، می‌تواند ظرف ۶ ماه بودجه سفر تفریحی کامل خانواده را تامین کند.',
+      realWorldContextEn: 'Saving $200-$300 monthly by eliminating grocery waste and impulse leaks fully finances your dream family holiday within 6 months.'
+    },
+    20: {
+      scenarioFa: 'در پیش‌بینی حراج‌های استثنایی و لحظه‌ای بلیت هواپیما و هتل‌ها (کمتر از ۱٪ روزها)، چرا معیار Accuracy گمراه‌کننده است؟',
+      scenarioEn: 'In predicting rare 48-hour flight flash sales and hotel super-deals occurring on < 1% of calendar days, why is Accuracy deceptive?',
+      realWorldContextFa: 'نرخ پروازها در ۹۹٪ روزها عادی است. مدلی که همیشه بگوید «امروز تخفیفی نیست»، ۹۹٪ دقت ریاضی دارد اما هیچ تخفیف و آفر طلایی را برای خانواده شکار نخواهد کرد!',
+      realWorldContextEn: 'Flights sit at base rates 99% of days. A lazy model predicting "No Sale" boasts 99% Accuracy yet saves zero dollars for family vacations!'
+    },
+    21: {
+      scenarioFa: 'سیستم هوشمند مدیریت خرید خانه که پاییز عالی کار می‌کرد، با شروع اسفندماه و خریدهای عید نوروز دچار پیش‌بینی‌های نامربوط شده است.',
+      scenarioEn: 'A smart household grocery bot working flawlessly in autumn fails to predict March holiday shopping and seasonal New Year expenses.',
+      realWorldContextFa: 'دریفت مفهومی (Concept Drift) زمانی رخ می‌دهد که الگوهای تقویمی، تورم یا مناسبت‌ها تغییر می‌کنند و رفتار خرید خانواده دیگر شبیه روزهای عادی نیست.',
+      realWorldContextEn: 'Concept drift occurs when seasonal festivities, school terms, or macro-inflation fundamentally alter normal family purchase cadences.'
+    }
+  }
+};
+
+export function getAdaptedQuizQuestions(
+  level: AiFamiliarityLevel = 'intermediate',
+  disciplineId?: DisciplineId,
+  industryTrack?: IndustryTrackId
+): QuizQuestion[] {
+  const effectiveTrack: IndustryTrackId =
+    industryTrack ||
+    (disciplineId ? getDisciplineMetadata(disciplineId).trackId : getSavedIndustryTrack());
+  const effectiveDiscipline: DisciplineId =
+    disciplineId || getSavedDiscipline(effectiveTrack);
+  const discMeta = getDisciplineMetadata(effectiveDiscipline);
+
+  const baseQuestions = QUIZ_QUESTIONS.filter((q) => q.level === level);
+
+  if (effectiveTrack === 'CIVIL_INFRA') {
+    return baseQuestions;
+  }
+
+  const trackAdaptations = DISCIPLINE_QUIZ_ADAPTATIONS[effectiveTrack] || {};
+
+  return baseQuestions.map((q) => {
+    const adapt = trackAdaptations[q.id];
+    if (!adapt) return q;
+
+    return {
+      ...q,
+      questionFa: adapt.questionFa || q.questionFa,
+      questionEn: adapt.questionEn || q.questionEn,
+      scenarioFa: adapt.scenarioFa ? adapt.scenarioFa.replace('[دیسیپلین]', discMeta.shortTitleFa) : q.scenarioFa,
+      scenarioEn: adapt.scenarioEn ? adapt.scenarioEn.replace('[Discipline]', discMeta.shortTitleEn) : q.scenarioEn,
+      realWorldContextFa: adapt.realWorldContextFa || q.realWorldContextFa,
+      realWorldContextEn: adapt.realWorldContextEn || q.realWorldContextEn
+    };
+  });
+}

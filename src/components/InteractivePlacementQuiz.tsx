@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Language } from '../types/cpmai';
 import {
   QUIZ_QUESTIONS,
   QUIZ_LEVELS,
   QuizQuestion,
   QuizResultLevel,
-  QuizCategory
+  QuizCategory,
+  getAdaptedQuizQuestions
 } from '../data/placement_quiz_data';
+import {
+  IndustryTrackId,
+  DisciplineId,
+  getSavedIndustryTrack,
+  getSavedDiscipline,
+  INDUSTRY_TRACKS
+} from '../types/industryTrack';
+import { getDisciplineMetadata } from '../data/disciplineExamplesRegistry';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../data/logo';
 import {
   Sparkles,
@@ -55,6 +64,8 @@ interface InteractivePlacementQuizProps {
   onCloseQuiz?: () => void;
   onOpenLeaderboard?: () => void;
   currentUser?: UserProfile | null;
+  disciplineId?: DisciplineId;
+  industryTrack?: IndustryTrackId;
 }
 
 const STORAGE_QUIZ_KEY = 'cpmai-readiness-quiz-result-v1';
@@ -64,8 +75,18 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
   onNavigateToPage,
   onCloseQuiz,
   onOpenLeaderboard,
-  currentUser
+  currentUser,
+  disciplineId: propDisciplineId,
+  industryTrack: propIndustryTrack
 }) => {
+  const effectiveTrack: IndustryTrackId =
+    propIndustryTrack ||
+    (propDisciplineId ? getDisciplineMetadata(propDisciplineId).trackId : getSavedIndustryTrack());
+  const effectiveDiscipline: DisciplineId =
+    propDisciplineId || getSavedDiscipline(effectiveTrack);
+  const discMeta = getDisciplineMetadata(effectiveDiscipline);
+  const trackInfo = INDUSTRY_TRACKS[effectiveTrack];
+
   const [quizState, setQuizState] = useState<'intro' | 'question' | 'result'>('intro');
   const [alignmentIndex, setAlignmentIndex] = useState<AlignmentIndex | null>(null);
   const [selectedTrack, setSelectedTrack] = useState<AiFamiliarityLevel>(
@@ -108,10 +129,10 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
     }
   }, []);
 
-  // Filter questions for the active track
-  const trackQuestions: QuizQuestion[] = QUIZ_QUESTIONS.filter(
-    (q) => q.level === selectedTrack
-  );
+  // Filter and adapt questions for the active track and discipline
+  const trackQuestions: QuizQuestion[] = useMemo(() => {
+    return getAdaptedQuizQuestions(selectedTrack, effectiveDiscipline, effectiveTrack);
+  }, [selectedTrack, effectiveDiscipline, effectiveTrack]);
   const totalQuestions = trackQuestions.length;
   const currentQuestion: QuizQuestion =
     trackQuestions[currentQuestionIndex] || trackQuestions[0];
@@ -262,25 +283,24 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
   };
 
   const handleCopyReport = () => {
-    const isCandidatePetro =
-      (candidateSpecialty || '').includes('نفت') ||
-      (candidateSpecialty || '').includes('گاز') ||
-      (candidateSpecialty || '').includes('پتروشیمی') ||
-      (candidateSpecialty || '').toLowerCase().includes('petro') ||
-      (candidateSpecialty || '').toLowerCase().includes('oil');
+    const domainTrackBadgeFa =
+      effectiveTrack === 'GENERAL_EVERYDAY'
+        ? `حوزه ارزیابی‌شده: سبک زندگی، خانواده و کاربردهای روزمره (${discMeta.titleFa})`
+        : effectiveTrack === 'ENERGY_PETRO'
+        ? `حوزه تخصصی ارزیابی‌شده: صنایع نفت، گاز، پالایش و پتروشیمی (${discMeta.titleFa})`
+        : `حوزه تخصصی ارزیابی‌شده: مگاپروژه‌های عمرانی، راه، ترابری و ابنیه کلان (${discMeta.titleFa})`;
 
-    const domainTrackBadgeFa = isCandidatePetro
-      ? 'حوزه تخصصی ارزیابی‌شده: صنایع نفت، گاز، پالایش و پتروشیمی'
-      : 'حوزه تخصصی ارزیابی‌شده: مگاپروژه‌های عمرانی، راه، ترابری و ابنیه کلان';
-
-    const domainTrackBadgeEn = isCandidatePetro
-      ? 'Evaluated Industry Track: Oil, Gas & Petrochemical Engineering'
-      : 'Evaluated Industry Track: Mega Civil & Transportation Infrastructure';
+    const domainTrackBadgeEn =
+      effectiveTrack === 'GENERAL_EVERYDAY'
+        ? `Evaluated Track: Everyday & Family AI (${discMeta.titleEn})`
+        : effectiveTrack === 'ENERGY_PETRO'
+        ? `Evaluated Industry Track: Oil, Gas & Petrochemical Engineering (${discMeta.titleEn})`
+        : `Evaluated Industry Track: Mega Civil & Transportation Infrastructure (${discMeta.titleEn})`;
 
     const reportText = `🏆 کارنامه رسمی آزمون سطح‌سنجی هوش مصنوعی و مهندسی
 مشاوران مدیریت کسب و کار اوج (OWJ)
 نام شرکت‌کننده: ${candidateDisplayName}
-تخصص / رشته مهندسی: ${candidateSpecialty}
+تخصص / دیسیپلین: ${discMeta.titleFa}
 ${lang === 'fa' ? domainTrackBadgeFa : domainTrackBadgeEn}
 ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوالات آزمون: ${trackLabelFa[selectedTrack]}
 امتیاز کل: ${currentScore} از ${totalQuestions} (${Math.round((currentScore / totalQuestions) * 100)}%)
@@ -407,10 +427,14 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
               {/* Candidate Profile & Track Selector Island */}
               <div className="p-4 rounded-2xl bg-black/25 border border-white/15 backdrop-blur-md relative z-10 space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-white/10 text-xs">
-                  <div className="flex items-center gap-2 text-white">
+                  <div className="flex flex-wrap items-center gap-2 text-white">
                     <User className="w-4 h-4 text-[#99e2b4]" />
                     <span className="font-bold">{candidateDisplayName}</span>
                     <span className="text-white/60">({candidateSpecialty})</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-white/15 text-white text-[11px] font-semibold border border-white/20 flex items-center gap-1">
+                      <span>دیسیپلین:</span>
+                      <span className="text-[#99e2b4] font-bold">{discMeta.shortTitleFa}</span>
+                    </span>
                   </div>
                   {candidatePhone && (
                     <div className="text-[11px] font-mono text-white/70" dir="ltr">
@@ -665,12 +689,15 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
                     : `Level: ${selectedTrack.toUpperCase()}`}
                 </span>
 
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#5d6b73] dark:text-[#9aa8b0]">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[#5d6b73] dark:text-[#9aa8b0] flex-wrap">
                   <span className="p-1 rounded-lg bg-black/5 dark:bg-white/10 text-[#1f5163] dark:text-[#6fb3c6]">
                     {renderCategoryIcon(currentQuestion.categoryIcon)}
                   </span>
                   <span>
                     {lang === 'fa' ? currentQuestion.categoryFa : currentQuestion.categoryEn}
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-sans font-normal">
+                    {discMeta.shortTitleFa}
                   </span>
                 </div>
               </div>

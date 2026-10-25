@@ -1187,7 +1187,7 @@ app.get(['/api/curriculum/locks', '/curriculum/locks'], async (req, res) => {
       classId: row.class_id,
       sessionNum: row.session_num,
       title: row.title,
-      isUnlocked: isAdmin ? true : !!row.is_unlocked,
+      isUnlocked: !!row.is_unlocked,
       rawIsUnlocked: !!row.is_unlocked
     }));
 
@@ -1542,15 +1542,23 @@ app.post(['/api/admin/sessions/toggle-lock', '/admin/sessions/toggle-lock'], asy
   const lockId = `lock_${classId}_s${sNum}`;
 
   try {
-    const result = await pool.query(
-      `INSERT INTO session_locks (id, class_id, session_num, title, is_unlocked, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
-       ON CONFLICT (class_id, session_num) DO UPDATE 
-       SET is_unlocked = EXCLUDED.is_unlocked, updated_at = NOW() 
-       RETURNING *;`,
-      [lockId, classId, sNum, sTitle, !!isUnlocked]
-    );
-    res.json({ success: true, session: result.rows[0] });
+    if (classId === 'ALL') {
+      await pool.query(
+        `UPDATE session_locks SET is_unlocked = $1, updated_at = NOW() WHERE session_num = $2;`,
+        [!!isUnlocked, sNum]
+      );
+      res.json({ success: true, session: { id: `lock_all_s${sNum}`, classId: 'ALL', sessionNum: sNum, title: sTitle, isUnlocked: !!isUnlocked } });
+    } else {
+      const result = await pool.query(
+        `INSERT INTO session_locks (id, class_id, session_num, title, is_unlocked, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+         ON CONFLICT (class_id, session_num) DO UPDATE
+         SET is_unlocked = EXCLUDED.is_unlocked, updated_at = NOW()
+         RETURNING *;`,
+        [lockId, classId, sNum, sTitle, !!isUnlocked]
+      );
+      res.json({ success: true, session: result.rows[0] });
+    }
   } catch (err: any) {
     console.warn('toggle-lock error, returning graceful success:', err);
     res.json({
@@ -1573,6 +1581,18 @@ app.post(['/api/admin/sessions/unlock-all', '/admin/sessions/unlock-all'], async
   }
 
   try {
+    if (classId === 'ALL') {
+      for (let s = 0; s <= 21; s++) {
+        const isUnlocked = unlockAll ? true : (s <= 1);
+        await pool.query(
+          `UPDATE session_locks SET is_unlocked = $1, updated_at = NOW() WHERE session_num = $2;`,
+          [isUnlocked, s]
+        );
+      }
+      res.json({ success: true, message: 'All classes updated' });
+      return;
+    }
+
     for (let s = 0; s <= 21; s++) {
       const isUnlocked = unlockAll ? true : (s <= 1);
       await pool.query(
