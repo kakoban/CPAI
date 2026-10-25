@@ -69,17 +69,17 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioEn: 'During a strategy meeting, the project director asks why conventional Excel macros cannot be classified as AI.',
     optionsFa: [
       'هوش مصنوعی فقط نرم‌افزارهایی است که روی سرورهای ابری اجرا می‌شوند.',
-      'اتوماسیون سنتی بر اساس قواعد و فرمول‌های شرطی ثابت (If/Then) کار می‌کند، در حالی که هوش مصنوعی شناختی الگوها را از داده‌ها می‌آموزد و در شرایط ابهام تصمیم‌گیری می‌کند.',
       'اتوماسیون سنتی خطا ندارد، اما هوش مصنوعی هیچ‌گاه نتایج قابل تکرار تولید نمی‌کند.',
+      'اتوماسیون سنتی بر اساس قواعد و فرمول‌های شرطی ثابت (If/Then) کار می‌کند، در حالی که هوش مصنوعی شناختی الگوها را از داده‌ها می‌آموزد و در شرایط ابهام تصمیم‌گیری می‌کند.',
       'تنها تفاوت آن‌ها در سرعت محاسبات سخت‌افزاری است.'
     ],
     optionsEn: [
       'AI only refers to software hosted on cloud servers.',
-      'Traditional automation strictly follows rigid rules (If/Then), whereas Cognitive AI learns patterns from data and reasons under uncertainty.',
       'Traditional automation is infallible, while AI never yields reproducible results.',
+      'Traditional automation strictly follows rigid rules (If/Then), whereas Cognitive AI learns patterns from data and reasons under uncertainty.',
       'The only difference lies in hardware computing clock speeds.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 2,
     explanationFa: 'اتوماسیون کلاسیک نیازمند تعیین صریح همه سناریوها توسط برنامه‌نویس است. اما مدل‌های شناختی با یادگیری آماری از حجم داده‌ها، الگوهای پیچیده و غیرخطی را استخراج کرده و قابلیت تعمیم به داده‌های جدید را دارند.',
     explanationEn: 'Classic automation requires hardcoding every possible case. Cognitive AI infers patterns from observations and generalizes to unseen scenarios.',
     realWorldContextFa: 'در پروژه‌های عمرانی، یک ماکرو می‌تواند میانگین مقاومت فشاری بتن را حساب کند؛ اما یک مدل شناختی عوامل غیرمستقیم مانند رطوبت هوا و خطای اپراتور را در افت مقاومت کشف می‌کند.',
@@ -97,18 +97,18 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioFa: 'یک مدل هوش مصنوعی در پاسخ به استعلام مهندس دفتر فنی، بندی از نشریه ۵۵ را با لحنی بسیار مطمئن نقل می‌کند که اصلاً در استاندارد وجود ندارد.',
     scenarioEn: 'An LLM quotes a nonexistent engineering clause with extreme confidence.',
     optionsFa: [
-      'ویروسی شدن سرور هوش مصنوعی و نیاز به نصب مجدد نرم‌افزار.',
       'تولید اطلاعات نادرست یا ساختگی با لحنی کاملاً قانع‌کننده؛ که با متصل کردن مدل به اسناد معتبر مرجع (Grounding) مهار می‌شود.',
+      'ویروسی شدن سرور هوش مصنوعی و نیاز به نصب مجدد نرم‌افزار.',
       'خاموش شدن خودکار مدل در اثر بار محاسباتی بالا.',
       'ناتوانی مدل در خواندن فایل‌های متنی فارسی.'
     ],
     optionsEn: [
-      'A server virus corruption requiring software reinstallation.',
       'Generating factually incorrect or fabricated claims with plausible eloquence; mitigated via strict source Grounding (RAG).',
+      'A server virus corruption requiring software reinstallation.',
       'Automatic engine termination caused by excessive inference loads.',
       'An inherent inability to process Persian language syntax.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 0,
     explanationFa: 'مدل‌های زبانی ذاتاً تولیدکننده احتمالاتی واژگان بعدی هستند، نه پایگاه داده حقیقت‌سنج. راه‌حل بنیادین، متصل کردن مدل به منابع معتبر (Grounding/RAG) و اجبار مدل به استناد مستقیم به اسناد آپلودشده است.',
     explanationEn: 'LLMs predict token probabilities rather than querying absolute databases. Grounding grounds generative predictions strictly against verified corporate documentation.',
     realWorldContextFa: 'در استعلام‌های حقوقی پیمان، استناد به بند ناموجود شرایط عمومی پیمان می‌تواند به خسارت‌های چند ده میلیاردی منجر شود.',
@@ -127,17 +127,17 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioEn: 'A planning engineer sends a vague one-sentence prompt and receives an unhelpful generic response.',
     optionsFa: [
       'Result, Code, Target, Operation',
-      'Role (نقش)، Context (زمینه و مستندات)، Task (ماموریت مشخص)، Output (ساختار خروجی مطلوب)',
+      'Rules, Constraints, Testing, Objectives',
       'Review, Calculate, Translate, Order',
-      'Rules, Constraints, Testing, Objectives'
+      'Role (نقش)، Context (زمینه و مستندات)، Task (ماموریت مشخص)، Output (ساختار خروجی مطلوب)'
     ],
     optionsEn: [
       'Result, Code, Target, Operation',
-      'Role, Context, Task, Output format specifications',
+      'Rules, Constraints, Testing, Objectives',
       'Review, Calculate, Translate, Order',
-      'Rules, Constraints, Testing, Objectives'
+      'Role, Context, Task, Output format specifications'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 3,
     explanationFa: 'مدل زبانی به هدایت دقیق نیاز دارد. مشخص کردن نقش (مثلاً مدیر ادعا)، زمینه (شرایط پروژه)، ماموریت (بررسی تاخیر) و خروجی (جدول ۴ ستونه با ارجاع به ماده ۳۰) کیفیت پاسخ را به شدت ارتقا می‌دهد.',
     explanationEn: 'Specifying Role, Context, Task, and Output constraints forces the LLM into targeted engineering persona and deterministic output schemas.',
     realWorldContextFa: 'به جای نوشتن «تاخیرات را تحلیل کن»، می‌نویسیم: «در نقش مدیر قراردادهای مترو (R)، با توجه به این ۳ صورتجلسه (C)، تاخیرات کارفرما را استخراج کن (T) در قالب جدول ماتریس ادعا (O)».',
@@ -184,18 +184,18 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioFa: 'مهندس ناظر می‌خواهد یک پرونده ادعای ۵۰۰۰ صفحه‌ای پیمانکار را یکجا تحلیل کند، اما با خطای محدودیت مواجه می‌شود.',
     scenarioEn: 'A project supervisor attempts to pass a 5,000-page claim binder in a single prompt and hits a system rejection.',
     optionsFa: [
-      'ابعاد مانیتوری که هوش مصنوعی روی آن نمایش داده می‌شود.',
       'حداکثر حجم داده (توکن‌ها) که مدل می‌تواند در یک تعامل دریافت کرده و همزمان در حافظه فعال خود مد نظر قرار دهد.',
+      'ابعاد مانیتوری که هوش مصنوعی روی آن نمایش داده می‌شود.',
       'تعداد کارمندانی که می‌توانند همزمان با اکانت هوش مصنوعی کار کنند.',
       'زمان مجاز برای پاسخ‌دهی به یک سوال توسط هوش مصنوعی.'
     ],
     optionsEn: [
-      'The physical display resolution of the monitor.',
       'The maximum quantity of tokens an LLM can parse and attend to simultaneously in a single session.',
+      'The physical display resolution of the monitor.',
       'The concurrent user seat allocation per enterprise license.',
       'The timeout threshold allotted for response generation.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 0,
     explanationFa: 'هر مدل سقف مشخصی برای تعداد توکن ورودی و خروجی دارد. برای اسناد بسیار حجیم، تقسیم‌بندی به قطعات معنادار (Chunking) و بهره‌گیری از ابزارهایی نظیر Google NotebookLM یا سیستم‌های RAG الزامی است.',
     explanationEn: 'Every model maintains finite context boundaries. Massive archives require semantic chunking and RAG pipelines such as NotebookLM.',
     realWorldContextFa: 'در نشریات فنی قطور، مدل‌های با کانتکست کوچک دچار پدیده فراموشی بخش‌های میانی متن (Lost in the Middle) می‌شوند.',
@@ -213,18 +213,18 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioFa: 'در کمیته فنی پیشنهاد شده تا محاسبات بارهای لرزه‌ای پل بزرگراهی مستقیماً به هوش مصنوعی واگذار شود.',
     scenarioEn: 'A committee proposes handing seismic bridge load calculations entirely to a generative AI chatbot.',
     optionsFa: [
-      'محاسبه دقیق لنگر خمشی بحرانی یک تیر بتنی بر اساس فرمول‌های ریاضی و آیین‌نامه دقیق مبحث نهم.',
+      'دسته‌بندی خودکار عکس‌های هوایی کارگاه بر اساس پیشرفت بتن‌ریزی.',
       'خلاصه‌سازی ۲۰۰ صورتجلسه کارگاهی ۳ سال گذشته و کشف تاخیرات بحرانی.',
       'ترجمه و تطبیق استاندارد FIDIC با شرایط عمومی پیمان ایران.',
-      'دسته‌بندی خودکار عکس‌های هوایی کارگاه بر اساس پیشرفت بتن‌ریزی.'
+      'محاسبه دقیق لنگر خمشی بحرانی یک تیر بتنی بر اساس فرمول‌های ریاضی و آیین‌نامه دقیق مبحث نهم.'
     ],
     optionsEn: [
-      'Exact deterministic bending moment calculations governed by strict mathematical formulas and building codes.',
+      'Automated visual tagging of drone site photographs based on structural concrete curing progress.',
       'Synthesizing 200 workshop minutes to identify critical path delay occurrences.',
       'Translating and mapping FIDIC contractual clauses against local public tender conditions.',
-      'Automated visual tagging of drone site photographs based on structural concrete curing progress.'
+      'Exact deterministic bending moment calculations governed by strict mathematical formulas and building codes.'
     ],
-    correctAnswerIndex: 0,
+    correctAnswerIndex: 3,
     explanationFa: 'هوش مصنوعی شناختی بر پایه استنباط احتمالاتی است، نه اثبات فرمولی قطعی. برای محاسبات سازه‌ای که فرمول دقیق دارند، ماشین‌حساب‌های مهندسی قطعی (مانند نرم‌افزارهای ETABS یا SAP) تنها گزینه معتبر و ایمن هستند.',
     explanationEn: 'Cognitive models are probabilistic, not deterministic calculators. Closed-form structural equations mandate certified deterministic solvers (e.g., ETABS, SAP).',
     realWorldContextFa: 'قاعده فاز اول CPMAI: اگر مسئله با یک فرمول ریاضی قطعی یا قانون ساده اکسل حل می‌شود، هرگز به سراغ هوش مصنوعی نروید.',
@@ -243,17 +243,17 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioEn: 'Daily site logs recorded by foremen are full of contradictions and typo errors, producing unusable predictive models.',
     optionsFa: [
       'سرورهای هوش مصنوعی هنگام پردازش داده‌های قدیمی خاک می‌گیرند.',
-      'حتی قدرتمندترین مدل هوش مصنوعی در صورت تغذیه شدن با داده‌های ناقص، متناقض یا نادرست، نتایج فاقد اعتبار و گمراه‌کننده تولید خواهد کرد.',
       'هوش مصنوعی فقط با زبان انگلیسی خروجی باکیفیت می‌دهد.',
+      'حتی قدرتمندترین مدل هوش مصنوعی در صورت تغذیه شدن با داده‌های ناقص، متناقض یا نادرست، نتایج فاقد اعتبار و گمراه‌کننده تولید خواهد کرد.',
       'داده‌های بازیافتی محیط زیست را باید در سرورهای سبز ذخیره کرد.'
     ],
     optionsEn: [
       'AI hardware racks physically deteriorate when handling uncleaned legacy files.',
-      'Even the most advanced model will produce invalid and dangerous forecasts if trained or prompted with noisy, contradictory, or uncurated data.',
       'AI systems only generate robust outputs when prompted exclusively in English.',
+      'Even the most advanced model will produce invalid and dangerous forecasts if trained or prompted with noisy, contradictory, or uncurated data.',
       'Recycled environmental data must be stored on green solar servers.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 2,
     explanationFa: 'کیفیت بینش تولیدشده توسط هوش مصنوعی کاملاً تابع کیفیت، ساختاریافتگی و صحه‌گذاری داده‌های ورودی است. در CPMAI فازهای Data Understanding و Data Preparation بخش اعظم زمان پروژه را به خود اختصاص می‌دهند.',
     explanationEn: 'Cognitive intelligence is completely bounded by the integrity and curation of input data. In CPMAI, data understanding and preparation consume the vast majority of lifecycle effort.',
     realWorldContextFa: 'اگر احجام بتن‌ریزی در گزارش‌های روزانه کارگاه به صورت تخمینی ثبت شده باشند، مدل نمی‌تواند انحراف هزینه و مصالح پروژه را با دقت واقعی تخمین بزند.',
@@ -300,18 +300,18 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioFa: 'معاونت فنی سازمان می‌خواهد بداند برای پیش‌بینی احتمال تاخیر در تحویل تجهیزات خارجی، باید از مدل‌های زبانی مانند ChatGPT استفاده کند یا مدل‌های رگرسیون و یادگیری ماشین.',
     scenarioEn: 'Management asks whether to use LLMs like ChatGPT or machine learning regression models to predict equipment lead-time delays.',
     optionsFa: [
-      'هوش مصنوعی مولد محتوای جدید (متن، کد، جدول) تولید می‌کند؛ در حالی که هوش مصنوعی پیش‌بین بر اساس داده‌های عددی تاریخی، احتمال وقوع رخدادهای آینده یا مقادیر عددی را برآورد می‌کند.',
+      'هیچ تفاوتی ندارند و هر دو نام‌های تجاری مختلف برای یک الگوریتم هستند.',
       'هوش مصنوعی مولد فقط برای نقاشی است و هوش مصنوعی پیش‌بین فقط برای پیش‌بینی وضع آب‌وهوا.',
       'هوش مصنوعی پیش‌بین قدیمی و منسوخ شده و امروزه مدل‌های زبانی جایگزین همه محاسبات شده‌اند.',
-      'هیچ تفاوتی ندارند و هر دو نام‌های تجاری مختلف برای یک الگوریتم هستند.'
+      'هوش مصنوعی مولد محتوای جدید (متن، کد، جدول) تولید می‌کند؛ در حالی که هوش مصنوعی پیش‌بین بر اساس داده‌های عددی تاریخی، احتمال وقوع رخدادهای آینده یا مقادیر عددی را برآورد می‌کند.'
     ],
     optionsEn: [
-      'Generative AI creates novel synthesis (text, structured tables, code), whereas Predictive AI models estimate likelihoods or numerical values from historical tabular data.',
+      'They are identical commercial marketing synonyms for the same underlying algorithm.',
       'Generative AI is only for visual art while Predictive AI is restricted to meteorological weather forecasts.',
       'Predictive AI is obsolete and LLMs have completely replaced statistical modeling.',
-      'They are identical commercial marketing synonyms for the same underlying algorithm.'
+      'Generative AI creates novel synthesis (text, structured tables, code), whereas Predictive AI models estimate likelihoods or numerical values from historical tabular data.'
     ],
-    correctAnswerIndex: 0,
+    correctAnswerIndex: 3,
     explanationFa: 'هوش مصنوعی مولد برای خلاصه‌سازی اسناد، نگارش مکاتبات و پیش‌نویس ادعاها عالی است؛ اما برای پیش‌بینی تاخیر، هزینه و ریسک، مدل‌های پیش‌بین (مانند Random Forest، XGBoost یا شبکه‌های عصبی سری زمانی) دقت و اعتبار بالاتری دارند.',
     explanationEn: 'Generative AI excels at textual synthesis and contract drafting, while tabular predictive algorithms (e.g. XGBoost, regression) are required for numerical schedule and cost forecasting.',
     realWorldContextFa: 'برای پیش‌نویس لایحه تاخیرات از هوش مصنوعی مولد استفاده می‌کنیم، اما برای تخمین درصد تاخیر مجاز از مدل‌های آماری و هوش مصنوعی پیش‌بین کمک می‌گیریم.',
@@ -330,17 +330,17 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioEn: 'An engineer asks the model to format site minutes into the company template, but the AI keeps inventing arbitrary layouts.',
     optionsFa: [
       'ارسال پرامپت با سرعت خیلی بالا در چند ثانیه متوالی.',
-      'قرار دادن ۲ یا ۳ نمونه کامل از «ورودی و خروجی ایده‌آل» در بدنه پرامپت، تا مدل سبک، لحن و فرمت جدول‌بندی مورد انتظار را بیاموزد.',
       'کاهش طول پرامپت به کمتر از ۵ کلمه جهت صرفه‌جویی در مصرف توکن.',
+      'قرار دادن ۲ یا ۳ نمونه کامل از «ورودی و خروجی ایده‌آل» در بدنه پرامپت، تا مدل سبک، لحن و فرمت جدول‌بندی مورد انتظار را بیاموزد.',
       'استفاده همزمان از چند مرورگر مختلف برای ارسال یک پرامپت.'
     ],
     optionsEn: [
       'Rapid-fire dispatching of prompts within milliseconds.',
-      'Providing 2 or 3 curated input-output demonstrations within the prompt context to anchor structure, schema, and engineering tone.',
       'Constraining the prompt length to under 5 tokens to minimize cost.',
+      'Providing 2 or 3 curated input-output demonstrations within the prompt context to anchor structure, schema, and engineering tone.',
       'Running multiple parallel browsers simultaneously for one request.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 2,
     explanationFa: 'مدل‌های زبانی با مشاهده نمونه‌های واقعی (Exemplars) الگوی ساختاری را دقیقاً تکرار می‌کنند. ارائه یک نمونه از صورت‌جلسه ورودی و جدول ادعای خروجی مد نظرتان، احتمال خطای فرمت را به صفر نزدیک می‌کند.',
     explanationEn: 'LLMs mirror structural patterns through in-context learning. Providing few-shot demonstrations virtually eliminates formatting and schema divergence.',
     realWorldContextFa: 'وقتی می‌خواهید صدها نامه کارگاهی را به جدول ماتریس ریسک تبدیل کنید، گذاشتن یک نمونه تبدیل‌شده در پرامپت، خروجی یکدست و بی‌نقص ایجاد می‌کند.',
@@ -358,18 +358,18 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioFa: 'یک سیستم هوش مصنوعی پیشنهاد قطع بتن‌ریزی فونداسیون به دلیل خطر فرونشست خاک را به صورت خودکار صادر کرده است.',
     scenarioEn: 'An autonomous AI system issues an automated directive to halt foundation pouring due to settlement risk.',
     optionsFa: [
-      'باید یک اپراتور در اتاق سرور بنشیند و فقط چراغ‌های دستگاه را چک کند.',
       'هیچ خروجی یا توصیه بحرانی هوش مصنوعی نباید بدون بررسی، راستی‌آزمایی و امضای مهندس صاحب صلاحیت انسانی به اقدام عملی یا تعهد قراردادی تبدیل شود.',
+      'باید یک اپراتور در اتاق سرور بنشیند و فقط چراغ‌های دستگاه را چک کند.',
       'انسان‌ها باید همه کارها را خودشان با دست انجام دهند و هوش مصنوعی خاموش بماند.',
       'هوش مصنوعی باید بتواند انسان‌ها را استخدام یا اخراج کند.'
     ],
     optionsEn: [
-      'A hardware technician must passively monitor physical cooling lights in the server room.',
       'No mission-critical AI inference or directive can trigger physical execution without rigorous verification and sign-off by a licensed human professional.',
+      'A hardware technician must passively monitor physical cooling lights in the server room.',
       'Engineers must manually perform all drafting by hand while keeping AI disconnected.',
       'The AI system is empowered to autonomously hire or dismiss site personnel.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 0,
     explanationFa: 'مدل‌های هوش مصنوعی مشاور و شتاب‌دهنده هستند؛ اما مسئولیت مدنی، حقوقی، ایمنی و اخلاقی تصمیمات منحصراً بر عهده اشخاص حقیقی و مهندسان دارای پروانه است.',
     explanationEn: 'Cognitive models advise and accelerate analysis; ultimate legal, ethical, and structural liability rests exclusively with certified human professionals.',
     realWorldContextFa: 'هوش مصنوعی می‌تواند ناهنجاری در کرنش‌سنج‌های سد را گزارش دهد، اما تصمیم تخلیه کارگاه یا اصلاح تزریق بتن باید با تایید ناظر مقیم و سرناظر باشد.',
@@ -421,17 +421,17 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioEn: 'A vendor urges purchasing an expensive deep learning progress tracking model without a validated use case.',
     optionsFa: [
       'فاز اول، خرید کارت‌های گرافیک GPU است.',
-      'فاز اول «درک کسب‌وکار (Business Understanding)» است؛ بدون تعریف شاخص‌های موفقیت عینی، بررسی راه‌حل‌های سنتی و توجیه مالی ROI، پروژه در معرض شکست قرار می‌گیرد.',
+      'فاز اول، جمع‌آوری یک میلیون عکس از محیط کارگاه است.',
       'فاز اول، نصب سیستم‌عامل لینوکس بر روی سرورهای محلی است.',
-      'فاز اول، جمع‌آوری یک میلیون عکس از محیط کارگاه است.'
+      'فاز اول «درک کسب‌وکار (Business Understanding)» است؛ بدون تعریف شاخص‌های موفقیت عینی، بررسی راه‌حل‌های سنتی و توجیه مالی ROI، پروژه در معرض شکست قرار می‌گیرد.'
     ],
     optionsEn: [
       'Phase I is the bulk acquisition of high-performance GPU hardware.',
-      'Phase I is "Business Understanding"; without defining quantifiable business KPIs, evaluating non-cognitive baselines, and proving ROI, failure is guaranteed.',
+      'Phase I is capturing a million unstructured drone photos of the construction site.',
       'Phase I is installing open-source Linux distributions across local workstations.',
-      'Phase I is capturing a million unstructured drone photos of the construction site.'
+      'Phase I is "Business Understanding"; without defining quantifiable business KPIs, evaluating non-cognitive baselines, and proving ROI, failure is guaranteed.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 3,
     explanationFa: 'بیش از ۸۰ درصد پروژه‌های هوش مصنوعی سنتی به این دلیل شکست می‌خورند که قبل از درک دقیق صورت‌مسئله کسب‌وکار، ذی‌نفعان و سنجش راه‌حل‌های غیرشناختی ارزان‌تر، مستقیماً وارد کدنویسی مدل می‌شوند.',
     explanationEn: 'Over 80% of enterprise AI pilots collapse because teams code models before rigorously qualifying stakeholder value and non-cognitive baselines in Phase I.',
     realWorldContextFa: 'کتاب‌کار ۲۱ صفحه‌ای CPMAI فاز اول را در صفحات ۱ تا ۷ به تثبیت اهداف، معیار موفقیت، ROI و گزینه‌های جایگزین غیرهوش‌مصنوعی اختصاص داده است.',
@@ -478,18 +478,18 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioFa: 'مشاور پروژه تصمیم دارد برای استعلام اسناد مناقصه، بین آپلود مدارک در سیستم RAG و بازآموزی اختصاصی مدل یکی را انتخاب کند.',
     scenarioEn: 'A consultant must choose between a RAG architecture and fine-tuning an open-source model to query technical specs.',
     optionsFa: [
-      'معماری RAG فقط برای متون انگلیسی کاربرد دارد، اما Fine-Tuning برای زبان فارسی است.',
       'معماری RAG با جستجو در منابع اسناد سازمانی به‌روز، بدون تغییر وزن‌های مدل، پاسخ مستند با ارجاع دقیق می‌دهد؛ در حالی که Fine-Tuning وزن‌های مدل را برای یادگیری لحن تغییر می‌دهد و تضمینی برای جلوگیری از توهم ندارد.',
+      'معماری RAG فقط برای متون انگلیسی کاربرد دارد، اما Fine-Tuning برای زبان فارسی است.',
       'معماری RAG نیاز به ابرکامپیوترهای فوق گران‌قیمت دارد ولی Fine-Tuning در چند ثانیه روی لپ‌تاپ انجام می‌شود.',
       'معماری RAG تمام اسناد را روی اینترنت عمومی منتشر می‌کند.'
     ],
     optionsEn: [
-      'RAG is strictly compatible with English, whereas Fine-Tuning is exclusive to Persian.',
       'RAG dynamically retrieves verified enterprise chunks without modifying weights, providing precise citations; Fine-Tuning updates weights to teach style/syntax but does not guarantee factual grounding.',
+      'RAG is strictly compatible with English, whereas Fine-Tuning is exclusive to Persian.',
       'RAG demands multi-million dollar supercomputers, whereas Fine-Tuning runs in seconds on consumer laptops.',
       'RAG exposes all proprietary files publicly across external search indexes.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 0,
     explanationFa: 'در پروژه‌های مهندسی که اسناد مدام تغییر می‌کنند (نقشه‌های As-Built، الحاقیه‌ها)، سیستم RAG (مانند Google NotebookLM) بسیار چابک‌تر، ارزان‌تر و قابل اتکاتر است، زیرا به هر پاسخ منبع دقیق الصاق می‌کند.',
     explanationEn: 'RAG retrieves real-time project revisions and pins direct citations to sources, whereas fine-tuning is static, expensive, and still prone to hallucinating facts.',
     realWorldContextFa: 'در کارگاه آموزشی نوت‌بوک‌ال‌ام، با بارگذاری اسناد پیمانکاری، ظرف چند ثانیه یک سیستم RAG محلی بدون نیاز به کدنویسی در اختیار مدیران قرار می‌گیرد.',
@@ -508,17 +508,17 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioEn: 'An inspector notes the vision model occasionally flags paint scratches as structural cracks (False Positive), but never misses an actual fissure.',
     optionsFa: [
       'چون محاسبه فرمول Recall در اکسل ساده‌تر از Precision است.',
-      'چون هزینه یک مثبت کاذب (بررسی مجدد توسط ناظر) بسیار ناچیز است، اما منفی کاذب (عدم تشخیص ترک واقعی) می‌تواند منجر به ریزش پل و فاجعه انسانی شود.',
       'چون استانداردهای بین‌المللی اجازه استفاده از Precision را نمی‌دهند.',
+      'چون هزینه یک مثبت کاذب (بررسی مجدد توسط ناظر) بسیار ناچیز است، اما منفی کاذب (عدم تشخیص ترک واقعی) می‌تواند منجر به ریزش پل و فاجعه انسانی شود.',
       'چون مدل‌های هوش مصنوعی اصولاً نمی‌توانند Precision بالای ۵۰ درصد داشته باشند.'
     ],
     optionsEn: [
       'Because Recall calculation formulas are simpler to evaluate in spreadsheets.',
-      'Because the operational cost of a False Positive (human reinspection) is trivial, while a False Negative (missing a catastrophic fissure) risks structural collapse and loss of human life.',
       'Because international civil codes legally ban Precision benchmarking.',
+      'Because the operational cost of a False Positive (human reinspection) is trivial, while a False Negative (missing a catastrophic fissure) risks structural collapse and loss of human life.',
       'Because computer vision models can never theoretically exceed 50% Precision.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 2,
     explanationFa: 'در کاربردهای ایمنی‌محور و پزشکی، منفی کاذب (False Negative) مرگبار است. بالا بردن Recall تضمین می‌کند تمام عیوب بحرانی شناسایی شوند، حتی اگر ناظر انسانی مجبور شود چند مورد آلارم اشتباه را بازبینی کند.',
     explanationEn: 'In life-safety engineering, False Negatives carry fatal consequences. Maximizing Recall captures all true defects, accepting marginal human reinspection overhead.',
     realWorldContextFa: 'کتاب‌کار CPMAI در صفحه ۱۸ و ۱۹ ماتریس اغتشاش و حساسیت‌های سنجه‌ها را دقیقاً بر مبنای هزینه مالی و جانی خطاهای False Positive و False Negative تدوین می‌کند.',
@@ -566,17 +566,17 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioEn: 'An external auditor asks which specific structural drawing revision an AI model used six months ago to approve slab pouring.',
     optionsFa: [
       'برای اینکه پوشه‌های ویندوز مرتب‌تر به نظر برسند.',
-      'برای تضمین تکرارپذیری، امکان ردیابی قانونی تصمیمات گذشته (Auditability)، و بازگردانی سریع سیستم در صورت بروز رفتار پیش‌بینی‌نشده.',
+      'برای اینکه سرعت کدنویسی برنامه‌نویسان دو برابر شود.',
       'چون گیت‌هاب فضای ذخیره‌سازی نامحدود رایگان برای فیلم‌ها می‌دهد.',
-      'برای اینکه سرعت کدنویسی برنامه‌نویسان دو برابر شود.'
+      'برای تضمین تکرارپذیری، امکان ردیابی قانونی تصمیمات گذشته (Auditability)، و بازگردانی سریع سیستم در صورت بروز رفتار پیش‌بینی‌نشده.'
     ],
     optionsEn: [
       'To make Windows folder directories look neat and tidy.',
-      'To guarantee scientific reproducibility, legal auditability of historical outputs, and rollback capability in the event of behavioral drift.',
+      'To artificially double developer typing velocity.',
       'Because GitHub provides free unlimited storage for video assets.',
-      'To artificially double developer typing velocity.'
+      'To guarantee scientific reproducibility, legal auditability of historical outputs, and rollback capability in the event of behavioral drift.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 3,
     explanationFa: 'در دعاوی حقوقی مهندسی، باید دقیقاً اثبات شود در فلان تاریخ، کدام نسخه داده آموزشی و کدام وزن مدل تصمیم گرفته است. ابزارهای Git و DVC زیربنای حاکمیت شفاف در فاز ۶ CPMAI هستند.',
     explanationEn: 'In legal claims arbitration, parties must mathematically prove which training dataset slice and model checkpoint produced a historic recommendation.',
     realWorldContextFa: 'اگر پیمانکار نقشه Revision 2 را دستکاری کرده باشد، کنترل نسخه گیت مشخص می‌کند خطای تحلیلی ناشی از نسخه فایل ارسالی بوده نه مدل.',
@@ -594,18 +594,18 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioFa: 'دفتر فنی قصد دارد تناقضات میان ادعای بارندگی پیمانکار با واقعیت کارگاه را کشف کند.',
     scenarioEn: 'A technical office seeks to cross-examine contractor weather delay claims against factual site daily logs.',
     optionsFa: [
-      'عکس پروفایل کارکنان، فیش‌های حقوقی و لیست بیمه تامین اجتماعی.',
       'صورت‌جلسات کارگاهی روزانه (Daily Logs)، برنامه‌زمانی تفصیلی مصوب (Baseline CPM)، و گزارش‌های رسمی هواشناسی یا مستندات ثبت‌شده ورود مصالح.',
+      'عکس پروفایل کارکنان، فیش‌های حقوقی و لیست بیمه تامین اجتماعی.',
       'کتاب‌های دانشگاهی مدیریت پروژه، بروشورهای تبلیغاتی و روزنامه‌های کثیرالانتشار.',
       'فاکتورهای خرید تجهیزات کامپیوتری و قرارداد اینترنت کارگاه.'
     ],
     optionsEn: [
-      'Staff badge photos, payroll ledger stubs, and social security tax returns.',
       'Daily site logs, approved CPM baseline schedules, and official meteorological station records / material delivery submittals.',
+      'Staff badge photos, payroll ledger stubs, and social security tax returns.',
       'Academic project management textbooks, marketing pamphlets, and daily newspapers.',
       'Computer hardware procurement invoices and site internet service agreements.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 0,
     explanationFa: 'هوش مصنوعی زمانی ادعاهای واهی را کشف می‌کند که این سه ضلع را با هم تطبیق دهد: اگر پیمانکار ادعای تعطیلی به علت باران داشته، اما ثبت ورود بتن در همان روز وجود دارد، تناقض آشکار می‌شود.',
     explanationEn: 'AI uncovers fraudulent claims when triangulating claims against baseline schedules and daily delivery logs to surface irreconcilable contradictions.',
     realWorldContextFa: 'در کارگاه آموزشی NotebookLM پلتفرم، دقیقاً این موردکاوی با اسناد شبیه‌سازی‌شده مترو جهت استخراج تاخیرات مجاز پیاده‌سازی شده است.',
@@ -624,17 +624,17 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioEn: 'A vendor advertises 99% accuracy, but the model simply predicts "no breakdown" 100% of the time, missing every disaster.',
     optionsFa: [
       'چون Accuracy فقط برای زبان‌های خارجی محاسبه می‌شود.',
-      'در داده‌های نامتعادل (Class Imbalance)، مدلی که همیشه بگوید «هیچ حادثه‌ای رخ نمی‌دهد» به راحتی به ۹۹٪ Accuracy می‌رسد اما در عمل کارایی آن صفر است؛ لذا باید از F1-Score یا PR-AUC استفاده کرد.',
       'چون Accuracy نیازمند داشتن حداقل ۱۰ هزار کاربر همزمان است.',
+      'در داده‌های نامتعادل (Class Imbalance)، مدلی که همیشه بگوید «هیچ حادثه‌ای رخ نمی‌دهد» به راحتی به ۹۹٪ Accuracy می‌رسد اما در عمل کارایی آن صفر است؛ لذا باید از F1-Score یا PR-AUC استفاده کرد.',
       'چون فرمول ریاضی Accuracy دارای باگ سیستمی در کامپیوترهاست.'
     ],
     optionsEn: [
       'Because Accuracy metrics are only valid when applied to foreign languages.',
-      'In severely imbalanced datasets, a trivial model that always predicts "normal" achieves 99% accuracy while having zero utility; F1-score or PR-AUC is required.',
       'Because Accuracy requires 10,000 concurrent web users to evaluate.',
+      'In severely imbalanced datasets, a trivial model that always predicts "normal" achieves 99% accuracy while having zero utility; F1-score or PR-AUC is required.',
       'Because computer processors contain arithmetic bugs when calculating division by zero.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 2,
     explanationFa: 'مشکل عدم تعادل داده (Class Imbalance) یکی از شایع‌ترین دام‌های مهندسی است. در صفحه ۱۹ کتاب‌کار CPMAI صراحتاً تاکید شده که برای رخدادهای نادر، سنجه F1-Score میانگین همساز Precision و Recall است و مانع فریب مدیر پروژه می‌شود.',
     explanationEn: 'Class imbalance renders raw accuracy useless. CPMAI Page 19 mandates F1-Score (harmonic mean of Precision & Recall) to prevent catastrophic false confidence.',
     realWorldContextFa: 'دستگاه حفار تونل مترو در ۹۹.۵٪ روزها کار می‌کند. مدلی که خرابی‌های نادر بلبرینگ اصلی را نبیند، حتی با ۹۹٪ صحت کلی، خسارت ۱۰۰ میلیاردی توقف دستگاه را به بار می‌آورد.',
@@ -653,17 +653,17 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioEn: 'A model that accurately forecasted customs clearance lead times last year now produces massive forecasting errors.',
     optionsFa: [
       'سیم‌های سرور شل شده یا کابل‌های شبکه کهنه شده‌اند.',
-      'رفتار محیطی، قوانین ارزی، تحریم‌ها، تورم یا رفتار پیمانکاران در گذر زمان تغییر کرده و داده‌های پیشین دیگر بیانگر واقعیت روز نیستند.',
+      'تعداد بازدیدکنندگان سایت پلتفرم کاهش یافته است.',
       'کدهای پایتون به دلیل گذشت زمان فاسد می‌شوند.',
-      'تعداد بازدیدکنندگان سایت پلتفرم کاهش یافته است.'
+      'رفتار محیطی، قوانین ارزی، تحریم‌ها، تورم یا رفتار پیمانکاران در گذر زمان تغییر کرده و داده‌های پیشین دیگر بیانگر واقعیت روز نیستند.'
     ],
     optionsEn: [
       'Physical network Ethernet cables have degraded over time.',
-      'Macroeconomic dynamics, inflation, supply chains, regulatory policies, or contractor behavior shift over time, rendering historical training data unrepresentative.',
+      'Site visitor web traffic volume has diminished.',
       'Python source code undergoes bit rot and logical expiration.',
-      'Site visitor web traffic volume has diminished.'
+      'Macroeconomic dynamics, inflation, supply chains, regulatory policies, or contractor behavior shift over time, rendering historical training data unrepresentative.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 3,
     explanationFa: 'مدل‌های هوش مصنوعی ایستا هستند در حالی که جهان پروژه پویاست. در فاز ششم CPMAI (Model Operationalization) پایش مستمر، تعیین آستانه افت کارایی و بازآموزی دوره‌ای مدل پیش‌بینی الزامی است.',
     explanationEn: 'Trained models are static snapshots; real megaproject environments evolve. CPMAI Phase VI enforces ongoing monitoring pipelines to trigger retraining upon drift detection.',
     realWorldContextFa: 'تغییر ناگهانی نرخ ارز یا قوانین ثبت سفارش قطعات یدکی پمپ‌بنزین‌ها، الگوهای ترخیص را دگرگون کرده و نیاز به کالیبراسیون فوری مدل دارد.',
@@ -681,18 +681,18 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioFa: 'مدل هوش مصنوعی در محیط تست آزمایشگاهی ۱۰۰٪ پیش‌بینی درست داشت، اما در کارگاه واقعی عملکرد فاجعه‌باری به جای گذاشت.',
     scenarioEn: 'A model achieved 100% predictive accuracy in laboratory cross-validation, but completely failed when deployed live on site.',
     optionsFa: [
-      'ریختن مایعات یا چای روی هارد دیسک سرور حاوی داده‌ها.',
       'ورود اطلاعاتی از آینده (مانند صورت‌جلسه توافق نهایی تاخیرات) به ویژگی‌های آموزشی مدل، به طوری که مدل پاسخ نهایی را در زمان آموزش دیده‌است.',
+      'ریختن مایعات یا چای روی هارد دیسک سرور حاوی داده‌ها.',
       'هک شدن پسورد اکانت دیتابیس توسط مهندسان رقیب.',
       'عدم استفاده از فونت استاندارد در شیت‌های اکسل.'
     ],
     optionsEn: [
-      'Spilling beverages over physical server storage chassis.',
       'Accidentally incorporating target outcome information from the future (such as final negotiated settlement values) into training features.',
+      'Spilling beverages over physical server storage chassis.',
       'Brute-force credential compromises executed by rival construction firms.',
       'Neglecting to apply standard typography fonts in spreadsheet templates.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 0,
     explanationFa: 'نشت داده زمانی رخ می‌دهد که ویژگی‌هایی که فقط «پس از وقوع رخداد» آشکار می‌شوند، به عنوان ورودی به مدل داده شوند. مدل در آزمون تست این تقلب را می‌خواند اما در محیط واقعی داده‌های آینده در دسترس نیستند.',
     explanationEn: 'Data leakage happens when features only observable after an event occurs are fed into the training matrix, creating false perfection that fails live.',
     realWorldContextFa: 'اگر در پیش‌بینی ادعای پیمانکار، تاریخ صدور چک خسارت را جزو ورودی‌ها بگذارید، مدل ادعا را حدس نمی‌زند بلکه از تاریخ چک می‌فهمد که ادعا تایید شده بوده است!',
@@ -740,17 +740,17 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioEn: 'A data scientist presents a mathematically complex model, but site engineers refuse to adopt it because outputs lack explainability.',
     optionsFa: [
       'هر مدلی که تعداد پارامترهای بیشتری داشته باشد خودبه‌خود تایید می‌شود.',
-      'انطباق با معیارهای پذیرش کسب‌وکار (Business Acceptance Criteria) که در فاز ۱ تعریف شده بود، نه صرفاً نمرات ریاضی دقت؛ مدل باید برای مهندسان قابل تفسیر و در فرآیند کارگاهی عملیاتی باشد.',
       'رای‌گیری در کانال تلگرامی سازمان برای انتخاب مدل برتر.',
+      'انطباق با معیارهای پذیرش کسب‌وکار (Business Acceptance Criteria) که در فاز ۱ تعریف شده بود، نه صرفاً نمرات ریاضی دقت؛ مدل باید برای مهندسان قابل تفسیر و در فرآیند کارگاهی عملیاتی باشد.',
       'تایید فقط بر عهده واحد IT سازمان است و نیازی به نظر مهندسان پروژه نیست.'
     ],
     optionsEn: [
       'Whichever model exhibits the highest parameter count is automatically certified.',
-      'Fulfillment of the operational Business Acceptance Criteria established in Phase I, rather than abstract mathematical loss metrics alone, ensuring explainability for site teams.',
       'Running a social media poll among field staff to pick the favorite model.',
+      'Fulfillment of the operational Business Acceptance Criteria established in Phase I, rather than abstract mathematical loss metrics alone, ensuring explainability for site teams.',
       'Sign-off is the sole discretion of corporate IT without technical office or project manager participation.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 2,
     explanationFa: 'موفقیت در CPMAI با رضایت ذی‌نفع و انطباق با اهداف کسب‌وکار سنجیده می‌شود. مدلی با ۹۸٪ دقت که مهندسان دلیل پیش‌بینی‌های آن را نفهمند، کنار گذاشته خواهد شد.',
     explanationEn: 'CPMAI defines success through stakeholder adoption and business value realization. An unexplainable black-box model will be rejected by field engineers regardless of accuracy scores.',
     realWorldContextFa: 'کتاب‌کار در صفحه ۲۱ سنجه‌های KPI پذیرش را تدوین کرده تا فاصله بین دانشمندان داده و مهندسان اجرایی پل زده شود.',
@@ -772,18 +772,18 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioFa: 'سازمان قصد دارد فرآیند ارزیابی صورت‌وضعیت‌ها را از طریق چند هوش مصنوعی خودکارسازی کند تا احتمال تبانی و خطای انسانی حذف شود.',
     scenarioEn: 'An infrastructure agency deploys a multi-agent framework to audit contractor interim payment certificates.',
     optionsFa: [
-      'استفاده از یک مدل بسیار بزرگ به تنهایی برای همه کارها بدون نیاز به ساختار چندعاملی.',
       'تعریف عامل‌های تخصصی مجزا (مانند عامل استخراج مقادیر، عامل تطبیق با فهرست‌بها، عامل راستی‌آزمایی قرارداد) همراه با یک عامل منتقد/داور (Critic/Verifier) جهت کنترل تناقضات.',
+      'استفاده از یک مدل بسیار بزرگ به تنهایی برای همه کارها بدون نیاز به ساختار چندعاملی.',
       'دادن دسترسی مستقیم به هوش مصنوعی برای امضا و پرداخت چک‌های بانکی پروژه.',
       'اجرای همزمان ۵ چت‌بات در تب‌های مختلف گوگل کروم.'
     ],
     optionsEn: [
-      'Deploying a monolithic ultra-large model to execute all multi-disciplinary workflows without decomposition.',
       'Decomposing workflows into specialized discrete agents (e.g. Quantity Extractor, Specification Verifier, Contract Adjudicator) supervised by an independent Critic/Verifier agent.',
+      'Deploying a monolithic ultra-large model to execute all multi-disciplinary workflows without decomposition.',
       'Granting autonomous agents direct credentialed authorization to sign and disburse bank transfers.',
       'Manually opening five browser tabs with generic commercial chatbot interfaces.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 0,
     explanationFa: 'سیستم‌های چندعاملی با تقسیم مسئولیت و نقد متقابل خروجی‌ها (Agentic Verification) توهم را به شدت کاهش می‌دهند. عامل اول بندهای قرارداد را می‌خواند، عامل دوم مقادیر نقشه را استخراج می‌کند و عامل سوم عدم تطابق‌ها را به صورت مدلل گزارش می‌دهد.',
     explanationEn: 'Multi-agent architectures isolate cognitive tasks and enforce peer verification protocols (Critic/Verifier), driving hallucination down while maintaining auditable logs.',
     realWorldContextFa: 'در دفتر فنی، تفکیک وظیفه بین عامل بررسی نقشه‌ها و عامل انطباق با شرایط عمومی پیمان مانع از پذیرش صورت‌وضعیت‌های فاقد مصوبه تغییر مقادیر می‌شود.',
@@ -802,17 +802,17 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioEn: 'A national security directive orders all AI inference pipelines to run on air-gapped on-premise servers with zero external connectivity.',
     optionsFa: [
       'کشیدن کابل شبکه در ساعت‌های اداری و وصل کردن آن در شب.',
-      'استقرار مدل‌های منبع‌باز سبک و کوانتیزه‌شده (Local LLMs) نظیر Llama 3 یا DeepSeek روی کلاسترهای GPU داخلی با موتورهای استنتاجی مانند vLLM یا Ollama و پایگاه برداری محلی.',
       'خرید اکانت پرمیوم ChatGPT با پروکسی‌های پنهان.',
+      'استقرار مدل‌های منبع‌باز سبک و کوانتیزه‌شده (Local LLMs) نظیر Llama 3 یا DeepSeek روی کلاسترهای GPU داخلی با موتورهای استنتاجی مانند vLLM یا Ollama و پایگاه برداری محلی.',
       'نصب آنتی‌ویروس قوی روی لپ‌تاپ مدیر پروژه.'
     ],
     optionsEn: [
       'Disconnecting Ethernet cables during office hours and reconnecting overnight.',
-      'Deploying quantized open-weights models (Local LLMs like Llama 3 or DeepSeek) orchestrated via high-throughput inference engines (vLLM, Ollama) against local vector stores.',
       'Purchasing commercial cloud tokens routed through obfuscated enterprise proxies.',
+      'Deploying quantized open-weights models (Local LLMs like Llama 3 or DeepSeek) orchestrated via high-throughput inference engines (vLLM, Ollama) against local vector stores.',
       'Installing consumer antivirus utilities on project executive laptops.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 2,
     explanationFa: 'امنیت در مگاپروژه‌ها نیازمند عدم خروج حتی یک بایت داده به خارج از فایروال سازمان است. استفاده از مدل‌های منبع‌باز روی سخت‌افزار اختصاصی محلی با پایگاه داده‌های برداری محلی (مانند pgvector روی Neon یا Qdrant) این امر را محقق می‌سازد.',
     explanationEn: 'Zero-trust defense infrastructure prohibits external packet routing. Quantized open-weight models hosted on internal clusters provide sovereign AI capabilities.',
     realWorldContextFa: 'با استقرار لوکال، اسناد مناقصات محرمانه و نقشه‌های تاسیسات زیرزمینی پدافندی بدون نیاز به اینترنت و با سرعت فوق‌العاده پردازش و جستجو می‌شوند.',
@@ -830,18 +830,18 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioFa: 'مدل برداری نمی‌تواند پلاک ثبتی ملک معارض یا شماره دقیق بخشنامه ۵ رقمی را بیابد، هرچند مفهوم حقوقی آن را می‌فهمد.',
     scenarioEn: 'A dense vector search model understands the legal concept of an expropriated parcel, but consistently fails to locate the exact 5-digit plot registration number.',
     optionsFa: [
-      'چون جستجوی برداری کلمات کوتاه و ارقام دقیق را در فضای برداری به خوبی تفکیک نمی‌کند و جستجوی BM25 دقت کدهای فنی و پلاک‌ها را تضمین می‌نماید.',
+      'برای اینکه سرعت پاسخگویی مدل ۵ برابر شود.',
       'چون الگوریتم BM25 مصرف برق سرور را کاهش می‌دهد.',
       'چون وکتور دیتابیس‌ها قادر به ذخیره بیش از ۱۰۰ سند نیستند.',
-      'برای اینکه سرعت پاسخگویی مدل ۵ برابر شود.'
+      'چون جستجوی برداری کلمات کوتاه و ارقام دقیق را در فضای برداری به خوبی تفکیک نمی‌کند و جستجوی BM25 دقت کدهای فنی و پلاک‌ها را تضمین می‌نماید.'
     ],
     optionsEn: [
-      'Dense embeddings compress semantic meaning but blur exact alphanumeric serials and clause codes; sparse BM25 guarantees deterministic exact-match retrieval.',
+      'To artificially increase LLM inference token generation speed fivefold.',
       'Because sparse BM25 indexing algorithms reduce physical datacenter electrical consumption.',
       'Because vector databases crash when document collections exceed 100 files.',
-      'To artificially increase LLM inference token generation speed fivefold.'
+      'Dense embeddings compress semantic meaning but blur exact alphanumeric serials and clause codes; sparse BM25 guarantees deterministic exact-match retrieval.'
     ],
-    correctAnswerIndex: 0,
+    correctAnswerIndex: 3,
     explanationFa: 'مدل‌های Embedding معنا را درک می‌کنند اما در تطابق اعداد خاص (مانند ماده ۴۶-الف یا شماره بخشنامه) ضعیف هستند. ترکیب BM25 و Dense با الگوریتم Reciprocal Rank Fusion (RRF) بهترین دقت را در متون مهندسی رقم می‌زند.',
     explanationEn: 'Dense embeddings excel at conceptual semantic search but struggle with exact alphanumeric strings. Hybrid search with Reciprocal Rank Fusion delivers peak engineering precision.',
     realWorldContextFa: 'وقتی مهندس می‌نویسد «شماره استعلام ۲۳۴-ب مربوط به تحویل زمین»، سیستم هم شماره سند را با BM25 پیدا می‌کند و هم مفهوم تاخیرات تحویل زمین را با Embeddings استخراج می‌نماید.',
@@ -859,18 +859,18 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioFa: 'کمیته ریسک مگاپروژه می‌خواهد بداند در صورت خطای هوش مصنوعی در پایش شیب شیروانی خاکی، سیستم چگونه ایمن متوقف خواهد شد.',
     scenarioEn: 'A risk committee audits how the predictive AI slope stability system safely fails if sensor telemetry drifts.',
     optionsFa: [
-      'شدت اثر خرابی (Severity)، احتمال وقوع خطا (Occurrence)، و احتمال کشف پیش از آسیب (Detection) جهت تعیین عدد اولویت ریسک (RPN).',
       'میزان حقوق دریافتی برنامه‌نویسان و سرعت تایپ آن‌ها در گیت‌هاب.',
+      'شدت اثر خرابی (Severity)، احتمال وقوع خطا (Occurrence)، و احتمال کشف پیش از آسیب (Detection) جهت تعیین عدد اولویت ریسک (RPN).',
       'دمای قطعات کامپیوتری و میزان خنک‌کنندگی فن‌ها.',
       'تعداد لایک‌های دریافتی گزارش‌های هفتگی در شبکه‌های اجتماعی.'
     ],
     optionsEn: [
-      'Failure Severity (S), Likelihood of Occurrence (O), and Detection capability (D) to calculate the actionable Risk Priority Number (RPN).',
       'Software developer compensation packages and typing metrics on GitHub commits.',
+      'Failure Severity (S), Likelihood of Occurrence (O), and Detection capability (D) to calculate the actionable Risk Priority Number (RPN).',
       'Physical processor component temperatures and fan RPM acoustics.',
       'Social media engagement metrics across executive company releases.'
     ],
-    correctAnswerIndex: 0,
+    correctAnswerIndex: 1,
     explanationFa: 'روش استاندارد FMEA برای هوش مصنوعی، خطرات ناشی از توهم، نشت داده، سوگیری و انحراف مدل را بر اساس ۳ شاخص S و O و D ارزیابی می‌کند تا مکانیزم‌های Fallback خودکار طراحی شوند.',
     explanationEn: 'AI FMEA quantifies failure modes (hallucination, data shift, bias) across Severity, Occurrence, and Detectability to establish automated graceful degradation guardrails.',
     realWorldContextFa: 'در پلتفرم CPMAI، در صورت عدم قطعیت بالای مدل در پایش شیب ترانشه، سیستم خودبه‌خود پرچم قرمز بالا برده و کنترل را به تجهیزات ژئوتکنیکی آنالوگ و ناظر انسانی بازمی‌گرداند.',
@@ -888,18 +888,18 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioFa: 'تیم هوش مصنوعی افت تاخیر پاسخ‌دهی (Latency) به زیر ۲۰۰ میلی‌ثانیه را جشن گرفته است، اما مدیر پروژه از افزایش هزینه‌های ادعایی پیمانکار شکایت دارد.',
     scenarioEn: 'Data engineers celebrate driving inference latency below 200ms, yet the project director notes contract claims costs continue to escalate.',
     optionsFa: [
-      'سنجه‌های فنی (مانند Loss، F1-Score، Latency، Throughput) کیفیت الگوریتم را می‌سنجند؛ در حالی که سنجه‌های کسب‌وکار (مانند صرفه‌جویی ریالی، کاهش تاخیرات پروژه، زمان چرخه تایید اسناد) ارزش حاصله برای سازمان را اندازه‌گیری می‌کنند.',
-      'سنجه‌های فنی با ریال سنجیده می‌شوند و سنجه‌های کسب‌وکار با مگابایت.',
       'سنجه‌های کسب‌وکار متعلق به قرن گذشته است و هوش مصنوعی فقط با سنجه‌های فنی ارزیابی می‌شود.',
+      'سنجه‌های فنی با ریال سنجیده می‌شوند و سنجه‌های کسب‌وکار با مگابایت.',
+      'سنجه‌های فنی (مانند Loss، F1-Score، Latency، Throughput) کیفیت الگوریتم را می‌سنجند؛ در حالی که سنجه‌های کسب‌وکار (مانند صرفه‌جویی ریالی، کاهش تاخیرات پروژه، زمان چرخه تایید اسناد) ارزش حاصله برای سازمان را اندازه‌گیری می‌کنند.',
       'این دو کاملاً یکسان هستند و هیچ تفاوتی با هم ندارند.'
     ],
     optionsEn: [
-      'Technical Model KPIs (Loss, F1-Score, Latency, Token Throughput) assess algorithmic health; Business KPIs (cost avoidance, claim settlement velocity, schedule float preserved) quantify enterprise ROI.',
-      'Technical KPIs are measured in monetary currency while Business KPIs are measured in megabytes.',
       'Business KPIs are legacy artifacts; modern AI initiatives are governed exclusively by raw compute metrics.',
+      'Technical KPIs are measured in monetary currency while Business KPIs are measured in megabytes.',
+      'Technical Model KPIs (Loss, F1-Score, Latency, Token Throughput) assess algorithmic health; Business KPIs (cost avoidance, claim settlement velocity, schedule float preserved) quantify enterprise ROI.',
       'They are identical and interchangeable terms.'
     ],
-    correctAnswerIndex: 0,
+    correctAnswerIndex: 2,
     explanationFa: 'مدل می‌تواند از نظر فنی سریع و با دقت بالا باشد، اما اگر بر روی مسئله‌ای بی‌اهمیت اعمال شود، هیچ ارزش تجاری برای پروژه نخواهد داشت. کتاب‌کار CPMAI در صفحات ۲۰ و ۲۱ این دو سنجه را با هم کالیبره می‌کند.',
     explanationEn: 'A model may boast high accuracy, but if misaligned with operational bottlenecks, it delivers zero economic return. CPMAI Pages 20 & 21 tightly couple technical thresholds to corporate milestones.',
     realWorldContextFa: 'کاهش زمان بررسی یک نامه ادعایی از ۱۴ روز به ۲ ساعت (Business KPI) ثمره ارتقای سنجه F1-Score مدل به بالای ۹۲٪ (Technical KPI) است.',
@@ -946,18 +946,18 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioFa: 'سازمان قصد دارد یک مدل زبانی ۷۰ میلیارد پارامتری را برای تحلیل شرایط عمومی پیمان و نشریات سازمان برنامه سازگار کند، اما بودجه خرید ده‌ها سرور گران‌قیمت را ندارد.',
     scenarioEn: 'An agency aims to adapt a 70B parameter open-weights model to local state procurement regulations on a limited budget.',
     optionsFa: [
-      'قفل کردن وزن‌های اصلی مدل و آموزش دادن فقط بخش بسیار کوچکی (زیر ۱٪) از ماتریس‌های وزن افزوده، که هزینه محاسباتی و سخت‌افزاری را بیش از ۹۰٪ کاهش می‌دهد.',
       'حذف نیمی از لایه‌های مدل برای سبک شدن برنامه.',
+      'قفل کردن وزن‌های اصلی مدل و آموزش دادن فقط بخش بسیار کوچکی (زیر ۱٪) از ماتریس‌های وزن افزوده، که هزینه محاسباتی و سخت‌افزاری را بیش از ۹۰٪ کاهش می‌دهد.',
       'ترجمه همه قراردادها به زبان انگلیسی و سپس استفاده از مدل‌های خارجی.',
       'استفاده از هوش مصنوعی برای تایپ سریع‌تر متون در ورد.'
     ],
     optionsEn: [
-      'Freezing the core model weights and updating less than 1% of parameters via low-rank adapter matrices, slashing GPU compute and VRAM overhead by over 90%.',
       'Deleting 50% of the transformer layers to lighten disk footprint.',
+      'Freezing the core model weights and updating less than 1% of parameters via low-rank adapter matrices, slashing GPU compute and VRAM overhead by over 90%.',
       'Translating all Persian contracts into English to leverage foreign commercial APIs.',
       'Using consumer generative autocomplete plugins to type text faster in Word.'
     ],
-    correctAnswerIndex: 0,
+    correctAnswerIndex: 1,
     explanationFa: 'آموزش کامل (Full Fine-Tuning) مدل‌های بزرگ نیازمند کلاسترهای فوق‌سنگین است. با تکنیک LoRA می‌توان آدپتورهای سبکی ساخت که در حافظه یک سرور محلی جای گرفته و زبان تخصصی مقررات ملی را فرا بگیرند.',
     explanationEn: 'Full parameter fine-tuning is economically prohibitive. LoRA injects trainable low-rank decomposition matrices, enabling enterprise domain specialization on modest local GPUs.',
     realWorldContextFa: 'یک تیم مهندسی با آموزش یک LoRA Adapter پنجاه مگابایتی روی مدل Llama، توانست اصطلاحات متروی تهران و نشریه ۱۰۱ را با دقت شگفت‌انگیز تحلیل کند.',
@@ -976,17 +976,17 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioEn: 'An agency needs to continuously audit thousands of automated tender Q&A answers without manual human review bottlenecks.',
     optionsFa: [
       'بررسی اینکه آیا پاسخ به زبان شعر یا نثر ادبی نگاشته شده است.',
-      'اندازه‌گیری سنجه‌های علمی نظیر وفاداری به منبع (Faithfulness)، ارتباط پاسخ (Answer Relevance) و انطباق با واقعیت زمینه (Context Precision) از طریق یک مدل ارزیاب مستقل و بی‌طرف.',
+      'مقایسه سرعت اینترنت سرور در زمان پاسخ‌دهی.',
       'امتیازدهی بر اساس تعداد کلمات به‌کاررفته در متن خروجی.',
-      'مقایسه سرعت اینترنت سرور در زمان پاسخ‌دهی.'
+      'اندازه‌گیری سنجه‌های علمی نظیر وفاداری به منبع (Faithfulness)، ارتباط پاسخ (Answer Relevance) و انطباق با واقعیت زمینه (Context Precision) از طریق یک مدل ارزیاب مستقل و بی‌طرف.'
     ],
     optionsEn: [
       'Scoring whether technical answers exhibit poetic eloquence or formal prose.',
-      'Benchmarking programmatic metrics such as Faithfulness to context, Answer Relevance, and Context Recall via an independent, prompt-engineered evaluator model.',
+      'Comparing local broadband bandwidth metrics during inference generation.',
       'Rating quality strictly based on the gross word count of the generated output.',
-      'Comparing local broadband bandwidth metrics during inference generation.'
+      'Benchmarking programmatic metrics such as Faithfulness to context, Answer Relevance, and Context Recall via an independent, prompt-engineered evaluator model.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 3,
     explanationFa: 'چارچوب Ragas بررسی می‌کند آیا تمام ادعاهای پاسخ در متن استخراج‌شده وجود دارند (Faithfulness) و آیا پاسخ واقعاً پرسش مطرح‌شده را حل کرده است (Relevance)، که از ارزیابی‌های سلیقه‌ای جلوگیری می‌کند.',
     explanationEn: 'Ragas mathematically calculates whether generated assertions are faithfully grounded in retrieved context and directly answer the underlying prompt query.',
     realWorldContextFa: 'در پلتفرم CPMAI، پاسخ‌های تولیدی نوت‌بوک‌ال‌ام با سنجه Faithfulness ارزیابی می‌شوند تا اطمینان حاصل شود هیچ تفسیری خارج از شرایط عمومی پیمان صادر نشده است.',
@@ -1034,17 +1034,17 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioEn: 'IT reports that acquiring an 80GB VRAM GPU is impossible, leaving the engineering team with only a single 24GB workstation card.',
     optionsFa: [
       'با پاک کردن کلمات کم‌استفاده از دیکشنری مدل.',
-      'با تبدیل وزن‌های اعشاری ۱۶ بیتی (FP16) به اعداد صحیح ۴ بیتی یا ۸ بیتی (INT4/INT8)، که مصرف حافظه VRAM را به یک‌چهارم کاهش داده و با افت ناچیز دقت، اجرای مدل‌های بزرگ را روی کارت‌های عادی ممکن می‌کند.',
       'با افزایش ولتاژ برق ورودی سرور به دو برابر.',
+      'با تبدیل وزن‌های اعشاری ۱۶ بیتی (FP16) به اعداد صحیح ۴ بیتی یا ۸ بیتی (INT4/INT8)، که مصرف حافظه VRAM را به یک‌چهارم کاهش داده و با افت ناچیز دقت، اجرای مدل‌های بزرگ را روی کارت‌های عادی ممکن می‌کند.',
       'با فشرده‌سازی فایل مدل به فرمت ZIP قبل از اجرا.'
     ],
     optionsEn: [
       'By purging infrequent vocabulary terms from the model token dictionary.',
-      'By converting 16-bit floating-point weights (FP16) into 4-bit or 8-bit integers (INT4/INT8), compressing VRAM footprints by up to 75% with negligible accuracy trade-off.',
       'By double-stepping datacenter incoming three-phase electrical voltage.',
+      'By converting 16-bit floating-point weights (FP16) into 4-bit or 8-bit integers (INT4/INT8), compressing VRAM footprints by up to 75% with negligible accuracy trade-off.',
       'By archiving the foundation model weights into a standard ZIP archive before loading.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 2,
     explanationFa: 'یک مدل ۷۰ میلیارد پارامتری در حالت FP16 نیازمند حداقل ۱۴۰ گیگابایت حافظه VRAM است. اما در نسخه کوانتیزه‌شده ۴ بیتی (INT4)، در حدود ۴۰ گیگابایت جا می‌گیرد و روی دو کارت معمولی اجرا می‌شود.',
     explanationEn: 'FP16 requires 140GB of VRAM for a 70B parameter model. INT4 quantization compresses the footprint to ~40GB, allowing deployment on cost-effective multi-GPU rigs.',
     realWorldContextFa: 'با کوانتیزاسیون، پلتفرم CPMAI را می‌توان در سرورهای محلی پروژه‌های سدسازی و نیروگاهی بدون نیاز به سخت‌افزارهای چند میلیارد تومانی مستقر کرد.',
@@ -1092,17 +1092,17 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     scenarioEn: 'The executive board approves a 5-year digital transformation budget for corporate-wide AI adoption.',
     optionsFa: [
       'خرید سریع گران‌ترین نرم‌افزار هوش مصنوعی موجود در بازار بدون آموزش کارکنان.',
-      'پیوند عمیق هوش مصنوعی با شایستگی‌های مهندسی انسانی، فرهنگ‌سازی آموزش مستمر، پایبندی به چرخه ۶ فازی CPMAI و شروع از مسائل با ROI بالا و ریسک مهارشده.',
+      'ممنوعیت کامل استفاده از کامپیوتر در پروژه‌ها.',
       'برگزاری سمینارهای تشریفاتی بدون وارد کردن هوش مصنوعی به جریان واقعی کارهای دفتر فنی.',
-      'ممنوعیت کامل استفاده از کامپیوتر در پروژه‌ها.'
+      'پیوند عمیق هوش مصنوعی با شایستگی‌های مهندسی انسانی، فرهنگ‌سازی آموزش مستمر، پایبندی به چرخه ۶ فازی CPMAI و شروع از مسائل با ROI بالا و ریسک مهارشده.'
     ],
     optionsEn: [
       'Purchasing the most expensive commercial AI tool on the market without investing in personnel upskilling.',
-      'Deep alignment of cognitive technology with human engineering expertise, continuous upskilling, strict adherence to the 6-phase CPMAI methodology, and targeting high-ROI, risk-governed pilot use cases.',
+      'Banning personal computers and spreadsheets from engineering job sites.',
       'Hosting theoretical academic seminars without embedding AI assistants into real technical office daily workflows.',
-      'Banning personal computers and spreadsheets from engineering job sites.'
+      'Deep alignment of cognitive technology with human engineering expertise, continuous upskilling, strict adherence to the 6-phase CPMAI methodology, and targeting high-ROI, risk-governed pilot use cases.'
     ],
-    correctAnswerIndex: 1,
+    correctAnswerIndex: 3,
     explanationFa: 'هوش مصنوعی یک تحول سازمانی است، نه یک ابزار نرم‌افزاری صرف. متدولوژی CPMAI با تمرکز بر درک کسب‌وکار، مهندسی داده، مدیریت ریسک و ارتقای مهارت سرمایه انسانی، موفقیت پایدار را تضمین می‌کند.',
     explanationEn: 'Enterprise AI is an organizational capability transformation. CPMAI guarantees sustainable value by bridging technology, sound engineering discipline, and human workforce leadership.',
     realWorldContextFa: 'کتاب‌کار ۲۱ صفحه‌ای CPMAI اوج، نقشه راه گام‌به‌گام این توانمندسازی را از مهندسی پرامپت فاز صفر تا سنجه‌های نهایی فاز ۶ در اختیار مدیران قرار می‌دهد.',
