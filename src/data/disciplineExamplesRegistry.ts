@@ -253,6 +253,127 @@ export const DISCIPLINE_REGISTRY: Record<DisciplineId, DisciplineMetadata> = {
     performanceMetricsEn: ['Signed Mechanical Completion Certs (MCC)', 'Category-A Critical Punch Clearance', 'Steam/Air Blowing Milestones', 'Stable Feed-in Operating Hours'],
     descriptionFa: 'تفکیک پلنت به ساب‌سیستم‌ها، گشت پانچ‌گیری با کارفرما، شستشوی شیمیایی بویلرها، گازپرانی با نیتروژن، بارگذاری کاتالیست و تزریق خوراک تا تولید پایدار.',
     descriptionEn: 'Plant subsystems turnover, joint walk-down punchlisting, N2 purging, chemical cleaning, catalyst loading, and live feed-in.'
+  },
+  // GENERAL & EVERYDAY LIFESTYLE DISCIPLINES (8)
+  general_family_parenting: {
+    id: 'general_family_parenting',
+    trackId: 'GENERAL_EVERYDAY',
+    titleFa: 'والدین هوشمند، آموزش کودک و تعامل با فرزندان',
+    titleEn: 'Smart Parenting, Kids Education & Child Engagement',
+    shortTitleFa: 'والدین و آموزش کودک',
+    shortTitleEn: 'Parenting & Kids',
+    iconName: 'Smile',
+    governingStandardsFa: ['اصول تربیت مثبت و یادگیری بازی‌محور', 'رهنمودهای ایمنی و سلامت دیجیتال کودک (AAP)'],
+    governingStandardsEn: ['Positive Discipline & Gamified Education', 'American Academy of Pediatrics (AAP) Digital Guidelines'],
+    performanceMetricsFa: ['ساعات مطالعه و آموزش مشتاقانه کودک', 'کاهش تنش‌های تکالیف مدرسه و اسکرین‌تایم', 'نرخ خلاقیت و حل مسئله مشارکتی در خانه'],
+    performanceMetricsEn: ['Voluntary Learning Hours', 'Screen-Time Tantrum Reduction %', 'Parent-Child Collaborative Play Frequency'],
+    descriptionFa: 'آموزش مفاهیم دشوار درسی به زبان قصه‌های جذاب، تبدیل تکالیف به چالش‌های سرگرم‌کننده، مدیریت اصولی بازی‌های دیجیتال و تقویت اعتماد به نفس کودکان.',
+    descriptionEn: 'Simplifying complex STEM homework into playful bedtime stories, managing healthy screen limits, and nurturing curiosity without friction.'
+  },
+  general_household_finance: {
+    id: 'general_household_finance',
+    trackId: 'GENERAL_EVERYDAY',
+    titleFa: 'مدیریت خرید، سبد مصرف و اقتصاد خانوار',
+    titleEn: 'Smart Household Budgeting & Grocery Economy',
+    shortTitleFa: 'مدیریت خرید و اقتصاد خانوار',
+    shortTitleEn: 'Household Budget',
+    iconName: 'ShoppingBag',
+    governingStandardsFa: ['قاعده ۵۰/۳۰/۲۰ بودجه‌بندی مالی خانوار', 'اصول صفر دورریز مواد غذایی (Zero Food Waste)'],
+    governingStandardsEn: ['50/30/20 Family Budgeting Standard', 'EPA Zero Food Waste Household Guidelines'],
+    performanceMetricsFa: ['درصد کاهش اقلام دورریز غذایی در هفته', 'میزان پس‌انداز ماهانه واریز شده به صندوق خانواده', 'دقت پیش‌بینی مایحتاج قبل از اتمام موجودی'],
+    performanceMetricsEn: ['Food Waste Reduction %', 'Monthly Micro-Savings Volume', 'Pantry Stockout Prevention Accuracy'],
+    descriptionFa: 'پیش‌بینی زمان اتمام خوراکی‌های ضروری، تهیه فهرست خرید هدفمند، جلوگیری از خریدهای وسوسه‌انگیز فروشگاهی و تبدیل دورریز به پس‌انداز واقعی.',
+    descriptionEn: 'Predicting pantry depletion, automating smart grocery shopping lists, capping impulse shopping, and redirecting waste to family wealth.'
+  },
+  general_travel_lifestyle: {
+    id: 'general_travel_lifestyle',
+    trackId: 'GENERAL_EVERYDAY',
+    titleFa: 'برنامه‌ریزی سفر، تعطیلات خانوادگی و ماجراجویی آخر هفته',
+    titleEn: 'Family Vacation Planning, Travel Deals & Weekend Getaways',
+    shortTitleFa: 'سفر و اوقات فراغت',
+    shortTitleEn: 'Travel & Vacations',
+    iconName: 'Plane',
+    governingStandardsFa: ['استاندارد گردشگری پایدار و اکوتوریسم', 'چک‌لیست ایمنی و سلامت سفر با کودکان'],
+    governingStandardsEn: ['Sustainable Tourism & Ecotourism Principles', 'Family Travel Safety & Child Healthcare Protocol'],
+    performanceMetricsFa: ['درصد صرفه‌جویی در بلیت و اقامتگاه با خرید به‌موقع', 'شاخص رضایت اعضای خانواده از برنامه سفر', 'پوشش ۱۰۰ درصدی وسایل و الزامات چمدان'],
+    performanceMetricsEn: ['Airfare/Lodging Savings %', 'Family Holiday Happiness Score', 'Pack-List Preparedness Zero-Omission'],
+    descriptionFa: 'شکار ارزان‌ترین بلیت و هتل، طراحی برنامه‌های روزانه سفر متناسب با حوصله کودکان و بزرگسالان، و کشف جاذبه‌های بکر و دیدنی بدون اتلاف وقت.',
+    descriptionEn: 'Scouting optimal flight/hotel booking windows, tailoring balanced multi-generational itineraries, and discovering hidden local gems.'
+  },
+  general_viral_content: {
+    id: 'general_viral_content',
+    trackId: 'GENERAL_EVERYDAY',
+    titleFa: 'تولید محتوای وایرال، ایده‌های جذاب و ترندهای شبکه‌های اجتماعی',
+    titleEn: 'Viral Social Media Ideation, Content Trends & Creative Hooks',
+    shortTitleFa: 'ترندهای وایرال و سرگرمی',
+    shortTitleEn: 'Viral Content',
+    iconName: 'Sparkles',
+    governingStandardsFa: ['اصول داستان‌سرایی و روانشناسی تعامل مخاطب', 'استانداردهای کپی‌رایت و هویت بصری مدرن'],
+    governingStandardsEn: ['Audience Attention Psychology & Storytelling', 'Social Media Algorithmic Retention Standards'],
+    performanceMetricsFa: ['نرخ تعامل (Engagement Rate) ریلز و پست‌ها', 'تعداد ایده‌های تولیدشده در کمتر از ۱۰ دقیقه', 'نرخ حفظ تماشاگر در ۳ ثانیه اول ویدیو'],
+    performanceMetricsEn: ['Content Engagement Rate', 'Script Generation Speed in Minutes', 'First-3-Seconds Hook Retention Rate %'],
+    descriptionFa: 'نگارش سناریوهای میخکوب‌کننده برای اینستاگرام و یوتیوب، یافتن ترندهای داغ روزمره، کپشن‌نویسی شوخ‌طبعانه و پرطرفدار، و ساخت پرسونای جذاب دیجیتال.',
+    descriptionEn: 'Drafting high-retention video scripts, identifying daily viral conversational hooks, writing snappy captions, and sparking authentic community engagement.'
+  },
+  general_ecommerce_retail: {
+    id: 'general_ecommerce_retail',
+    trackId: 'GENERAL_EVERYDAY',
+    titleFa: 'خرید هوشمند آنلاین، کشف تخفیف‌ها و مقایسه قیمت کالاها',
+    titleEn: 'Smart Online Shopping, Discount Hunting & Price Matching',
+    shortTitleFa: 'خرید آنلاین و تخفیف‌ها',
+    shortTitleEn: 'Smart Shopping',
+    iconName: 'Tag',
+    governingStandardsFa: ['حقوق مصرف‌کننده در تجارت الکترونیک', 'اصول ارزیابی نقدهای واقعی کاربران در فروشگاه‌ها'],
+    governingStandardsEn: ['E-Commerce Consumer Rights & Warranties', 'Review Sentiment Analysis & Authenticity Verification'],
+    performanceMetricsFa: ['مجموع مبلغ تخفیف واقعی کسب‌شده', 'جلوگیری از خرید کالاهای فیک یا بی‌کیفیت', 'زمان صرف‌شده برای مقایسه ۵ فروشگاه برتر'],
+    performanceMetricsEn: ['Net Cash Saved via Coupon/Deals', 'Counterfeit / Low-Rating Purchase Avoidance', 'Multi-Store Comparison Time (Minutes)'],
+    descriptionFa: 'پایش تغییرات قیمت اقلام دیجی‌کالا و وب‌سایت‌های آنلاین، تشخیص نظرات تقلبی خریداران، پیدا کردن کدهای تخفیف معتبر و خرید در کف قیمت.',
+    descriptionEn: 'Tracking e-commerce price drops, filtering fake sponsored reviews, discovering active promo codes, and timing purchases at price troughs.'
+  },
+  general_health_nutrition: {
+    id: 'general_health_nutrition',
+    trackId: 'GENERAL_EVERYDAY',
+    titleFa: 'سلامت فردی، تغذیه سالم، تناسب اندام و برنامه‌ریزی غذایی',
+    titleEn: 'Personal Health, Meal Planning, Fitness & Nutrition',
+    shortTitleFa: 'سلامت و تغذیه خانوادگی',
+    shortTitleEn: 'Health & Nutrition',
+    iconName: 'Activity',
+    governingStandardsFa: ['هرم راهنمای غذایی سالم سازمان بهداشت جهانی (WHO)', 'دستورالعمل‌های تمرینات بدنی روزمره خانگی'],
+    governingStandardsEn: ['WHO Healthy Dietary Guidelines', 'ACSG Everyday Physical Activity Protocol'],
+    performanceMetricsFa: ['شاخص مصرف روزانه پروتئین و فیبر خانواده', 'تعداد روزهای پایبندی به رژیم غذایی بدون خستگی', 'کاهش مصرف قند و فست‌فود در طول ماه'],
+    performanceMetricsEn: ['Daily Micronutrient & Fiber Adherence', 'Healthy Diet Streak Continuity (Days)', 'Ultra-Processed Food Reduction %'],
+    descriptionFa: 'طراحی رژیم‌های غذایی خوشمزه با در نظر گرفتن ذائقه تک‌تک اعضای خانواده، پیشنهادات ورزشی سریع ۱۵ دقیقه‌ای در منزل و کنترل کالری روزانه.',
+    descriptionEn: 'Crafting balanced family-friendly meal plans accommodating picky eaters, simple 15-minute home workouts, and sustainable daily vitality.'
+  },
+  general_personal_productivity: {
+    id: 'general_personal_productivity',
+    trackId: 'GENERAL_EVERYDAY',
+    titleFa: 'بهره‌وری فردی، مدیریت زمان روزمره، تمرکز و غلبه بر تنبلی',
+    titleEn: 'Personal Productivity, Daily Time Boxing, Focus & Habit Building',
+    shortTitleFa: 'بهره‌وری و مدیریت زمان',
+    shortTitleEn: 'Productivity & Habits',
+    iconName: 'CheckCircle2',
+    governingStandardsFa: ['تکنیک‌های مدیریت زمان پومودورو و Time-Boxing', 'اصول شکل‌گیری عادات پایدار جیمز کلیر'],
+    governingStandardsEn: ['Time-Boxing & Deep Work Methodologies', 'Atomic Habits Micro-Routines Framework'],
+    performanceMetricsFa: ['تعداد تسک‌های انجام‌شده از فهرست کارها (To-Do)', 'ساعات کار عمیق بدون حواس‌پرتی گوشی', 'کاهش استرس ناشی از فراموشی موعد کارها'],
+    performanceMetricsEn: ['Completed High-Priority Daily Tasks', 'Deep Focus Hours without Phone Interruption', 'Missed Deadlines & Procrastination Score'],
+    descriptionFa: 'اولویت‌بندی کارهای روزمره، شکستن پروژه‌های بزرگ به گام‌های کوچک، تنظیم روتین صبحگاهی پرانرژی و رهایی از اهمال‌کاری و احساس گناه.',
+    descriptionEn: 'Prioritizing daily to-do lists, breaking overwhelming goals into bite-sized steps, structuring energizing morning routines, and overcoming procrastination.'
+  },
+  general_customer_care: {
+    id: 'general_customer_care',
+    trackId: 'GENERAL_EVERYDAY',
+    titleFa: 'روابط اجتماعی، آداب معاشرت، حل تعارض و نامه‌نگاری روزمره',
+    titleEn: 'Social Etiquette, Everyday Negotiation, Conflict Resolution & Polite Messaging',
+    shortTitleFa: 'آداب معاشرت و حل تعارض',
+    shortTitleEn: 'Etiquette & Negotiation',
+    iconName: 'MessageSquare',
+    governingStandardsFa: ['اصول ارتباط بدون خشونت (NVC مارشال روزنبرگ)', 'تکنیک‌های مذاکره برد-برد دانشگاه هاروارد'],
+    governingStandardsEn: ['Nonviolent Communication (NVC) Framework', 'Harvard Principled Negotiation Model'],
+    performanceMetricsFa: ['حل سوءتفاهم‌های دوستانه و کاری بدون دلخوری', 'موفقیت در اخذ تخفیف یا تمدید مهلت قراردادها', 'سرعت تنظیم پیام‌های رسمی، مؤدبانه و کاری'],
+    performanceMetricsEn: ['Interpersonal Conflict Resolution Rate', 'Successful Everyday Negotiation Outcomes %', 'Diplomatic Communication Drafting Speed'],
+    descriptionFa: 'نگارش پیام‌های دشوار (مانند پس‌گرفتن پول قرض‌داده‌شده یا درخواست افزایش حقوق)، پاسخ محترمانه به انتقادات، و مذاکره هوشمندانه در مسائل زندگی.',
+    descriptionEn: 'Formulating delicate messages (recovering loans, asking for pay raises, setting boundaries) with warmth, poise, and diplomatic firmness.'
   }
 };
 
@@ -627,6 +748,191 @@ export const DISCIPLINE_EXAMPLES_REGISTRY: Record<DisciplineId, DisciplineExampl
     costBenefitSummaryEn: '$4.5M in early commercial production revenue unlocked through expedited commissioning turnover.',
     roiEstimateFa: 'بازگشت سرمایه ۲۸۰۰٪ در کمتر از ۲ هفته.',
     roiEstimateEn: '2,800% Net ROI within 14 days.'
+  },
+  // GENERAL LIFESTYLE & EVERYDAY DISCIPLINES CONTENT
+  general_family_parenting: {
+    disciplineId: 'general_family_parenting',
+    titleFa: 'والدین هوشمند، آموزش کودک و تعامل با فرزندان',
+    titleEn: 'Smart Parenting & Kids Engagement',
+    businessProblemFa: 'لجبازی کودکان در انجام تکالیف، سردرگمی والدین در توضیح مباحث پایه علوم و ریاضی، و نبرد بی‌پایان خانوادگی بر سر محدودکردن اسکرین‌تایم بازی‌های کامپیوتری.',
+    businessProblemEn: 'Homework resistance, parental frustration explaining school concepts, and continuous household battles over screen-time limits.',
+    whyAiFa: 'مدل‌های زبانی با تسلط بر لحن داستانی و علایق اختصاصی کودک، هر درس خسته‌کننده را به ماجراجویی تعاملی تبدیل کرده و راهکارهای روانشناختی شخصی‌سازی‌شده پیشنهاد می‌دهند.',
+    whyAiEn: 'LLMs dynamically adapt explanatory depth to a child exact passions (e.g., teaching fractions using Minecraft or Roblox mechanics), turning resistance into joyful curiosity.',
+    successCriteriaFa: [
+      'انجام داوطلبانه تکالیف در کمتر از ۴۵ دقیقه بدون اشک و فریاد',
+      'کاهش ۶۰ درصدی چالش‌های خاموش کردن تبلت و کنسول بازی',
+      'تسلط مفهومی کودک بر مبحث درسی هدف در ارزشیابی مدرسه'
+    ],
+    successCriteriaEn: [
+      '45-minute tears-free homework completion',
+      '60% reduction in screen-time transition tantrums',
+      'Measurable improvement in school conceptual retention'
+    ],
+    costBenefitSummaryFa: 'صرفه‌جویی ماهیانه ۴ تا ۸ میلیون تومان در عدم نیاز به معلم خصوصی و ساعات بی‌پایان آرامش در محیط خانواده.',
+    costBenefitSummaryEn: '$150-$300 monthly savings on remedial tutoring, coupled with priceless reduction in household evening stress.',
+    roiEstimateFa: 'آرامش پایدار خانواده و بازگشت سرمایه ۵۰۰٪ در اولین ماه.',
+    roiEstimateEn: '500% Net Value in restored domestic harmony and child academic confidence.'
+  },
+  general_household_finance: {
+    disciplineId: 'general_household_finance',
+    titleFa: 'مدیریت خرید، سبد مصرف و اقتصاد خانوار',
+    titleEn: 'Smart Household Budgeting & Grocery Economy',
+    businessProblemFa: 'دورریز مداوم ۲۰ تا ۳۰ درصدی خریدهای سوپرمارکت، خریدهای هیجانی اقلام حراجی که هیچ‌وقت مصرف نمی‌شوند، و احساس دائمی کمبود پول در پایان هر ماه.',
+    businessProblemEn: '20-30% recurring perishable grocery spoilage, impulse spending on deceptive promotions, and month-end paycheck exhaustion.',
+    whyAiFa: 'پیش‌بینی مصرف واقعی بر اساس تعداد اعضای خانواده و نرخ مصرف هفتگی، تهیه لیست خودکار خرید و ردیابی ریالی پس‌اندازهای خرد.',
+    whyAiEn: 'Predictive consumption algorithms track pantry velocity, generate lean dynamic shopping lists, and capture stealth leaks.',
+    successCriteriaFa: [
+      'کاهش دورریز مواد غذایی یخچال به زیر ۵ درصد',
+      'پس‌انداز ماهانه حداقل ۲۰ درصد از کل هزینه‌های سوپرمارکت',
+      'پیش‌بینی دقیق مایحتاج قبل از تمام شدن نمک، روغن یا نان'
+    ],
+    successCriteriaEn: [
+      'Reduce household food waste to under 5%',
+      'Capture at least 20% recurring monthly grocery spend savings',
+      '99% proactive pantry stock replenishment without stockouts'
+    ],
+    costBenefitSummaryFa: 'صرفه‌جویی سالیانه ۲۵ تا ۳۵ میلیون تومان در سبد مصرفی خانوار و هدایت کامل آن به صندوق پس‌انداز خانواده.',
+    costBenefitSummaryEn: '$1,200 annual household expenditure reduction channeled directly to family emergency or travel savings.',
+    roiEstimateFa: 'بازگشت سرمایه ۱۲۰۰٪ در کمتر از ۴۵ روز.',
+    roiEstimateEn: '1,200% Net ROI in 45 days.'
+  },
+  general_travel_lifestyle: {
+    disciplineId: 'general_travel_lifestyle',
+    titleFa: 'برنامه‌ریزی سفر، تعطیلات خانوادگی و ماجراجویی',
+    titleEn: 'Family Vacation Planning & Travel Deals',
+    businessProblemFa: 'خرید بلیت هواپیما و رزرو هتل با بالاترین نرخ ممکن به دلیل بی‌اطلاعی از نوسانات قیمت، برنامه‌ریزی شلوغ و خسته‌کننده سفر که باعث بدخلقی کودکان می‌شود، و اتلاف ساعت‌ها وقت در ترافیک یا مکان‌های بی‌کیفیت.',
+    businessProblemEn: 'Paying peak booking fares due to price fluctuation blindness, exhausting over-scheduled itineraries sparking family meltdowns, and wasting precious vacation days in tourist traps.',
+    whyAiFa: 'تحلیل الگوهای زمانی قیمت‌گذاری خطوط پروازی و هتل‌ها، و ساخت برنامه‌های منعطف روزانه بر مبنای انرژی و سلیقه کودکان و والدین.',
+    whyAiEn: 'Mining fare volatility algorithms to target booking sweet spots, while synthesizing balanced, crowd-free itineraries accommodating both kids and seniors.',
+    successCriteriaFa: [
+      'خرید بلیت و اقامتگاه با حداقل ۳۰ درصد زیر قیمت بازار',
+      'رضایت ۱۰۰ درصدی تمام اعضای خانواده از تنوع و آرامش سفر',
+      'آماده‌سازی کامل چک‌لیست چمدان و داروها بدون حتی یک قلم فراموشی'
+    ],
+    successCriteriaEn: [
+      '30%+ savings on combined flight and accommodation bookings',
+      '100% positive post-trip family enjoyment rating',
+      'Zero forgotten medication or luggage essentials'
+    ],
+    costBenefitSummaryFa: 'صرفه‌جویی ۱۲ تا ۳۰ میلیون تومانی در هر سفر خانوادگی و دو برابر شدن لذت و آرامش تعطیلات.',
+    costBenefitSummaryEn: '$600-$1,500 direct cash savings per family holiday with zero logistical burnout.',
+    roiEstimateFa: 'بازگشت سرمایه ۸۰۰٪ در اولین سفر.',
+    roiEstimateEn: '800% Net ROI on the very first vacation booked.'
+  },
+  general_viral_content: {
+    disciplineId: 'general_viral_content',
+    titleFa: 'تولید محتوای وایرال، ایده‌های جذاب و ترندهای شبکه‌های اجتماعی',
+    titleEn: 'Viral Social Media Ideation & Content Growth',
+    businessProblemFa: 'قفل ذهنی در ایده‌پردازی برای پست و استوری، ریزش مخاطبان در ۳ ثانیه اول ویدیو، کپشن‌های تکراری و خسته‌کننده، و صرف ساعت‌ها زمان برای ویدیویی که دیده نمی‌شود.',
+    businessProblemEn: 'Content creator writer block, viewer drop-off in the first 3 seconds, dry cookie-cutter captions, and spending 6 hours on videos that get 200 views.',
+    whyAiFa: 'تسلط بر هوک‌های روانشناختی جلب توجه، تحلیل ساختار الگوهای پربازدید اینستاگرام و یوتیوب و بازنویسی متون با شوخ‌طبعی و لحن خودمانی.',
+    whyAiEn: 'Deconstructing high-retention algorithmic hooks, pacing frameworks, and punchy conversational copywriting tailored to audience psychology.',
+    successCriteriaFa: [
+      '۳ برابر شدن نرخ مشاهده کامل ویدیوها (Watch Time)',
+      'تولید ۱۰ ایده سناریوی جذاب در کمتر از ۱۵ دقیقه',
+      'رشد چشمگیر کامنت‌ها و تعامل ارگانیک مخاطبان'
+    ],
+    successCriteriaEn: [
+      '3x increase in video completion retention rate',
+      'Generate 10 compelling hook concepts inside 15 minutes',
+      '200% surge in organic comments and audience shares'
+    ],
+    costBenefitSummaryFa: 'حذف هزینه‌های استخدام ادمین و سناریونویس به ارزش ماهانه ۱۰ تا ۲۰ میلیون تومان با خروجی به مراتب خلاقانه‌تر.',
+    costBenefitSummaryEn: '$300-$700 monthly copywriter agency savings alongside accelerated organic audience monetization.',
+    roiEstimateFa: 'بازگشت سرمایه ۱۵۰۰٪ در ماه اول.',
+    roiEstimateEn: '1,500% Net ROI in 30 days.'
+  },
+  general_ecommerce_retail: {
+    disciplineId: 'general_ecommerce_retail',
+    titleFa: 'خرید هوشمند آنلاین، کشف تخفیف‌ها و مقایسه قیمت کالاها',
+    titleEn: 'Smart Online Shopping & Deals',
+    businessProblemFa: 'خرید کالاهایی با تخفیف‌های دروغین در جشنواره‌ها، فریب خوردن با نظرات ساختگی و کامنت‌های فیک در فروشگاه‌ها، و خرید کالاهای نامرغوب.',
+    businessProblemEn: 'Falling for artificial markup-discount traps, deceived by incentivized fake product reviews, and receiving substandard goods.',
+    whyAiFa: 'تحلیل تاریخچه نوسان قیمت، بررسی هوشمند کامنت‌ها برای استخراج معایب واقعی و کشف کدهای تخفیف واقعی در کمتر از ۱۰ ثانیه.',
+    whyAiEn: 'Natural language sentiment analysis on hundreds of buyer reviews isolating genuine flaws, coupled with automated real-time price history validation.',
+    successCriteriaFa: [
+      'کشف پایین‌ترین قیمت واقعی در بین تمام فروشگاه‌های آنلاین',
+      'تفکیک دقیق نظرات سفارشی از تجربیات صادقانه خریداران',
+      'صرفه‌جویی میانگین ۱۵ تا ۳۰ درصدی روی هر سفارش خرید'
+    ],
+    successCriteriaEn: [
+      'Identify absolute lowest historic price across e-tailers',
+      '98% accuracy in filtering sponsored or manipulated reviews',
+      'Average 15-30% verified savings per online purchase'
+    ],
+    costBenefitSummaryFa: 'جلوگیری از زیان خرید کالاهای معیوب و بهره‌مندی از حداکثر تخفیف‌های پنهان فروشگاه‌ها.',
+    costBenefitSummaryEn: 'Preventing costly buyer remorse and unlocking steep hidden promotional discounts.',
+    roiEstimateFa: 'بازگشت سرمایه ۹۰۰٪ به ازای هر خرید عمده.',
+    roiEstimateEn: '900% Net Savings on major household purchases.'
+  },
+  general_health_nutrition: {
+    disciplineId: 'general_health_nutrition',
+    titleFa: 'سلامت فردی، تغذیه سالم و تناسب اندام',
+    titleEn: 'Personal Health & Nutrition',
+    businessProblemFa: 'رژیم‌های سخت و غیرقابل‌تحمل که بعد از دو هفته رها می‌شوند، خستگی از سوال «امروز چی بپزیم؟»، مصرف مداوم غذاهای فست‌فودی و چاقی و خستگی مزمن.',
+    businessProblemEn: 'Unsustainable crash diets abandoned in 10 days, daily meal fatigue, reliance on ultra-processed delivery, and creeping weight gain.',
+    whyAiFa: 'ترکیب علایق غذایی اعضای خانواده، موجودی فعلی یخچال و اهداف سلامت در یک برنامه هفتگی خوشمزه، سریع و کم‌هزینه.',
+    whyAiEn: 'Synthesizing real-time fridge ingredients, family flavor preferences, and caloric goals into effortless 20-minute whole-food menus.',
+    successCriteriaFa: [
+      'پخت غذاهای خانگی خوشمزه در کمتر از ۳۰ دقیقه بدون سردرگمی',
+      'کاهش ۵۰ درصدی سفارش فست‌فود و غذاهای رستورانی',
+      'بهبود سطح انرژی، خواب و تناسب اندام کل اعضای خانواده'
+    ],
+    successCriteriaEn: [
+      'Nutritious family dinners prepared in < 30 minutes',
+      '50% reduction in commercial fast-food delivery reliance',
+      'Measurable improvement in family vitality, sleep, and body composition'
+    ],
+    costBenefitSummaryFa: 'صرفه‌جویی ماهیانه ۶ تا ۱۲ میلیون تومان در هزینه‌های سفارش رستوران و جلوگیری از هزینه‌های پزشکی آتی.',
+    costBenefitSummaryEn: '$200-$400 monthly savings on restaurant bills plus long-term preventative health benefits.',
+    roiEstimateFa: 'بازگشت سرمایه ۱۱۰۰٪ در کمتر از ۲ ماه.',
+    roiEstimateEn: '1,100% Net ROI in healthy lifestyle longevity.'
+  },
+  general_personal_productivity: {
+    disciplineId: 'general_personal_productivity',
+    titleFa: 'بهره‌وری فردی، مدیریت زمان روزمره و غلبه بر تنبلی',
+    titleEn: 'Personal Productivity & Time Management',
+    businessProblemFa: 'به تعویق انداختن کارهای مهم، اعتیاد به اسکرول بی‌پایان در شبکه‌های اجتماعی، شلوغی ذهن و احساس گناه در پایان هر روز به خاطر کارهای ناتمام.',
+    businessProblemEn: 'Chronic procrastination, addictive doom-scrolling, mental overwhelm, and evening guilt over unaccomplished priorities.',
+    whyAiFa: 'تبدیل اهداف مبهم به فهرست‌های عملیاتی ۵ دقیقه‌ای، طراحی بلوک‌های تمرکز عمیق و نقش مربی همراه برای ایجاد انگیزه و نظم فردی.',
+    whyAiEn: 'Breaking intimidating tasks into frictionless 5-minute micro-actions and designing hyper-focused Pomodoro deep-work sprints.',
+    successCriteriaFa: [
+      'انجام مهم‌ترین کار روز قبل از ساعت ۱۲ ظهر',
+      'کاهش حداقل ۲ ساعته اسکرین‌تایم بیهوده گوشی',
+      'پایان روز با ذهن آرام و رضایت درونی از پیشرفت کارها'
+    ],
+    successCriteriaEn: [
+      'Complete #1 top priority before noon daily',
+      '2+ hours daily reclaimed from aimless smartphone scrolling',
+      'Evening peace of mind and consistent habit momentum'
+    ],
+    costBenefitSummaryFa: 'بازپس‌گیری ماهانه ۶۰ ساعت وقت تلف‌شده و تبدیل آن به درآمد، یادگیری یا تفریح مفید.',
+    costBenefitSummaryEn: 'Reclaiming 60 high-value hours each month for career advancement or personal recreation.',
+    roiEstimateFa: 'بازگشت سرمایه بی‌نهایت در آرامش روان و انضباط فردی.',
+    roiEstimateEn: 'Boundless ROI in career trajectory and mental clarity.'
+  },
+  general_customer_care: {
+    disciplineId: 'general_customer_care',
+    titleFa: 'روابط اجتماعی، آداب معاشرت و نامه‌نگاری روزمره',
+    titleEn: 'Social Etiquette & Conflict Resolution',
+    businessProblemFa: 'خجالت در مطالبه حق یا پس‌گرفتن طلب از اطرافیان، پاسخ‌های عجولانه و عصبی در پیام‌ها که به دلخوری منجر می‌شود، و ناتوانی در نه گفتن محترمانه.',
+    businessProblemEn: 'Awkwardness requesting owed money, reactionary text messages igniting unnecessary drama, and inability to say a polite, firm "No".',
+    whyAiFa: 'بهره‌گیری از اصول ارتباط بدون خشونت (NVC)، بازنویسی پیام‌ها با لحن قاطع، محترمانه و گرم که احترام و رابطه را همزمان حفظ می‌کند.',
+    whyAiEn: 'Applying Nonviolent Communication principles to reframe tense interpersonal texts into warm, diplomatic, and unassailable messages.',
+    successCriteriaFa: [
+      'بازپس‌گیری طلب‌ها و حل اختلافات مالی بدون کدورت و قطع رابطه',
+      'گفتن نه قاطعانه و محترمانه به درخواست‌های غیرمنطقی',
+      'تقویت احترام متقابل در روابط دوستانه، خانوادگی و کاری'
+    ],
+    successCriteriaEn: [
+      '100% recovery of personal loans without broken friendships',
+      'Setting healthy, boundary-affirming refusals gracefully',
+      'Restoring warmth and respect across family and social circles'
+    ],
+    costBenefitSummaryFa: 'نجات روابط ارزشمند انسانی و جلوگیری از خسارات مالی ناشی از تعارفات بیجا.',
+    costBenefitSummaryEn: 'Preserving invaluable relationships while eliminating financial losses from awkward timidity.',
+    roiEstimateFa: 'بازگشت سرمایه فوری در اولین پیام ارسالی.',
+    roiEstimateEn: 'Instant ROI on the very first delicate message sent.'
   }
 };
 

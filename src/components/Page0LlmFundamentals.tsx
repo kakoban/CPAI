@@ -167,8 +167,8 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
       id: `discipline_custom_${discMeta.id}`,
       titleFa: `پرامپت تخصصی دیسیپلین: ${discMeta.titleFa}`,
       titleEn: `Discipline Engineering Prompt: ${discMeta.titleEn}`,
-      categoryFa: discMeta.trackId === 'CIVIL_INFRA' ? 'مگاپروژه‌های راه و ابنیه' : 'نفت، گاز و پتروشیمی',
-      categoryEn: discMeta.trackId === 'CIVIL_INFRA' ? 'Civil & Infrastructure' : 'Oil & Gas EPCC',
+      categoryFa: discMeta.trackId === 'CIVIL_INFRA' ? 'مگاپروژه‌های راه و ابنیه' : discMeta.trackId === 'ENERGY_PETRO' ? 'نفت، گاز و پتروشیمی' : 'سبک زندگی و خانواده',
+      categoryEn: discMeta.trackId === 'CIVIL_INFRA' ? 'Civil & Infrastructure' : discMeta.trackId === 'ENERGY_PETRO' ? 'Oil & Gas EPCC' : 'Lifestyle & Everyday AI',
       descriptionFa: `پرامپت مهندسی‌شده RCTO با استانداردهای ${discMeta.governingStandardsFa[0]} و تحلیل شاخص‌های ${discMeta.performanceMetricsFa.slice(0, 2).join(' و ')}.`,
       descriptionEn: `Engineered RCTO prompt customized for ${discMeta.governingStandardsEn[0]} and ${discMeta.performanceMetricsEn.slice(0, 2).join(', ')}.`,
       promptFa: disciplinePromptPair.engineeredPromptFa,
@@ -428,6 +428,169 @@ Tasks:
 3. Generate a structured Non-Conformance Report (NCR) matrix: [NCR ID | Description | Severity | Corrective Action (CAPA) | Re-inspection Protocol | Approver].
 4. Draft a definitive field inspection checklist for mechanical completion / temporary handover.`,
       targetTools: ['Claude', 'ChatGPT', 'Gemini']
+    },
+    // LIFESTYLE & EVERYDAY PROMPT SUITE
+    {
+      id: 'kitchen_fridge_chef',
+      titleFa: 'سرآشپز نجات یخچال: دستور پخت خوشمزه با باقیمانده مواد غذایی',
+      titleEn: 'Zero-Waste Fridge Chef: Creative Meals from Leftovers',
+      categoryFa: 'آشپزی و سبک زندگی',
+      categoryEn: 'Home & Lifestyle',
+      descriptionFa: 'اقلام پراکنده باقیمانده در یخچال را بدهید تا ۳ غذای سریع، اقتصادی و لذیذ بدون نیاز به خرید اضافی پیشنهاد دهد.',
+      descriptionEn: 'Feed your scattered fridge ingredients to generate 3 quick, delicious, zero-waste family meals.',
+      promptFa: `تو یک سرآشپز خلاق، صرفه‌جو و کارشناس تغذیه خانواده هستی که شعارت «صفر دورریز مواد غذایی» است.
+من در حال حاضر اقلام غذایی زیر را در یخچال و کابینت دارم که ممکن است به زودی فاسد یا کهنه شوند:
+[لیست اقلام موجود، مثلاً: نصف سینه مرغ پخته، دو عدد کدو، مقداری ماست چکیده، کمی پنیر پیتزا، پیاز و ادویه‌جات]
+
+شرایط:
+- تعداد نفرات: [مثلاً ۳ نفر]
+- حداکثر زمان آماده‌سازی: [مثلاً ۲۵ دقیقه]
+- وسایل پخت موجود: [مثلاً گاز و تابه، بدون فر]
+
+وظیفه تو:
+۱. سه گزینه غذای لذیذ، ابتکاری و متناسب با ذائقه ایرانی پیشنهاد کن (یکی بسیار سریع، یکی خوراک گرم، یکی غذای سبک).
+2. برای هر گزینه: مواد لازم دقیق از بین اقلام من، طرز تهیه گام‌به‌گام در ۵ مرحله کوتاه، و ترفند خوشمزه‌تر شدن را ذکر کن.
+۳. در یک خط بگو با این کار جلوی دورریز چه اقلامی گرفته شد و چقدر در خرید دوباره صرفه‌جویی شد.`,
+      promptEn: `You are an inventive, zero-waste family chef and home nutrition expert.
+Here are the miscellaneous leftover ingredients currently in my fridge that need using up:
+[List ingredients, e.g., half roasted chicken breast, 2 zucchinis, plain yogurt, shredded cheese, onion, basic spices]
+
+Constraints:
+- Serving: [e.g., 3 people]
+- Max prep & cooking time: [e.g., 25 minutes]
+- Equipment: [Stovetop and skillet, no oven]
+
+Tasks:
+1. Propose 3 delicious, creative meal concepts from these exact items (Quick Stir-fry, Warm Comfort Dish, Light Dinner).
+2. For each: Step-by-step 5-minute recipe, seasoning hacks, and exact portions.
+3. Calculate estimated grocery waste avoided.`,
+      targetTools: ['ChatGPT-4o', 'Claude 3.5 / 3.7', 'Gemini Flash']
+    },
+    {
+      id: 'parenting_homework',
+      titleFa: 'مربی همراه والدین: آموزش درس‌های سخت به زبان قصه و بازی',
+      titleEn: 'Smart Parenting Coach: Explaining Homework through Fun Stories',
+      categoryFa: 'والدین و آموزش کودک',
+      categoryEn: 'Parenting & EdTech',
+      descriptionFa: 'آموزش مفاهیم دشوار ریاضی، علوم و تاریخ با انیمیشن‌های مورد علاقه کودک بدون اشک و لجبازی.',
+      descriptionEn: 'Teach challenging STEM or history concepts using a child favorite characters and game mechanics.',
+      promptFa: `تو یک مربی مهربان، متخصص روانشناسی یادگیری کودک و قصه‌گوی خلاق هستی.
+کودک من [سن مثلاً: ۸ ساله، کلاس دوم یا سوم] در یادگیری مبحث [موضوع درسی مثلاً: جمع و تفریق کسرها یا چرخه‌های آب و باران در علوم] احساس خستگی و مقاومت می‌کند.
+علاقه‌مندی‌های اصلی او: [مثلاً کارتون کارخانه‌هیولاها، بازی‌های لگو و شخصیت‌های فضایی].
+
+وظیفه تو:
+۱. این مفهوم درسی را در قالب یک داستان کوتاه هیجان‌انگیز ۳ دقیقه‌ای با کاراکترهای مورد علاقه او توضیح بده طوری که مفهوم در ذهن او تصویرسازی شود.
+۲. یک بازی خانگی ۵ دقیقه‌ای ۲ نفره (بین والد و کودک) بدون نیاز به وسایل خاص طراحی کن که کودک با بازی، درستی فرمول را خودش کشف کند.
+۳. دو سوال معماگونه با جایزه فرضی برای تثبیت درس بنویس.
+لحن پاسخ صمیمی، پرانرژی و سرشار از شوخ‌طبعی کودکانه باشد.`,
+      promptEn: `You are an empathetic child educational psychologist and master storyteller.
+My child [Age: e.g., 8 years old, 3rd grade] is struggling and frustrated with [Topic: e.g., Fractions or Water Cycle].
+Their passions: [e.g., Minecraft building, Space exploration, Lego].
+
+Tasks:
+1. Explain this exact academic concept through an engaging 3-minute adventure story starring their favorite theme.
+2. Design a simple 5-minute hands-on game using household items where the child naturally discovers the solution.
+3. Craft 2 riddle-style reward questions reinforcing the takeaway.
+Tone must be warm, enthusiastic, and playful.`,
+      targetTools: ['ChatGPT-4o', 'Claude 3.7', 'Gemini Pro']
+    },
+    {
+      id: 'polite_negotiation',
+      titleFa: 'مذاکره روزمره، اجاره‌بها و پس‌گرفتن مؤدبانه طلب بدون دلخوری',
+      titleEn: 'Polite Negotiation: Rent Discount & Tactful Loan Recovery',
+      categoryFa: 'آداب معاشرت و ارتباطات',
+      categoryEn: 'Social & Negotiation',
+      descriptionFa: 'نگارش پیام‌های محکم، دیپلماتیک و بسیار محترمانه برای پس‌گرفتن قرض یا گرفتن تخفیف کرایه خانه.',
+      descriptionEn: 'Draft warm, assertive, non-confrontational texts to recover loans or negotiate favorable rent terms.',
+      promptFa: `تو متخصص برجسته ارتباطات بین‌فردی، اصول مذاکره هاروارد و روانشناسی زبان (NVC) هستی.
+موقعیت حساس من:
+[شرح موقعیت مثلاً: می‌خواهم از صاحب‌خانه‌ام درخواست کنم اجاره امسال را کمتر از نرخ تورم افزایش دهد چون مستاجر بسیار خوش‌حساب و مراقب ملک بوده‌ام / یا: می‌خواهم مبلغی را که ۶ ماه پیش به دوستم قرض داده‌ام بدون ایجاد ناراحتی و با حفظ رفاقت پس بگیرم].
+
+ملاحظات:
+- رابطه ما: [صمیمی / نیمه‌رسمی / کاری]
+- هدف مشخص: [مثلاً تعیین تاریخ دقیق واریز یا توافق روی مبلغ مشخص]
+
+وظیفه تو:
+۱. سه متن پیام کوتاه آماده ارسال بنویس:
+   - گزینه ۱: لحن بسیار گرم و دوستانه با حفظ حرمت‌ها
+   - گزینه ۲: لحن قاطع، محترمانه و شفاف بر مبنای منطق و حقایق
+   - گزینه ۳: پیشنهاد بازپرداخت قسطی یا مصالحه برد-برد
+۲. دو خطای بزرگ کلامی که نباید در این گفتگو مرتکب شوم را به من هشدار بده.`,
+      promptEn: `You are an elite interpersonal communication and negotiation expert specializing in principled negotiation and boundary-setting.
+My delicate interpersonal scenario:
+[Describe scenario, e.g., Tactfully asking landlord for a rent freeze based on 3-year spotless tenancy, OR gently recovering an overdue personal loan from a close friend without destroying the relationship].
+
+Tasks:
+1. Draft 3 tailored, ready-to-send messages:
+   - Option A: Warm, friendly, and relationship-centric.
+   - Option B: Firm, polite, and fact-based.
+   - Option C: Pragmatic win-win compromise proposal.
+2. Warn me against 2 conversational landmines to strictly avoid.`,
+      targetTools: ['Claude 3.5 / 3.7', 'ChatGPT-4o']
+    },
+    {
+      id: 'viral_reels_script',
+      titleFa: 'سناریونویسی وایرال اینستاگرام و ریلز با قلاب‌های ۳ ثانیه‌ای',
+      titleEn: 'Viral Social Media Script: 3-Second Hooks & Retention',
+      categoryFa: 'ترندها و تولید محتوا',
+      categoryEn: 'Viral Content',
+      descriptionFa: 'ایده و سناریوی آماده ویدیو با قلاب‌های روانشناختی، کات‌های جذاب و کپشن پرکامنت.',
+      descriptionEn: 'High-retention video scripts with psychological hooks, visual pacing, and comment-generating CTAs.',
+      promptFa: `تو یک استراتژیست ارشد تولید محتوای وایرال در اینستاگرام و تیک‌تاک با شناخت عمیق از الگوریتم ریلز و روانشناسی ۳ ثانیه اول هستی.
+موضوع ویدیوی من: [موضوع، مثلاً: ۳ اشتباه بزرگ در خرید لباس / یا: ترفند پس‌انداز ماهیانه ۱۰ میلیون تومان / یا: طرز تهیه یک دسر ۳ سوته].
+مخاطب هدف: [مثلاً جوانان، مادران، کارمندان].
+
+وظیفه تو تدوین یک سناریوی کامل ۶۰ ثانیه‌ای است:
+۱. قلاب طلایی (Hook): ۳ گزینه جمله افتتاحیه کنجکاوی‌برانگیز و شوکه‌کننده برای ۳ ثانیه اول.
+۲. بدنه سناریو (Story & Value): متن گفتار کلمه‌به‌کلمه همراه با مشخص کردن زاویه دوربین و کات‌های تصویر (B-Roll).
+۳. کال تو اکشن (CTA): یک دعوت به اقدام هوشمندانه که مخاطب را ترغیب به کامنت‌گذاشتن یا اشتراک‌گذاری در استوری کند.
+۴. متن کپشن با ۵ هشتگ پربازدید هدفمند و خط اول جذاب.`,
+      promptEn: `You are a viral social media strategist specializing in Instagram Reels/TikTok algorithmic retention and psychological hooks.
+Video Topic: [e.g., 3 stealth money leaks keeping you broke, OR 15-minute healthy lunchbox prep].
+Target Audience: [e.g., Working parents, young professionals].
+
+Deliverables for a 45-60 second high-retention reel:
+1. 3 explosive 3-second auditory/visual hooks that stop the thumb scroll.
+2. Word-for-word spoken script with camera angles and B-roll visual cues.
+3. High-converting CTA engineered to trigger comments and story shares.
+4. Companion caption with engaging first-line preview and 5 targeted hashtags.`,
+      targetTools: ['ChatGPT-4o', 'Claude', 'Gemini']
+    },
+    {
+      id: 'smart_travel_planner',
+      titleFa: 'برنامه‌ریزی سفر اقتصادی خانوادگی و شکار بلیت ارزان',
+      titleEn: 'Family Vacation Architect: Budget Itineraries & Flight Deals',
+      categoryFa: 'سفر و اوقات فراغت',
+      categoryEn: 'Travel & Vacations',
+      descriptionFa: 'طراحی برنامه روزبه‌روز سفر متناسب با انرژی کودک و سالمندان، به همراه چک‌لیست چمدان و ترفندهای کاهش هزینه.',
+      descriptionEn: 'Balanced multi-day travel itineraries accommodating kids and seniors, with zero-forgotten packing matrices.',
+      promptFa: `تو یک راهنمای حرفه‌ای سفر، مشاور بودجه‌بندی گردشگری و طراح برنامه‌های خانوادگی هستی.
+اطلاعات سفر ما:
+- مقصد: [مثلاً جزیره کیش / شهر استانبول / شمال ایران]
+- مدت سفر: [مثلاً ۴ روز و ۳ شب]
+- همسفران: [مثلاً ۲ بزرگسال و یک کودک ۶ ساله]
+- سقف بودجه کل: [مثلاً ۲۵ میلیون تومان بدون احتساب پرواز]
+- سبک ترجیحی: [آرامش‌بخش، تجربیات محلی و شکم‌گردی، بدون دویدن مدام]
+
+وظیفه تو:
+۱. جدول زمان‌بندی روزانه منعطف (صبح، بعدازظهر، شب) با فواصل استراحت کافی برای کودک.
+۲. معرفی غذاهای محلی اصیل و رستوران‌های باکیفیت و قیمت‌مناسب دور از تله‌های توریستی.
+۳. ترفندهای طلایی برای خرید بلیت و رزرو اقامتگاه با تخفیف حداکثری.
+۴. چک‌لیست کامل بستن چمدان شامل داروهای ضروری و مدارک به صورت تفکیک‌شده.`,
+      promptEn: `You are an elite family travel concierge and budget travel optimizer.
+Trip Profile:
+- Destination: [e.g., Istanbul, Turkey / Kish Island / Northern Coast]
+- Duration: [e.g., 4 Days, 3 Nights]
+- Party: [e.g., 2 adults, 1 child aged 6]
+- Total Budget Cap: [e.g., $1,000 excluding airfare]
+- Preferred Travel Vibe: [Relaxed, foodie, cultural, low-stress]
+
+Tasks:
+1. Flexible hour-by-hour itinerary balancing sights with child nap/downtime windows.
+2. Authentic local cuisine gems off the commercial tourist traps.
+3. Proven fare-saving hacks for local transit and accommodation.
+4. Comprehensive multi-compartment luggage & first-aid pack list.`,
+      targetTools: ['Claude 3.7', 'Gemini Pro', 'ChatGPT-4o']
     }
   ];
 

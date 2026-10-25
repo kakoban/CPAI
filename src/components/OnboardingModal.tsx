@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UserProfile, AiFamiliarityLevel, OnboardingPayload } from '../types/auth';
 import { authApi } from '../services/authApi';
+import { getAutoTimeSlotCode } from '../utils/timeSlot';
 import { Language } from '../types/cpmai';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../data/logo';
 import {
@@ -36,6 +37,8 @@ const SPECIALTY_PRESETS = [
   'نفت، گاز، پتروشیمی و انرژی',
   'مهندسی مکانیک، تاسیسات و برق (MEP)',
   'فناوری اطلاعات، مهندسی نرم‌افزار و داده',
+  'کسب‌وکار، فروش، بازاریابی و تجارت الکترونیک',
+  'آموزش، پژوهش، تولید محتوا و فریلنسری',
   'معماری و طراحی شهری',
   'امور پیمان و دعاوی قراردادی (Claims)'
 ];
@@ -107,7 +110,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           specialty: payload.specialty,
           aiLevel: payload.aiLevel,
           initialAiLevel: payload.aiLevel,
-          classCode: payload.classCode || 'DEFAULT_COHORT',
+          classCode: (payload.classCode && payload.classCode.trim()) ? payload.classCode.trim() : getAutoTimeSlotCode(),
           isOnboarded: true
         };
         authApi.setSavedUser(localUser);
@@ -138,7 +141,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           specialty: payload.specialty,
           aiLevel: payload.aiLevel,
           initialAiLevel: payload.aiLevel,
-          classCode: payload.classCode || 'DEFAULT_COHORT',
+          classCode: (payload.classCode && payload.classCode.trim()) ? payload.classCode.trim() : getAutoTimeSlotCode(),
           isOnboarded: true
         };
         authApi.setSavedUser(fallbackUser);

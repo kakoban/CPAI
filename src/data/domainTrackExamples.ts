@@ -252,6 +252,130 @@ export const DOMAIN_PHASE_EXAMPLES: DomainTrackExamplesRegistry = {
         relatedQuestionsEn: ['What is the scheduled MLOps retraining cadence aligned with refinery turnaround cycles?']
       }
     }
+  },
+  GENERAL_EVERYDAY: {
+    1: {
+      phaseId: 1,
+      trackId: 'GENERAL_EVERYDAY',
+      titleFa: 'درک کسب‌وکار: مدیریت هوشمند اقتصاد خانوار، کاهش دورریز خرید و پس‌انداز سفر',
+      titleEn: 'Business Understanding: Smart Household Budget, Grocery Waste Reduction & Vacation Fund',
+      exampleNoteFa:
+        'مثال: هدف اصلی، کاهش ۲۵ درصدی دورریز مواد غذایی فاسدشدنی در سبد خرید هفتگی و ماهانه خانوار، پیشگیری از خریدهای هیجانی و هدایت پس‌اندازهای حاصله به سمت صندوق سفر تفریحی سالیانه خانواده است.',
+      exampleNoteEn:
+        'Example: Primary objective is cutting 25% perishable grocery waste, eliminating impulse buying leaks, and redirecting accumulated savings into a fully-funded annual family vacation.',
+      artifacts: {
+        backgroundFa:
+          'خانواده‌ها ماهانه بخش چشمگیری از خریدهای سوپرمارکتی (میوه، سبزیجات و لبنیات) را به دلیل خرید بیش از حد نیاز یا فراموشی تاریخ انقضا دور می‌ریزند که بار مالی سنگین و عذاب وجدان به همراه دارد.',
+        backgroundEn:
+          'Urban households waste substantial grocery volume through impulse purchasing and fridge blindness, causing preventable financial strain and sustainability concerns.',
+        primaryObjectiveFa:
+          'طراحی ساختار شناختی برای پیش‌بینی دقیق مایحتاج مصرفی، بهینه‌سازی بودجه جاری و ذخیره ماهانه ۲۵٪ از هزینه‌های اتلافی در صندوق سفر.',
+        primaryObjectiveEn:
+          'Architect cognitive mechanisms to forecast household consumption, optimize shopping schedules, and capture 25% wasted spend for family recreation.',
+        relatedQuestionsFa: [
+          'کدام دسته‌های خرید سوپرمارکت بالاترین سهم را در دورریز ماهانه خانوار دارند؟',
+          'چگونه هوش مصنوعی می‌تواند بدون نیاز به ثبت دستی خسته‌کننده، هزینه واقعی هر وعده غذای خانگی را تحلیل کند؟'
+        ],
+        relatedQuestionsEn: [
+          'Which grocery categories suffer the highest expiration spoilage or redundant re-purchasing?',
+          'How can AI compute accurate per-meal family costs without tedious manual bookkeeping?'
+        ],
+        sampleDatasetTitleFa: 'پیامک‌های بانکی تراکنش، عکس فاکتورهای فروشگاهی و گزارش موجودی یخچال',
+        sampleDatasetTitleEn: 'Bank SMS alerts, supermarket receipts OCR logs, and weekly fridge pantry inventory',
+        sampleContractClauseFa: 'منشور توافق بودجه‌بندی هوشمند خانوار و تعهد کاهش اسراف غذایی',
+        sampleContractClauseEn: 'Smart Household Financial Compact & Zero-Waste Family Protocol'
+      }
+    },
+    2: {
+      phaseId: 2,
+      trackId: 'GENERAL_EVERYDAY',
+      titleFa: 'درک داده‌ها: پیامک‌های بانکی، فاکتورهای خرید، بلیت‌های سفر و نرخ‌های بازار',
+      titleEn: 'Data Understanding: Bank Telemetry, Supermarket Receipts & Travel Fare Streams',
+      exampleNoteFa:
+        'مثال: تجمیع داده‌های تراکنش‌های کارت‌های خانواده، استخراج اقلام از روی رسیدهای فروشگاه با OCR، و پایش روندهای فصلی قیمت بلیت هواپیما و هتل‌ها.',
+      exampleNoteEn:
+        'Example: Ingesting bank transaction telemetry, extracting itemized lines from retail receipts via OCR, and monitoring seasonal hotel/flight price volatility.',
+      artifacts: {
+        backgroundFa: 'داده‌های مالی خانواده در قالب پیامک‌های متفرقه بانکی، رسیدهای کاغذی و فاکتورهای اپلیکیشن‌های سفارش آنلاین پراکنده هستند.',
+        backgroundEn: 'Household expenditure data is scattered across multi-bank SMS, physical thermal receipts, and online delivery app order histories.',
+        primaryObjectiveFa: 'یکپارچه‌سازی، طبقه‌بندی خودکار اقلام و اعتبارسنجی کیفیت داده‌های خرید برای تغذیه به مدل هوش مصنوعی.',
+        primaryObjectiveEn: 'Aggregate, categorize retail lines, and validate data cleanliness to feed the household intelligence model.',
+        relatedQuestionsFa: ['میزان خطای خوانش متن فاکتورهای فارسی با عکس گوشی موبایل چقدر است؟'],
+        relatedQuestionsEn: ['What is the OCR error rate on unstructured Persian thermal grocery receipts?']
+      }
+    },
+    3: {
+      phaseId: 3,
+      trackId: 'GENERAL_EVERYDAY',
+      titleFa: 'آماده‌سازی داده‌ها: یکسان‌سازی اسامی اقلام، پاکسازی و تفکیک خریدهای ضروری از تفریحی',
+      titleEn: 'Data Preparation: Persian Grocery Normalization & Discretionary Expense Flagging',
+      exampleNoteFa:
+        'مثال: نرمال‌سازی اسامی متنوع کالاها (مانند یکی‌کردن شیر کم‌چرب برندهای مختلف)، حذف نویز، تبدیل واحدهای کیلوگرم و بسته، و تفکیک هزینه‌های واجب از خریدهای تنقلاتی.',
+      exampleNoteEn:
+        'Example: Normalizing diverse brand item descriptions, unit conversions, and separating essential pantry staples from impulse discretionary treats.',
+      artifacts: {
+        backgroundFa: 'رسیدهای فروشگاهی دارای نام‌های مخفف و متناقض هستند و نیازمند نگاشت معنایی به فهرست استاندارد مواد غذایی و مصرفی می‌باشند.',
+        backgroundEn: 'Thermal receipts use noisy abbreviations requiring semantic mapping into standard household nutrition and consumer catalogs.',
+        primaryObjectiveFa: 'تولید مجموعه داده تمیز و مهندسی ویژگی‌های مصرفی خانوار (مانند نرخ هفتگی اتمام تخم‌مرغ یا لبنیات).',
+        primaryObjectiveEn: 'Generate clean tabular datasets and engineered consumption features (e.g., weekly depletion velocity of essentials).',
+        relatedQuestionsFa: ['چگونه خریدهای دوره‌ای (مانند شوینده‌ها) از مصرف روزانه تفکیک شوند؟'],
+        relatedQuestionsEn: ['How do we isolate periodic bulk purchases from daily perishable consumption?']
+      }
+    },
+    4: {
+      phaseId: 4,
+      trackId: 'GENERAL_EVERYDAY',
+      titleFa: 'توسعه مدل: پیش‌بینی اتمام اقلام یخچال، خوشه‌بندی ترجیحات و الگوریتم ارزان‌ترین سفر',
+      titleEn: 'Model Development: Food Depletion Forecasting, Preference Clustering & Vacation Deal Finder',
+      exampleNoteFa:
+        'مثال: پیاده‌سازی مدل پیش‌بینی زمان تمام‌شدن اقلام بر اساس بعد خانوار، الگوریتم پیشنهاد دستور غذا با باقیمانده یخچال، و یادگیری ماشین برای شکار ارزان‌ترین زمان خرید بلیت سفر.',
+      exampleNoteEn:
+        'Example: Implementing depletion estimation models, leftover meal recipe recommenders, and predictive travel fare bargain locators.',
+      artifacts: {
+        backgroundFa: 'ترکیب الگوی پیش‌بینی (Predictive)، الگوی سیستم پیشنهاددهنده (Recommendation) و الگوی شناخت ناهنجاری قیمت برای خدمت به خانواده.',
+        backgroundEn: 'Combining predictive analytics, personalized recipe recommendations, and pricing anomaly detection for household stewardship.',
+        primaryObjectiveFa: 'ارائه پیش‌بینی دقیق از لیست خرید ضروری قبل از فاسد شدن مواد قبلی، و پیشنهاد بهترین بازه زمانی مسافرت اقتصادی.',
+        primaryObjectiveEn: 'Deliver proactive grocery replenishment lists before spoilage occurs and pinpoint lowest-cost holiday vacation windows.',
+        relatedQuestionsFa: ['دقت مدل در پیشنهاد فهرست خرید مطابق سلیقه غذایی فرزندان چقدر است؟'],
+        relatedQuestionsEn: ['What is the model recommendation precision aligned with child nutritional preferences?']
+      }
+    },
+    5: {
+      phaseId: 5,
+      trackId: 'GENERAL_EVERYDAY',
+      titleFa: 'ارزیابی مدل: سنجه دقت پیش‌بینی هزینه‌ها، رضایت اعضای خانواده و شاخص سلامت رژیم',
+      titleEn: 'Model Evaluation: Budget Forecast Accuracy, Family Satisfaction & Nutritional Balance',
+      exampleNoteFa:
+        'مثال: ارزیابی خطای تخمین صورت‌حساب ماهانه (MAE کمتر از ۵٪)، سنجش میزان وفاداری خانواده به پیشنهادات سبد خرید و اطمینان از حذف تخفیف‌های قلابی.',
+      exampleNoteEn:
+        'Example: Validating monthly expense error margins (MAE < 5%), measuring household compliance to recommended menus, and filtering deceptive retailer discounts.',
+      artifacts: {
+        backgroundFa: 'مدل باید قبل از ورود به زندگی واقعی اعضای خانواده، از نظر عدم ارائه پیشنهادهای نامناسب یا ایجاد استرس مالی بررسی شود.',
+        backgroundEn: 'The model must be audited to prevent stressful austerity recommendations or unhealthy dietary meal compositions.',
+        primaryObjectiveFa: 'اطمینان از ارتقای رفاه خانواده، اثبات عینی پس‌انداز ریالی برای سفر و حفظ رضایت خاطر تمام اعضا.',
+        primaryObjectiveEn: 'Ensure measurable quality-of-life improvements, verifiable vacation fund accumulation, and stress-free adoption.',
+        relatedQuestionsFa: ['آیا هشدارهای اضافه مصرف بودجه لحنی مشوقانه و آرامش‌بخش دارند؟'],
+        relatedQuestionsEn: ['Are budget overrun alerts empathetic, supportive, and actionable for family members?']
+      }
+    },
+    6: {
+      phaseId: 6,
+      trackId: 'GENERAL_EVERYDAY',
+      titleFa: 'عملیاتی‌سازی: دستیار خانوادگی در پیام‌رسان‌ها (بله/تلگرام)، اعلان‌های خرید و داشبورد سفر',
+      titleEn: 'Model Operationalization: Messaging Bot Concierge, Proactive Expiry Push Alerts & Vacation Tracker',
+      exampleNoteFa:
+        'مثال: استقرار ربات در پیام‌رسان‌های در دسترس خانواده، ارسال هشدار هوشمند «شیر فردا ترش می‌شود، پنکیک درست کنید!» و نمایش ویجت پس‌انداز سفر روی صفحه گوشی.',
+      exampleNoteEn:
+        'Example: Deploying via everyday family messaging bots, sending proactive tips ("Milk expires tomorrow, make pancakes!"), and live vacation savings widgets.',
+      artifacts: {
+        backgroundFa: 'سیستم باید بدون نیاز به نصب اپلیکیشن‌های پیچیده، در پیام‌رسان‌های روزمره پدران و مادران با زبان طبیعی فارسی تعامل کند.',
+        backgroundEn: 'The solution must integrate into familiar messaging apps using friendly natural Persian conversations without learning curves.',
+        primaryObjectiveFa: 'استفاده مداوم روزمره تمام اعضای خانواده، ثبت آسان فاکتور با ارسال عکس، و دستیابی به هدف سفر خانوادگی.',
+        primaryObjectiveEn: 'Sustained daily engagement, effortless photo-receipt uploads, and successful realization of the dream family vacation.',
+        relatedQuestionsFa: ['چگونه سیستم با قطعی اینترنت یا دسترسی آفلاین به موجودی خانه هماهنگ می‌شود؟'],
+        relatedQuestionsEn: ['How does the family assistant cache pantry inventory during temporary network disconnections?']
+      }
+    }
   }
 };
 

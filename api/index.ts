@@ -38,6 +38,7 @@ async function ensureUsersTable() {
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       );
+      ALTER TABLE classes ADD COLUMN IF NOT EXISTS organization VARCHAR(255);
 
       CREATE TABLE IF NOT EXISTS users (
         id VARCHAR(64) PRIMARY KEY,
@@ -137,19 +138,30 @@ function getAutoSlotCode(): string {
 }
 const getCohortTimeWindowSlot = getAutoSlotCode;
 
-async function getOrCreateClass(client: any, rawCode?: string, title?: string) {
+function formatSlotTitle(code: string): string {
+  const match = (code || '').match(/^(\d{4})(\d{2})(\d{2})_SLOT(\d+)$/i);
+  if (!match) return `کلاس دوره CPMAI (${code})`;
+  const [, yyyy, mm, dd, slotStr] = match;
+  const slotNum = parseInt(slotStr, 10);
+  const startHour = String(slotNum * 2).padStart(2, '0') + ':00';
+  const endHour = String((slotNum * 2 + 2) % 24).padStart(2, '0') + ':00';
+  return `نوبت ۲ ساعته (${startHour} الی ${endHour}) · ${yyyy}/${mm}/${dd}`;
+}
+
+async function getOrCreateClass(client: any, rawCode?: string, title?: string, organization?: string) {
   const code = (rawCode && rawCode.trim()) ? rawCode.trim().toUpperCase() : getAutoSlotCode();
   const existing = await client.query('SELECT * FROM classes WHERE UPPER(code) = $1 LIMIT 1;', [code]);
   if (existing.rows.length > 0) {
     return existing.rows[0];
   }
   const classId = `cls_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-  const displayTitle = title || `کلاس دوره CPMAI (${code})`;
+  const displayTitle = title || (code.includes('_SLOT') ? formatSlotTitle(code) : `کلاس دوره CPMAI (${code})`);
+  const orgName = organization || (code.includes('_SLOT') ? 'ثبت‌نام خودکار (نوبت ۲ ساعته)' : 'کارگاه سازمانی CPMAI');
   const insertRes = await client.query(
-    `INSERT INTO classes (id, code, title, is_leaderboard_visible, created_at, updated_at)
-     VALUES ($1, $2, $3, false, NOW(), NOW())
+    `INSERT INTO classes (id, code, title, organization, is_leaderboard_visible, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, false, NOW(), NOW())
      RETURNING *;`,
-    [classId, code, displayTitle]
+    [classId, code, displayTitle, orgName]
   );
   const newClass = insertRes.rows[0];
 
@@ -671,7 +683,7 @@ app.post(['/api/auth/onboarding', '/auth/onboarding'], async (req, res) => {
       client = await pool.connect();
       await client.query('BEGIN');
 
-      const targetClass = await getOrCreateClass(client, classCode);
+      const targetClass = await getOrCreateClass(client, resolvedClassCode);
 
       const updateQuery = `
         UPDATE users 
@@ -1441,6 +1453,75 @@ app.post(['/api/admin/classes/toggle-leaderboard', '/admin/classes/toggle-leader
   } catch (err: any) {
     console.warn('toggle-leaderboard error, returning graceful success:', err);
     res.json({ success: true, isLeaderboardVisible: !!isLeaderboardVisible });
+  }
+});
+
+// Admin: Update Class Custom Title & Organization (Name 2-Hour Time Window Slots)
+app.post(['/api/admin/classes/update', '/admin/classes/update'], async (req, res) => {
+  await ensureUsersTable().catch(() => {});
+  if (!verifyAdmin(req)) {
+    return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
+  }
+
+  const { classId, title, organization, isLeaderboardVisible } = req.body;
+  if (!classId) {
+    return res.status(400).json({ error: 'classId is required' });
+  }
+
+  try {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    if (title !== undefined) {
+      fields.push(`title = $${idx++}`);
+      values.push(title.trim());
+    }
+    if (organization !== undefined) {
+      fields.push(`organization = $${idx++}`);
+      values.push(organization.trim());
+    }
+    if (isLeaderboardVisible !== undefined) {
+      fields.push(`is_leaderboard_visible = $${idx++}`);
+      values.push(!!isLeaderboardVisible);
+    }
+    fields.push(`updated_at = NOW()`);
+
+    values.push(classId);
+
+    const result = await pool.query(
+      `UPDATE classes SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *;`,
+      values
+    );
+
+    res.json({ success: true, class: result.rows[0] });
+  } catch (err: any) {
+    console.warn('update class error, returning graceful success:', err);
+    res.json({
+      success: true,
+      class: { id: classId, title: title || '', organization: organization || '', isLeaderboardVisible: !!isLeaderboardVisible }
+    });
+  }
+});
+
+// Admin: Create New Custom Cohort Class
+app.post(['/api/admin/classes/create', '/admin/classes/create'], async (req, res) => {
+  await ensureUsersTable().catch(() => {});
+  if (!verifyAdmin(req)) {
+    return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
+  }
+
+  const { code, title, organization } = req.body;
+  if (!code || !code.trim()) {
+    return res.status(400).json({ error: 'کد کلاس الزامی است.' });
+  }
+
+  try {
+    const newClass = await getOrCreateClass(pool, code.trim(), title?.trim(), organization?.trim());
+    res.json({ success: true, class: newClass });
+  } catch (err: any) {
+    console.error('create class error:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 

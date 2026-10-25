@@ -33,8 +33,35 @@ import {
   Calendar,
   Phone,
   Mail,
-  Check
+  Check,
+  Edit2,
+  FolderKanban,
+  Building,
+  Briefcase
 } from 'lucide-react';
+import { DISCIPLINE_REGISTRY } from '../../data/disciplineExamplesRegistry';
+
+export function parseTimeSlotInfo(code: string): { isSlot: boolean; labelFa: string; labelEn: string; dateStr: string } {
+  const match = code.match(/^(\d{4})(\d{2})(\d{2})_SLOT(\d+)$/i);
+  if (!match) {
+    return { isSlot: false, labelFa: code, labelEn: code, dateStr: '' };
+  }
+  const [, yyyy, mm, dd, slotStr] = match;
+  const slotNum = parseInt(slotStr, 10);
+  const startHour = slotNum * 2;
+  const endHour = (startHour + 2) % 24;
+
+  const startPad = String(startHour).padStart(2, '0') + ':00';
+  const endPad = String(endHour).padStart(2, '0') + ':00';
+  const dateFormatted = `${yyyy}/${mm}/${dd}`;
+
+  return {
+    isSlot: true,
+    labelFa: `نوبت خودکار ۲ ساعته (${startPad} الی ${endPad}) · تاریخ ${dateFormatted}`,
+    labelEn: `2-Hour Window (${startPad}–${endPad}) · ${dateFormatted}`,
+    dateStr: dateFormatted
+  };
+}
 
 interface AdminControlCenterModalProps {
   isOpen: boolean;
@@ -49,7 +76,7 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
   currentUser,
   lang
 }) => {
-  const [activeTab, setActiveTab] = useState<'users' | 'matrix' | 'drip'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'matrix' | 'drip' | 'cohorts'>('users');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [overview, setOverview] = useState<AdminOverviewResponse>(() => getDefaultAdminOverview(currentUser));
   const [selectedClassId, setSelectedClassId] = useState<string>('ALL');
@@ -58,6 +85,19 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [tierFilter, setTierFilter] = useState<string>('ALL');
   const [alignmentFilter, setAlignmentFilter] = useState<string>('ALL');
+  const [disciplineFilter, setDisciplineFilter] = useState<string>('ALL');
+  const [trackFilter, setTrackFilter] = useState<string>('ALL');
+
+  // Cohort Class Editing State
+  const [editingClassId, setEditingClassId] = useState<string | null>(null);
+  const [editTitleInput, setEditTitleInput] = useState<string>('');
+  const [editOrgInput, setEditOrgInput] = useState<string>('');
+
+  // New Class Creation State
+  const [isCreatingNewClass, setIsCreatingNewClass] = useState<boolean>(false);
+  const [newClassCode, setNewClassCode] = useState<string>('');
+  const [newClassTitle, setNewClassTitle] = useState<string>('');
+  const [newClassOrg, setNewClassOrg] = useState<string>('');
 
   // Matrix interactive drilldown state
   const [selectedCell, setSelectedCell] = useState<{
@@ -155,8 +195,72 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
       (alignmentFilter === 'NONE' && !u.assessmentResult) ||
       (u.assessmentResult?.alignmentIndex === alignmentFilter);
 
-    return matchesClass && matchesSearch && matchesTier && matchesAlignment;
+    const matchesDiscipline =
+      disciplineFilter === 'ALL' ||
+      u.disciplineId === disciplineFilter ||
+      (u.specialty && u.specialty.includes(disciplineFilter));
+
+    const matchesTrack =
+      trackFilter === 'ALL' ||
+      u.trackId === trackFilter;
+
+    return matchesClass && matchesSearch && matchesTier && matchesAlignment && matchesDiscipline && matchesTrack;
   });
+
+  // Start Editing Class Title / Org
+  const handleStartEditClass = (cls: ClassEntity) => {
+    setEditingClassId(cls.id);
+    setEditTitleInput(cls.title || '');
+    setEditOrgInput(cls.organization || '');
+  };
+
+  // Save Class Title / Org
+  const handleSaveClassInfo = async (classId: string) => {
+    if (!editTitleInput.trim()) {
+      showToast('عنوان کلاس نمی‌تواند خالی باشد.');
+      return;
+    }
+
+    const updatedTitle = editTitleInput.trim();
+    const updatedOrg = editOrgInput.trim();
+
+    // Optimistic UI Update
+    setOverview((prev) => ({
+      ...prev,
+      classes: prev.classes.map((c) =>
+        c.id === classId ? { ...c, title: updatedTitle, organization: updatedOrg } : c
+      )
+    }));
+
+    setEditingClassId(null);
+    showToast(`نام کلاس به «${updatedTitle}» تغییر یافت.`);
+    await lmsApi.updateClassInfo(classId, updatedTitle, updatedOrg);
+  };
+
+  // Create New Manual Cohort Class
+  const handleCreateNewClass = async () => {
+    if (!newClassCode.trim()) {
+      showToast('لطفاً کد کلاس را وارد نمایید (مانند METRO-LINE10).');
+      return;
+    }
+
+    const code = newClassCode.trim().toUpperCase();
+    const title = newClassTitle.trim() || `کلاس دوره CPMAI (${code})`;
+    const org = newClassOrg.trim() || 'کارگاه سازمانی CPMAI';
+
+    const created = await lmsApi.createCustomClass(code, title, org);
+    if (created) {
+      setOverview((prev) => ({
+        ...prev,
+        classes: [created, ...prev.classes]
+      }));
+      setNewClassCode('');
+      setNewClassTitle('');
+      setNewClassOrg('');
+      setIsCreatingNewClass(false);
+      showToast(`کلاس «${title}» با کد ${code} با موفقیت ایجاد شد.`);
+    }
+  };
 
   // Toggle Leaderboard Visibility with Optimistic UI
   const handleToggleLeaderboard = async () => {
@@ -218,7 +322,10 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
       'ایمیل',
       'تلفن همراه',
       'رشته و تخصص',
+      'دیسیپلین سازمانی',
+      'رده نقشی',
       'کد کلاس',
+      'عنوان کلاس',
       'سطح انتخابی اولیه',
       'سطح آزموده شده',
       'نمره خام',
@@ -237,20 +344,28 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
       }
     };
 
-    const rows = filteredUsers.map((u) => [
-      `"${u.id}"`,
-      `"${u.fullName}"`,
-      `"${u.email}"`,
-      `"${u.phone || ''}"`,
-      `"${u.specialty || ''}"`,
-      `"${u.classCode || ''}"`,
-      `"${u.initialAiLevel || ''}"`,
-      `"${u.assessmentResult?.testedTier || ''}"`,
-      `"${u.assessmentResult?.rawScore ?? ''}"`,
-      `"${u.assessmentResult?.percentage ?? ''}%"`,
-      `"${u.assessmentResult?.alignmentIndex || 'شرکت نکرده'}"`,
-      `"${formatDate(u.createdAt)}"`
-    ]);
+    const rows = filteredUsers.map((u) => {
+      const cls = overview.classes.find(c => c.id === u.classId || c.code === u.classCode);
+      const discTitle = u.disciplineId ? (DISCIPLINE_REGISTRY[u.disciplineId as keyof typeof DISCIPLINE_REGISTRY]?.shortTitleFa || u.disciplineId) : 'حفاری TBM';
+
+      return [
+        `"${u.id}"`,
+        `"${u.fullName}"`,
+        `"${u.email}"`,
+        `"${u.phone || ''}"`,
+        `"${u.specialty || ''}"`,
+        `"${discTitle}"`,
+        `"${u.roleId || 'مهندس دفتر فنی'}"`,
+        `"${u.classCode || ''}"`,
+        `"${cls?.title || u.classTitle || ''}"`,
+        `"${u.initialAiLevel || ''}"`,
+        `"${u.assessmentResult?.testedTier || ''}"`,
+        `"${u.assessmentResult?.rawScore ?? ''}"`,
+        `"${u.assessmentResult?.percentage ?? ''}%"`,
+        `"${u.assessmentResult?.alignmentIndex || 'شرکت نکرده'}"`,
+        `"${formatDate(u.createdAt)}"`
+      ];
+    });
 
     const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -340,42 +455,42 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-5 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
-      {/* Double Bezel Container */}
-      <div className="relative w-full max-w-6xl my-auto p-1.5 rounded-3xl bg-black/[0.05] dark:bg-white/[0.06] border border-black/[0.1] dark:border-white/[0.15] shadow-2xl">
-        <div className="rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 sm:p-8 space-y-6 text-right">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-black/[0.06] dark:border-white/[0.08]">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-purple-600/10 text-purple-600 dark:text-purple-400 border border-purple-600/20 shrink-0">
-                <ShieldCheck className="w-6 h-6" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-5 bg-black/85 backdrop-blur-md animate-fadeIn">
+      {/* Modal Dialog Container with bounded height and scrollable body */}
+      <div className="relative w-full max-w-6xl h-full sm:h-auto max-h-[96vh] sm:max-h-[92vh] flex flex-col p-1 sm:p-1.5 rounded-2xl sm:rounded-3xl bg-black/[0.05] dark:bg-white/[0.06] border border-black/[0.1] dark:border-white/[0.15] shadow-2xl overflow-hidden">
+        <div className="rounded-xl sm:rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-3.5 sm:p-7 space-y-3.5 sm:space-y-5 text-right flex flex-col flex-1 min-h-0 overflow-hidden">
+          {/* Header - Fixed top */}
+          <div className="flex items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-black/[0.06] dark:border-white/[0.08] shrink-0">
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-purple-600/10 text-purple-600 dark:text-purple-400 border border-purple-600/20 shrink-0">
+                <ShieldCheck className="w-5 h-5 sm:w-6 h-6" />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                    مرکز فرماندهی مدیریت آموزش (Admin Control Center)
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                  <h3 className="text-sm sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9] leading-snug">
+                    مرکز فرماندهی آموزش
                   </h3>
-                  <span className="px-2.5 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20">
-                    دسترسی مدیر ارشد
+                  <span className="px-2 py-0.5 text-[9px] sm:text-[10px] font-extrabold uppercase rounded-full bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20 whitespace-nowrap">
+                    مدیر ارشد
                   </span>
                 </div>
-                <span className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-                  پایش پیشرفت دانشجویان، ماتریس تطابق سطح و مدیریت محتوای قطره‌ای (Curriculum Drip)
+                <span className="text-[10px] sm:text-xs text-[#5d6b73] dark:text-[#9aa8b0] line-clamp-1 sm:line-clamp-none block mt-0.5">
+                  پایش دانشجویان، ماتریس سطح و مدیریت دوره‌ها
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 self-end sm:self-auto">
+            <div className="flex items-center gap-1 shrink-0">
               <button
                 onClick={() => loadData(selectedClassId)}
                 title="تازه‌سازی داده‌ها"
-                className="p-2 rounded-xl text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-xl text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
               >
                 <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
               </button>
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-xl text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -384,23 +499,25 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
 
           {/* Toast Notification */}
           {toastMessage && (
-            <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-200 text-xs font-bold flex items-center gap-2 animate-fadeIn">
-              <Check className="w-4 h-4 text-emerald-600" />
+            <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-200 text-xs font-bold flex items-center gap-2 animate-fadeIn shrink-0">
+              <Check className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>{toastMessage}</span>
             </div>
           )}
 
-          {/* Cohort Class Selector Strip */}
-          <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08]">
-            <div className="flex items-center gap-2">
-              <GraduationCap className="w-4 h-4 text-[#2563EB]" />
-              <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9]">
-                انتخاب کلاس آموزشی (Cohort):
-              </span>
+          {/* Cohort Class Selector Strip - Responsive */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-2.5 sm:p-3 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+              <div className="flex items-center gap-1.5 shrink-0">
+                <GraduationCap className="w-4 h-4 text-[#2563EB]" />
+                <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] whitespace-nowrap">
+                  کلاس آموزشی:
+                </span>
+              </div>
               <select
                 value={selectedClassId}
                 onChange={(e) => setSelectedClassId(e.target.value)}
-                className="px-3 py-1.5 text-xs rounded-xl border border-black/[0.1] dark:border-white/[0.15] bg-white dark:bg-[#12181d] text-[#1c2830] dark:text-[#e8ebe9] font-mono font-bold cursor-pointer"
+                className="w-full sm:w-auto max-w-full sm:max-w-md px-2.5 py-1 text-xs rounded-xl border border-black/[0.1] dark:border-white/[0.15] bg-white dark:bg-[#12181d] text-[#1c2830] dark:text-[#e8ebe9] font-mono font-bold cursor-pointer"
               >
                 <option value="ALL">کلیه کلاس‌ها (All Cohorts)</option>
                 {overview?.classes.map((cls) => (
@@ -412,13 +529,13 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
             </div>
 
             {selectedClassId !== 'ALL' && currentClass ? (
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-[#5d6b73]">
-                  وضعیت رتبه‌بندی ({currentClass.code}):
+              <div className="flex items-center justify-between sm:justify-end gap-2 pt-1 sm:pt-0 border-t sm:border-t-0 border-black/[0.04]">
+                <span className="text-[11px] text-[#5d6b73]">
+                  رتبه‌بندی ({currentClass.code}):
                 </span>
                 <button
                   onClick={handleToggleLeaderboard}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer border ${
                     currentClass.isLeaderboardVisible
                       ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
                       : 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
@@ -427,31 +544,31 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
                   {currentClass.isLeaderboardVisible ? (
                     <>
                       <Eye className="w-3.5 h-3.5" />
-                      <span>منتشر شده (قابل مشاهده برای دانشجو)</span>
+                      <span>منتشر شده</span>
                     </>
                   ) : (
                     <>
                       <EyeOff className="w-3.5 h-3.5" />
-                      <span>مخفی (در انتظار انتشار)</span>
+                      <span>مخفی</span>
                     </>
                   )}
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
+              <div className="flex items-center gap-2 text-xs text-[#5d6b73] dark:text-[#9aa8b0] self-end sm:self-auto">
                 <span>نمای تجمیعی:</span>
-                <span className="font-mono bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full font-bold">
-                  {overview?.classes.length || 0} کلاس آموزشی
+                <span className="font-mono bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full font-bold text-[11px]">
+                  {overview?.classes.length || 0} کلاس
                 </span>
               </div>
             )}
           </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex items-center gap-2 border-b border-black/[0.06] dark:border-white/[0.08]">
+          {/* Navigation Tabs - Fixed */}
+          <div className="flex items-center gap-2 border-b border-black/[0.06] dark:border-white/[0.08] overflow-x-auto no-scrollbar shrink-0">
             <button
               onClick={() => setActiveTab('users')}
-              className={`flex items-center gap-2 pb-3 px-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer ${
+              className={`flex items-center gap-2 pb-3 px-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 activeTab === 'users'
                   ? 'border-[#2563EB] text-[#2563EB]'
                   : 'border-transparent text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
@@ -466,7 +583,7 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
 
             <button
               onClick={() => setActiveTab('matrix')}
-              className={`flex items-center gap-2 pb-3 px-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer ${
+              className={`flex items-center gap-2 pb-3 px-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 activeTab === 'matrix'
                   ? 'border-[#2563EB] text-[#2563EB]'
                   : 'border-transparent text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
@@ -481,7 +598,7 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
 
             <button
               onClick={() => setActiveTab('drip')}
-              className={`flex items-center gap-2 pb-3 px-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer ${
+              className={`flex items-center gap-2 pb-3 px-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 activeTab === 'drip'
                   ? 'border-[#2563EB] text-[#2563EB]'
                   : 'border-transparent text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
@@ -493,7 +610,25 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
                 ۲۲ جلسه
               </span>
             </button>
+
+            <button
+              onClick={() => setActiveTab('cohorts')}
+              className={`flex items-center gap-2 pb-3 px-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                activeTab === 'cohorts'
+                  ? 'border-[#2563EB] text-[#2563EB]'
+                  : 'border-transparent text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <FolderKanban className="w-4 h-4" />
+              <span>۴. مدیریت دوره‌ها و اسلات‌های زمانی (Cohorts & Time-Slots)</span>
+              <span className="px-2 py-0.2 text-[10px] rounded-full bg-amber-500/10 text-amber-600 font-mono">
+                {overview?.classes.length || 0} کلاس
+              </span>
+            </button>
           </div>
+
+          {/* Modal Tab Content Area - Scrollable */}
+          <div className="flex-1 overflow-y-auto no-scrollbar pr-1 -mr-1 space-y-4 min-h-0">
 
           {/* TAB 1: User Registry Table */}
           {activeTab === 'users' && (
@@ -537,6 +672,42 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
                     <option value="Above Tier">فراتر از سطح (Above Tier)</option>
                     <option value="NONE">بدون آزمون</option>
                   </select>
+
+                  {/* Discipline Filter (16 OBS Disciplines) */}
+                  <select
+                    value={disciplineFilter}
+                    onChange={(e) => setDisciplineFilter(e.target.value)}
+                    className="px-3 py-1.5 text-xs rounded-xl border border-black/[0.1] dark:border-white/[0.15] bg-white dark:bg-[#12181d] text-[#1c2830] dark:text-[#e8ebe9] cursor-pointer font-bold"
+                  >
+                    <option value="ALL">کلیه دیسیپلین‌ها (۲۴ دیسیپلین)</option>
+                    <optgroup label="مگاپروژه‌های راه، ترابری و ابنیه (عمران)">
+                      {Object.values(DISCIPLINE_REGISTRY)
+                        .filter((d) => d.trackId === 'CIVIL_INFRA')
+                        .map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.shortTitleFa}
+                          </option>
+                        ))}
+                    </optgroup>
+                    <optgroup label="نفت، گاز، پالایشگاه و پتروشیمی">
+                      {Object.values(DISCIPLINE_REGISTRY)
+                        .filter((d) => d.trackId === 'ENERGY_PETRO')
+                        .map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.shortTitleFa}
+                          </option>
+                        ))}
+                    </optgroup>
+                    <optgroup label="کاربردهای عمومی، خانواده و سبک زندگی">
+                      {Object.values(DISCIPLINE_REGISTRY)
+                        .filter((d) => d.trackId === 'GENERAL_EVERYDAY')
+                        .map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.shortTitleFa}
+                          </option>
+                        ))}
+                    </optgroup>
+                  </select>
                 </div>
 
                 {/* Export CSV Button */}
@@ -556,6 +727,7 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
                     <thead className="bg-black/[0.02] dark:bg-white/[0.03] border-b border-black/[0.06] dark:border-white/[0.08] text-[#5d6b73] font-bold">
                       <tr>
                         <th className="py-3 px-4">مشخصات دانشجو</th>
+                        <th className="py-3 px-4">دیسیپلین و رده سازمانی</th>
                         <th className="py-3 px-4">اطلاعات تماس</th>
                         <th className="py-3 px-4">کلاس دوره</th>
                         <th className="py-3 px-4">سطح ادعایی اولیه</th>
@@ -589,6 +761,16 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
                                 </div>
                                 <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
                                   {user.specialty || 'تخصص نامشخص'}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="space-y-0.5">
+                                <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6]">
+                                  {user.disciplineId ? (DISCIPLINE_REGISTRY[user.disciplineId as keyof typeof DISCIPLINE_REGISTRY]?.shortTitleFa || user.disciplineId) : 'حفاری TBM'}
+                                </span>
+                                <span className="block text-[10px] text-gray-400 font-mono">
+                                  {user.roleId || 'مهندس دفتر فنی'}
                                 </span>
                               </div>
                             </td>
@@ -949,8 +1131,271 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
             </div>
           )}
 
-          {/* Modal Footer */}
-          <div className="flex items-center justify-between pt-4 border-t border-black/[0.06] dark:border-white/[0.08]">
+          {/* TAB 4: Cohort Classes & 2-Hour Time Window Slots Management */}
+          {activeTab === 'cohorts' && (
+            <div className="space-y-5">
+              {/* Top Banner Guide */}
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                <div className="flex items-start gap-2.5">
+                  <div className="p-2 rounded-xl bg-amber-500 text-white shrink-0 mt-0.5 sm:mt-0 shadow-xs">
+                    <FolderKanban className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-amber-950 dark:text-amber-200 text-xs sm:text-sm">
+                      مدیریت کلاس‌ها و دسته‌بندی خودکار پنجره‌های زمانی ۲ ساعته
+                    </h3>
+                    <p className="text-amber-900/80 dark:text-amber-300/80 text-[11px] mt-0.5 leading-relaxed">
+                      کاربرانی که در یک بازه زمانی ۲ ساعته ثبت‌نام می‌کنند، به صورت خودکار در یک اسلات کلاس واحد دسته‌بندی می‌شوند. در این بخش می‌توانید برای هر کلاس/اسلات عنوان رسمی فارسی، سازمان کارفرما و وضعیت انتشار رتبه‌بندی را تعیین فرمایید.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+                  <span className="text-[11px] font-mono font-bold px-3 py-1 rounded-xl bg-amber-500/20 text-amber-800 dark:text-amber-200">
+                    {overview?.classes.length || 0} کلاس فعال
+                  </span>
+                  <button
+                    onClick={() => setIsCreatingNewClass((prev) => !prev)}
+                    className="px-3 py-1.5 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-xs transition-all shadow-xs cursor-pointer whitespace-nowrap"
+                  >
+                    {isCreatingNewClass ? 'بستن فرم' : '+ تعریف کلاس جدید'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Create New Class Form Container */}
+              {isCreatingNewClass && (
+                <div className="p-4 rounded-2xl bg-white dark:bg-[#161e24] border border-[#2563EB]/40 shadow-sm space-y-3 animate-fadeIn">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#2563EB]">
+                    <FolderKanban className="w-4 h-4" />
+                    <span>مشخصات کلاس و دوره آموزشی جدید:</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 mb-1">
+                        کد یکتای کلاس (انگلیسی):
+                      </label>
+                      <input
+                        type="text"
+                        value={newClassCode}
+                        onChange={(e) => setNewClassCode(e.target.value)}
+                        placeholder="مثال: METRO-LINE10"
+                        className="w-full px-3 py-1.5 text-xs rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-[#12181d] text-[#1c2830] dark:text-[#e8ebe9] font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 mb-1">
+                        عنوان رسمی کلاس (فارسی):
+                      </label>
+                      <input
+                        type="text"
+                        value={newClassTitle}
+                        onChange={(e) => setNewClassTitle(e.target.value)}
+                        placeholder="مثال: دوره تخصصی مترو و TBM"
+                        className="w-full px-3 py-1.5 text-xs rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-[#12181d] text-[#1c2830] dark:text-[#e8ebe9]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 mb-1">
+                        شرکت / سازمان کارفرما:
+                      </label>
+                      <input
+                        type="text"
+                        value={newClassOrg}
+                        onChange={(e) => setNewClassOrg(e.target.value)}
+                        placeholder="مثال: شرکت راه‌آهن شهری تهران"
+                        className="w-full px-3 py-1.5 text-xs rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-[#12181d] text-[#1c2830] dark:text-[#e8ebe9]"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-end gap-2 pt-1">
+                    <button
+                      onClick={() => setIsCreatingNewClass(false)}
+                      className="px-3 py-1 text-xs text-gray-500 hover:text-gray-700 cursor-pointer"
+                    >
+                      انصراف
+                    </button>
+                    <button
+                      onClick={handleCreateNewClass}
+                      className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs cursor-pointer"
+                    >
+                      ایجاد و فعال‌سازی کلاس
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Class Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(overview?.classes || []).map((cls) => {
+                  const slotInfo = parseTimeSlotInfo(cls.code);
+                  const isEditingThis = editingClassId === cls.id;
+
+                  return (
+                    <div
+                      key={cls.id}
+                      className="p-5 rounded-2xl border border-black/[0.08] dark:border-white/[0.1] bg-white dark:bg-[#161e24] shadow-xs space-y-4 hover:border-amber-500/40 transition-all flex flex-col justify-between"
+                    >
+                      <div className="space-y-3">
+                        {/* Card Header */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-mono text-xs font-black px-2.5 py-0.5 rounded-lg bg-black/[0.04] dark:bg-white/[0.08] text-[#1c2830] dark:text-[#e8ebe9]">
+                                {cls.code}
+                              </span>
+                              {slotInfo.isSlot && (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                                  اسلات ۲ ساعته خودکار
+                                </span>
+                              )}
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                {cls.studentCount || 0} دانشجو
+                              </span>
+                            </div>
+
+                            {/* Human Title or Edit Form */}
+                            {isEditingThis ? (
+                              <div className="space-y-2 pt-1 animate-fadeIn">
+                                <div>
+                                  <label className="block text-[10px] font-bold text-gray-500 mb-1">
+                                    عنوان اختصاصی کلاس / دوره:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={editTitleInput}
+                                    onChange={(e) => setEditTitleInput(e.target.value)}
+                                    placeholder="مثال: دوره تخصصی پایپینگ - نوبت عصر"
+                                    className="w-full px-3 py-1.5 text-xs rounded-xl border border-[#2563EB] bg-white dark:bg-[#12181d] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-hidden"
+                                    autoFocus
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] font-bold text-gray-500 mb-1">
+                                    سازمان / شرکت کارفرما:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={editOrgInput}
+                                    onChange={(e) => setEditOrgInput(e.target.value)}
+                                    placeholder="مثال: شرکت نفت و گاز پارس"
+                                    className="w-full px-3 py-1.5 text-xs rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-[#12181d] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-hidden"
+                                  />
+                                </div>
+                                <div className="flex items-center gap-2 pt-1">
+                                  <button
+                                    onClick={() => handleSaveClassInfo(cls.id)}
+                                    className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+                                  >
+                                    <Check className="w-3.5 h-3.5" />
+                                    <span>ذخیره نام</span>
+                                  </button>
+                                  <button
+                                    onClick={() => setEditingClassId(null)}
+                                    className="px-3 py-1 rounded-lg bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold text-xs cursor-pointer"
+                                  >
+                                    انصراف
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2 pt-0.5">
+                                <h4 className="font-black text-sm text-[#1c2830] dark:text-[#e8ebe9] leading-snug">
+                                  {cls.title}
+                                </h4>
+                                <button
+                                  onClick={() => handleStartEditClass(cls)}
+                                  className="p-1 rounded-md text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors cursor-pointer"
+                                  title="تغییر نام کلاس"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            )}
+
+                            {cls.organization && !isEditingThis && (
+                              <div className="flex items-center gap-1 text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                                <Building className="w-3 h-3 text-amber-500" />
+                                <span>سازمان: {cls.organization}</span>
+                              </div>
+                            )}
+
+                            {slotInfo.isSlot && (
+                              <p className="text-[11px] text-gray-500 dark:text-gray-400 font-mono mt-0.5">
+                                ⏱️ {slotInfo.labelFa}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Card Action Controls */}
+                      <div className="pt-3 border-t border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => {
+                              setSelectedClassId(cls.id);
+                              setActiveTab('users');
+                              showToast(`فیلتر جدول روی کلاس «${cls.title}» تنظیم شد.`);
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.06] hover:bg-black/[0.06] text-[#1c2830] dark:text-[#e8ebe9] font-bold text-[11px] transition-colors cursor-pointer"
+                          >
+                            مشاهده دانشجویان 👥
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedClassId(cls.id);
+                              setActiveTab('drip');
+                              showToast(`قفل‌های قطره‌ای کلاس «${cls.title}» بازخوانی شدند.`);
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.06] hover:bg-black/[0.06] text-[#1c2830] dark:text-[#e8ebe9] font-bold text-[11px] transition-colors cursor-pointer"
+                          >
+                            مدیریت قفل جلسات 🔒
+                          </button>
+                        </div>
+
+                        {/* Leaderboard toggle */}
+                        <button
+                          onClick={async () => {
+                            const newStatus = !cls.isLeaderboardVisible;
+                            setOverview((prev) => ({
+                              ...prev,
+                              classes: prev.classes.map((c) =>
+                                c.id === cls.id ? { ...c, isLeaderboardVisible: newStatus } : c
+                              )
+                            }));
+                            showToast(newStatus ? 'لیدربورد این کلاس منتشر شد.' : 'لیدربورد مخفی شد.');
+                            await lmsApi.toggleLeaderboardVisibility(cls.id, newStatus);
+                          }}
+                          className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer border ${
+                            cls.isLeaderboardVisible
+                              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                              : 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30'
+                          }`}
+                        >
+                          {cls.isLeaderboardVisible ? (
+                            <>
+                              <Eye className="w-3 h-3" />
+                              <span>رتبه‌بندی عمومی</span>
+                            </>
+                          ) : (
+                            <>
+                              <EyeOff className="w-3 h-3" />
+                              <span>رتبه‌بندی مخفی</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          </div>
+
+          {/* Modal Footer - Fixed */}
+          <div className="flex items-center justify-between pt-3 border-t border-black/[0.06] dark:border-white/[0.08] shrink-0">
             <span className="text-[11px] text-[#5d6b73]">
               سیستم مدیریت یکپارچه کلاس‌های دوره CPMAI مشاوران مدیریت اوج
             </span>

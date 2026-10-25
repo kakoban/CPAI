@@ -1,4 +1,4 @@
-export type IndustryTrackId = 'CIVIL_INFRA' | 'ENERGY_PETRO';
+export type IndustryTrackId = 'CIVIL_INFRA' | 'ENERGY_PETRO' | 'GENERAL_EVERYDAY';
 
 export interface IndustryTrackInfo {
   id: IndustryTrackId;
@@ -10,7 +10,7 @@ export interface IndustryTrackInfo {
   taglineEn: string;
   descriptionFa: string;
   descriptionEn: string;
-  iconName: 'Building2' | 'Factory';
+  iconName: 'Building2' | 'Factory' | 'Sparkles';
   scopePillsFa: string[];
   scopePillsEn: string[];
   governingStandardsFa: string[];
@@ -141,6 +141,62 @@ export const INDUSTRY_TRACKS: Record<IndustryTrackId, IndustryTrackInfo> = {
     gradient: 'from-amber-500 via-orange-600 to-red-600',
     borderColor: 'border-amber-500/40 hover:border-amber-400',
     glowColor: 'rgba(245, 158, 11, 0.4)'
+  },
+  GENERAL_EVERYDAY: {
+    id: 'GENERAL_EVERYDAY',
+    titleFa: 'سبک زندگی، خانواده و کاربردهای روزمره هوش مصنوعی',
+    titleEn: 'Everyday, Family & Lifestyle AI Track',
+    shortTitleFa: 'روزمره، خانواده و سفر',
+    shortTitleEn: 'Everyday & Lifestyle',
+    taglineFa: 'والدین هوشمند، اقتصاد خانوار، خرید بهینه، برنامه‌ریزی سفر و ترندهای جذاب هوش مصنوعی',
+    taglineEn: 'Smart Parenting, Household Budgeting, Smart Shopping, Travel & Viral Everyday AI',
+    descriptionFa: 'ویژه والدین، خانواده‌ها، عاشقان سفر، علاقه‌مندان به ترندهای وایرال شبکه‌های اجتماعی و کارآفرینان کسب‌وکارهای خرد برای کاربرد هوش مصنوعی در زندگی ملموس روزمره.',
+    descriptionEn: 'Designed for families, parents, travel enthusiasts, social media creators, and everyday smart living powered by AI.',
+    iconName: 'Sparkles',
+    scopePillsFa: [
+      'والدین و آموزش خلاقانه کودکان',
+      'مدیریت خرید، سبد مصرف و اقتصاد خانوار',
+      'برنامه‌ریزی هوشمند سفرهای رویایی و تفریحات',
+      'آشپزی خلاقانه با باقیمانده یخچال و رژیم',
+      'ترفندهای مذاکره، خرید خانه و خودرو',
+      'تولید سناریوهای جذاب و وایرال شبکه‌های اجتماعی'
+    ],
+    scopePillsEn: [
+      'Smart Parenting & Kids EdTech',
+      'Household Budget & Smart Shopping',
+      'Smart Travel Itineraries & Vacations',
+      'Kitchen Creativity & Zero-Waste Meals',
+      'Everyday Negotiation & Real Estate',
+      'Viral Content & Social Media Ideas'
+    ],
+    governingStandardsFa: [
+      'استاندارد ۶ فاز مدیریت پروژه‌های شناختی CPMAI',
+      'چارچوب سواد دیجیتال و هوش مصنوعی یونسکو',
+      'اصول مصرف پایدار و اقتصاد مقاومتی خانوار',
+      'رهنمودهای ایمنی و سلامت دیجیتال کودک و خانواده'
+    ],
+    governingStandardsEn: [
+      'CPMAI 6-Phase Cognitive Project Methodology',
+      'UNESCO AI & Digital Literacy Framework',
+      'Sustainable Household Economics Principles',
+      'Family & Kids Digital Well-being Guidelines'
+    ],
+    defaultCaseStudy: {
+      projectTitleFa: 'سامانه هوشمند اقتصاد خانوار، کاهش دورریز خرید و پس‌انداز بودجه سفر خانوادگی',
+      projectTitleEn: 'Smart Household Budget, Grocery Waste Reduction & Vacation Savings AI',
+      organizationFa: 'باشگاه هوشمند خانواده و سبک زندگی (Smart Family Hub)',
+      organizationEn: 'Smart Family & Lifestyle Community',
+      coreProblemFa: 'کاهش ۲۵ درصدی دورریز اقلام فاسدشدنی در خرید ماهانه، پیش‌بینی ارزان‌ترین نرخ بلیت و اقامتگاه سفر، و متناسب‌سازی تغذیه خانواده.',
+      coreProblemEn: 'Reducing 25% perishable grocery waste, predicting lowest vacation flight/hotel fares, and personalizing family nutrition.',
+      aiPatternFa: 'الگوی شناخت ناهنجاری (Anomaly Detection)، الگوی پیش‌بینی (Predictive) و سیستم پیشنهاددهنده (Recommendation)',
+      aiPatternEn: 'Anomaly Detection, Predictive Analytics & Hyper-Personalized Recommendation Patterns',
+      expectedRoiFa: 'صرفه‌جویی ماهیانه ۸ الی ۱۲ میلیون تومان در هزینه‌های پرت خانوار و تامین ۱۰۰ درصدی بودجه سفر سالیانه خانواده.',
+      expectedRoiEn: '$2,400 annual household grocery savings and fully funded annual family vacation fund.'
+    },
+    accentColor: 'text-emerald-500 dark:text-emerald-400',
+    gradient: 'from-emerald-500 via-teal-500 to-indigo-600',
+    borderColor: 'border-emerald-500/40 hover:border-emerald-400',
+    glowColor: 'rgba(16, 185, 129, 0.35)'
   }
 };
 
@@ -149,7 +205,7 @@ const STORAGE_KEY_TRACK = 'cpmai_selected_industry_track';
 export const getSavedIndustryTrack = (): IndustryTrackId => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY_TRACK);
-    if (saved === 'CIVIL_INFRA' || saved === 'ENERGY_PETRO') {
+    if (saved === 'CIVIL_INFRA' || saved === 'ENERGY_PETRO' || saved === 'GENERAL_EVERYDAY') {
       return saved;
     }
   } catch {
@@ -186,7 +242,17 @@ export type PetroDisciplineId =
   | 'petro_qaqc_ndt'
   | 'petro_commissioning_pcc';
 
-export type DisciplineId = CivilDisciplineId | PetroDisciplineId;
+export type GeneralDisciplineId =
+  | 'general_family_parenting'
+  | 'general_household_finance'
+  | 'general_travel_lifestyle'
+  | 'general_viral_content'
+  | 'general_ecommerce_retail'
+  | 'general_health_nutrition'
+  | 'general_personal_productivity'
+  | 'general_customer_care';
+
+export type DisciplineId = CivilDisciplineId | PetroDisciplineId | GeneralDisciplineId;
 
 export type EngineeringRoleId =
   | 'director'            // مدیر طرح / مدیر ارشد پروژه
@@ -235,11 +301,14 @@ export const getSavedDiscipline = (track: IndustryTrackId = 'CIVIL_INFRA'): Disc
     if (saved) {
       if (track === 'CIVIL_INFRA' && saved.startsWith('civil_')) return saved;
       if (track === 'ENERGY_PETRO' && saved.startsWith('petro_')) return saved;
+      if (track === 'GENERAL_EVERYDAY' && saved.startsWith('general_')) return saved;
     }
   } catch {
     // LocalStorage error
   }
-  return track === 'ENERGY_PETRO' ? 'petro_process_safety' : 'civil_tbm_tunnel';
+  if (track === 'ENERGY_PETRO') return 'petro_process_safety';
+  if (track === 'GENERAL_EVERYDAY') return 'general_household_finance';
+  return 'civil_tbm_tunnel';
 };
 
 export const saveDiscipline = (disciplineId: DisciplineId): void => {

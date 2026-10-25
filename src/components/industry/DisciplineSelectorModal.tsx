@@ -63,6 +63,7 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
 
   const disciplines = getDisciplinesByTrack(currentTrack);
   const isRtl = lang === 'fa';
+  const isEveryday = currentTrack === 'GENERAL_EVERYDAY';
 
   // Side A (Disciplines, right side in RTL = +x shift):
   const colASign = isMobile ? 0 : isRtl ? 1 : -1;
@@ -80,36 +81,67 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
     ? `${R_REST}px 0 0 ${R_REST}px`
     : `0 ${R_REST}px ${R_REST}px 0`;
 
-  const roles = [
-    {
-      id: 'director' as EngineeringRoleId,
-      titleFa: 'مدیر طرح / مدیر ارشد پروژه',
-      titleEn: 'Project Director / Executive PM',
-      descFa: 'تصمیم‌گیری کلان سبد پروژه، مدل‌های مالی BOT/PPP، مناقصات و حاکمیت کلیم',
-      descEn: 'Strategic portfolio decisions, BOT/PPP models, executive claims governance'
-    },
-    {
-      id: 'lead_superintendent' as EngineeringRoleId,
-      titleFa: 'سرپرست دیسیپلین / رئیس کارگاه',
-      titleEn: 'Discipline Lead / Superintendent',
-      descFa: 'راهبری عملیات اجرایی کارگاه، تخصیص منابع ماشین‌آلات و مدیریت پیمانکاران جزء',
-      descEn: 'Field site supervision, heavy plant deployment, subcontractor management'
-    },
-    {
-      id: 'technical_engineer' as EngineeringRoleId,
-      titleFa: 'مهندس دفتر فنی / کنترل پروژه / ناظر',
-      titleEn: 'Technical Office & Controls Engineer',
-      descFa: 'متره و برآورد، تهیه صورت‌وضعیت‌ها، لایحه تاخیرات ماده ۳۰، مدلسازی BIM و شاپ',
-      descEn: 'Quantity surveying, IPC audits, delay claim briefs, BIM coordination'
-    },
-    {
-      id: 'site_operator' as EngineeringRoleId,
-      titleFa: 'اپراتور، جنرال فورمن و بازرس کیفی',
-      titleEn: 'Site Operator, Foreman & Inspector',
-      descFa: 'کابین هدایت TBM، پایپینگ، جوشکاری و NDT، کنترل لوپ‌های DCS و پرمیت کارگاهی',
-      descEn: 'TBM cabin pilot, piping fit-up, NDT film inspection, DCS loop checks'
-    }
-  ];
+  const roles = isEveryday
+    ? [
+        {
+          id: 'director' as EngineeringRoleId,
+          titleFa: 'سرپرست خانوار / مدیر ارشد اقتصاد خانه',
+          titleEn: 'Head of Household & Family Decision Maker',
+          descFa: 'مدیریت کلان بودجه و پس‌انداز خانواده، برنامه‌ریزی مسکن و سرمایه‌گذاری، تصمیم‌گیری اهداف سفر و آینده فرزندان',
+          descEn: 'Macro budget stewardship, family savings, vacation funding & strategic household milestones'
+        },
+        {
+          id: 'lead_superintendent' as EngineeringRoleId,
+          titleFa: 'پدر، مادر یا هماهنگ‌کننده امور خانه',
+          titleEn: 'Parent & Home Coordinator',
+          descFa: 'آموزش و همراهی کودک، مدیریت سبد مصرف و مواد غذایی، سلامت و تغذیه اعضای خانواده و نظم روزانه',
+          descEn: 'Child homework & emotional growth, zero-waste pantry planning, balanced family vitality'
+        },
+        {
+          id: 'technical_engineer' as EngineeringRoleId,
+          titleFa: 'فریلنسر، شاغل یا کارآفرین خرد',
+          titleEn: 'Freelancer, Creator & Small Business Lead',
+          descFa: 'تولید محتوا، شبکه‌های اجتماعی، بهره‌وری فردی، مذاکره و توسعه مهارت‌ها و جریان‌های درآمدی',
+          descEn: 'Viral content creation, daily time-boxing, social media growth & independent income streams'
+        },
+        {
+          id: 'site_operator' as EngineeringRoleId,
+          titleFa: 'دانشجو، یادگیرنده یا جستجوگر هوش مصنوعی',
+          titleEn: 'Student, Self-Learner & Everyday AI Explorer',
+          descFa: 'تکالیف درسی و پژوهشی، یادگیری خودآموز، مهارت‌های نوین دیجیتال و حل هوشمند مسائل روزمره',
+          descEn: 'Coursework mastery, rapid skill acquisition, homework shortcuts and hands-on AI experiments'
+        }
+      ]
+    : [
+        {
+          id: 'director' as EngineeringRoleId,
+          titleFa: 'مدیر طرح / مدیر ارشد پروژه',
+          titleEn: 'Project Director / Executive PM',
+          descFa: 'تصمیم‌گیری کلان سبد پروژه، مدل‌های مالی BOT/PPP، مناقصات و حاکمیت کلیم',
+          descEn: 'Strategic portfolio decisions, BOT/PPP models, executive claims governance'
+        },
+        {
+          id: 'lead_superintendent' as EngineeringRoleId,
+          titleFa: 'سرپرست دیسیپلین / رئیس کارگاه',
+          titleEn: 'Discipline Lead / Superintendent',
+          descFa: 'راهبری عملیات اجرایی کارگاه، تخصیص منابع ماشین‌آلات و مدیریت پیمانکاران جزء',
+          descEn: 'Field site supervision, heavy plant deployment, subcontractor management'
+        },
+        {
+          id: 'technical_engineer' as EngineeringRoleId,
+          titleFa: 'مهندس دفتر فنی / کنترل پروژه / ناظر',
+          titleEn: 'Technical Office & Controls Engineer',
+          descFa: 'متره و برآورد، تهیه صورت‌وضعیت‌ها، لایحه تاخیرات ماده ۳۰، مدلسازی BIM و شاپ',
+          descEn: 'Quantity surveying, IPC audits, delay claim briefs, BIM coordination'
+        },
+        {
+          id: 'site_operator' as EngineeringRoleId,
+          titleFa: 'اپراتور، جنرال فورمن و بازرس کیفی',
+          titleEn: 'Site Operator, Foreman & Inspector',
+          descFa: 'کابین هدایت TBM، پایپینگ، جوشکاری و NDT، کنترل لوپ‌های DCS و پرمیت کارگاهی',
+          descEn: 'TBM cabin pilot, piping fit-up, NDT film inspection, DCS loop checks'
+        }
+      ];
 
   const handleApply = () => {
     onSelectDiscipline(selectedDiscipline);
@@ -136,8 +168,10 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
           <div className="w-11 h-11 rounded-xl bg-[#12343b] dark:bg-[#1b3b40] text-[#f2f8f6] flex items-center justify-center shrink-0 shadow-sm">
             {currentTrack === 'CIVIL_INFRA' ? (
               <Building2 className="w-5 h-5" />
-            ) : (
+            ) : currentTrack === 'ENERGY_PETRO' ? (
               <Factory className="w-5 h-5" />
+            ) : (
+              <Sparkles className="w-5 h-5 text-emerald-400" />
             )}
           </div>
           <div className="flex-1 min-w-0">
@@ -145,16 +179,30 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
               id="discipline-dialog-title"
               className="text-lg sm:text-xl font-black leading-snug flex flex-wrap items-center gap-2"
             >
-              <span>{lang === 'fa' ? 'انتخاب دیسیپلین تخصصی و رده سازمانی' : 'Discipline & Organizational Role Selection'}</span>
+              <span>
+                {lang === 'fa'
+                  ? isEveryday
+                    ? 'انتخاب حوزه کاربردی و نقش شما در زندگی و خانواده'
+                    : 'انتخاب دیسیپلین تخصصی و رده سازمانی'
+                  : isEveryday
+                  ? 'Lifestyle Focus Area & Personal / Family Role Selection'
+                  : 'Discipline & Organizational Role Selection'}
+              </span>
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#eaf2f1] dark:bg-[#172d31] text-[#587479] dark:text-[#8ca8ab]">
                 {currentTrack === 'CIVIL_INFRA'
                   ? (lang === 'fa' ? 'هلدینگ راه و شهرسازی' : 'Civil & Infrastructure Holding')
-                  : (lang === 'fa' ? 'هلدینگ پتروشیمی و پالایشگاه' : 'Oil & Gas EPCC Holding')}
+                  : currentTrack === 'ENERGY_PETRO'
+                  ? (lang === 'fa' ? 'هلدینگ پتروشیمی و پالایشگاه' : 'Oil & Gas EPCC Holding')
+                  : (lang === 'fa' ? 'سبک زندگی، خانواده و کاربردهای روزمره' : 'Family, Lifestyle & Everyday AI')}
               </span>
             </h1>
             <p className="text-xs text-[#587479] dark:text-[#8ca8ab] mt-1 leading-relaxed max-w-2xl">
               {lang === 'fa'
-                ? 'بر اساس ساختار سازمانی (OBS) مرجع، دیسیپلین و رده خود را انتخاب کنید تا مثال‌ها و تمرین‌ها اختصاصی شوند.'
+                ? isEveryday
+                  ? 'بر اساس نیاز و جایگاه خود، حوزه تمرکز و نقش خود را انتخاب کنید تا مثال‌ها و تمرین‌ها شخصی‌سازی شوند.'
+                  : 'بر اساس ساختار سازمانی (OBS) مرجع، دیسیپلین و رده خود را انتخاب کنید تا مثال‌ها و تمرین‌ها اختصاصی شوند.'
+                : isEveryday
+                ? 'Select your lifestyle focus area and personal/family role to customize everyday AI examples.'
                 : 'Select your OBS discipline & hierarchical role to customize CPMAI examples and worksheets.'}
             </p>
           </div>
@@ -180,12 +228,22 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
                 <Check className="w-3 h-3 stroke-[3]" />
               </span>
               <h2 className="text-sm font-bold text-[#12343b] dark:text-[#e4f0ee]">
-                {lang === 'fa' ? '۱. دیسیپلین تخصصی شما' : '1. Your Specialized Discipline'}
+                {lang === 'fa'
+                  ? isEveryday
+                    ? '۱. حوزه کاربردی و دغدغه شما'
+                    : '۱. دیسیپلین تخصصی شما'
+                  : isEveryday
+                  ? '1. Your Lifestyle Focus Area'
+                  : '1. Your Specialized Discipline'}
               </h2>
             </div>
             <p className="text-xs text-[#587479] dark:text-[#8ca8ab]">
               {lang === 'fa'
-                ? 'یک حوزه را انتخاب کنید؛ شاخص‌های آن در مثال‌ها به کار می‌روند.'
+                ? isEveryday
+                  ? 'یک حوزه را انتخاب کنید؛ شاخص‌ها و ابزارهای آن در تمرین‌ها فعال می‌شوند.'
+                  : 'یک حوزه را انتخاب کنید؛ شاخص‌های آن در مثال‌ها به کار می‌روند.'
+                : isEveryday
+                ? 'Select a lifestyle domain to tailor everyday KPIs and AI tools.'
                 : 'Select a domain; its KPIs will populate your exercises and examples.'}
             </p>
 
@@ -290,11 +348,23 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
                 <Check className="w-3 h-3 stroke-[3]" />
               </span>
               <h2 className="text-sm font-bold text-[#12343b] dark:text-[#e4f0ee]">
-                {lang === 'fa' ? '۲. رده سازمانی و مسئولیت شما' : '2. Organizational Role & Responsibility'}
+                {lang === 'fa'
+                  ? isEveryday
+                    ? '۲. نقش و جایگاه شما در زندگی و خانواده'
+                    : '۲. رده سازمانی و مسئولیت شما'
+                  : isEveryday
+                  ? '2. Your Role in Family & Everyday Life'
+                  : '2. Organizational Role & Responsibility'}
               </h2>
             </div>
             <p className="text-xs text-[#587479] dark:text-[#8ca8ab]">
-              {lang === 'fa' ? 'از تصمیم‌گیری کلان تا اجرای میدانی.' : 'From strategic executive down to site execution.'}
+              {lang === 'fa'
+                ? isEveryday
+                  ? 'از مدیریت بودجه خانه تا فریلنسری و یادگیری فردی.'
+                  : 'از تصمیم‌گیری کلان تا اجرای میدانی.'
+                : isEveryday
+                ? 'From household management to freelancing and personal growth.'
+                : 'From strategic executive down to site execution.'}
             </p>
 
             {/* Vertical Ladder (.ladder) with dashed connector line */}
@@ -399,7 +469,13 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
               className="px-5 py-2.5 rounded-xl text-xs font-bold bg-[#12343b] dark:bg-[#1b3b40] text-[#f2f8f6] hover:brightness-110 active:scale-[0.97] transition-all flex items-center gap-2 cursor-pointer shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Sparkles className="w-4 h-4 text-[#d98a1f]" />
-              <span>{lang === 'fa' ? 'اعمال دیسیپلین و سفارشی‌سازی' : 'Apply & Personalize'}</span>
+              <span>
+                {lang === 'fa'
+                  ? isEveryday
+                    ? 'اعمال تنظیمات و شخصی‌سازی'
+                    : 'اعمال دیسیپلین و سفارشی‌سازی'
+                  : 'Apply & Personalize'}
+              </span>
             </button>
           </div>
         </footer>

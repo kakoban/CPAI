@@ -1,4 +1,5 @@
 import { AuthResponse, UserProfile, GoogleLoginPayload, OnboardingPayload } from '../types/auth';
+import { getAutoTimeSlotCode } from '../utils/timeSlot';
 
 const TOKEN_KEY = 'cpmai_auth_token';
 const USER_KEY = 'cpmai_auth_user';
@@ -221,7 +222,7 @@ class AuthService {
       specialty: payload.specialty,
       aiLevel: payload.aiLevel,
       initialAiLevel: payload.aiLevel,
-      classCode: payload.classCode || 'DEFAULT_COHORT',
+      classCode: (payload.classCode && payload.classCode.trim()) ? payload.classCode.trim() : getAutoTimeSlotCode(),
       role: isAdmin ? 'admin' : (currentUser?.role || 'user'),
       isOnboarded: true
     };

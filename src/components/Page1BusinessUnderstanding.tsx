@@ -51,6 +51,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
 
   const domainEx = getDomainPhaseExample(1, industryTrack);
   const isPetro = industryTrack === 'ENERGY_PETRO';
+  const isEveryday = industryTrack === 'GENERAL_EVERYDAY';
   const discMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
 
   const t = {
@@ -72,10 +73,14 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       wsTitle: 'Worksheet: Your Project Artifacts',
       wsDesc: 'Fill these in for your own project or case study iteration.',
       storyL: 'Sprint User Story',
-      storyHint: isPetro
+      storyHint: isEveryday
+        ? 'e.g. As a household manager, I want smart pantry expiration alerts so that I can eliminate food waste and save for our annual family vacation.'
+        : isPetro
         ? 'e.g. As a refinery process lead, I want 60-day fouling forecasts so that I can schedule heat exchanger descaling without emergency shutdowns.'
         : 'e.g. As a metro project director, I want 48-hour ground settlement predictions so that I can adjust TBM foam injection and prevent utility damage.',
-      storyPh: isPetro
+      storyPh: isEveryday
+        ? 'As a [Household Manager], I want [Pantry Depletion Alerts] so that [Save 25% on Groceries & Fund Vacation]...'
+        : isPetro
         ? 'As a [Refinery Unit Lead], I want [Fouling Prediction] so that [Avoid Flaring & Emergency Trips]...'
         : 'As a [Metro Tunnel Engineer], I want [Ground Subsidence Early Warning] so that [Prevent Utility Ruptures & Delay Claims]...',
       bgL: 'Background',
@@ -135,10 +140,14 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       wsTitle: 'برگه تمرین: مستندات پروژه شما',
       wsDesc: 'این بخش‌ها را برای پروژه یا مطالعه موردی خود تکمیل کنید.',
       storyL: 'داستان کاربر اسپرینت (Sprint User Story)',
-      storyHint: isPetro
+      storyHint: isEveryday
+        ? 'مثال: به عنوان سرپرست خانواده، می‌خواهم پیش‌بینی انقضا و اتمام اقلام یخچال را دریافت کنم تا لیست خرید هفتگی را بدون دورریز تنظیم نمایم و بودجه سفر را ذخیره کنم.'
+        : isPetro
         ? 'مثال: به عنوان سرپرست فرآیند پالایشگاه، می‌خواهم پیش‌بینی ۶۰ روزه رسوب مبدل‌ها را دریافت کنم تا برنامه شستشو را بدون توقف خط تولید تنظیم نمایم.'
         : 'مثال: به عنوان مدیر پروژه مترو، می‌خواهم پیش‌بینی ۴۸ ساعته نشست معابر را دریافت کنم تا پارامترهای حفاری TBM را تغییر دهم و از آسیب به لوله‌های گاز و ادعای تاخیرات جلوگیری شود.',
-      storyPh: isPetro
+      storyPh: isEveryday
+        ? 'به عنوان [سرپرست خانواده / مدیر خرید]، می‌خواهم [پیش‌بینی هوشمند اتمام اقلام یخچال و هشدار دورریز] را داشته باشم تا [۲۵٪ در هزینه‌ها صرفه‌جویی و بودجه سفر ذخیره شود]...'
+        : isPetro
         ? 'به عنوان [رئیس بهره‌برداری پالایشگاه]، می‌خواهم [پیش‌بینی رسوب مبدل‌ها] را داشته باشم تا [از شات‌دان و فلرینگ اضطراری پیشگیری شود]...'
         : 'به عنوان [مدیر پروژه احداث مترو]، می‌خواهم [پیش‌بینی ۴۸ ساعته فرونشست زمین] را داشته باشم تا [از آسیب به لوله‌های گاز و ادعای تاخیرات نشریه ۴۳۱۱ جلوگیری شود]...',
       bgL: 'پس‌زمینه (Background)',

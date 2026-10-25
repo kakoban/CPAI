@@ -10,9 +10,14 @@ export interface ClassEntity {
   id: string;
   code: string;
   title: string;
+  organization?: string;
   isLeaderboardVisible: boolean;
   studentCount?: number;
+  testedCount?: number;
+  averageScore?: number;
   createdAt: string;
+  isAutoSlot?: boolean;
+  slotWindowLabel?: string;
 }
 
 export interface SessionLockEntity {
@@ -65,8 +70,12 @@ export interface UserRegistryItem {
   phone?: string;
   specialty?: string;
   role: string;
+  trackId?: 'CIVIL_INFRA' | 'ENERGY_PETRO' | 'GENERAL_EVERYDAY';
+  disciplineId?: string;
+  roleId?: string;
   classId?: string;
   classCode?: string;
+  classTitle?: string;
   initialAiLevel?: string;
   isOnboarded: boolean;
   assessmentResult?: {

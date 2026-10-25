@@ -371,8 +371,18 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
               </h1>
               <span className="block text-[11px] font-semibold text-[#587479] dark:text-[#8ca8ab] mt-0.5">
                 {discMeta
-                  ? `${industryTrack === 'CIVIL_INFRA' ? 'راه و شهرسازی' : 'پتروشیمی'} · ${discMeta.shortTitleFa}`
-                  : (industryTrack === 'CIVIL_INFRA' ? 'هلدینگ راه و شهرسازی' : 'هلدینگ پتروشیمی')}
+                  ? `${
+                      industryTrack === 'CIVIL_INFRA'
+                        ? 'راه و ابنیه'
+                        : industryTrack === 'ENERGY_PETRO'
+                        ? 'پتروشیمی'
+                        : 'روزمره و خانواده'
+                    } · ${discMeta.shortTitleFa}`
+                  : industryTrack === 'CIVIL_INFRA'
+                  ? 'هلدینگ راه و ابنیه'
+                  : industryTrack === 'ENERGY_PETRO'
+                  ? 'هلدینگ نفت و انرژی'
+                  : 'سبک زندگی و خانواده'}
               </span>
             </div>
 
