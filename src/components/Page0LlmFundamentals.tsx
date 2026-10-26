@@ -44,6 +44,7 @@ import { ENGINEERING_CONTRACTS } from '../data/engineering_sample_contracts';
 import { Page0EngineeringMasterclass } from './Page0EngineeringMasterclass';
 import { NotebookLmWorkshop } from './NotebookLmWorkshop';
 import { ClaudeEnterpriseConnectors } from './connectors/ClaudeEnterpriseConnectors';
+import { ObsidianBrainSkillsWorkshop } from './obsidian/ObsidianBrainSkillsWorkshop';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../data/logo';
 import { IndustryTrackId, DisciplineId } from '../types/industryTrack';
 import {
@@ -98,6 +99,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     | 'engineering_dashboards'
     | 'contracts_and_gems'
     | 'connectors'
+    | 'obsidian_brain'
     | 'notebooklm'
     | 'masterclass'
     | 'safety'
@@ -794,6 +796,17 @@ Tasks:
           {lang === 'fa' ? '۷. کانکتورهای گوگل، Slack و Notion MCP' : '7. Google, Slack & Notion Connectors'}
         </button>
         <button
+          onClick={(e) => handleTabClick('obsidian_brain', e)}
+          data-active={activeTab === 'obsidian_brain'}
+          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
+            activeTab === 'obsidian_brain'
+              ? 'bg-[#7c3aed] text-white font-semibold shadow-xs'
+              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+          }`}
+        >
+          {lang === 'fa' ? '۸. کارگاه Obsidian و Skills (ساخت مغز دوم و ایجنت‌ها)' : '8. Obsidian & Agent Skills (Second Brain)'}
+        </button>
+        <button
           onClick={(e) => handleTabClick('notebooklm', e)}
           data-active={activeTab === 'notebooklm'}
           className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
@@ -802,7 +815,7 @@ Tasks:
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
           }`}
         >
-          {lang === 'fa' ? '۸. کارگاه Google NotebookLM (مدیران و تمرینات)' : '8. Google NotebookLM Workshop'}
+          {lang === 'fa' ? '۹. کارگاه Google NotebookLM (مدیران و تمرینات)' : '9. Google NotebookLM Workshop'}
         </button>
         <button
           onClick={(e) => handleTabClick('masterclass', e)}
@@ -813,7 +826,7 @@ Tasks:
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
           }`}
         >
-          {lang === 'fa' ? '۹. مسترکلاس مهندسی با LLM' : '9. Engineering Masterclass'}
+          {lang === 'fa' ? '۱۰. مسترکلاس مهندسی با LLM' : '10. Engineering Masterclass'}
         </button>
         <button
           onClick={(e) => handleTabClick('safety', e)}
@@ -824,7 +837,7 @@ Tasks:
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
           }`}
         >
-          {lang === 'fa' ? '۱۰. خطوط قرمز امنیتی و توهم' : '10. Safety & Guardrails'}
+          {lang === 'fa' ? '۱۱. خطوط قرمز امنیتی و توهم' : '11. Safety & Guardrails'}
         </button>
         <button
           onClick={(e) => handleTabClick('sandbox', e)}
@@ -835,7 +848,7 @@ Tasks:
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
           }`}
         >
-          {lang === 'fa' ? '۱۱. کارگاه تست پرامپت' : '11. Prompt Sandbox'}
+          {lang === 'fa' ? '۱۲. کارگاه تست پرامپت' : '12. Prompt Sandbox'}
         </button>
       </div>
 
@@ -2436,6 +2449,16 @@ Tasks:
           lang={lang}
           copyToClipboard={copyToClipboard}
           copiedId={copiedId}
+        />
+      )}
+
+      {/* SECTION 8: OBSIDIAN SECOND BRAIN & AGENT SKILLS WORKSHOP */}
+      {(activeTab === 'all' || activeTab === 'obsidian_brain') && (
+        <ObsidianBrainSkillsWorkshop
+          lang={lang}
+          copyToClipboard={copyToClipboard}
+          copiedId={copiedId}
+          onLoadToSandbox={loadPromptToSandbox}
         />
       )}
 
