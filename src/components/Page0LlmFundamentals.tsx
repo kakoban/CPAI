@@ -37,12 +37,19 @@ import {
   BookmarkCheck,
   FileCheck2,
   Shield,
-  Target
+  Target,
+  Users,
+  Volume2,
+  VolumeX,
+  ChevronUp,
+  ChevronDown,
+  LayoutGrid
 } from 'lucide-react';
 import { ENGINEERING_DATASETS } from '../data/engineering_sample_datasets';
 import { ENGINEERING_CONTRACTS } from '../data/engineering_sample_contracts';
 import { Page0EngineeringMasterclass } from './Page0EngineeringMasterclass';
 import { NotebookLmWorkshop } from './NotebookLmWorkshop';
+import { HrArtifactsCanvasWorkshop } from './HrArtifactsCanvasWorkshop';
 import { ClaudeEnterpriseConnectors } from './connectors/ClaudeEnterpriseConnectors';
 import { ObsidianBrainSkillsWorkshop } from './obsidian/ObsidianBrainSkillsWorkshop';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../data/logo';
@@ -51,6 +58,11 @@ import {
   getDisciplineMetadata,
   getDisciplinePromptShowcase
 } from '../data/disciplineExamplesRegistry';
+import {
+  playTactileSound,
+  isTactileSoundEnabled,
+  setTactileSoundEnabled
+} from '../utils/uiSoundEffects';
 
 interface Page0Props {
   lang: Language;
@@ -105,6 +117,8 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     | 'safety'
     | 'sandbox'
   >('all');
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(() => isTactileSoundEnabled());
+  const [isQuickDrawerOpen, setIsQuickDrawerOpen] = useState<boolean>(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [sandboxCopied, setSandboxCopied] = useState(false);
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>('metro_station_tbm');
@@ -114,24 +128,197 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   const [contractCopied, setContractCopied] = useState(false);
   const [instructionCopiedId, setInstructionCopiedId] = useState<string | null>(null);
 
-  // Auto-scroll selected tab pill into view smoothly
   const navPillsRef = useRef<HTMLDivElement | null>(null);
 
-  const handleTabClick = (tab: typeof activeTab, e?: React.MouseEvent<HTMLButtonElement>) => {
-    setActiveTab(tab);
-    if (e?.currentTarget) {
-      e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  const MODULE_NAV_ITEMS = [
+    {
+      id: 'tools' as const,
+      num: '۰۱',
+      keyHint: 'F1',
+      titleFa: 'سه غول هوش مصنوعی',
+      subFa: 'ChatGPT · Claude · Gemini',
+      titleEn: 'Top 3 LLMs',
+      subEn: 'ChatGPT, Claude, Gemini',
+      activeBg: 'bg-gradient-to-br from-[#00738c] to-[#0a5366]',
+      activeBorder: 'border-[#053b49]',
+      badgeColor: 'text-[#00738c] dark:text-[#6fb3c6]'
+    },
+    {
+      id: 'prompting' as const,
+      num: '۰۲',
+      keyHint: 'F2',
+      titleFa: 'فرمول طلایی مهندسی پرامپت',
+      subFa: 'چارچوب ۴ مرحله‌ای RCTO',
+      titleEn: 'RCTO Prompt Framework',
+      subEn: 'Role, Context, Task, Output',
+      activeBg: 'bg-gradient-to-br from-[#0f4c5c] to-[#08303b]',
+      activeBorder: 'border-[#051f26]',
+      badgeColor: 'text-[#0f4c5c] dark:text-[#6fb3c6]'
+    },
+    {
+      id: 'prompts_library' as const,
+      num: '۰۳',
+      keyHint: 'F3',
+      titleFa: 'کتابخانه پرامپت‌های آماده',
+      subFa: 'پرامپت‌های تخصصی و روزمره',
+      titleEn: 'Ready Prompt Library',
+      subEn: 'Copyable Domain Prompts',
+      activeBg: 'bg-gradient-to-br from-[#b87333] to-[#8f5622]',
+      activeBorder: 'border-[#663c16]',
+      badgeColor: 'text-[#b87333] dark:text-[#eab308]'
+    },
+    {
+      id: 'advanced_features' as const,
+      num: '۰۴',
+      keyHint: 'F4',
+      titleFa: 'سیستم‌های خبره سازمانی',
+      subFa: 'Claude Projects و Gemini Gems',
+      titleEn: 'Enterprise Gems & Projects',
+      subEn: 'Custom Knowledge Workspaces',
+      activeBg: 'bg-gradient-to-br from-[#1b3a4b] to-[#102530]',
+      activeBorder: 'border-[#09161d]',
+      badgeColor: 'text-[#1b3a4b] dark:text-[#93c5fd]'
+    },
+    {
+      id: 'engineering_dashboards' as const,
+      num: '۰۵',
+      keyHint: 'F5',
+      titleFa: 'داشبورد داده‌های مهندسی و HR',
+      subFa: 'ساخت ابزار در Artifacts و Canvas',
+      titleEn: 'Engineering & HR Dashboards',
+      subEn: 'Claude Artifacts & Gemini Canvas',
+      activeBg: 'bg-gradient-to-br from-[#0284c7] to-[#0369a1]',
+      activeBorder: 'border-[#075985]',
+      badgeColor: 'text-[#0284c7] dark:text-[#38bdf8]'
+    },
+    {
+      id: 'contracts_and_gems' as const,
+      num: '۰۶',
+      keyHint: 'F6',
+      titleFa: 'کارگاه ممیزی قراردادها',
+      subFa: 'نشریه ۴۳۱۱، فیدیک و ادعاها',
+      titleEn: 'Contracts & Claims Lab',
+      subEn: 'FIDIC & EPC Clauses Audit',
+      activeBg: 'bg-gradient-to-br from-[#d97706] to-[#b45309]',
+      activeBorder: 'border-[#78350f]',
+      badgeColor: 'text-[#d97706] dark:text-[#fbbf24]'
+    },
+    {
+      id: 'connectors' as const,
+      num: '۰۷',
+      keyHint: 'F7',
+      titleFa: 'کانکتورهای گوگل، Slack و MCP',
+      subFa: 'اتصال به ایمیل، درایو و تقویم',
+      titleEn: 'Google, Slack & MCP',
+      subEn: 'Workspace & Tool Connectors',
+      activeBg: 'bg-gradient-to-br from-[#2563eb] to-[#1d4ed8]',
+      activeBorder: 'border-[#1e3a8a]',
+      badgeColor: 'text-[#2563eb] dark:text-[#60a5fa]'
+    },
+    {
+      id: 'obsidian_brain' as const,
+      num: '۰۸',
+      keyHint: 'F8',
+      titleFa: 'مسترکلاس AI Skills و مغز دوم Obsidian',
+      subFa: 'ساخت SKILL.md · آبسیدین + Hermes · باکس MCP',
+      titleEn: 'AI Skills, Obsidian Brain & MCP',
+      subEn: 'SKILL.md · Obsidian + Hermes · MCP Box',
+      activeBg: 'bg-gradient-to-br from-[#7c3aed] to-[#5b21b6]',
+      activeBorder: 'border-[#4c1d95]',
+      badgeColor: 'text-[#7c3aed] dark:text-[#a78bfa]'
+    },
+    {
+      id: 'notebooklm' as const,
+      num: '۰۹',
+      keyHint: 'F9',
+      titleFa: 'کارگاه جامع Google NotebookLM',
+      subFa: 'نقشه ذهنی، ویدیو، پادکست و تمرینات',
+      titleEn: 'Google NotebookLM Workshop',
+      subEn: 'Mind Map, Video, Audio & Labs',
+      activeBg: 'bg-gradient-to-br from-[#0d9488] to-[#0f766e]',
+      activeBorder: 'border-[#115e59]',
+      badgeColor: 'text-[#0d9488] dark:text-[#2dd4bf]'
+    },
+    {
+      id: 'masterclass' as const,
+      num: '۱۰',
+      keyHint: 'F10',
+      titleFa: 'مسترکلاس مهندسی با LLM',
+      subFa: 'تکنیک‌های پیشرفته تحلیل فنی',
+      titleEn: 'Engineering Masterclass',
+      subEn: 'Advanced Technical Workflows',
+      activeBg: 'bg-gradient-to-br from-[#6d28d9] to-[#4c1d95]',
+      activeBorder: 'border-[#3b0764]',
+      badgeColor: 'text-[#6d28d9] dark:text-[#c4b5fd]'
+    },
+    {
+      id: 'safety' as const,
+      num: '۱۱',
+      keyHint: 'F11',
+      titleFa: 'خطوط قرمز امنیتی و توهم',
+      subFa: 'محرمانگی داده‌ها و راستی‌آزمایی',
+      titleEn: 'Safety & Hallucinations',
+      subEn: 'Data Privacy & Verification',
+      activeBg: 'bg-gradient-to-br from-[#b91c1c] to-[#991b1b]',
+      activeBorder: 'border-[#7f1d1d]',
+      badgeColor: 'text-[#b91c1c] dark:text-[#f87171]'
+    },
+    {
+      id: 'sandbox' as const,
+      num: '۱۲',
+      keyHint: 'F12',
+      titleFa: 'کارگاه عملی تست پرامپت',
+      subFa: 'سندباکس تمرین و آزمایش زنده',
+      titleEn: 'Interactive Prompt Sandbox',
+      subEn: 'Test & Refine Your Prompts',
+      activeBg: 'bg-gradient-to-br from-[#15803d] to-[#166534]',
+      activeBorder: 'border-[#14532d]',
+      badgeColor: 'text-[#15803d] dark:text-[#4ade80]'
+    }
+  ];
+
+  const handleToggleSound = () => {
+    const next = !soundEnabled;
+    setSoundEnabled(next);
+    setTactileSoundEnabled(next);
+    if (next) {
+      playTactileSound('thock');
     }
   };
 
-  useEffect(() => {
-    if (navPillsRef.current) {
-      const activeEl = navPillsRef.current.querySelector<HTMLButtonElement>('[data-active="true"]');
-      if (activeEl) {
-        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      }
+  const handleTabClick = (
+    tab: typeof activeTab,
+    e?: React.MouseEvent<HTMLButtonElement>,
+    scrollToTop = false
+  ) => {
+    playTactileSound('thock');
+    setActiveTab(tab);
+    setIsQuickDrawerOpen(false);
+    if (scrollToTop && navPillsRef.current) {
+      setTimeout(() => {
+        navPillsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 40);
     }
-  }, [activeTab]);
+  };
+
+  const currentModuleIdx = MODULE_NAV_ITEMS.findIndex((m) => m.id === activeTab);
+  const currentModuleMeta = currentModuleIdx >= 0 ? MODULE_NAV_ITEMS[currentModuleIdx] : null;
+
+  const handlePrevModule = () => {
+    if (currentModuleIdx <= 0) {
+      handleTabClick(MODULE_NAV_ITEMS[MODULE_NAV_ITEMS.length - 1].id, undefined, true);
+    } else {
+      handleTabClick(MODULE_NAV_ITEMS[currentModuleIdx - 1].id, undefined, true);
+    }
+  };
+
+  const handleNextModule = () => {
+    if (currentModuleIdx < 0 || currentModuleIdx >= MODULE_NAV_ITEMS.length - 1) {
+      handleTabClick(MODULE_NAV_ITEMS[0].id, undefined, true);
+    } else {
+      handleTabClick(MODULE_NAV_ITEMS[currentModuleIdx + 1].id, undefined, true);
+    }
+  };
 
   React.useEffect(() => {
     if (industryTrack === 'ENERGY_PETRO') {
@@ -144,6 +331,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   }, [industryTrack]);
 
   const copyToClipboard = (text: string, id: string) => {
+    playTactileSound('success');
     navigator.clipboard.writeText(text);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2500);
@@ -151,12 +339,14 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
 
   const copySandboxToClipboard = () => {
     if (!content) return;
+    playTactileSound('success');
     navigator.clipboard.writeText(content);
     setSandboxCopied(true);
     setTimeout(() => setSandboxCopied(false), 2500);
   };
 
   const loadPromptToSandbox = (promptText: string) => {
+    playTactileSound('switch');
     onChangeContent(promptText);
     const sandboxEl = document.getElementById('prompt-sandbox');
     if (sandboxEl) {
@@ -596,8 +786,85 @@ Tasks:
     }
   ];
 
+  const renderKeycapGrid = (scrollToTopOnSelect: boolean) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 text-xs">
+      {MODULE_NAV_ITEMS.map((item) => {
+        const isSelected = activeTab === item.id;
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onMouseEnter={() => playTactileSound('hover')}
+            onClick={(e) => handleTabClick(item.id, e, scrollToTopOnSelect)}
+            data-active={isSelected}
+            data-keycap="true"
+            className={`group relative p-3 rounded-2xl border border-b-4 text-right transition-all duration-150 cursor-pointer flex items-start gap-2.5 select-none ${
+              isSelected
+                ? `${item.activeBg} ${item.activeBorder} text-white shadow-md -translate-y-0.5 active:translate-y-0.5 active:border-b-2`
+                : 'bg-gradient-to-b from-white to-[#f3f5f4] dark:from-[#1a232b] dark:to-[#12181e] text-[#1c2830] dark:text-[#e8ebe9] border-black/[0.1] dark:border-white/[0.1] border-b-[#cbd0cd] dark:border-b-[#090d10] shadow-2xs hover:-translate-y-0.5 hover:shadow-md hover:border-[#00738c]/50 active:translate-y-[2px] active:border-b'
+            }`}
+          >
+            {/* Keycap Number Badge */}
+            <div className="flex flex-col items-center gap-1 shrink-0">
+              <span
+                className={`font-mono text-[11px] font-black px-2 py-1 rounded-lg border shadow-2xs transition-transform group-hover:scale-105 ${
+                  isSelected
+                    ? 'bg-white/20 text-white border-white/30'
+                    : `bg-white dark:bg-[#0e1419] border-black/10 dark:border-white/10 ${item.badgeColor}`
+                }`}
+              >
+                {item.num}
+              </span>
+              <span
+                dir="ltr"
+                className={`text-[9px] font-mono tracking-tighter ${
+                  isSelected ? 'text-white/75' : 'text-[#7c8b94] dark:text-[#6c7a82]'
+                }`}
+              >
+                {item.keyHint}
+              </span>
+            </div>
+
+            {/* Keycap Label & Subtitle */}
+            <div className="min-w-0 flex-1 space-y-0.5">
+              <div className="flex items-center justify-between gap-1">
+                <span className="font-extrabold text-xs leading-snug">
+                  {lang === 'fa' ? item.titleFa : item.titleEn}
+                </span>
+                {/* LED Indicator Dot */}
+                <span
+                  className={`w-2 h-2 rounded-full shrink-0 transition-all ${
+                    isSelected
+                      ? 'bg-[#4ade80] shadow-[0_0_8px_#4ade80]'
+                      : 'bg-black/10 dark:bg-white/10 group-hover:bg-[#00738c]/50'
+                  }`}
+                />
+              </div>
+              <div
+                className={`text-[10px] leading-tight ${
+                  isSelected ? 'text-white/85' : 'text-[#5d6b73] dark:text-[#9aa8b0]'
+                }`}
+              >
+                {lang === 'fa' ? item.subFa : item.subEn}
+              </div>
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+
   return (
-    <div className="space-y-8 animate-fadeIn text-[#1c2830] dark:text-[#e8ebe9]">
+    <div
+      className="space-y-8 animate-fadeIn text-[#1c2830] dark:text-[#e8ebe9] pb-16"
+      onClickCapture={(e) => {
+        const target = e.target as HTMLElement | null;
+        const btn = target?.closest('button');
+        if (btn && !btn.hasAttribute('data-keycap')) {
+          playTactileSound('switch');
+        }
+      }}
+    >
       {/* Top Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1f5163] via-[#0f4c5c] to-[#0a3540] text-white p-6 sm:p-8 shadow-md border border-[#1f5163]/40">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -687,7 +954,7 @@ Tasks:
 
           <button
             onClick={onOpenQuiz}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#2f7d5b] hover:bg-[#256347] text-white text-xs font-black shadow-xs transition-all active:scale-[0.96] shrink-0 hover:scale-[1.02]"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#2f7d5b] border-b-4 border-[#1b4d36] hover:bg-[#256347] text-white text-xs font-black shadow-xs transition-all active:translate-y-[2px] active:border-b shrink-0 cursor-pointer"
           >
             <span>{lang === 'fa' ? 'شرکت در آزمون سطح‌سنجی 🚀' : 'Take Readiness Quiz 🚀'}</span>
             {lang === 'fa' ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
@@ -695,161 +962,74 @@ Tasks:
         </div>
       </div>
 
-      {/* Navigation Pills (Double-Bezel Island with Auto-Scroll to Active Pill) */}
+      {/* TOP TACTILE 3D MECHANICAL KEYCAP NAVIGATOR */}
       <div
         ref={navPillsRef}
-        className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-xs shadow-inner overflow-x-auto no-scrollbar scroll-smooth text-xs font-medium"
+        className="p-4 sm:p-5 rounded-3xl bg-gradient-to-b from-[#eceeed] to-[#dfe3e1] dark:from-[#161f26] dark:to-[#0f161b] border-2 border-black/[0.08] dark:border-white/[0.1] shadow-inner space-y-3.5"
       >
-        <button
-          onClick={onOpenQuiz}
-          className="px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap bg-[#2f7d5b]/10 text-[#2f7d5b] dark:text-[#52b788] hover:bg-[#2f7d5b]/20 border border-[#2f7d5b]/30 font-bold flex items-center gap-1.5 cursor-pointer"
-        >
-          <Target className="w-3.5 h-3.5" />
-          <span>{lang === 'fa' ? '🎯 آزمون تعیین سطح' : '🎯 Readiness Quiz'}</span>
-        </button>
-        <button
-          onClick={(e) => handleTabClick('all', e)}
-          data-active={activeTab === 'all'}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
-            activeTab === 'all'
-              ? 'bg-[#1f5163] text-white font-semibold shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          {lang === 'fa' ? 'نمای کامل همه بخش‌ها' : 'All Sections'}
-        </button>
-        <button
-          onClick={(e) => handleTabClick('tools', e)}
-          data-active={activeTab === 'tools'}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
-            activeTab === 'tools'
-              ? 'bg-[#00738c] text-white font-semibold shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          {lang === 'fa' ? '۱. سه غول هوش مصنوعی' : '1. Top 3 LLMs'}
-        </button>
-        <button
-          onClick={(e) => handleTabClick('prompting', e)}
-          data-active={activeTab === 'prompting'}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
-            activeTab === 'prompting'
-              ? 'bg-[#0f4c5c] text-white font-semibold shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          {lang === 'fa' ? '۲. فرمول طلایی RCTO' : '2. RCTO Framework'}
-        </button>
-        <button
-          onClick={(e) => handleTabClick('prompts_library', e)}
-          data-active={activeTab === 'prompts_library'}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
-            activeTab === 'prompts_library'
-              ? 'bg-[#b87333] text-white font-semibold shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          {lang === 'fa' ? '۳. کتابخانه پرامپت‌های آماده' : '3. Prompt Library'}
-        </button>
-        <button
-          onClick={(e) => handleTabClick('advanced_features', e)}
-          data-active={activeTab === 'advanced_features'}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
-            activeTab === 'advanced_features'
-              ? 'bg-[#1b3a4b] text-white font-semibold shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          {lang === 'fa' ? '۴. سیستم‌های خبره سازمانی و قراردادها (Gems & Projects)' : '4. Enterprise Systems & Contracts'}
-        </button>
-        <button
-          onClick={(e) => handleTabClick('engineering_dashboards', e)}
-          data-active={activeTab === 'engineering_dashboards'}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
-            activeTab === 'engineering_dashboards'
-              ? 'bg-[#00738c] text-white font-semibold shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          {lang === 'fa' ? '۵. کارگاه داشبورد داده‌های مهندسی (مترو و نفت‌وگاز)' : '5. Engineering Data & Dashboards'}
-        </button>
-        <button
-          onClick={(e) => handleTabClick('contracts_and_gems', e)}
-          data-active={activeTab === 'contracts_and_gems'}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
-            activeTab === 'contracts_and_gems'
-              ? 'bg-[#b87333] text-white font-semibold shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          {lang === 'fa' ? '۶. کارگاه قراردادها و دستیار Gems/Projects' : '6. Contracts & Gems/Projects'}
-        </button>
-        <button
-          onClick={(e) => handleTabClick('connectors', e)}
-          data-active={activeTab === 'connectors'}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
-            activeTab === 'connectors'
-              ? 'bg-[#1a73e8] text-white font-semibold shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          {lang === 'fa' ? '۷. کانکتورهای گوگل، Slack و Notion MCP' : '7. Google, Slack & Notion Connectors'}
-        </button>
-        <button
-          onClick={(e) => handleTabClick('obsidian_brain', e)}
-          data-active={activeTab === 'obsidian_brain'}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
-            activeTab === 'obsidian_brain'
-              ? 'bg-[#7c3aed] text-white font-semibold shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          {lang === 'fa' ? '۸. کارگاه Obsidian و Skills (ساخت مغز دوم و ایجنت‌ها)' : '8. Obsidian & Agent Skills (Second Brain)'}
-        </button>
-        <button
-          onClick={(e) => handleTabClick('notebooklm', e)}
-          data-active={activeTab === 'notebooklm'}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
-            activeTab === 'notebooklm'
-              ? 'bg-[#00738c] text-white font-semibold shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          {lang === 'fa' ? '۹. کارگاه Google NotebookLM (مدیران و تمرینات)' : '9. Google NotebookLM Workshop'}
-        </button>
-        <button
-          onClick={(e) => handleTabClick('masterclass', e)}
-          data-active={activeTab === 'masterclass'}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
-            activeTab === 'masterclass'
-              ? 'bg-[#6d28d9] text-white font-semibold shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          {lang === 'fa' ? '۱۰. مسترکلاس مهندسی با LLM' : '10. Engineering Masterclass'}
-        </button>
-        <button
-          onClick={(e) => handleTabClick('safety', e)}
-          data-active={activeTab === 'safety'}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
-            activeTab === 'safety'
-              ? 'bg-[#8c3b2d] text-white font-semibold shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          {lang === 'fa' ? '۱۱. خطوط قرمز امنیتی و توهم' : '11. Safety & Guardrails'}
-        </button>
-        <button
-          onClick={(e) => handleTabClick('sandbox', e)}
-          data-active={activeTab === 'sandbox'}
-          className={`px-3 py-1.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 whitespace-nowrap cursor-pointer ${
-            activeTab === 'sandbox'
-              ? 'bg-[#2f7d5b] text-white font-semibold shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          {lang === 'fa' ? '۱۲. کارگاه تست پرامپت' : '12. Prompt Sandbox'}
-        </button>
+        {/* Top Deck Bar: Title + Sound Toggle + All Sections & Quiz Quick Keys */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-black/[0.08] dark:border-white/[0.1]">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#4ade80] shadow-[0_0_8px_#4ade80]" />
+            <span className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9]">
+              {lang === 'fa'
+                ? 'کیبورد ناوبری ۱۲ کارگاه آموزشی (با افکت لمسی و صدای کلید مکانیکی):'
+                : '12-Module Mechanical Keycap Deck (Click Any Key):'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Mechanical Sound Toggle Keycap */}
+            <button
+              type="button"
+              data-keycap="true"
+              onClick={handleToggleSound}
+              className={`px-3 py-1.5 rounded-xl border border-b-3 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-all active:translate-y-[2px] active:border-b ${
+                soundEnabled
+                  ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/40 border-b-amber-600/50'
+                  : 'bg-black/[0.05] dark:bg-white/[0.05] text-[#5d6b73] border-black/10 dark:border-white/10'
+              }`}
+              title="روشن/خاموش کردن صدای کیبورد مکانیکی هنگام کلیک"
+            >
+              {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+              <span>
+                {lang === 'fa'
+                  ? soundEnabled
+                    ? 'صدای کلید: روشن'
+                    : 'صدای کلید: خاموش'
+                  : soundEnabled
+                  ? 'Key Sound: ON'
+                  : 'Key Sound: OFF'}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onOpenQuiz}
+              className="px-3 py-1.5 rounded-xl border border-b-3 border-[#2f7d5b]/40 border-b-[#1e523b] text-xs bg-[#2f7d5b]/15 text-[#2f7d5b] dark:text-[#52b788] hover:bg-[#2f7d5b]/25 font-bold flex items-center gap-1.5 cursor-pointer transition-all active:translate-y-[2px] active:border-b"
+            >
+              <Target className="w-3.5 h-3.5" />
+              <span>{lang === 'fa' ? '🎯 آزمون تعیین سطح' : '🎯 Readiness Quiz'}</span>
+            </button>
+
+            <button
+              type="button"
+              data-keycap="true"
+              onClick={(e) => handleTabClick('all', e, false)}
+              data-active={activeTab === 'all'}
+              className={`px-3.5 py-1.5 rounded-xl border border-b-3 text-xs font-bold transition-all cursor-pointer active:translate-y-[2px] active:border-b ${
+                activeTab === 'all'
+                  ? 'bg-[#1f5163] border-[#0e2a34] text-white shadow-xs'
+                  : 'bg-white dark:bg-[#1a232b] border-black/10 dark:border-white/10 border-b-black/25 text-[#1c2830] dark:text-[#e8ebe9] hover:bg-black/[0.04]'
+              }`}
+            >
+              {lang === 'fa' ? 'نمایش یکجای همه ۱۲ بخش' : 'Show All 12 Sections'}
+            </button>
+          </div>
+        </div>
+
+        {/* Render 12 Mechanical Keycaps */}
+        {renderKeycapGrid(false)}
       </div>
 
       {/* SECTION 1: THE BIG 3 LLMs */}
@@ -1662,6 +1842,26 @@ Tasks:
                       <div>• {lang === 'fa' ? 'ساخت جداول تعهدات متقابل در Artifact برای ارجاع سریع تیم اجرایی' : 'Reciprocal obligations matrices in Artifacts for site execution'}</div>
                     </td>
                   </tr>
+
+                  {/* Row 4: HR, Admin & Welfare */}
+                  <tr className="hover:bg-[#f8f9fa] dark:hover:bg-[#162026] transition-colors">
+                    <td className="p-3 align-top font-bold text-[#2f7d5b] dark:text-[#63c496]">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-[#2f7d5b] shrink-0" />
+                        <span>{lang === 'fa' ? 'مدیر منابع انسانی، اداری و رفاهی' : 'HR, Admin & Welfare Manager'}</span>
+                      </div>
+                    </td>
+                    <td className="p-3 align-top text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                      {lang === 'fa'
+                        ? 'مواد منابع انسانی و رفاهی شرایط خصوصی پیمان (پروژه مترو خط ایکس)، جدول متراژ فضاهای کمپ کارگاهی (صفحه ۵۴)، بخشنامه داخلی کنترل اضافه‌کاری و لاگ‌های ساعت‌زنی.'
+                        : 'Particular Conditions HR & welfare clauses (Metro Line X), Page 54 mandatory camp space table, internal overtime directives, and attendance logs.'}
+                    </td>
+                    <td className="p-3 align-top text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed space-y-1">
+                      <div>• {lang === 'fa' ? 'ساخت داشبورد React کنترل اضافه‌کاری و ریسک خستگی در Claude Artifacts / Gemini Canvas' : 'Interactive React overtime & fatigue risk dashboard in Artifacts/Canvas'}</div>
+                      <div>• {lang === 'fa' ? 'ماشین‌حساب مهلت اطلاع‌رسانی بند ۴۲-۱ (۷ روز شب‌کاری / ۲۴ ساعت روزکاری) و صدور نامه رسمی' : 'Sub-Clause 42-1 notice deadline calculator & official letter generator'}</div>
+                      <div>• {lang === 'fa' ? 'اپلیکیشن ممیزی متراژ کمپ کارگاهی (ماده ۲۰-ح) و مبدل CSV کارت‌زن به گزارش ماهانه ماده ۱۸' : 'Article 20-H camp space audit app & Article 18 monthly CSV manpower chart converter'}</div>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -1768,6 +1968,14 @@ Tasks:
               </ul>
             </div>
           </div>
+
+          {/* Part 6: 5 Interactive HR & Admin Exercises for Claude Artifacts & Gemini Canvas */}
+          <HrArtifactsCanvasWorkshop
+            lang={lang}
+            onLoadToSandbox={loadPromptToSandbox}
+            copyToClipboard={copyToClipboard}
+            copiedId={copiedId}
+          />
         </section>
       )}
 
@@ -2737,6 +2945,172 @@ Tasks:
           </div>
         </section>
       )}
+
+      {/* ===================================================================== */}
+      {/* BOTTOM 12-MODULE MECHANICAL KEYCAP DECK & PREV/NEXT SWITCHER          */}
+      {/* ===================================================================== */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-white to-[#f4f6f5] dark:from-[#161d22] dark:to-[#11171b] border-2 border-[#1f5163]/25 dark:border-[#6fb3c6]/25 shadow-md space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.07] dark:border-white/[0.08]">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <h3 className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9]">
+              {lang === 'fa'
+                ? 'پنل پایین صفحه: پرش فوری بین ۱۲ کارگاه آموزشی (بدون نیاز به اسکرول به بالا):'
+                : 'Bottom Navigation Deck: Instant Jump Across All 12 Workshops:'}
+            </h3>
+            {currentModuleMeta && (
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6] border border-[#00738c]/20">
+                {lang === 'fa'
+                  ? `کارگاه فعلی: ${currentModuleMeta.num}. ${currentModuleMeta.titleFa}`
+                  : `Current: ${currentModuleMeta.num}. ${currentModuleMeta.titleEn}`}
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            {activeTab !== 'all' && (
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={handlePrevModule}
+                  className="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-white dark:bg-[#1a232a] text-[#1c2830] dark:text-[#e8ebe9] border border-black/15 dark:border-white/15 border-b-4 border-b-black/25 dark:border-b-black/60 hover:-translate-y-0.5 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
+                >
+                  {lang === 'fa' ? '→ کارگاه قبلی' : '← Prev Workshop'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextModule}
+                  className="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-[#00738c] text-white border border-black/15 border-b-4 border-b-[#083b47] hover:-translate-y-0.5 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
+                >
+                  {lang === 'fa' ? 'کارگاه بعدی ←' : 'Next Workshop →'}
+                </button>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => {
+                playTactileSound('switch');
+                navPillsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              className="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] border border-[#1f5163]/25 border-b-4 border-b-[#1f5163]/40 hover:-translate-y-0.5 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
+            >
+              {lang === 'fa' ? '↑ بازگشت به بالای صفحه' : '↑ Scroll to Top'}
+            </button>
+          </div>
+        </div>
+
+        {/* Full 12-Module Mechanical Keycap Grid at Bottom (auto-scrolls smoothly to module top on click) */}
+        {renderKeycapGrid(true)}
+      </div>
+
+      {/* ===================================================================== */}
+      {/* FLOATING STICKY BOTTOM QUICK-SWITCH DOCK                              */}
+      {/* ===================================================================== */}
+      <div className="sticky bottom-3 z-40 pointer-events-none flex justify-center">
+        <div className="pointer-events-auto w-full max-w-4xl mx-auto px-3 py-2 rounded-2xl bg-[#141c22]/95 dark:bg-[#0d1317]/95 text-white backdrop-blur-md border border-white/15 shadow-[0_12px_32px_rgba(0,0,0,0.35)] space-y-2">
+          {/* Expandable Popup Drawer inside Floating Dock */}
+          {isQuickDrawerOpen && (
+            <div className="p-3 rounded-xl bg-[#f4f6f5] dark:bg-[#161d22] text-[#1c2830] dark:text-[#e8ebe9] border border-black/10 dark:border-white/10 max-h-[60vh] overflow-y-auto space-y-2">
+              <div className="flex items-center justify-between pb-1.5 border-b border-black/10 dark:border-white/10">
+                <span className="text-xs font-black">
+                  {lang === 'fa' ? 'انتخاب سریع کارگاه آموزشی (با صدای کلید مکانیکی):' : 'Quick Workshop Switcher:'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    playTactileSound('switch');
+                    setIsQuickDrawerOpen(false);
+                  }}
+                  className="text-xs font-bold px-2 py-0.5 rounded bg-black/10 dark:bg-white/10 hover:bg-black/20 cursor-pointer"
+                >
+                  {lang === 'fa' ? 'بستن ✕' : 'Close ✕'}
+                </button>
+              </div>
+              {renderKeycapGrid(true)}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            {/* Active Workshop Indicator & Quick Drawer Trigger */}
+            <div className="flex items-center gap-2 min-w-0">
+              <button
+                type="button"
+                onClick={() => {
+                  playTactileSound('thock');
+                  setIsQuickDrawerOpen((prev) => !prev);
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-b from-[#00738c] to-[#0a5263] text-white text-xs font-black border border-white/20 border-b-[3px] border-b-[#052c36] hover:brightness-110 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
+              >
+                <Layers className="w-3.5 h-3.5 shrink-0" />
+                <span>
+                  {lang === 'fa'
+                    ? isQuickDrawerOpen
+                      ? 'بستن فهرست ۱۲ کارگاه ▾'
+                      : 'فهرست ۱۲ کارگاه آموزشی ▴'
+                    : isQuickDrawerOpen
+                    ? 'Hide 12 Workshops ▾'
+                    : 'All 12 Workshops ▴'}
+                </span>
+              </button>
+
+              {currentModuleMeta && (
+                <span className="text-[11px] font-bold text-white/90 truncate hidden sm:inline">
+                  {lang === 'fa'
+                    ? `${currentModuleMeta.num}. ${currentModuleMeta.titleFa}`
+                    : `${currentModuleMeta.num}. ${currentModuleMeta.titleEn}`}
+                </span>
+              )}
+            </div>
+
+            {/* Prev / Next / Sound / Top Controls */}
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={handlePrevModule}
+                className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold border border-white/15 border-b-[3px] border-b-black/50 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
+                title={lang === 'fa' ? 'کارگاه قبلی' : 'Previous Workshop'}
+              >
+                {lang === 'fa' ? '→ قبلی' : '← Prev'}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleNextModule}
+                className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold border border-white/15 border-b-[3px] border-b-black/50 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
+                title={lang === 'fa' ? 'کارگاه بعدی' : 'Next Workshop'}
+              >
+                {lang === 'fa' ? 'بعدی ←' : 'Next →'}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleToggleSound}
+                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold border border-b-[3px] active:translate-y-[2px] active:border-b transition-all cursor-pointer ${
+                  soundEnabled
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 border-b-emerald-900'
+                    : 'bg-white/10 text-white/60 border-white/15 border-b-black/50'
+                }`}
+                title={lang === 'fa' ? 'صدای کلیک مکانیکی کیبورد' : 'Mechanical Key Click Sound'}
+              >
+                {soundEnabled ? '🔊' : '🔇'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  playTactileSound('switch');
+                  navPillsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+                className="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[11px] font-black border border-amber-500/40 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
+                title={lang === 'fa' ? 'پرش به بالای صفحه' : 'Scroll to Top'}
+              >
+                ↑
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Prominent Footer Call to Action: Proceed to Page 1 */}
       <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-[#e3eef1] via-[#d7e8ec] to-[#cbe2e8] dark:from-[#1b2c32] dark:via-[#16252b] dark:to-[#121e23] border border-[#1f5163]/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">

@@ -1,4 +1,4 @@
-import app from './api/index.js';
+import app from './api/index.ts';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';

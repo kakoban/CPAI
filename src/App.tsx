@@ -48,6 +48,7 @@ import { IndustryTrackSelectorModal } from './components/industry/IndustryTrackS
 import { DisciplineSelectorModal } from './components/industry/DisciplineSelectorModal';
 import { DisciplineBadge } from './components/industry/DisciplineBadge';
 import { WorkspaceSidebar } from './components/navigation/WorkspaceSidebar';
+import { ContextualAiTutorSidebar } from './components/tutor/ContextualAiTutorSidebar';
 import { getDisciplineMetadata } from './data/disciplineExamplesRegistry';
 import { authApi, isAuthorizedAdminUser } from './services/authApi';
 import { lmsApi } from './services/lmsApi';
@@ -142,6 +143,25 @@ export default function App() {
       const nextVal = !prev;
       try {
         localStorage.setItem('cpmai_sidebar_open', nextVal.toString());
+      } catch {}
+      return nextVal;
+    });
+  };
+
+  // Contextual AI Tutor Sidebar state (persisted across sessions)
+  const [isTutorOpen, setIsTutorOpen] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('cpmai_tutor_sidebar_open');
+      if (saved !== null) return saved === 'true';
+    } catch {}
+    return false;
+  });
+
+  const toggleTutor = () => {
+    setIsTutorOpen((prev) => {
+      const nextVal = !prev;
+      try {
+        localStorage.setItem('cpmai_tutor_sidebar_open', nextVal.toString());
       } catch {}
       return nextVal;
     });
@@ -733,6 +753,64 @@ export default function App() {
     }
   };
 
+  // Compute live draft content of the currently selected workbook page for grounding the AI Tutor
+  const getActivePageDraft = (): string => {
+    switch (page) {
+      case 0:
+        return page0Content;
+      case 1: {
+        const parts: string[] = [];
+        if (story.trim()) parts.push(`Sprint User Story: ${story}`);
+        if (bg.trim()) parts.push(`Background: ${bg}`);
+        if (obj.trim()) parts.push(`Primary Business Objective: ${obj}`);
+        if (qs.length > 0) parts.push(`Business Questions:\n${qs.map((q, i) => `${i + 1}. ${q}`).join('\n')}`);
+        return parts.join('\n\n');
+      }
+      case 2:
+        return page2Content;
+      case 3:
+        return page3Content;
+      case 4:
+        return page4Content;
+      case 5:
+        return page5Content;
+      case 6:
+        return page6Content;
+      case 7:
+        return page7Content;
+      case 8:
+        return page8Content;
+      case 9:
+        return page9Content;
+      case 10:
+        return page10Content;
+      case 11:
+        return page11Content;
+      case 12:
+        return page12Content;
+      case 13:
+        return page13Content;
+      case 14:
+        return page14Content;
+      case 15:
+        return page15Content;
+      case 16:
+        return page16Content;
+      case 17:
+        return page17Content;
+      case 18:
+        return page18Content;
+      case 19:
+        return page19Content;
+      case 20:
+        return page20Content;
+      case 21:
+        return page21Content;
+      default:
+        return '';
+    }
+  };
+
   // Agentify Enterprise Hero Landing Page (Pure English & Login-gated)
   // AJA Cinematic Brand Intro (Unseen Studio Inspired Experience)
   if (showBrandIntro) {
@@ -929,6 +1007,23 @@ export default function App() {
 
           {/* Section 3: Tools & Utilities */}
           <div className="flex items-center gap-1.5 shrink-0">
+            {/* Contextual AI Tutor Toggle Button */}
+            <button
+              type="button"
+              onClick={toggleTutor}
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer shrink-0 whitespace-nowrap shadow-2xs ${
+                isTutorOpen
+                  ? 'bg-[#1e8f6b] text-white border-[#1e8f6b]'
+                  : 'bg-[#1e8f6b]/10 text-[#1e8f6b] dark:text-[#63c496] border-[#1e8f6b]/30 hover:bg-[#1e8f6b]/20'
+              }`}
+              title={lang === 'fa' ? 'مربی هوشمند CPMAI (پاسخگویی بر اساس محتوای همین صفحه)' : 'Contextual CPMAI AI Tutor'}
+            >
+              <Bot className="w-4 h-4 shrink-0" />
+              <span className="hidden md:inline whitespace-nowrap">
+                {lang === 'fa' ? 'مربی هوشمند AI' : 'AI Tutor'}
+              </span>
+            </button>
+
             {/* Class Leaderboard Button */}
             <button
               onClick={() => setIsLeaderboardModalOpen(true)}
@@ -1632,6 +1727,18 @@ export default function App() {
           lang={lang}
         />
         </main>
+
+        {/* Contextual CPMAI AI Tutor Sidebar */}
+        <ContextualAiTutorSidebar
+          isOpen={isTutorOpen}
+          onClose={() => setIsTutorOpen(false)}
+          page={page}
+          lang={lang}
+          industryTrack={industryTrack}
+          disciplineId={activeDiscipline}
+          roleId={activeRole}
+          activePageDraft={getActivePageDraft()}
+        />
       </div>
     </div>
   );

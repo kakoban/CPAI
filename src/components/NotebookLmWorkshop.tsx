@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Language } from '../types/cpmai';
+import { playTactileSound } from '../utils/uiSoundEffects';
 import {
   Sparkles,
   ExternalLink,
@@ -26,8 +27,16 @@ import {
   ArrowRight,
   Eye,
   EyeOff,
-  FileCode
+  FileCode,
+  Users,
+  Code,
+  Monitor
 } from 'lucide-react';
+import {
+  ProjectorSlideModal,
+  ProjectorSlideItem,
+  splitPointTitleAndBody
+} from './ProjectorSlideModal';
 import {
   NOTEBOOKLM_OVERVIEW,
   UNIT_MANAGERS_MATRIX,
@@ -41,8 +50,14 @@ import {
   SAMPLE_DEPARTMENT_DOCS,
   SAMPLE_BLUEPRINT_DOCS,
   SAMPLE_EXERCISE_DOCS,
-  SampleDepartmentDocument
+  SampleDepartmentDocument,
+  SampleSubDocument
 } from '../data/notebooklm_sample_documents';
+import {
+  NOTEBOOKLM_MASTERY_MODULES,
+  NOTEBOOKLM_STUDIO_TOOLS
+} from '../data/notebooklm_mastery_curriculum';
+import { HrArtifactsCanvasWorkshop } from './HrArtifactsCanvasWorkshop';
 
 interface NotebookLmWorkshopProps {
   lang: Language;
@@ -57,12 +72,130 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
   copyToClipboard,
   copiedId
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'departments' | 'blueprints' | 'exercises'>('departments');
+  const [activeSubTab, setActiveSubTab] = useState<'mastery_guide' | 'departments' | 'blueprints' | 'exercises' | 'artifacts_canvas'>('mastery_guide');
+  const [activeMasteryIdx, setActiveMasteryIdx] = useState<number>(0);
+  const [activeStudioToolId, setActiveStudioToolId] = useState<string>(NOTEBOOKLM_STUDIO_TOOLS[0].id);
+  const [projectorDeck, setProjectorDeck] = useState<'mastery' | 'studio' | null>(null);
   const [selectedDeptId, setSelectedDeptId] = useState<string>('tech_office');
   const [selectedBlueprintId, setSelectedBlueprintId] = useState<string>('presentation_deck_workflow');
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>('ex1_contract_claim_extraction');
   const [previewDocId, setPreviewDocId] = useState<string | null>(null);
   const [docCopiedId, setDocCopiedId] = useState<string | null>(null);
+  const [activeScenarioIdx, setActiveScenarioIdx] = useState<number>(0);
+  const subTabNavRef = useRef<HTMLDivElement>(null);
+
+  const SUB_TAB_ITEMS: Array<{
+    id: 'mastery_guide' | 'departments' | 'blueprints' | 'exercises' | 'artifacts_canvas';
+    keyHint: string;
+    titleFa: string;
+    titleEn: string;
+    subtitleFa: string;
+    subtitleEn: string;
+    activeClass: string;
+    icon: React.ReactNode;
+  }> = [
+    {
+      id: 'mastery_guide',
+      keyHint: 'N1',
+      titleFa: '۰. آموزش جامع قابلیت‌ها',
+      titleEn: '0. Complete Mastery Guide',
+      subtitleFa: 'نقشه ذهنی، ویدیو، نوت‌ها و فارسی‌سازی',
+      subtitleEn: 'Mind Map, Video, Notes & Persian',
+      activeClass: 'bg-gradient-to-b from-[#0f4c5c] to-[#0a3642] text-white border-[#07262e] border-b-[#04181d] ring-2 ring-[#0f4c5c]/30',
+      icon: <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />,
+    },
+    {
+      id: 'departments',
+      keyHint: 'N2',
+      titleFa: '۱. ماتریس ۷ دپارتمان',
+      titleEn: '1. 7-Department Matrix',
+      subtitleFa: 'دفتر فنی، قراردادها، PMO، HSE و HR',
+      subtitleEn: 'Tech Office, Contracts, PMO, HSE, HR',
+      activeClass: 'bg-gradient-to-b from-[#00738c] to-[#00596d] text-white border-[#004454] border-b-[#002f3a] ring-2 ring-[#00738c]/30',
+      icon: <Building2 className="w-4 h-4 shrink-0 mt-0.5" />,
+    },
+    {
+      id: 'blueprints',
+      keyHint: 'N3',
+      titleFa: '۲. پرزنتیشن و ممیزی HR',
+      titleEn: '2. Slide Decks & HR Audit',
+      subtitleFa: 'اسلاید، اینفوگرافیک، پادکست و منابع انسانی',
+      subtitleEn: 'Decks, Infographics & HR Compliance',
+      activeClass: 'bg-gradient-to-b from-[#b87333] to-[#965b24] text-white border-[#78471a] border-b-[#593412] ring-2 ring-[#b87333]/30',
+      icon: <FileBarChart className="w-4 h-4 shrink-0 mt-0.5" />,
+    },
+    {
+      id: 'exercises',
+      keyHint: 'N4',
+      titleFa: '۳. تمرینات عملی (۵ تمرین)',
+      titleEn: '3. Hands-On Labs (5)',
+      subtitleFa: 'سناریوهای واقعی با فایل‌های آماده تست',
+      subtitleEn: 'Real Scenarios with Sample Docs',
+      activeClass: 'bg-gradient-to-b from-[#2f7d5b] to-[#236146] text-white border-[#1a4934] border-b-[#113123] ring-2 ring-[#2f7d5b]/30',
+      icon: <BookmarkCheck className="w-4 h-4 shrink-0 mt-0.5" />,
+    },
+    {
+      id: 'artifacts_canvas',
+      keyHint: 'N5',
+      titleFa: '۴. ساخت ابزار (Artifacts/Canvas)',
+      titleEn: '4. Build HR Tools (Artifacts)',
+      subtitleFa: '۵ تمرین ساخت داشبورد و ماشین‌حساب HR',
+      subtitleEn: '5 Interactive HR Dashboard Exercises',
+      activeClass: 'bg-gradient-to-b from-[#b45309] to-[#92400e] text-white border-[#78350f] border-b-[#451a03] ring-2 ring-[#b45309]/30',
+      icon: <Code className="w-4 h-4 shrink-0 mt-0.5" />,
+    },
+  ];
+
+  const renderSubTabKeycaps = (scrollToTopOnSelect: boolean) => (
+    <div className="p-2.5 rounded-2xl bg-[#eef1f0] dark:bg-[#131b20] border border-black/[0.08] dark:border-white/[0.1] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 text-xs shadow-inner">
+      {SUB_TAB_ITEMS.map((tab) => {
+        const isSelected = activeSubTab === tab.id;
+        return (
+          <button
+            key={tab.id}
+            type="button"
+            onMouseEnter={() => playTactileSound('hover')}
+            onClick={() => {
+              playTactileSound('thock');
+              setActiveSubTab(tab.id);
+              if (scrollToTopOnSelect) {
+                setTimeout(() => {
+                  subTabNavRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 40);
+              }
+            }}
+            className={`group flex flex-col justify-between gap-2 p-3 rounded-xl text-right transition-all duration-100 cursor-pointer select-none border border-b-4 active:translate-y-[2px] active:border-b ${
+              isSelected
+                ? `${tab.activeClass} shadow-md`
+                : 'bg-gradient-to-b from-white to-[#f6f8f7] dark:from-[#1d262d] dark:to-[#161d23] text-[#1c2830] dark:text-[#e8ebe9] border-black/10 dark:border-white/10 border-b-black/25 dark:border-b-black/60 hover:-translate-y-0.5 hover:border-[#00738c]/40 shadow-xs'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2 w-full">
+              <div className="flex items-center gap-1.5">
+                {tab.icon}
+                <span className="font-black leading-snug">
+                  {lang === 'fa' ? tab.titleFa : tab.titleEn}
+                </span>
+              </div>
+              <span
+                dir="ltr"
+                className={`text-[9px] font-mono px-1.5 py-0.5 rounded border shrink-0 ${
+                  isSelected
+                    ? 'bg-black/20 text-white border-white/25'
+                    : 'bg-black/[0.04] dark:bg-white/[0.05] text-[#5d6b73] dark:text-[#9aa8b0] border-black/10 dark:border-white/10'
+                }`}
+              >
+                {tab.keyHint}
+              </span>
+            </div>
+            <div className={`text-[10px] leading-snug ${isSelected ? 'text-white/85' : 'text-[#5d6b73] dark:text-[#9aa8b0]'}`}>
+              {lang === 'fa' ? tab.subtitleFa : tab.subtitleEn}
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
 
   const selectedDepartment: DepartmentUseCase =
     UNIT_MANAGERS_MATRIX.find((d) => d.id === selectedDeptId) || UNIT_MANAGERS_MATRIX[0];
@@ -107,6 +240,18 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
               'Cumulative excavation, ring assembly and footage logs',
               'HSE safety performance register (LTI-free man-hours)',
               '5-step engineering and segment lining process workflow'
+            ];
+      case 'hr_overtime_compliance_blueprint':
+        return isFa
+          ? [
+              'منبع ۱: گزیده مواد منابع انسانی، رفاهی، بیمه‌ای و کارگاهی از قرارداد پروژه مترو خط ایکس',
+              'منبع ۲: بخشنامه داخلی کنترل اضافه‌کاری پرسنل سازمان پیمانکار (HR-INST-1403/07) و گزارش کارکرد مهرماه',
+              'جدول متراژ الزامی فضاهای اداری، کارگری و رفاهی کارگاه (صفحه ۵۴ قرارداد) و ضوابط ماده ۲۰-ح و ۲۵'
+            ]
+          : [
+              'Source 1: Metro Line X EPC Contract HR, Welfare, SSO & Camp Clauses',
+              'Source 2: Contractor Internal Overtime Directive (HR-INST-1403/07) & October Attendance Logs',
+              'Contract Page 54 Mandatory Camp Space Table & Articles 20-H / 25 / 42-1'
             ];
       case 'audio_overview_deep_dive':
       default:
@@ -162,6 +307,18 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
               'Earned Value metrics sheet (PV, EV, AC, SPI=0.835, CPI=0.910)',
               'Metro TBM segment or pipeline welding CSV raw data from Section 5'
             ];
+      case 'ex5_hr_metro_line10_compliance':
+        return isFa
+          ? [
+              'منبع شماره ۱: گزیده مواد منابع انسانی، اداری و کارگاهی از قرارداد پروژه مترو خط ایکس (metro_line_x_hr_contract_clauses.md)',
+              'منبع شماره ۲: دستورالعمل داخلی کنترل اضافه‌کاری و دیتابیس کارکرد مهرماه پرسنل سازمان پیمانکار (contractor_internal_overtime_directive.md)',
+              'امکان کپی مجزای منبع ۱ و منبع ۲ از طریق گزینه Paste Text در NotebookLM'
+            ]
+          : [
+              'Source 1: Metro Line X HR, Admin & Camp Welfare Contract Clauses (metro_line_x_hr_contract_clauses.md)',
+              'Source 2: Contractor Internal Overtime Directive & October Time-Card Logs (contractor_internal_overtime_directive.md)',
+              'Individual Copy buttons for Paste Text of Source 1 and Source 2 in NotebookLM'
+            ];
       case 'ex4_hse_qaqc_infographic':
       default:
         return isFa
@@ -178,7 +335,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
     }
   };
 
-  const handleDownloadSpecimen = (doc: SampleDepartmentDocument) => {
+  const handleDownloadSpecimen = (doc: SampleDepartmentDocument | SampleSubDocument) => {
     const blob = new Blob([doc.markdownContent], { type: 'text/markdown;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -190,10 +347,96 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  const handleCopySpecimen = (doc: SampleDepartmentDocument) => {
+  const handleCopySpecimen = (doc: SampleDepartmentDocument | SampleSubDocument) => {
     copyToClipboard(doc.markdownContent, `specimen_doc_${doc.id}`);
     setDocCopiedId(doc.id);
     setTimeout(() => setDocCopiedId(null), 2500);
+  };
+
+  const renderSubDocumentsSection = (subDocs?: SampleSubDocument[]) => {
+    if (!subDocs || subDocs.length === 0) return null;
+    return (
+      <div className="space-y-2.5 pt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <span className="text-xs font-extrabold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
+            <FileText className="w-4 h-4 text-[#00738c] dark:text-[#6fb3c6]" />
+            <span>
+              {lang === 'fa'
+                ? 'بارگذاری تفکیکی دو منبع در NotebookLM (از طریق گزینه Paste Text):'
+                : 'Copy Individual Sources for NotebookLM (Paste Text):'}
+            </span>
+          </span>
+          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6]">
+            {lang === 'fa' ? '۲ منبع مجزا (الزامات پیمان + ضوابط داخلی پیمانکار)' : '2 Separate Sources'}
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {subDocs.map((sub) => (
+            <div
+              key={sub.id}
+              className="p-3.5 rounded-xl bg-white dark:bg-[#12171b] border border-black/[0.08] dark:border-white/[0.1] space-y-2.5 shadow-2xs"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-1 min-w-0">
+                  <div className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] leading-snug">
+                    {lang === 'fa' ? sub.labelFa : sub.labelEn}
+                  </div>
+                  <div dir="ltr" className="text-[10px] font-mono text-[#5d6b73] dark:text-[#9aa8b0] truncate">
+                    {sub.fileName}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap pt-1">
+                <button
+                  onClick={() => handleCopySpecimen(sub)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all active:scale-[0.96] ${
+                    docCopiedId === sub.id
+                      ? 'bg-[#2f7d5b] text-white'
+                      : 'bg-[#00738c] hover:bg-[#0f4c5c] text-white'
+                  }`}
+                >
+                  {docCopiedId === sub.id ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>{lang === 'fa' ? 'کپی شد! (Paste Text)' : 'Copied!'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>{lang === 'fa' ? 'کپی متن برای Paste Text' : 'Copy for Paste Text'}</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => handleDownloadSpecimen(sub)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#f0f2f1] dark:bg-[#1a232a] hover:bg-black/10 text-[#1c2830] dark:text-[#e8ebe9] text-[11px] font-semibold transition-all"
+                >
+                  <Download className="w-3 h-3" />
+                  <span>{lang === 'fa' ? 'دانلود (.md)' : 'Download'}</span>
+                </button>
+                <button
+                  onClick={() => setPreviewDocId(previewDocId === sub.id ? null : sub.id)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#00738c]/30 text-[#00738c] dark:text-[#6fb3c6] text-[11px] font-semibold hover:bg-[#00738c]/10 transition-all"
+                >
+                  {previewDocId === sub.id ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                  <span>{lang === 'fa' ? (previewDocId === sub.id ? 'بستن متن' : 'مشاهده متن') : 'View'}</span>
+                </button>
+              </div>
+              {previewDocId === sub.id && (
+                <div className="p-3 rounded-lg bg-[#f8f9fa] dark:bg-[#0e1317] border border-black/[0.06] dark:border-white/[0.08] max-h-64 overflow-y-auto mt-2">
+                  <pre
+                    dir={lang === 'fa' ? 'rtl' : 'ltr'}
+                    className="text-[11px] font-mono text-[#1c2830] dark:text-[#e8ebe9] whitespace-pre-wrap leading-relaxed select-text"
+                  >
+                    {sub.markdownContent}
+                  </pre>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   const renderDeptIcon = (iconName: string, className = 'w-5 h-5') => {
@@ -208,6 +451,8 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
         return <Shield className={className} />;
       case 'CheckCircle2':
         return <CheckCircle2 className={className} />;
+      case 'Users':
+        return <Users className={className} />;
       case 'Layers':
       default:
         return <Layers className={className} />;
@@ -290,50 +535,356 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
         </div>
       </div>
 
-      {/* SUB-TAB NAVIGATOR (DOUBLE-BEZEL CONCENTRIC PILLS) */}
-      <div className="flex items-center p-1.5 rounded-2xl bg-[#f0f2f1] dark:bg-[#131b20] border border-black/[0.05] dark:border-white/[0.06] overflow-x-auto gap-1 text-xs">
-        <button
-          onClick={() => setActiveSubTab('departments')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 font-bold ${
-            activeSubTab === 'departments'
-              ? 'bg-[#00738c] text-white shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          <Building2 className="w-4 h-4" />
-          <span>{lang === 'fa' ? '۱. ماتریس ۶ دپارتمان پروژه' : '1. 6-Department Matrix'}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSubTab('blueprints')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 font-bold ${
-            activeSubTab === 'blueprints'
-              ? 'bg-[#b87333] text-white shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          <FileBarChart className="w-4 h-4" />
-          <span>{lang === 'fa' ? '۲. پرزنتیشن، اینفوگرافیک و پادکست' : '2. Slide Decks & Infographics'}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSubTab('exercises')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-150 active:scale-[0.96] shrink-0 font-bold ${
-            activeSubTab === 'exercises'
-              ? 'bg-[#2f7d5b] text-white shadow-xs'
-              : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
-          }`}
-        >
-          <BookmarkCheck className="w-4 h-4" />
-          <span>{lang === 'fa' ? '۳. تمرینات عملی کلاسی (۴ تمرین)' : '3. Hands-On Exercises'}</span>
-        </button>
+      {/* SUB-TAB NAVIGATOR: 5-COLUMN TACTILE MECHANICAL KEYCAP GRID */}
+      <div ref={subTabNavRef} className="scroll-mt-4">
+        {renderSubTabKeycaps(false)}
       </div>
+
+      {/* SUB-TAB 0: COMPREHENSIVE NOTEBOOKLM MASTERY & STUDIO TOOLS GUIDE */}
+      {activeSubTab === 'mastery_guide' && (
+        <div className="space-y-6 animate-fadeIn">
+          {/* Part A: 7-Step Comprehensive Curriculum */}
+          <div className="p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <div className="rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 sm:p-6 space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6] border border-[#00738c]/20">
+                      راهنمای صفر تا صد کار با Google NotebookLM
+                    </span>
+                    <span className="text-[11px] font-semibold text-[#2f7d5b] dark:text-[#52b788]">
+                      ذخیره نوت‌ها · فارسی‌سازی خروجی · نقشه ذهنی · ویدیو و پادکست · آنبوردینگ پرسنل
+                    </span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9]">
+                    {lang === 'fa'
+                      ? '۷ مبحث کلیدی تسلط بر NotebookLM (روی هر مبحث کلیک کنید):'
+                      : '7 Core Modules for Mastering Google NotebookLM:'}
+                  </h3>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playTactileSound('thock');
+                      setProjectorDeck('mastery');
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs"
+                  >
+                    <Monitor className="w-4 h-4" />
+                    <span>حالت اسلاید پروژکتور (۷ اسلاید)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playTactileSound('switch');
+                      setActiveMasteryIdx((prev) =>
+                        prev > 0 ? prev - 1 : NOTEBOOKLM_MASTERY_MODULES.length - 1
+                      );
+                    }}
+                    className="px-2.5 py-1.5 rounded-xl text-xs font-extrabold bg-[#f4f6f5] dark:bg-[#1d262d] text-[#1c2830] dark:text-[#e8ebe9] border border-black/10 dark:border-white/10 border-b-[3px] border-b-black/25 active:translate-y-[2px] active:border-b cursor-pointer"
+                  >
+                    → مبحث قبلی
+                  </button>
+                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-[#00738c]/15 text-[#00738c] dark:text-[#6fb3c6]">
+                    {activeMasteryIdx + 1} / {NOTEBOOKLM_MASTERY_MODULES.length}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playTactileSound('switch');
+                      setActiveMasteryIdx((prev) =>
+                        prev < NOTEBOOKLM_MASTERY_MODULES.length - 1 ? prev + 1 : 0
+                      );
+                    }}
+                    className="px-2.5 py-1.5 rounded-xl text-xs font-extrabold bg-[#00738c] text-white border border-[#004454] border-b-[3px] border-b-[#002f3a] active:translate-y-[2px] active:border-b cursor-pointer"
+                  >
+                    مبحث بعدی ←
+                  </button>
+                </div>
+              </div>
+
+              {/* Clean All-Visible 7-Module Tactile Keycap Grid Selector */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                {NOTEBOOKLM_MASTERY_MODULES.map((item, idx) => {
+                  const isSelected = idx === activeMasteryIdx;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onMouseEnter={() => playTactileSound('hover')}
+                      onClick={() => {
+                        playTactileSound('thock');
+                        setActiveMasteryIdx(idx);
+                      }}
+                      className={`p-3 rounded-xl border border-b-4 text-right transition-all duration-100 cursor-pointer flex items-start gap-2.5 select-none active:translate-y-[2px] active:border-b ${
+                        isSelected
+                          ? 'bg-gradient-to-b from-[#00738c] to-[#00596d] text-white border-[#004454] border-b-[#002f3a] shadow-md ring-2 ring-[#00738c]/25'
+                          : 'bg-gradient-to-b from-white to-[#f6f8f7] dark:from-[#1b242b] dark:to-[#141b20] text-[#1c2830] dark:text-[#e8ebe9] border-black/10 dark:border-white/10 border-b-black/25 dark:border-b-black/60 hover:-translate-y-0.5 hover:border-[#00738c]/40 shadow-xs'
+                      }`}
+                    >
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded border shrink-0 mt-0.5 ${
+                          isSelected
+                            ? 'bg-white/20 text-white border-white/25'
+                            : 'bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6] border-[#00738c]/20'
+                        }`}
+                      >
+                        {item.stepBadge}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-extrabold leading-snug line-clamp-2">{item.titleFa}</div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Active Lesson Multi-Column Slide Card (Fixes Screenshot 3!) */}
+              {(() => {
+                const mod = NOTEBOOKLM_MASTERY_MODULES[activeMasteryIdx] || NOTEBOOKLM_MASTERY_MODULES[0];
+                return (
+                  <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#00738c]/[0.07] via-white to-[#2f7d5b]/[0.05] dark:from-[#00738c]/[0.15] dark:via-[#141c22] dark:to-[#2f7d5b]/[0.1] border-2 border-[#00738c]/35 space-y-5">
+                    <div className="flex items-center justify-between gap-2 flex-wrap pb-3 border-b border-[#00738c]/20">
+                      <span className="px-3.5 py-1 rounded-xl bg-[#00738c] text-white text-xs sm:text-sm font-black">
+                        {mod.stepBadge} — {mod.categoryFa}
+                      </span>
+                      <span dir="ltr" className="text-xs sm:text-sm font-mono font-bold text-[#334155] dark:text-[#cbd5e1]">
+                        {mod.titleEn}
+                      </span>
+                    </div>
+
+                    <h4 className="text-lg sm:text-2xl font-black text-[#0f172a] dark:text-white leading-snug">
+                      {mod.titleFa}
+                    </h4>
+
+                    {/* 3-Column Scannable Slide Grid Instead of Wide Text Lines */}
+                    <div
+                      className={`grid grid-cols-1 ${
+                        mod.detailedStepsFa.length === 2
+                          ? 'lg:grid-cols-2'
+                          : mod.detailedStepsFa.length >= 3
+                            ? 'md:grid-cols-2 xl:grid-cols-3'
+                            : 'lg:grid-cols-1'
+                      } gap-4`}
+                    >
+                      {mod.detailedStepsFa.map((st, idx) => {
+                        const { heading, body } = splitPointTitleAndBody(st);
+                        return (
+                          <div
+                            key={idx}
+                            className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#11171d] border border-[#00738c]/25 shadow-2xs space-y-2.5 flex flex-col justify-between"
+                          >
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2.5">
+                                <span className="w-7 h-7 rounded-lg bg-[#00738c] text-white font-mono text-xs font-black flex items-center justify-center shrink-0">
+                                  {idx + 1}
+                                </span>
+                                <span className="text-sm sm:text-base font-black text-[#00738c] dark:text-[#6fb3c6] leading-snug">
+                                  {heading || `گام اجرایی ${idx + 1}`}
+                                </span>
+                              </div>
+                              <p className="text-sm sm:text-[15px] font-semibold text-[#0f172a] dark:text-[#f1f5f9] leading-relaxed">
+                                {body}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Pro Tip Box */}
+                    <div className="p-4 rounded-2xl bg-[#2f7d5b]/15 border-2 border-[#2f7d5b]/35 flex items-start gap-3">
+                      <Lightbulb className="w-5 h-5 text-[#2f7d5b] dark:text-[#52b788] shrink-0 mt-0.5" />
+                      <div className="text-sm sm:text-base font-bold text-[#0f172a] dark:text-[#e8ebe9] leading-relaxed">
+                        <strong className="text-[#2f7d5b] dark:text-[#52b788] font-black">ترفند حرفه‌ای: </strong>
+                        {mod.proTipFa}
+                      </div>
+                    </div>
+
+                    {/* Optional Copyable Prompt */}
+                    {mod.copyablePromptFa && (
+                      <div className="p-4 sm:p-5 rounded-2xl bg-[#11161c] text-[#f1f5f9] space-y-2.5 border border-white/15">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <span className="text-xs sm:text-sm font-black text-[#6fb3c6]">
+                            {mod.copyablePromptTitleFa || 'پرامپت آماده کپی:'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(mod.copyablePromptFa!, `mastery_prompt_${mod.id}`)}
+                            className="px-3.5 py-1.5 rounded-xl bg-[#00738c] hover:bg-[#0f4c5c] text-white text-xs font-black flex items-center gap-1.5 cursor-pointer"
+                          >
+                            {copiedId === `mastery_prompt_${mod.id}` ? (
+                              <>
+                                <Check className="w-3.5 h-3.5" />
+                                <span>کپی شد!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3.5 h-3.5" />
+                                <span>کپی پرامپت</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <pre className="text-xs sm:text-sm font-mono whitespace-pre-wrap leading-relaxed select-text text-right" dir="rtl">
+                          {mod.copyablePromptFa}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+
+          {/* Part B: 6 Studio Super-Tools Interactive Explorer (Mind Map, Video Overview, Audio Overview, Flashcards, Briefing/Timeline, Infographic Vision) */}
+          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.08] dark:border-white/[0.1] shadow-2xs space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Sliders className="w-5 h-5 text-[#00738c] dark:text-[#6fb3c6]" />
+                  <h3 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9]">
+                    {lang === 'fa'
+                      ? 'جعبه ابزار پنل Studio در NotebookLM: آموزش ۶ خروجی جادویی + پرامپت‌های Customize'
+                      : 'NotebookLM Studio Panel: 6 Super-Tools & Customize Prompts'}
+                  </h3>
+                </div>
+                <p className="text-xs sm:text-sm font-semibold text-[#334155] dark:text-[#cbd5e1]">
+                  روی هر یک از ۶ ابزار پنل Studio کلیک کنید تا روش استفاده گام‌به‌گام و پرامپت فارسی‌ساز بخش Customize آن را ببینید:
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  playTactileSound('thock');
+                  setProjectorDeck('studio');
+                }}
+                className="self-start sm:self-center px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shrink-0"
+              >
+                <Monitor className="w-4 h-4" />
+                <span>حالت اسلاید پروژکتور (۶ ابزار Studio)</span>
+              </button>
+            </div>
+
+            {/* 6 Tool Selector Tactile Keycap Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              {NOTEBOOKLM_STUDIO_TOOLS.map((tool) => {
+                const isSelected = tool.id === activeStudioToolId;
+                return (
+                  <button
+                    key={tool.id}
+                    type="button"
+                    onMouseEnter={() => playTactileSound('hover')}
+                    onClick={() => {
+                      playTactileSound('thock');
+                      setActiveStudioToolId(tool.id);
+                    }}
+                    className={`p-3.5 rounded-2xl border border-b-4 text-right transition-all duration-100 cursor-pointer flex flex-col justify-between gap-2 select-none active:translate-y-[2px] active:border-b ${
+                      isSelected
+                        ? 'bg-gradient-to-b from-[#0f4c5c] to-[#0a3642] text-white border-[#07262e] border-b-[#04181d] shadow-md ring-2 ring-[#0f4c5c]/25'
+                        : 'bg-gradient-to-b from-white to-[#f6f8f7] dark:from-[#1b242b] dark:to-[#141b20] text-[#1c2830] dark:text-[#e8ebe9] border-black/10 dark:border-white/10 border-b-black/25 dark:border-b-black/60 hover:-translate-y-0.5 hover:border-[#00738c]/40 shadow-xs'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2 w-full">
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          isSelected
+                            ? 'bg-white/20 text-white'
+                            : 'bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6]'
+                        }`}
+                      >
+                        {tool.badgeFa}
+                      </span>
+                      <span dir="ltr" className={`text-[10px] font-mono ${isSelected ? 'text-white/80' : 'text-[#5d6b73]'}`}>
+                        {tool.nameEn}
+                      </span>
+                    </div>
+                    <div className="text-xs font-extrabold leading-snug">{tool.nameFa}</div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Active Studio Tool Details */}
+            {(() => {
+              const activeTool =
+                NOTEBOOKLM_STUDIO_TOOLS.find((t) => t.id === activeStudioToolId) || NOTEBOOKLM_STUDIO_TOOLS[0];
+              return (
+                <div className="p-5 rounded-2xl bg-[#f8f9fa] dark:bg-[#12171b] border border-[#00738c]/25 space-y-4">
+                  <div className="space-y-1">
+                    <h4 className="text-sm sm:text-base font-black text-[#1c2830] dark:text-[#e8ebe9]">
+                      {activeTool.nameFa}
+                    </h4>
+                    <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                      {activeTool.whatItDoesFa}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl bg-white dark:bg-[#161e24] border border-black/[0.06] dark:border-white/[0.08] space-y-2">
+                      <div className="text-xs font-extrabold text-[#00738c] dark:text-[#6fb3c6]">
+                        🛠️ راهنمای گام‌به‌گام اجرا در NotebookLM:
+                      </div>
+                      <ul className="space-y-2 text-xs text-[#2c3840] dark:text-[#d1d7db] leading-relaxed">
+                        {activeTool.howToUseFa.map((step, sIdx) => (
+                          <li key={sIdx} className="flex items-start gap-2">
+                            <span className="font-bold text-[#00738c] dark:text-[#6fb3c6]">{sIdx + 1}.</span>
+                            <span>{step}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-[#1e1e1e] text-[#d4d4d4] flex flex-col justify-between space-y-3">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-bold text-[#6fb3c6]">
+                            پرامپت سفارشی‌سازی فارسی (Customize / Chat Prompt):
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              copyToClipboard(activeTool.customizePromptFa, `studio_tool_${activeTool.id}`)
+                            }
+                            className="px-3 py-1 rounded-lg bg-[#00738c] hover:bg-[#0f4c5c] text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                          >
+                            {copiedId === `studio_tool_${activeTool.id}` ? (
+                              <>
+                                <Check className="w-3 h-3" />
+                                <span>کپی شد!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3 h-3" />
+                                <span>کپی پرامپت</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <pre
+                          dir="rtl"
+                          className="text-xs font-mono whitespace-pre-wrap leading-relaxed select-text text-right"
+                        >
+                          {activeTool.customizePromptFa}
+                        </pre>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* SUB-TAB 1: UNIT MANAGERS MATRIX */}
       {activeSubTab === 'departments' && (
         <div className="space-y-5">
           {/* Department Selector Pills */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
             {UNIT_MANAGERS_MATRIX.map((dept) => {
               const isSelected = dept.id === selectedDeptId;
               return (
@@ -574,6 +1125,9 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                       </pre>
                     </div>
                   )}
+
+                  {/* Individual Sub-Documents (e.g. Source 1 & Source 2 for HR Paste Text) */}
+                  {renderSubDocumentsSection(currentSampleDoc.subDocuments)}
                 </div>
               )}
 
@@ -651,7 +1205,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
       {activeSubTab === 'blueprints' && (
         <div className="space-y-5">
           {/* Blueprint Selector Tabs */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {PRESENTATION_INFOGRAPHIC_GUIDES.map((blueprint) => {
               const isSelected = blueprint.id === selectedBlueprintId;
               return (
@@ -672,6 +1226,8 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                       <Headphones className="w-4 h-4 text-[#b87333]" />
                     ) : blueprint.id === 'infographic_blueprint_workflow' ? (
                       <Sliders className="w-4 h-4 text-[#b87333]" />
+                    ) : blueprint.id === 'hr_overtime_compliance_blueprint' ? (
+                      <Users className="w-4 h-4 text-[#b87333]" />
                     ) : (
                       <FileBarChart className="w-4 h-4 text-[#b87333]" />
                     )}
@@ -870,6 +1426,9 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                         </pre>
                       </div>
                     )}
+
+                    {/* Individual Sub-Documents for Blueprint */}
+                    {renderSubDocumentsSection(currentBlueprintSampleDoc.subDocuments)}
                   </div>
                 )}
               </div>
@@ -970,13 +1529,16 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
       {activeSubTab === 'exercises' && (
         <div className="space-y-5">
           {/* Exercise Selector Pills */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {NOTEBOOKLM_EXERCISES.map((ex) => {
               const isSelected = ex.id === selectedExerciseId;
               return (
                 <button
                   key={ex.id}
-                  onClick={() => setSelectedExerciseId(ex.id)}
+                  onClick={() => {
+                    setSelectedExerciseId(ex.id);
+                    setActiveScenarioIdx(0);
+                  }}
                   className={`p-3.5 rounded-2xl border text-right transition-all duration-150 active:scale-[0.96] flex flex-col justify-between gap-3 ${
                     isSelected
                       ? 'bg-white dark:bg-[#1a232a] border-[#2f7d5b] shadow-md ring-2 ring-[#2f7d5b]/20'
@@ -1191,6 +1753,9 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                         </pre>
                       </div>
                     )}
+
+                    {/* Individual Sub-Documents (Source 1 & Source 2 for Paste Text) */}
+                    {renderSubDocumentsSection(currentExerciseSampleDoc.subDocuments)}
                   </div>
                 )}
               </div>
@@ -1289,6 +1854,184 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                 </div>
               </div>
 
+              {/* Multi-Scenario Workshop Section (e.g., Exercise 5 HR 4 Practice Scenarios) */}
+              {selectedExercise.subScenarios && selectedExercise.subScenarios.length > 0 && (
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#00738c]/[0.05] to-[#2f7d5b]/[0.05] dark:from-[#00738c]/[0.1] dark:to-[#2f7d5b]/[0.08] border border-[#00738c]/25 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
+                    <div className="flex items-center gap-2 text-[#00738c] dark:text-[#6fb3c6] font-extrabold text-xs sm:text-sm">
+                      <Users className="w-4 h-4 shrink-0" />
+                      <span>
+                        {lang === 'fa'
+                          ? 'سناریوهای چهارگانه تمرینی و پرامپت‌های کاربردی (ممیزی، رفاهی، مکاتبه اخطار، کوییز):'
+                          : '4 Interactive HR Practice Scenarios (Audit, Welfare, Warning Memo, Quiz):'}
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#2f7d5b]/15 text-[#2f7d5b] dark:text-[#52b788]">
+                      {lang === 'fa' ? 'همراه با کلید ارزیابی و نمونه نامه رسمی' : 'Includes Evaluation Keys & Sample Memo'}
+                    </span>
+                  </div>
+
+                  {/* Scenario Tabs */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                    {selectedExercise.subScenarios.map((scen, idx) => {
+                      const isActive = activeScenarioIdx === idx;
+                      return (
+                        <button
+                          key={scen.id}
+                          onClick={() => setActiveScenarioIdx(idx)}
+                          className={`p-3 rounded-xl border text-right transition-all active:scale-[0.97] flex flex-col justify-between gap-1.5 ${
+                            isActive
+                              ? 'bg-[#00738c] text-white border-[#00738c] shadow-sm'
+                              : 'bg-white dark:bg-[#141b20] text-[#1c2830] dark:text-[#e8ebe9] border-black/[0.06] dark:border-white/[0.08] hover:border-[#00738c]/40'
+                          }`}
+                        >
+                          <span
+                            className={`text-[10px] font-black px-2 py-0.5 rounded self-start ${
+                              isActive ? 'bg-white/20 text-white' : 'bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6]'
+                            }`}
+                          >
+                            {lang === 'fa' ? `سناریوی ${scen.number}` : `Scenario ${scen.number}`}
+                          </span>
+                          <span className="text-xs font-bold leading-snug line-clamp-2">
+                            {lang === 'fa' ? scen.titleFa : scen.titleEn}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Active Scenario Detail */}
+                  {(() => {
+                    const activeScen =
+                      selectedExercise.subScenarios[activeScenarioIdx] || selectedExercise.subScenarios[0];
+                    return (
+                      <div className="p-4 rounded-xl bg-white dark:bg-[#12171b] border border-black/[0.08] dark:border-white/[0.1] space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <h4 className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9]">
+                            {lang === 'fa' ? activeScen.titleFa : activeScen.titleEn}
+                          </h4>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() =>
+                                onLoadToSandbox(lang === 'fa' ? activeScen.promptFa : activeScen.promptEn)
+                              }
+                              className="flex items-center gap-1 text-[11px] font-bold text-[#00738c] dark:text-[#6fb3c6] hover:underline"
+                            >
+                              <Play className="w-3.5 h-3.5" />
+                              <span>{lang === 'fa' ? 'تست در کارگاه پرامپت' : 'Load to Sandbox'}</span>
+                            </button>
+                            <button
+                              onClick={() =>
+                                copyToClipboard(
+                                  lang === 'fa' ? activeScen.promptFa : activeScen.promptEn,
+                                  `scen_prompt_${activeScen.id}`
+                                )
+                              }
+                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                                copiedId === `scen_prompt_${activeScen.id}`
+                                  ? 'bg-[#2f7d5b] text-white'
+                                  : 'bg-[#00738c] hover:bg-[#0f4c5c] text-white'
+                              }`}
+                            >
+                              {copiedId === `scen_prompt_${activeScen.id}` ? (
+                                <>
+                                  <Check className="w-3.5 h-3.5" />
+                                  <span>{lang === 'fa' ? 'پرامپت کپی شد!' : 'Copied!'}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3.5 h-3.5" />
+                                  <span>{lang === 'fa' ? 'کپی پرامپت این تمرین' : 'Copy Scenario Prompt'}</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Prompt Box */}
+                        <div className="p-3.5 rounded-xl bg-[#f8f9fa] dark:bg-[#0e1317] border border-black/[0.06] dark:border-white/[0.08] font-mono text-xs text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed">
+                          <pre
+                            dir={lang === 'fa' ? 'rtl' : 'ltr'}
+                            className="whitespace-pre-wrap select-text text-right"
+                          >
+                            {lang === 'fa' ? activeScen.promptFa : activeScen.promptEn}
+                          </pre>
+                        </div>
+
+                        {/* Expected Output / Evaluation Key */}
+                        <div className="p-3.5 rounded-xl bg-[#2f7d5b]/[0.06] border border-[#2f7d5b]/25 space-y-2">
+                          <div className="text-xs font-extrabold text-[#2f7d5b] dark:text-[#52b788] flex items-center gap-1.5">
+                            <CheckCircle2 className="w-4 h-4 shrink-0" />
+                            <span>
+                              {lang === 'fa'
+                                ? 'خروجی مورد انتظار از NotebookLM (کلید ارزیابی):'
+                                : 'Expected NotebookLM Output (Evaluation Key):'}
+                            </span>
+                          </div>
+                          <ul className="space-y-1.5 text-xs text-[#1c2830] dark:text-[#d1d7db]">
+                            {(lang === 'fa' ? activeScen.expectedKeyFa : activeScen.expectedKeyEn).map((k, kIdx) => (
+                              <li key={kIdx} className="flex items-start gap-2 leading-relaxed">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#2f7d5b] mt-1.5 shrink-0" />
+                                <span>{k}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Sample Standard Internal Warning Letter (if present, e.g. Scenario 3) */}
+                        {activeScen.sampleLetterOutputFa && (
+                          <div className="p-4 rounded-xl bg-amber-500/[0.06] border border-amber-500/30 space-y-3">
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                              <span className="text-xs font-extrabold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                                <FileText className="w-4 h-4 shrink-0" />
+                                <span>
+                                  {lang === 'fa'
+                                    ? 'نمونه نامه استاندارد درون‌سازمانی (کلید ارزیابی تمرین ۳):'
+                                    : 'Standard Internal Warning Memo Specimen (Scenario 3 Key):'}
+                                </span>
+                              </span>
+                              <button
+                                onClick={() =>
+                                  copyToClipboard(
+                                    activeScen.sampleLetterOutputFa || '',
+                                    `scen_letter_${activeScen.id}`
+                                  )
+                                }
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                                  copiedId === `scen_letter_${activeScen.id}`
+                                    ? 'bg-[#2f7d5b] text-white'
+                                    : 'bg-amber-600 hover:bg-amber-700 text-white'
+                                }`}
+                              >
+                                {copiedId === `scen_letter_${activeScen.id}` ? (
+                                  <>
+                                    <Check className="w-3.5 h-3.5" />
+                                    <span>{lang === 'fa' ? 'متن نامه کپی شد!' : 'Letter Copied!'}</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-3.5 h-3.5" />
+                                    <span>{lang === 'fa' ? 'کپی متن نامه رسمی' : 'Copy Official Letter'}</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                            <div className="p-3.5 rounded-xl bg-white dark:bg-[#12171b] border border-black/[0.08] dark:border-white/[0.1] max-h-96 overflow-y-auto">
+                              <pre
+                                dir="rtl"
+                                className="text-xs font-mono text-[#1c2830] dark:text-[#e8ebe9] whitespace-pre-wrap leading-relaxed select-text text-right"
+                              >
+                                {activeScen.sampleLetterOutputFa}
+                              </pre>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
               {/* Success Criteria Verification Box */}
               <div className="p-4 rounded-2xl bg-[#f8f9fa] dark:bg-[#12171b] border border-black/[0.05] dark:border-white/[0.06] space-y-2.5">
                 <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
@@ -1312,7 +2055,112 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
               </div>
             </div>
           </div>
+
+          {/* When HR Exercise 5 is selected, also display the 5 Claude Artifacts & Gemini Canvas Exercises below */}
+          {selectedExercise.id === 'ex5_hr_metro_line10_compliance' && (
+            <HrArtifactsCanvasWorkshop
+              lang={lang}
+              onLoadToSandbox={onLoadToSandbox}
+              copyToClipboard={copyToClipboard}
+              copiedId={copiedId}
+            />
+          )}
         </div>
+      )}
+
+      {/* SUB-TAB 4: CLAUDE ARTIFACTS & GEMINI CANVAS HR TOOL-BUILDING WORKSHOP */}
+      {activeSubTab === 'artifacts_canvas' && (
+        <HrArtifactsCanvasWorkshop
+          lang={lang}
+          onLoadToSandbox={onLoadToSandbox}
+          copyToClipboard={copyToClipboard}
+          copiedId={copiedId}
+        />
+      )}
+
+      {/* ===================================================================== */}
+      {/* BOTTOM SUB-TAB MECHANICAL KEYCAP DECK FOR NOTEBOOKLM WORKSHOP         */}
+      {/* ===================================================================== */}
+      <div className="p-4 rounded-2xl bg-gradient-to-b from-white to-[#f4f6f5] dark:from-[#161e24] dark:to-[#11171b] border border-[#00738c]/25 space-y-3 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#00738c] animate-pulse" />
+            <span className="text-xs font-black text-[#1c2830] dark:text-[#e8ebe9]">
+              {lang === 'fa'
+                ? 'پنل پایین کارگاه NotebookLM: جابه‌جایی سریع بین ۵ بخش این کارگاه (بدون اسکرول به بالا):'
+                : 'NotebookLM Bottom Deck: Quick Switch Between All 5 Sections:'}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              playTactileSound('switch');
+              subTabNavRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+            className="self-start sm:self-auto px-3 py-1 rounded-xl text-[11px] font-extrabold bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6] border border-[#00738c]/25 border-b-[3px] border-b-[#00738c]/40 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
+          >
+            {lang === 'fa' ? '↑ پرش به بالای کارگاه NotebookLM' : '↑ Top of NotebookLM'}
+          </button>
+        </div>
+        {renderSubTabKeycaps(true)}
+      </div>
+
+      {/* FULL-SCREEN PROJECTOR SLIDE DECK MODAL FOR NOTEBOOKLM */}
+      {projectorDeck === 'mastery' && (
+        <ProjectorSlideModal
+          isOpen={true}
+          onClose={() => setProjectorDeck(null)}
+          deckTitleFa="۷ مبحث کلیدی تسلط کامل بر Google NotebookLM"
+          deckSubtitleFa="بخش ۹ · آموزش جامع قابلیت‌ها"
+          accentColor="teal"
+          slides={NOTEBOOKLM_MASTERY_MODULES.map((m, idx): ProjectorSlideItem => ({
+            stepNumber: m.stepBadge,
+            keyHint: `N${idx + 1}`,
+            badgeFa: m.categoryFa,
+            titleFa: m.titleFa,
+            titleEn: m.titleEn,
+            pointsFa: m.detailedStepsFa,
+            proTipFa: m.proTipFa,
+            codeTitleFa: m.copyablePromptTitleFa,
+            codeSnippet: m.copyablePromptFa,
+            codeDir: 'rtl'
+          }))}
+          activeIndex={activeMasteryIdx}
+          onChangeIndex={setActiveMasteryIdx}
+          copyToClipboard={copyToClipboard}
+          copiedId={copiedId}
+        />
+      )}
+
+      {projectorDeck === 'studio' && (
+        <ProjectorSlideModal
+          isOpen={true}
+          onClose={() => setProjectorDeck(null)}
+          deckTitleFa="جعبه ابزار پنل Studio در Google NotebookLM (۶ خروجی جادویی)"
+          deckSubtitleFa="بخش ۹ · Mind Map · Video · Audio · Flashcards · Vision"
+          accentColor="blue"
+          slides={NOTEBOOKLM_STUDIO_TOOLS.map((t, idx): ProjectorSlideItem => ({
+            stepNumber: `ابزار ${idx + 1}`,
+            keyHint: `ST${idx + 1}`,
+            badgeFa: t.badgeFa,
+            titleFa: t.nameFa,
+            titleEn: t.nameEn,
+            pointsFa: [t.whatItDoesFa, ...t.howToUseFa],
+            codeTitleFa: 'پرامپت سفارشی‌سازی فارسی (Customize Prompt)',
+            codeSnippet: t.customizePromptFa,
+            codeDir: 'rtl'
+          }))}
+          activeIndex={Math.max(
+            0,
+            NOTEBOOKLM_STUDIO_TOOLS.findIndex((t) => t.id === activeStudioToolId)
+          )}
+          onChangeIndex={(newIdx) => {
+            const tool = NOTEBOOKLM_STUDIO_TOOLS[newIdx];
+            if (tool) setActiveStudioToolId(tool.id);
+          }}
+          copyToClipboard={copyToClipboard}
+          copiedId={copiedId}
+        />
       )}
     </section>
   );

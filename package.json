@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
+    "start": "node server.ts",
     "server": "tsx server.ts",
     "build": "vite build",
     "preview": "vite preview",
@@ -15,7 +16,7 @@
     "prisma:studio": "prisma studio"
   },
   "dependencies": {
-    "@google/genai": "^2.4.0",
+    "@google/genai": "^2.32.0",
     "@prisma/client": "^6.4.0",
     "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-react": "^6.1.1",

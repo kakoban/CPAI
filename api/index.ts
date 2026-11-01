@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import pg from 'pg';
 import jwt from 'jsonwebtoken';
+import { GoogleGenAI } from '@google/genai';
 
 dotenv.config();
 
@@ -22,81 +23,132 @@ const pool = new Pool({
   connectionTimeoutMillis: 10000,
 });
 
+pool.on('error', (err) => {
+  console.warn('PostgreSQL pool background error (handled):', err?.message);
+});
+
 app.use(express.json({ limit: '10mb' }));
 
 // Setup Neon PostgreSQL users, classes, session_locks, and assessment_results tables
 let isTableReady = false;
-async function ensureUsersTable() {
+let tableInitPromise: Promise<void> | null = null;
+
+async function ensureUsersTable(): Promise<void> {
   if (isTableReady) return;
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS classes (
-        id VARCHAR(64) PRIMARY KEY,
-        code VARCHAR(100) UNIQUE NOT NULL,
-        title VARCHAR(255) DEFAULT 'کلاس آموزشی CPMAI',
-        is_leaderboard_visible BOOLEAN DEFAULT false,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
-        updated_at TIMESTAMPTZ DEFAULT NOW()
-      );
-      ALTER TABLE classes ADD COLUMN IF NOT EXISTS organization VARCHAR(255);
+  if (tableInitPromise) return tableInitPromise;
 
-      CREATE TABLE IF NOT EXISTS users (
-        id VARCHAR(64) PRIMARY KEY,
-        google_id VARCHAR(255),
-        email VARCHAR(255) UNIQUE NOT NULL,
-        username VARCHAR(100),
-        display_name VARCHAR(255),
-        avatar_url TEXT,
-        bio TEXT,
-        role VARCHAR(50) DEFAULT 'user',
-        phone VARCHAR(50),
-        specialty VARCHAR(150),
-        ai_level VARCHAR(50) DEFAULT 'beginner',
-        initial_ai_level VARCHAR(50) DEFAULT 'BEGINNER',
-        class_id VARCHAR(64),
-        is_onboarded BOOLEAN DEFAULT false,
-        is_verified BOOLEAN DEFAULT true,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
-        updated_at TIMESTAMPTZ DEFAULT NOW()
-      );
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'user';
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(50);
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS specialty VARCHAR(150);
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS ai_level VARCHAR(50) DEFAULT 'beginner';
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS initial_ai_level VARCHAR(50) DEFAULT 'BEGINNER';
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS class_id VARCHAR(64);
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS is_onboarded BOOLEAN DEFAULT false;
-      CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
-      CREATE INDEX IF NOT EXISTS idx_users_class_id ON users(class_id);
+  tableInitPromise = (async () => {
+    try {
+      // Fast read-only check: if tables and columns already exist, skip DDL locks completely
+      const checkRes = await pool.query(`
+        SELECT
+          (SELECT COUNT(*) FROM information_schema.tables
+           WHERE table_schema = 'public'
+             AND table_name IN ('classes', 'users', 'session_locks', 'assessment_results'))::int AS table_count,
+          (SELECT COUNT(*) FROM information_schema.columns
+           WHERE table_schema = 'public'
+             AND table_name = 'classes'
+             AND column_name = 'organization')::int AS has_org_col,
+          (SELECT COUNT(*) FROM information_schema.columns
+           WHERE table_schema = 'public'
+             AND table_name = 'users'
+             AND column_name = 'is_onboarded')::int AS has_onboarded_col;
+      `);
 
-      CREATE TABLE IF NOT EXISTS session_locks (
-        id VARCHAR(64) PRIMARY KEY,
-        class_id VARCHAR(64) REFERENCES classes(id) ON DELETE CASCADE,
-        session_num INT NOT NULL,
-        title VARCHAR(255) NOT NULL,
-        is_unlocked BOOLEAN DEFAULT false,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
-        updated_at TIMESTAMPTZ DEFAULT NOW(),
-        CONSTRAINT unq_class_session UNIQUE(class_id, session_num)
-      );
+      const row = checkRes.rows[0];
+      if (row && row.table_count >= 4 && row.has_org_col >= 1 && row.has_onboarded_col >= 1) {
+        isTableReady = true;
+        return;
+      }
 
-      CREATE TABLE IF NOT EXISTS assessment_results (
-        id VARCHAR(64) PRIMARY KEY,
-        user_id VARCHAR(64) UNIQUE REFERENCES users(id) ON DELETE CASCADE,
-        class_id VARCHAR(64) REFERENCES classes(id) ON DELETE SET NULL,
-        tested_tier VARCHAR(50) NOT NULL,
-        raw_score NUMERIC(5,2) NOT NULL,
-        max_score NUMERIC(5,2) NOT NULL,
-        percentage NUMERIC(5,2) NOT NULL,
-        alignment_index VARCHAR(50) NOT NULL,
-        completed_at TIMESTAMPTZ DEFAULT NOW()
-      );
-      CREATE INDEX IF NOT EXISTS idx_assessment_class_id ON assessment_results(class_id);
-    `);
-    isTableReady = true;
-  } catch (err) {
-    console.warn('Could not initialize database tables:', err);
-  }
+      // Run each DDL statement individually to avoid multi-table ACCESS EXCLUSIVE lock cycles
+      const statements = [
+        `CREATE TABLE IF NOT EXISTS classes (
+          id VARCHAR(64) PRIMARY KEY,
+          code VARCHAR(100) UNIQUE NOT NULL,
+          title VARCHAR(255) DEFAULT 'کلاس آموزشی CPMAI',
+          organization VARCHAR(255),
+          is_leaderboard_visible BOOLEAN DEFAULT false,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        )`,
+        `ALTER TABLE classes ADD COLUMN IF NOT EXISTS organization VARCHAR(255)`,
+        `CREATE TABLE IF NOT EXISTS users (
+          id VARCHAR(64) PRIMARY KEY,
+          google_id VARCHAR(255),
+          email VARCHAR(255) UNIQUE NOT NULL,
+          username VARCHAR(100),
+          display_name VARCHAR(255),
+          avatar_url TEXT,
+          bio TEXT,
+          role VARCHAR(50) DEFAULT 'user',
+          phone VARCHAR(50),
+          specialty VARCHAR(150),
+          ai_level VARCHAR(50) DEFAULT 'beginner',
+          initial_ai_level VARCHAR(50) DEFAULT 'BEGINNER',
+          class_id VARCHAR(64),
+          is_onboarded BOOLEAN DEFAULT false,
+          is_verified BOOLEAN DEFAULT true,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        )`,
+        `ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'user'`,
+        `ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(50)`,
+        `ALTER TABLE users ADD COLUMN IF NOT EXISTS specialty VARCHAR(150)`,
+        `ALTER TABLE users ADD COLUMN IF NOT EXISTS ai_level VARCHAR(50) DEFAULT 'beginner'`,
+        `ALTER TABLE users ADD COLUMN IF NOT EXISTS initial_ai_level VARCHAR(50) DEFAULT 'BEGINNER'`,
+        `ALTER TABLE users ADD COLUMN IF NOT EXISTS class_id VARCHAR(64)`,
+        `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_onboarded BOOLEAN DEFAULT false`,
+        `CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id)`,
+        `CREATE INDEX IF NOT EXISTS idx_users_class_id ON users(class_id)`,
+        `CREATE TABLE IF NOT EXISTS session_locks (
+          id VARCHAR(64) PRIMARY KEY,
+          class_id VARCHAR(64) REFERENCES classes(id) ON DELETE CASCADE,
+          session_num INT NOT NULL,
+          title VARCHAR(255) NOT NULL,
+          is_unlocked BOOLEAN DEFAULT false,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW(),
+          CONSTRAINT unq_class_session UNIQUE(class_id, session_num)
+        )`,
+        `CREATE TABLE IF NOT EXISTS assessment_results (
+          id VARCHAR(64) PRIMARY KEY,
+          user_id VARCHAR(64) UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+          class_id VARCHAR(64) REFERENCES classes(id) ON DELETE SET NULL,
+          tested_tier VARCHAR(50) NOT NULL,
+          raw_score NUMERIC(5,2) NOT NULL,
+          max_score NUMERIC(5,2) NOT NULL,
+          percentage NUMERIC(5,2) NOT NULL,
+          alignment_index VARCHAR(50) NOT NULL,
+          completed_at TIMESTAMPTZ DEFAULT NOW()
+        )`,
+        `CREATE INDEX IF NOT EXISTS idx_assessment_class_id ON assessment_results(class_id)`
+      ];
+
+      for (const sql of statements) {
+        try {
+          await pool.query(sql);
+        } catch (stmtErr: any) {
+          // Ignore benign duplicate/concurrent DDL race or retry once on deadlock (40P01)
+          if (stmtErr?.code === '40P01') {
+            await new Promise((r) => setTimeout(r, 150));
+            await pool.query(sql).catch(() => {});
+          }
+        }
+      }
+
+      isTableReady = true;
+    } catch (err: any) {
+      // If another process/request caused a transient deadlock, mark ready if tables exist
+      if (err?.code !== '40P01') {
+        console.warn('Database table check warning (non-fatal):', err?.message || err);
+      }
+    } finally {
+      tableInitPromise = null;
+    }
+  })();
+
+  return tableInitPromise;
 }
 ensureUsersTable();
 
@@ -160,6 +212,7 @@ async function getOrCreateClass(client: any, rawCode?: string, title?: string, o
   const insertRes = await client.query(
     `INSERT INTO classes (id, code, title, organization, is_leaderboard_visible, created_at, updated_at)
      VALUES ($1, $2, $3, $4, false, NOW(), NOW())
+     ON CONFLICT (code) DO UPDATE SET updated_at = classes.updated_at
      RETURNING *;`,
     [classId, code, displayTitle, orgName]
   );
@@ -167,12 +220,12 @@ async function getOrCreateClass(client: any, rawCode?: string, title?: string, o
 
   for (let s = 0; s <= 21; s++) {
     const isUnlocked = s <= 1; // Session 0 and 1 unlocked by default
-    const lockId = `lock_${classId}_s${s}`;
+    const lockId = `lock_${newClass.id}_s${s}`;
     await client.query(
       `INSERT INTO session_locks (id, class_id, session_num, title, is_unlocked, created_at, updated_at)
        VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
        ON CONFLICT (class_id, session_num) DO NOTHING;`,
-      [lockId, classId, s, SESSION_TITLES[s] || `جلسه ${s}`, isUnlocked]
+      [lockId, newClass.id, s, SESSION_TITLES[s] || `جلسه ${s}`, isUnlocked]
     );
   }
   return newClass;
@@ -1819,6 +1872,160 @@ app.post(['/api/ai/evaluate', '/ai/evaluate'], async (req, res) => {
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Contextual AI Tutor endpoint grounded in active CPMAI workbook page content
+app.post(['/api/ai/tutor', '/ai/tutor'], async (req, res) => {
+  const {
+    question,
+    history = [],
+    pageContext = {},
+    lang = 'fa'
+  } = req.body;
+
+  if (!question || typeof question !== 'string' || !question.trim()) {
+    return res.status(400).json({
+      error: lang === 'fa' ? 'لطفاً پرسش خود را وارد نمایید.' : 'Please enter a question.'
+    });
+  }
+
+  const geminiKey = process.env.GEMINI_API_KEY;
+  const gatewayKey = process.env.AI_GATEWAY_API_KEY;
+
+  const {
+    pageNumber,
+    pageTitleFa = '',
+    pageTitleEn = '',
+    cpmaiMethodSummary = '',
+    keyDeliverables = '',
+    industryTrack = '',
+    disciplineTitle = '',
+    roleTitle = '',
+    userDraft = ''
+  } = pageContext;
+
+  const systemInstruction = `You are a world-class Certified CPMAI (Cognitive Project Management for AI) Master Instructor, Socratic AI Project Auditor, and Enterprise Mentor at OWJ Business Council (مشاوران مدیریت کسب و کار اوج).
+Your job is to answer the user's questions specifically about the PMI/Cognilytica CPMAI v6 methodology, strictly grounded in the currently selected workbook page and the user's live workbook inputs.
+
+=== ACTIVE WORKBOOK PAGE CONTEXT ===
+- Selected Page / Session: ${pageNumber !== undefined ? `Page ${pageNumber}` : 'General'} (${pageTitleFa} / ${pageTitleEn})
+- CPMAI Methodology Focus for this Page: ${cpmaiMethodSummary}
+- Key Artifacts & Deliverables Expected on this Page: ${keyDeliverables}
+- User's Selected Industry Track: ${industryTrack || 'General Enterprise'}
+- User's Engineering Discipline: ${disciplineTitle || 'General Management & Engineering'}
+- User's Organizational Role: ${roleTitle || 'AI Project Manager'}
+- User's Current Live Workbook Content on this Page:
+"""
+${userDraft ? userDraft.slice(0, 6000) : '(The user has not written their draft on this page yet.)'}
+"""
+
+=== TEACHING & RESPONSE GUIDELINES ===
+1. Language: Respond in ${lang === 'fa' ? 'fluent, professional Persian (فارسی) with accurate English technical terms in parentheses where helpful' : 'clear, professional English'}.
+2. Grounding: Anchor every explanation, example, or critique directly to the current page (${pageTitleFa || pageTitleEn}) and the user's selected industry track (${industryTrack}) and discipline (${disciplineTitle}).
+3. Socratic & Practical Coaching:
+   - If the user asks how to fill out this page, give concrete, tailored examples from their discipline (${disciplineTitle}).
+   - If the user asks you to review or critique their current draft, evaluate what they wrote in "User's Current Live Workbook Content" against CPMAI Phase I standards (strengths, blind spots, and an actionable improvement).
+   - Keep responses structured, scannable (using concise bullet points and bold key terms), and under 300 words unless deep technical detail is requested.`;
+
+  // 1. Primary path: Official @google/genai SDK with gemini-3.8-flash
+  if (geminiKey) {
+    try {
+      const ai = new GoogleGenAI({
+        apiKey: geminiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          },
+        },
+      });
+
+      const formattedContents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
+      if (Array.isArray(history)) {
+        for (const msg of history.slice(-10)) {
+          if (msg && msg.text && (msg.role === 'user' || msg.role === 'model')) {
+            formattedContents.push({
+              role: msg.role,
+              parts: [{ text: String(msg.text) }],
+            });
+          }
+        }
+      }
+      formattedContents.push({
+        role: 'user',
+        parts: [{ text: question.trim() }],
+      });
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.8-flash',
+        contents: formattedContents,
+        config: {
+          systemInstruction,
+        },
+      });
+
+      const replyText = response.text || (lang === 'fa' ? 'پاسخی دریافت نشد.' : 'No response generated.');
+      return res.json({
+        reply: replyText,
+        model: 'gemini-3.8-flash',
+        groundedPage: pageNumber
+      });
+    } catch (err: any) {
+      console.error('Gemini API error in /api/ai/tutor:', err?.message || err);
+      if (!gatewayKey) {
+        return res.status(500).json({
+          error: err?.message || 'Failed to generate response from Gemini AI Tutor.'
+        });
+      }
+    }
+  }
+
+  // 2. Secondary fallback path if AI_GATEWAY_API_KEY is configured
+  if (gatewayKey) {
+    try {
+      const messages = [
+        { role: 'system', content: systemInstruction },
+        ...(Array.isArray(history)
+          ? history.slice(-8).map((m: any) => ({
+              role: m.role === 'model' ? 'assistant' : 'user',
+              content: String(m.text || '')
+            }))
+          : []),
+        { role: 'user', content: question.trim() }
+      ];
+
+      const aiResponse = await fetch('https://ai-gateway.vercel.sh/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${gatewayKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'openai/gpt-4o-mini',
+          messages
+        })
+      });
+
+      const aiData: any = await aiResponse.json();
+      if (aiData.error) {
+        return res.status(400).json({ error: aiData.error.message || 'AI Tutor error' });
+      }
+
+      const replyText = aiData.choices?.[0]?.message?.content || 'No response generated.';
+      return res.json({
+        reply: replyText,
+        model: aiData.model || 'gpt-4o-mini',
+        groundedPage: pageNumber
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  return res.status(500).json({
+    error: lang === 'fa'
+      ? 'کلید API هوش مصنوعی در تنظیمات سرور فعال نشده است. لطفاً از بخش Settings > Secrets کلید GEMINI_API_KEY را بررسی فرمایید.'
+      : 'AI API key is not configured on the server. Please check GEMINI_API_KEY in Settings > Secrets.'
+  });
 });
 
 export default app;

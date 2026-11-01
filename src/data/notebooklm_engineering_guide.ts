@@ -32,6 +32,18 @@ export interface PresentationInfographicBlueprint {
   outputPreviewHighlightsEn: string[];
 }
 
+export interface ExerciseSubScenario {
+  id: string;
+  number: number;
+  titleFa: string;
+  titleEn: string;
+  promptFa: string;
+  promptEn: string;
+  expectedKeyFa: string[];
+  expectedKeyEn: string[];
+  sampleLetterOutputFa?: string;
+}
+
 export interface NotebookLmExercise {
   id: string;
   exerciseNumber: number;
@@ -54,6 +66,7 @@ export interface NotebookLmExercise {
   promptToCopyEn: string;
   successVerificationFa: string[];
   successVerificationEn: string[];
+  subScenarios?: ExerciseSubScenario[];
 }
 
 // 1. CORE CAPABILITIES OF NOTEBOOKLM
@@ -330,6 +343,49 @@ Review all uploaded letters regarding the utility clash in Station 12.
 3. Identify the top 4 critical priority topics for this evening's coordination meeting.`,
     practicalValueFa: 'تسلط کامل مدیر پروژه بر جزییات کارگاه بدون غرق شدن در صدها برگه گزارش روزانه کاغذی.',
     practicalValueEn: 'Empowers the Project Director with full operational command without drowning in paperwork.'
+  },
+  {
+    id: 'hr_admin',
+    departmentFa: 'منابع انسانی، اداری و رفاهی (HR & Admin)',
+    departmentEn: 'Human Resources, Admin & Site Welfare',
+    managerRoleFa: 'مدیر منابع انسانی و امور اداری پروژه (پروژه مترو خط ایکس)',
+    managerRoleEn: 'HR & Administrative Affairs Manager (Metro Line X Project)',
+    iconName: 'Users',
+    colorTheme: '#7c3aed',
+    recommendedSourcesFa: [
+      'منبع ۱: گزیده مواد منابع انسانی، رفاهی، بیمه‌ای و کارگاهی از قرارداد احداث مترو خط ایکس (مواد ۱۸، ۲۰-ح، ۲۱-ج، ۲۴-ب، ۲۵ و بند ۴۲-۱)',
+      'منبع ۲: بخشنامه داخلی کنترل اضافه‌کاری پرسنل سازمان پیمانکار (HR-INST-1403/07) و دیتابیس کارکرد ماهانه دستگاه‌های کارت‌زن (ایستگاه S-01، ایستگاه S-02، واحد TBM و ستاد)',
+      'جدول حداقل متراژ فضاهای الزامی تجهیز کارگاه (صفحه ۵۴ قرارداد مترو خط ایکس)',
+      'لیست‌های بیمه تامین اجتماعی و گزارش‌های روزانه تاییدشده مهندسین مشاور ناظر'
+    ],
+    recommendedSourcesEn: [
+      'Source 1: HR, Welfare, Insurance & Site Clauses from Metro Line X Contract (Articles 18, 20-H, 21-C, 24-B, 25 & Clause 42-1)',
+      'Source 2: Internal Contractor Overtime Directive (HR-INST-1403/07) & Monthly Time-Card Attendance Logs (Station S-01, Station S-02, TBM, HQ)',
+      'Mandatory Site Camp Space Allocation Table (Contract Page 54)',
+      'Social Security (SSO) certified rosters & consultant-approved daily logs'
+    ],
+    keyDeliverablesFa: [
+      'تقاطع‌گیری هوشمند بین «الزامات بیرونی پیمان (کارفرما/مشاور)» و «ضوابط کنترلی داخلی (سازمان پیمانکار)» برای کشف انحرافات اضافه‌کاری و شب‌کاری',
+      'بررسی رعایت مهلت اطلاع‌رسانی قبلی به مهندس مشاور (بند ۴۲-۱: یک هفته قبل برای شب‌کاری و ۲۴ ساعت قبل برای اضافه‌کاری روز) و خط قرمز خستگی مفرط (۱۴ روز کار متوالی)',
+      'تفکیک تعهدات متراژ فضاهای اداری/رفاهی پرسنل پیمانکار در برابر عوامل کارفرما، مدیر طرح و مهندس مشاور (ماده ۲۰-ح و صفحه ۵۴)',
+      'نگارش خودکار نامه‌های رسمی اخطار درون‌سازمانی به سرپرستان کارگاه و طراحی کوییز ۴ گزینه‌ای ارزیابی تسلط کارشناسان HR'
+    ],
+    keyDeliverablesEn: [
+      'Cross-referencing External Contract Obligations (Client/Consultant) vs. Internal HR Controls (Contractor Organization)',
+      'Auditing Clause 42-1 notice deadlines (7 days for night shift, 24h for day overtime) & 14-day consecutive fatigue red-lines',
+      'Comparing contractor vs. client/consultant camp space allocations (Article 20-H & Page 54) and catering/service staff',
+      'Drafting formal internal warning memos to site superintendents & generating 4-option compliance quizzes'
+    ],
+    samplePromptFa: `با تقاطع‌گیری بین "منبع ۱ (قرارداد مترو خط ایکس)" و "منبع ۲ (بخشنامه داخلی و کارکرد ماهانه سازمان پیمانکار)":
+۱. یک جدول تحلیلی از وضعیت اضافه‌کاری ۴ واحد پروژه (ایستگاه مرکزی S-01، ایستگاه غربی S-02، واحد TBM، و دفتر فنی/ستاد) تهیه کن و مشخص کن در هر واحد آیا سقف مجاز داخلی و الزامات قراردادی (ماده ۲۵ و بند ۴۲-۱) رعایت شده است یا خیر؟
+۲. بر اساس ماده ۲۰-ح و جدول صفحه ۵۴ قرارداد، متراژ فضاهای الزامی برای پرسنل خود پیمانکار در مقایسه با عوامل کارفرما و نظارت چقدر است و چه تعداد نیروی خدماتی و وعده غذایی باید تامین شود؟
+۳. یک نامه رسمی درون‌سازمانی از طرف "مدیر منابع انسانی سازمان پیمانکار" به "سرپرست کارگاه ایستگاه شماره ۱ (S-01)" بابت عدم اطلاع‌رسانی ۱ هفته قبل شب‌کاری به مهندس مشاور و کارکرد ۱۸ روز متوالی ۳ تکنسین سازه نگهبان بنویس.`,
+    samplePromptEn: `By cross-referencing "Source 1 (Metro Line X Contract)" and "Source 2 (Internal Contractor Overtime Directive & Monthly Logs)":
+1. Build an analytical compliance table across all 4 project units (Station S-01, Station S-02, TBM Unit, and Technical Office/HQ) checking internal overtime caps, Clause 42-1 prior notice rules, and HSE fatigue risks.
+2. Extract the mandatory space allocation table (Page 54 & Article 20-H) comparing contractor staff facilities vs. client/consultant spaces and catering duties.
+3. Draft an official internal warning letter from the Contractor's HR Manager to the Station S-01 Site Superintendent regarding unnotified night concrete pouring and 18-day consecutive work violations.`,
+    practicalValueFa: 'جلوگیری از سوخت شدن هزینه‌های شب‌کاری و اضافه‌کاری در صورت‌وضعیت‌ها (ماده ۲۵ و بند ۴۲-۱) و پیشگیری از حوادث ناشی از خستگی مفرط در کارگاه‌های زیرزمینی.',
+    practicalValueEn: 'Prevents financial rejection of night-shift overtime claims under Clause 42-1 and eliminates underground fatigue hazards.'
   }
 ];
 
@@ -465,6 +521,56 @@ Each slide must include: Title, Core Takeaway, 3 Documented Bullet Points with e
       'Transforms dry contracts into engaging live discussions',
       'Listen on the go during project commute',
       'Easily shareable MP3 files with project stakeholders'
+    ]
+  },
+  {
+    id: 'hr_overtime_compliance_blueprint',
+    titleFa: 'ممیزی تطبیقی منابع انسانی، سقف اضافه‌کاری و تعهدات رفاهی کارگاه (HR & Contract Compliance Blueprint)',
+    titleEn: 'HR Overtime Audit, Camp Welfare & Contractual Compliance Blueprint (Metro Line X)',
+    categoryFa: 'منابع انسانی و کنترل کارگاهی',
+    categoryEn: 'HR & Site Administration',
+    descriptionFa: 'چگونه کارشناسان منابع انسانی و امور اداری در NotebookLM بین «الزامات بیرونی پیمان (قرارداد مترو خط ایکس)» و «ضوابط کنترلی داخلی (بخشنامه اضافه‌کاری و گزارش کارت‌زن سازمان پیمانکار)» تقاطع‌گیری کرده و گزارش ممیزی، جدول متراژ فضاهای رفاهی و مکاتبات اخطار کارگاهی تولید کنند.',
+    descriptionEn: 'Cross-analyze external EPC contract clauses (Metro Line X) against internal HR overtime directives to generate compliance matrices, welfare space audits, and formal warning letters.',
+    stepByStepGuideFa: [
+      '۱. دو منبع متنی شامل «منبع ۱: گزیده مواد منابع انسانی قرارداد مترو خط ایکس» و «منبع ۲: بخشنامه داخلی کنترل اضافه‌کاری و کارکرد ماهانه سازمان پیمانکار» را از طریق Paste Text یا فایل نمونه در NotebookLM بارگذاری کنید.',
+      '۲. پرامپت تقاطع‌گیری و ممیزی منابع انسانی (پایین) را در چت NotebookLM ارسال کنید تا هر ۴ واحد (ایستگاه مرکزی S-01، ایستگاه غربی S-02، واحد TBM و ستاد) بررسی شوند.',
+      '۳. جدول متراژ فضاهای رفاهی و اداری (صفحه ۵۴ قرارداد) و تعهدات تغذیه و نیروهای خدماتی (ماده ۲۰-ح) را به تفکیک عوامل پیمانکار و کارفرما/مشاور استخراج نمایید.',
+      '۴. پیش‌نویس نامه رسمی اخطار درون‌سازمانی به سرپرست کارگاه متخلف (S-01) و کوییز ۴ گزینه‌ای ارزیابی کارشناسان منابع انسانی را مستقیماً از NotebookLM تحویل بگیرید.'
+    ],
+    stepByStepGuideEn: [
+      '1. Load both sources (Source 1: Metro Line X HR Contract Clauses & Source 2: Internal Contractor Overtime Directive & Monthly Logs) into NotebookLM via Paste Text or file upload.',
+      '2. Run the HR Cross-Compliance Audit Prompt below to evaluate Station S-01, Station S-02, TBM Unit, and HQ.',
+      '3. Extract the mandatory camp space square-meter matrix (Contract Page 54) and catering/janitorial obligations (Article 20-H).',
+      '4. Generate the formal internal warning memo to the S-01 Site Superintendent and a 5-question multiple-choice quiz.'
+    ],
+    copyablePromptFa: `با تقاطع‌گیری دقیق بین «منبع شماره ۱ (گزیده الزامات منابع انسانی قرارداد مترو خط ایکس)» و «منبع شماره ۲ (بخشنامه داخلی HR-INST-1403/07 و کارکرد ماهانه سازمان پیمانکار)» خروجی‌های مدیریتی زیر را تولید کن:
+
+بخش اول (داشبورد ممیزی اضافه‌کاری و شب‌کاری ۴ واحد):
+یک جدول مقایسه‌ای برای ۴ واحد (۱. ایستگاه مرکزی S-01، ۲. ایستگاه غربی S-02، ۳. واحد TBM قطعه غربی، ۴. دفتر فنی و ستاد) رسم کن که شامل ستون‌های زیر باشد:
+- میانگین اضافه‌کاری واقعی در برابر سقف مجاز داخلی سازمان پیمانکار
+- وضعیت رعایت بند ۴۲-۱ ضمیمه شرایط خصوصی (اطلاع‌رسانی ۱ هفته قبل برای کار شبانه و ۲۴ ساعت قبل برای اضافه‌کاری روز) و ماده ۲۵ شرایط خصوصی
+- وضعیت رعایت خط قرمز ایمنی و خستگی مفرط (حداکثر ۱۱۰ ساعت یا ۱۴ روز کار متوالی طبق بند ۹-۱۲)
+- پیامد مالی و ادعایی برای سازمان پیمانکار
+
+بخش دوم (اینفوگرافیک تعهدات رفاهی و جدول متراژ فضاهای صفحه ۵۴):
+- تفکیک دقیق متراژ فضاهای الزامی برای پرسنل خود پیمانکار در مقابل فضاهای کارفرما، مدیر طرح و مهندس مشاور
+- تعهدات تامین غذا (۳ وعده برای حداقل ۱۰ نفر) و نفرات خدماتی مقیم (کارگر آزمایشگاه و آبدارچی مجزا طبق ماده ۲۰-ح)
+
+بخش سوم (نامه رسمی اخطار درون‌سازمانی):
+یک نامه رسمی با فرمت مکاتبات اداری سازمان پیمانکار از طرف «مدیر منابع انسانی و امور اداری پروژه مترو خط ایکس» به «سرپرست کارگاه ایستگاه شماره ۱ (S-01)» بنویس و ضمن استناد به بند ۴۲-۱، ماده ۲۵ و بند ۹-۱۲ قرارداد، ۳ دستورالعمل کنترلی الزامی برای ماه آینده ابلاغ کن.`,
+    copyablePromptEn: `Cross-reference Source 1 (Metro Line X Contract HR Clauses) and Source 2 (Internal Contractor Overtime Directive & Monthly Attendance Logs) to generate:
+1. A 4-unit Overtime & Night-Shift Compliance Audit Table (Station S-01, Station S-02, TBM, HQ) checking internal caps, Clause 42-1 notice deadlines, Article 25 insurance rosters, and 14-day fatigue red-lines.
+2. A breakdown of mandatory camp space allocations (Page 54) and catering/service staff duties (Article 20-H) for contractor vs. client/consultant teams.
+3. A formal internal warning memo from the Contractor HR Manager to the S-01 Site Superintendent with corrective actions for the upcoming month.`,
+    outputPreviewHighlightsFa: [
+      'کشف فوری تخلف ایستگاه شماره ۱ (S-01) در عدم ارسال نامه ۱ هفته قبل شب‌کاری به مهندس مشاور (بند ۴۲-۱) و کارکرد ۱۸ روز پیاپی ۳ تکنسین',
+      'تفکیک دقیق متراژ فضاهای کارگاهی (۱۵۰ مترمربع اتاق کارگری، ۳۰ مترمربع اجرایی، ۱۸ مترمربع دفتر فنی در برابر فضاهای نظارت و کارفرما)',
+      'تولید نامه رسمی اداری آماده امضا با استناد هم‌زمان به بخشنامه داخلی HR-INST-1403/07 و مواد ۲۵ و ۴۲-۱ پیمان'
+    ],
+    outputPreviewHighlightsEn: [
+      'Pinpoints Station S-01 night-shift notice violation under Clause 42-1 and 18-day consecutive work safety breach',
+      'Contrasts contractor camp space requirements vs. client/consultant offices and catering duties',
+      'Produces a sign-ready formal Persian administrative memo citing both internal directives and contract articles'
     ]
   }
 ];
@@ -655,6 +761,161 @@ export const NOTEBOOKLM_EXERCISES: NotebookLmExercise[] = [
       'Clear, visual block layout for field technicians',
       'Underground safety hazards properly emphasized',
       'Actionable rapid response protocol'
+    ]
+  },
+  {
+    exerciseNumber: 5,
+    id: 'ex5_hr_metro_line10_compliance',
+    titleFa: 'تمرین پنجم (ویژه منابع انسانی): تقاطع‌گیری قرارداد مترو خط ایکس و بخشنامه داخلی اضافه‌کاری سازمان پیمانکار',
+    titleEn: 'Exercise 5 (HR & Admin Masterclass): Metro Line X Contract vs. Internal Contractor Overtime Audit',
+    targetDepartmentFa: 'منابع انسانی، امور اداری، رفاهی و پشتیبانی کارگاه',
+    targetDepartmentEn: 'Human Resources, Admin & Site Welfare',
+    estimatedMinutes: 20,
+    difficultyFa: 'جامع و کاربردی (۴ سناریو)',
+    difficultyEn: 'Comprehensive (4 Scenarios)',
+    requiredSourceFa: 'منبع ۱ (گزیده مواد منابع انسانی قرارداد مترو خط ایکس) + منبع ۲ (بخشنامه داخلی کنترل اضافه‌کاری و کارکرد ماهانه سازمان پیمانکار)',
+    requiredSourceEn: 'Source 1 (Metro Line X HR Contract Clauses) + Source 2 (Internal Contractor Overtime Directive & Monthly Attendance Logs)',
+    sourceDownloadNoteFa: 'کارشناسان واحد منابع انسانی می‌توانند هر دو منبع را از کارت زیر دانلود یا کپی کرده و از طریق گزینه Paste Text به عنوان دو منبع مجزا در NotebookLM وارد کنند.',
+    sourceDownloadNoteEn: 'HR specialists can copy or download both sources below and load them via Paste Text into NotebookLM.',
+    objectiveFa: 'کسب مهارت تحلیل تطبیقی بین «الزامات بیرونی پیمان (کارفرما/مشاور)» و «ضوابط کنترلی داخلی (سازمان پیمانکار)»، کشف انحرافات اضافه‌کاری و شب‌کاری، استخراج تعهدات رفاهی و نگارش مکاتبات کنترلی.',
+    objectiveEn: 'Master cross-compliance analysis between external EPC contract terms and internal HR controls, audit site overtime logs, extract welfare obligations, and draft formal corrective memos.',
+    instructionsFa: [
+      'وارد سایت notebooklm.google.com شوید و یک نوت‌بوک جدید به نام «ممیزی منابع انسانی - پروژه مترو خط ایکس» بسازید.',
+      'منبع شماره ۱ (گزیده مواد منابع انسانی قرارداد مترو خط ایکس) و منبع شماره ۲ (بخشنامه داخلی کنترل اضافه‌کاری و کارکرد ماهانه سازمان پیمانکار) را از بخش منابع همین صفحه کپی کرده و با گزینه Paste Text در NotebookLM بارگذاری کنید.',
+      'هر یک از ۴ سناریوی تمرینی زیر (۱. ممیزی اضافه‌کاری، ۲. بررسی تعهدات رفاهی و متراژ فضاها، ۳. صدور اخطار رسمی درون‌سازمانی به سرپرست کارگاه S-01، و ۴. طراحی کوییز ۴ گزینه‌ای) را انتخاب و پرامپت آن را در چت NotebookLM اجرا نمایید.',
+      'پاسخ‌های تولیدشده توسط NotebookLM را با «کلید ارزیابی و نمونه نامه استاندارد» در هر تمرین مقایسه و صحت‌سنجی کنید.'
+    ],
+    instructionsEn: [
+      'Open notebooklm.google.com and create a new notebook titled "HR Compliance - Metro Line X".',
+      'Copy Source 1 (Metro Line X HR Contract Extract) and Source 2 (Internal Contractor Overtime Directive & Monthly Logs) from the source cards below and add them via Paste Text.',
+      'Run the 4 practice scenarios below (1. Overtime Audit, 2. Welfare & Space Allocation, 3. Formal Warning Letter to S-01 Superintendent, 4. 4-Option Quiz Generation).',
+      'Verify NotebookLM outputs against the provided Evaluation Keys and Standard Internal Letter template.'
+    ],
+    promptToCopyFa: `با تقاطع‌گیری بین "منبع ۱ (قرارداد مترو خط ایکس)" و "منبع ۲ (بخشنامه داخلی و کارکرد ماهانه سازمان پیمانکار)"، یک جدول تحلیلی از وضعیت اضافه‌کاری ۴ واحد پروژه در مهرماه تهیه کن. مشخص کن در هر واحد:
+۱. آیا سقف مجاز داخلی رعایت شده است؟
+۲. آیا الزامات قراردادی (ماده ۲۵ شرایط خصوصی و بند ۴۲-۱ ضمیمه شرایط خصوصی) رعایت شده است؟
+۳. چه ریسک‌های مالی یا ایمنی (HSE) برای سازمان پیمانکار ایجاد شده است؟`,
+    promptToCopyEn: `By cross-referencing "Source 1 (Metro Line X Contract)" and "Source 2 (Internal Contractor Directive & Monthly Attendance Logs)", prepare an analytical table of the overtime status of the 4 project units in October. Specify for each unit:
+1. Was the internal overtime cap respected?
+2. Were contractual requirements (Article 25 Particular Conditions and Clause 42-1 Annex) met?
+3. What financial or safety (HSE) risks were created for the Contractor Organization?`,
+    successVerificationFa: [
+      'کشف نقض سه‌گانه در ایستگاه مرکزی (S-01): ۱۰۵ ساعت اضافه‌کاری (سقف ۸۵)، ۱۸ روز کار متوالی ۳ تکنسین (سقف ۱۴ روز)، و عدم اطلاع‌رسانی ۱ هفته قبل شب‌کاری به مهندس مشاور (بند ۴۲-۱)',
+      'تشخیص انحراف سقف داخلی در دفتر فنی/متره (۹۲ ساعت بدون مجوز) و اداری/تدارکات ستاد (۶۸ ساعت در برابر سقف ۵۰ ساعت) و تایید انطباق کامل ایستگاه غربی (S-02) و TBM',
+      'استخراج دقیق متراژ فضاهای صفحه ۵۴ قرارداد، تعهدات ماده ۲۰-ح و نگارش نامه رسمی اخطار به سرپرست کارگاه S-01'
+    ],
+    successVerificationEn: [
+      'Identifies triple violation at Central Station (S-01): 105h overtime vs 85h cap, 18 consecutive workdays vs 14-day safety limit, and missed 7-day night-work notice to Consultant (Clause 42-1)',
+      'Detects internal cap overruns in Technical Office (92h) and HQ Admin (68h vs 50h) while confirming full compliance at West Station (S-02) and TBM',
+      'Extracts Page 54 camp space allocations, Article 20-H catering rules, and drafts a formal internal warning memo to S-01 Superintendent'
+    ],
+    subScenarios: [
+      {
+        id: 'hr_scen_1_overtime_audit',
+        number: 1,
+        titleFa: 'تمرین ۱: ممیزی اضافه‌کاری داخلی و کشف انحرافات (پرامپت تحلیلی)',
+        titleEn: 'Practice 1: Internal Overtime Audit & Deviation Discovery (Analytical Prompt)',
+        promptFa: `با تقاطع‌گیری بین "منبع ۱ (قرارداد مترو خط ایکس)" و "منبع ۲ (بخشنامه داخلی و کارکرد ماهانه سازمان پیمانکار)"، یک جدول تحلیلی از وضعیت اضافه‌کاری ۴ واحد پروژه در مهرماه تهیه کن. مشخص کن در هر واحد:
+۱. آیا سقف مجاز داخلی رعایت شده است؟
+۲. آیا الزامات قراردادی (ماده ۲۵ شرایط خصوصی و بند ۴۲-۱ ضمیمه شرایط خصوصی) رعایت شده است؟
+۳. چه ریسک‌های مالی یا ایمنی (HSE) برای سازمان پیمانکار ایجاد شده است؟`,
+        promptEn: `By cross-referencing "Source 1 (Metro Line X Contract)" and "Source 2 (Internal Contractor Directive & Monthly Attendance Logs)", prepare an analytical table of the overtime status of the 4 project units in October. Specify for each unit:
+1. Was the internal overtime cap respected?
+2. Were contractual requirements (Article 25 Particular Conditions and Clause 42-1 Annex) met?
+3. What financial or safety (HSE) risks were created for the Contractor Organization?`,
+        expectedKeyFa: [
+          'ایستگاه مرکزی (S-01): نقض سقف داخلی (۱۰۵ ساعت در برابر سقف ۸۵ ساعت) + نقض خط قرمز ایمنی (۱۸ روز کار متوالی ۳ تکنسین در برابر سقف ۱۴ روز) + نقض بند ۴۲-۱ ضمیمه شرایط خصوصی (عدم اطلاع‌رسانی ۱ هفته قبل به مهندس مشاور الف برای کار شبانه). پیامد: رد شدن کارکرد شبانه توسط مشاور و عدم امکان دریافت اضافه‌هزینه کار در شب طبق ماده ۲۵ شرایط خصوصی.',
+          'دفتر فنی و ستاد: انحراف از سقف داخلی در بخش متره (۹۲ ساعت در برابر سقف ۶۵/۸۰ ساعت بدون مجوز) و بخش اداری/تدارکات (۶۸ ساعت در برابر ۵۰ ساعت).',
+          'ایستگاه غربی (S-02) و واحد TBM: انطباق کامل با سقف داخلی و ضوابط بند ۴۲-۱ و ماده ۲۵ قرارداد.'
+        ],
+        expectedKeyEn: [
+          'Central Station (S-01): Breached internal cap (105h vs 85h) + Breached HSE fatigue red-line (18 consecutive days for 3 shoring technicians vs 14-day limit) + Breached Clause 42-1 (notified Consultant A 2 days after night concrete pour instead of 1 week prior). Consequence: Rejection of night hours and loss of Article 25 reimbursement.',
+          'Technical Office & HQ: Breached internal caps in Quantity Surveying (92h vs 65/80h without approval) and HQ Admin/Procurement (68h vs 50h cap).',
+          'West Station (S-02) & TBM Unit: Full compliance with internal caps, Clause 42-1 advance notice, and Article 25 continuous 24/7 tunneling rules.'
+        ]
+      },
+      {
+        id: 'hr_scen_2_welfare_spaces',
+        number: 2,
+        titleFa: 'تمرین ۲: بررسی تعهدات رفاهی و پشتیبانی پرسنل سازمان در مقابل عوامل کارفرما',
+        titleEn: 'Practice 2: Contractor Staff Welfare & Camp Spaces vs. Client/Consultant Personnel',
+        promptFa: `بر اساس منبع ۱ (ماده ۲۰-ح شرایط خصوصی و جدول متراژ فضاهای صفحه ۵۴)، واحد منابع انسانی و پشتیبانی کارگاه برای استقرار پرسنل خود سازمان پیمانکار در مقایسه با عوامل کارفرما و نظارت، چه فضاهایی با چه متراژی باید تأمین کند؟ همچنین چه تعداد نیروی انسانی خدماتی باید به هزینه پیمانکار در اختیار مشاور، مدیر طرح و آزمایشگاه قرار گیرد؟`,
+        promptEn: `Based on Source 1 (Article 20-H Particular Conditions and the space allocation table on Page 54), what spaces and square meters must HR & Site Support provide for the Contractor's own personnel compared to Client and Supervision teams? Also, how many service staff and meals must be provided at the Contractor's expense?`,
+        expectedKeyFa: [
+          'فضاهای پرسنل خود سازمان پیمانکار: سرپرست کارگاه (۱۲ مترمربع)، دفتر فنی (۱۸ مترمربع)، پرسنل اجرایی (۳۰ مترمربع)، نقشه‌برداری (۹ مترمربع)، پرسنل اداری و خدماتی (۲۰ مترمربع)، واحد HSE و کمک‌های اولیه (۱۲ مترمربع)، اتاق‌های کارگری (۱۵۰ مترمربع)، سرویس بهداشتی کارگری (۸ مترمربع)، حمام شبانه‌روزی (۳ باب - ۶ مترمربع).',
+          'فضاهای کارفرما و نظارت: نماینده کارفرما (۹ مترمربع)، سرپرست نظارت (۹ مترمربع)، نظارت (۱۳ مترمربع)، اتاق جلسات (۱۸ مترمربع)، آزمایشگاه (۹ مترمربع).',
+          'تأمین نیروی خدماتی و تغذیه: ۱ نفر کارگر تمام‌وقت برای آزمایشگاه + ۱ نفر آبدارچی مجزا و تمام‌وقت برای عوامل کارفرما، مدیر طرح و مشاور + تأمین غذای سه‌وعده برای حداقل ۱۰ نفر از عوامل کارفرما و مشاورین مقیم در هر بخش.'
+        ],
+        expectedKeyEn: [
+          'Contractor Staff Spaces: Site Superintendent (12 m²), Technical Office (18 m²), Execution Staff (30 m²), Surveying (9 m²), Admin & Services (20 m²), HSE & First Aid (12 m²), Workers Dormitories (150 m²), Workers Restrooms (8 m²), 24/7 Hot Showers (3 units - 6 m²).',
+          'Client & Supervision Spaces: Client Representative (9 m²), Chief Supervisor (9 m²), Supervision Office (13 m²), Meeting Room (18 m²), Laboratory (9 m²).',
+          'Service Staff & Catering: 1 full-time laboratory worker + 1 dedicated full-time janitor/tea-server for Client/Project Manager/Consultant + 3 daily meals across shifts for at least 10 resident Client/Consultant personnel per section.'
+        ]
+      },
+      {
+        id: 'hr_scen_3_warning_letter',
+        number: 3,
+        titleFa: 'تمرین ۳: صدور اخطار و دستورالعمل داخلی به سرپرست کارگاه (مکاتبه درون‌سازمانی)',
+        titleEn: 'Practice 3: Issuing Formal Internal Warning & Corrective Directive to Site Superintendent',
+        promptFa: `بر اساس انحرافات کشف‌شده در ایستگاه مرکزی (S-01) در منبع ۲ و الزامات بند ۴۲-۱ ضمیمه شرایط خصوصی و ماده ۲۵ شرایط خصوصی در منبع ۱، یک نامه رسمی درون‌سازمانی از طرف "مدیر منابع انسانی سازمان پیمانکار" به "سرپرست کارگاه ایستگاه مرکزی (S-01)" بنویس. در این نامه ضمن اشاره به خطای رخ‌داده در عدم اطلاع‌رسانی به موقع کار شبانه به مهندسین مشاور الف و ریسک خستگی مفرط ۳ نفر تکنسین سازه نگهبان، دستورالعمل اصلاحی برای ماه آینده را ابلاغ کن.`,
+        promptEn: `Based on the deviations discovered at Central Station (S-01) in Source 2 and the requirements of Clause 42-1 and Article 25 in Source 1, write a formal internal memo from the "HR Manager of the Contractor Organization" to the "Site Superintendent of Central Station (S-01)" highlighting the late night-work notice to Consultant A, the 18-day fatigue risk for 3 shoring technicians, and mandatory corrective rules for next month.`,
+        expectedKeyFa: [
+          'استناد دقیق به بند ۴۲-۱ ضمیمه شرایط خصوصی (الزام اطلاع‌رسانی ۱ هفته قبل برای کار شبانه و ۲۴ ساعت قبل برای اضافه‌کاری روز) و ماده ۲۵ شرایط خصوصی (لزوم تایید در گزارش روزانه و لیست بیمه تامین اجتماعی).',
+          'اشاره به تجاوز از سقف داخلی (۱۰۵ ساعت در برابر ۸۵ ساعت) و نقض خط قرمز ایمنی (۱۸ روز کار متوالی ۳ تکنسین سازه نگهبان در برابر سقف ۱۴ روز موضوع بند ۹-۱۲).',
+          'ابلاغ ۳ دستورالعمل اجرایی برای ماه آینده: ۱. استراحت جبرانی و مسدودسازی کارت‌زن بالای ۱۴ روز متوالی، ۲. ارسال برنامه شب‌کاری حداقل ۸ روز قبل به دفتر فنی و HR، ۳. رعایت سقف ۸۵ ساعت اضافه‌کاری.'
+        ],
+        expectedKeyEn: [
+          'Cites Clause 42-1 (1-week advance notice for night work, 24h for day overtime) and Article 25 (daily log confirmation & SSO insurance roster requirement).',
+          'Addresses the 105h overtime overrun (vs 85h cap) and the 18-day consecutive work safety violation for 3 shoring technicians (Clause 9-12).',
+          'Enforces 3 corrective actions: immediate compensatory rest & time-card block at 14 days, submitting night-work plans 8 days in advance, and enforcing the 85h monthly cap.'
+        ],
+        sampleLetterOutputFa: `سازمان مهندسی و ساخت پیمانکار - مکاتبات داخلی
+پروژه: احداث مترو خط ایکس (Line X)
+شماره: CTR-MX-HR-INT-[شماره]/[سال]
+تاریخ: [تاریخ شمسی]
+پیوست: گزارش کارکرد ماهانه دستگاه کارت‌زن ایستگاه S-01
+
+از: مدیریت منابع انسانی و امور اداری پروژه مترو خط ایکس
+به: جناب آقای [نام سرپرست کارگاه] - سرپرست محترم کارگاه ایستگاه مرکزی (S-01)
+رونوشت: مدیریت محترم پروژه / مدیریت محترم فنی و مهندسی / واحد HSE مرکزی
+موضوع: اعلام انحرافات کارکرد ماهانه، الزام به رعایت سقف اضافه‌کاری و ضوابط اطلاع‌رسانی کار در شب
+مرجع: بخشنامه داخلی شماره HR-INST-1403/07 و مفاد ماده ۲۵ و بند ۴۲-۱ شرایط خصوصی پیمان
+
+با سلام و احترام؛
+
+بر اساس بررسی‌های صورت‌گرفته بر روی داده‌های سامانه حضور و غیاب کارگاه ایستگاه مرکزی (S-01) در ماه گذشته و تطبیق آن با ضوابط داخلی سازمان و الزامات قراردادی پیمان، موارد عدم انطباق زیر در مدیریت ساعات کار پرسنل آن کارگاه احصا گردیده است:
+
+۱. عدم رعایت مهلت قراردادی اطلاع‌رسانی کار در شب: علی‌رغم ثبت ۴۰ ساعت شب‌کاری به ازای هر نفر برای ۱۲ نفر از پرسنل اجرایی سیویل جهت عملیات بتن‌ریزی، مکاتبه رسمی با مهندسین مشاور ناظر (مشاور الف) و مدیر طرح دو روز پس از شروع عملیات ارسال شده است. مطابق نص صریح بند ۴۲-۱ ضمیمه شرایط خصوصی پیمان، پیمانکار موظف است برنامه کار شبانه را یک هفته قبل و اضافه‌کاری در ساعات روز را ۲۴ ساعت قبل به مهندس مشاور و مدیر طرح اطلاع دهد و عدم اطلاع به موقع موجب رد شدن کار انجام‌شده در ساعات مزبور خواهد شد. همچنین به استناد ماده ۲۵ شرایط خصوصی پیمان، پذیرش اضافه‌هزینه‌های نیروی انسانی در شیفت شب منوط به تایید در گزارش‌های روزانه و تطابق با لیست‌های مستند سازمان تأمین اجتماعی است که به دلیل تأخیر در اطلاع‌رسانی، این مبالغ فاقد وجاهت ادعایی در صورت‌وضعیت‌ها می‌باشد.
+
+۲. تجاوز از سقف اضافه‌کاری داخلی و خط قرمز ایمنی (HSE): میانگین اضافه‌کاری پرسنل اجرایی آن کارگاه به ۱۰۵ ساعت رسیده که ۲۰ ساعت بالاتر از سقف مجاز داخلی (۸۵ ساعت) است. علاوه بر این، ۳ نفر از تکنسین‌های بخش سازه نگهبان به مدت ۱۸ روز متوالی بدون روز استراحت در کارگاه حضور داشته‌اند که نقض صریح ضوابط کنترل خستگی و ایمنی عملیات زیرزمینی (موضوع بند ۹-۱۲ ضمیمه شرایط خصوصی پیمان) محسوب می‌گردد.
+
+در همین راستا، مقتضی است از ابتدای ماه جاری اقدامات کنترلی زیر به طور دقیق در آن کارگاه اجرا گردد:
+- برنامه‌ریزی جهت استراحت جبرانی و چرخش شیفت فوری برای ۳ نفر تکنسین سازه نگهبان و مسدودسازی ثبت کارکرد بیش از ۱۴ روز متوالی در دستگاه کارت‌زن کارگاه.
+- ارسال برنامه نیازمندی‌های کار شبانه حداقل ۸ روز پیش از شروع عملیات به دفتر فنی و واحد منابع انسانی جهت صدور به موقع نامه رسمی به مهندسین مشاور ناظر و مدیر طرح.
+- کنترل سقف اضافه‌کاری پرسنل کارگاه در محدوده مصوب ۸۵ ساعت ماهانه.
+
+بدیهی است از ابتدای ماه جاری، هرگونه ساعت اضافه‌کاری و شب‌کاری در کارگاه‌های ایستگاهی که فاقد نامه اطلاع‌رسانی قبلی به دستگاه نظارت و تایید در گزارش روزانه کارگاهی باشد، در محاسبات کارکرد ماهانه قابل تایید نخواهد بود.
+
+[نام و نام خانوادگی]
+مدیر منابع انسانی و امور اداری
+پروژه احداث مترو خط ایکس`
+      },
+      {
+        id: 'hr_scen_4_quiz_generation',
+        number: 4,
+        titleFa: 'تمرین ۴: طراحی کوییز ۴ گزینه‌ای توسط NotebookLM',
+        titleEn: 'Practice 4: Automated 4-Option Compliance Quiz Generation by NotebookLM',
+        promptFa: `بر اساس هر دو منبع بارگذاری‌شده، ۵ سوال چهارگزینه‌ای استاندارد به همراه کلید پاسخ تشریحی طراحی کن که تسلط کارشناس منابع انسانی بر "تفاوت سقف‌های داخلی سازمان پیمانکار" و "الزامات قراردادی پروژه مترو خط ایکس" را بسنجد.`,
+        promptEn: `Based on both uploaded sources, design 5 standard multiple-choice questions with detailed answer keys to test an HR specialist's mastery of the difference between "Internal Contractor Caps" and "Metro Line X Contractual Requirements".`,
+        expectedKeyFa: [
+          'طراحی ۵ سوال چهارگزینه‌ای دقیق از اعداد و مواد هر دو سند (مثلاً مهلت ۲۰ام هر ماه برای گزارش ماهانه ماده ۱۸، مهلت ۱ هفته قبل شب‌کاری بند ۴۲-۱، سقف ۵۰/۶۵/۸۵/۱۰۰ ساعت اضافه‌کاری داخلی، و متراژ ۱۵۰ مترمربع اتاق کارگری).',
+          'ارائه کلید تشریحی مستند با ذکر دقیق شماره ماده قرارداد یا شماره بند بخشنامه داخلی HR-INST-1403/07.'
+        ],
+        expectedKeyEn: [
+          'Generates 5 rigorous multiple-choice questions testing exact numbers across both sources (Article 18 20th-of-month deadline, Clause 42-1 7-day night-work notice, 50/65/85/100h internal caps, and 150 m² worker dormitories).',
+          'Provides detailed answer keys citing the exact contract clause or internal directive section.'
+        ]
+      }
     ]
   }
 ];
