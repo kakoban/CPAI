@@ -1405,3 +1405,255 @@ export function getAdaptedQuizQuestions(
     };
   });
 }
+
+// =========================================================================
+// AI TOOLS READINESS MATRIX (ماتریس آمادگی و سنجش مهارت ۱۲ ابزار کلیدی)
+// =========================================================================
+
+export type ToolReadinessLevel = 0 | 1 | 2 | 3;
+
+export type ToolReadinessCategoryKey =
+  | 'chatbots'
+  | 'git_vcs'
+  | 'ai_coding_agents'
+  | 'pkm_docs'
+  | 'api_automation';
+
+export interface ToolReadinessCategory {
+  key: ToolReadinessCategoryKey;
+  titleFa: string;
+  titleEn: string;
+  descFa: string;
+  descEn: string;
+  iconName: string;
+}
+
+export interface ToolReadinessItem {
+  id: string;
+  name: string;
+  category: ToolReadinessCategoryKey;
+  titleFa: string;
+  titleEn: string;
+  descriptionFa: string;
+  descriptionEn: string;
+  iconName: string;
+}
+
+export interface ToolRatingLevelMeta {
+  level: ToolReadinessLevel;
+  labelFa: string;
+  labelEn: string;
+  descFa: string;
+  descEn: string;
+  score: number;
+}
+
+export const TOOL_READINESS_CATEGORIES: ToolReadinessCategory[] = [
+  {
+    key: 'chatbots',
+    titleFa: 'مدل‌های زبانی و چت‌بات‌ها',
+    titleEn: 'Foundation LLMs & Chatbots',
+    descFa: 'استفاده عمومی و تخصصی از چت‌بات‌های پیشرو هوش مصنوعی',
+    descEn: 'General & advanced usage of frontier conversational LLMs',
+    iconName: 'Brain'
+  },
+  {
+    key: 'git_vcs',
+    titleFa: 'کنترل نسخه و مخازن سازمانی',
+    titleEn: 'Version Control & Git Repositories',
+    descFa: 'مدیریت سورس‌کد، کامیت‌ها و همکاری تیمی در مخازن کلاود',
+    descEn: 'Source control, commits, branches & cloud repo collaboration',
+    iconName: 'GitBranch'
+  },
+  {
+    key: 'ai_coding_agents',
+    titleFa: 'کدنویسی هوشمند و ایجنت‌ها',
+    titleEn: 'AI Coding & Autonomous Agents',
+    descFa: 'توسعه نرم‌افزار با دستیارهای هوشمند و ایجنت‌های ترمینال',
+    descEn: 'Assisted coding with IDE copilots, CLI agents & MCP plugins',
+    iconName: 'Cpu'
+  },
+  {
+    key: 'pkm_docs',
+    titleFa: 'مدیریت دانش و مغز دوم',
+    titleEn: 'Personal Knowledge & Document RAG',
+    descFa: 'خلاصه‌سازی، حافظه متصل و پایگاه دانش محلی یا ابری',
+    descEn: 'Grounded document analysis, linked notes & local second brains',
+    iconName: 'BookOpen'
+  },
+  {
+    key: 'api_automation',
+    titleFa: 'کلیدهای API و اتوماسیون',
+    titleEn: 'API Keys & Workflow Automation',
+    descFa: 'اتصال برنامه‌ای مدل‌ها و ساخت پایپ‌لاین‌های خودکار بدون کد',
+    descEn: 'Programmatic API integration & visual pipeline orchestration',
+    iconName: 'Key'
+  }
+];
+
+export const TOOL_RATING_LEVELS: ToolRatingLevelMeta[] = [
+  {
+    level: 0,
+    labelFa: 'نشنیده‌ام',
+    labelEn: 'Never heard',
+    descFa: 'هیچ‌گونه شناختی از این ابزار ندارم',
+    descEn: 'No prior awareness of this tool',
+    score: 0
+  },
+  {
+    level: 1,
+    labelFa: 'فقط شنیده‌ام',
+    labelEn: 'Heard of it',
+    descFa: 'نام آن را شنیده‌ام ولی شخصاً از آن استفاده نکرده‌ام',
+    descEn: 'Aware of name and purpose, but never actively used',
+    score: 1
+  },
+  {
+    level: 2,
+    labelFa: 'استفاده معمولی',
+    labelEn: 'Regular user',
+    descFa: 'گاهی در کارهای اداری، تحصیلی یا کاری با آن کار کرده‌ام',
+    descEn: 'Use it occasionally for everyday or professional tasks',
+    score: 2
+  },
+  {
+    level: 3,
+    labelFa: 'کاربر حرفه‌ای / روزمره',
+    labelEn: 'Power user',
+    descFa: 'تسلط عمیق و کاربرد روزمره در خطوط لوله و جریان‌های کاری اصلی',
+    descEn: 'Daily hands-on mastery in core workflows and pipelines',
+    score: 3
+  }
+];
+
+export const TOOL_READINESS_ITEMS: ToolReadinessItem[] = [
+  // 1. Foundation LLMs & Chatbots (4 tools)
+  {
+    id: 'chatgpt',
+    name: 'ChatGPT',
+    category: 'chatbots',
+    titleFa: 'اوپن‌ای‌آی چت‌جی‌پی‌تی (OpenAI ChatGPT)',
+    titleEn: 'OpenAI ChatGPT (GPT-4o / Canvas)',
+    descriptionFa: 'پرامپت‌نویسی، تحلیل اسناد و مکالمه هوشمند برای تسریع امور روزمره و مهندسی',
+    descriptionEn: 'Prompt engineering, document parsing & everyday generative assistance',
+    iconName: 'Sparkles'
+  },
+  {
+    id: 'claude',
+    name: 'Claude',
+    category: 'chatbots',
+    titleFa: 'آنتیروپیک کلود (Anthropic Claude)',
+    titleEn: 'Anthropic Claude (Sonnet 3.5/3.7 & Artifacts)',
+    descriptionFa: 'استفاده از آرتفکت‌ها، مدل Sonnet برای نگارش فنی و استدلال‌های منطقی عمیق',
+    descriptionEn: 'Technical writing, long context windows, deep reasoning & Artifacts',
+    iconName: 'Brain'
+  },
+  {
+    id: 'gemini',
+    name: 'Gemini',
+    category: 'chatbots',
+    titleFa: 'گوگل جمینای (Google Gemini)',
+    titleEn: 'Google Gemini (1.5 Pro / Flash & 2M Context)',
+    descriptionFa: 'تحلیل چندرسانه‌ای (صوت، ویدیو، PDF سنگین) با پنجره متنی تا ۲ میلیون توکن',
+    descriptionEn: 'Multimodal reasoning (audio, video, long PDFs) with massive context',
+    iconName: 'Layers'
+  },
+  {
+    id: 'deepseek',
+    name: 'DeepSeek',
+    category: 'chatbots',
+    titleFa: 'دیپ‌سیک (DeepSeek R1 / V3)',
+    titleEn: 'DeepSeek (R1 Reasoning & V3 Coder)',
+    descriptionFa: 'مدل متن‌باز استدلالی و استنتاج لوکال مقرون‌به‌صرفه در مسائل ریاضی و کدنویسی',
+    descriptionEn: 'Open-weights reasoning model (R1) & cost-efficient coding inference',
+    iconName: 'Cpu'
+  },
+
+  // 2. Version Control & Git Repositories (2 tools)
+  {
+    id: 'git',
+    name: 'Git',
+    category: 'git_vcs',
+    titleFa: 'گیت محلی (Git CLI / Branches / Commits)',
+    titleEn: 'Git Version Control (Local)',
+    descriptionFa: 'دستورات بنیادین کنترل نسخه، شاخه‌بندی (Branching) و مدیریت تغییرات سورس',
+    descriptionEn: 'Core CLI commands, commit history, branching, merging & diffs',
+    iconName: 'GitCommit'
+  },
+  {
+    id: 'github',
+    name: 'GitHub',
+    category: 'git_vcs',
+    titleFa: 'گیت‌هاب ابری (GitHub Repos / PRs / Actions)',
+    titleEn: 'GitHub (Cloud Repos & PRs)',
+    descriptionFa: 'کلون مخازن، ثبت Issue، باز کردن Pull Request و بررسی تغییرات تیمی',
+    descriptionEn: 'Remote repos, issues, pull requests, code review & CI/CD workflows',
+    iconName: 'GitPullRequest'
+  },
+
+  // 3. AI Coding & Autonomous Agents (3 tools)
+  {
+    id: 'cursor_copilot',
+    name: 'Cursor / Copilot',
+    category: 'ai_coding_agents',
+    titleFa: 'کرسر یا گیت‌هاب کوپایلوت (Cursor / Copilot)',
+    titleEn: 'Cursor IDE / GitHub Copilot',
+    descriptionFa: 'دستیار کدنویسی محیط IDE با کلید Composer و ویرایش هوشمند چندفایلی',
+    descriptionEn: 'In-editor inline completions, Composer multi-file agentic edits & chat',
+    iconName: 'Cpu'
+  },
+  {
+    id: 'claude_code',
+    name: 'Claude Code',
+    category: 'ai_coding_agents',
+    titleFa: 'کلود کد ترمینال (Claude Code CLI)',
+    titleEn: 'Claude Code (CLI Agent)',
+    descriptionFa: 'ایجنت پیشرفته خط فرمان برای فهم ریپازیتوری، جستجو، ریفکتور و کامیت مستقل',
+    descriptionEn: 'Terminal agent for codebase search, automated refactoring & autonomous git',
+    iconName: 'Target'
+  },
+  {
+    id: 'skills_mcp',
+    name: 'Skills & MCP',
+    category: 'ai_coding_agents',
+    titleFa: 'پروتکل MCP و مهارت‌های ایجنت (Skills & MCP)',
+    titleEn: 'Skills & Model Context Protocol (MCP)',
+    descriptionFa: 'اتصال مدل به ابزارهای سیستمی، دیتابیس‌ها و نوشتن اسکیل‌های سفارشی ایجنتی',
+    descriptionEn: 'Tool extensions, Model Context Protocol servers & custom agent skills',
+    iconName: 'Lightbulb'
+  },
+
+  // 4. Personal Knowledge & Document RAG (2 tools)
+  {
+    id: 'notebooklm',
+    name: 'NotebookLM',
+    category: 'pkm_docs',
+    titleFa: 'گوگل نوت‌بوک‌ال‌ام (Google NotebookLM)',
+    titleEn: 'Google NotebookLM (Grounded RAG)',
+    descriptionFa: 'مستندسازی بدون توهم، پرسش‌وپاسخ متصل به سورس‌ها و ساخت پادکست صوتی عمیق',
+    descriptionEn: 'Hallucination-free source-grounded synthesis, notes & audio overviews',
+    iconName: 'BookCheck'
+  },
+  {
+    id: 'obsidian',
+    name: 'Obsidian',
+    category: 'pkm_docs',
+    titleFa: 'آبسیدین و یادداشت‌های متصل (Obsidian PKM)',
+    titleEn: 'Obsidian (Markdown Second Brain)',
+    descriptionFa: 'مدیریت دانش شخصی بر پایه مارک‌داون محلی، گراف لینک‌ها و اتصال به ابزارهای AI',
+    descriptionEn: 'Local markdown knowledge base, bi-directional linking & AI agent notes',
+    iconName: 'BookOpen'
+  },
+
+  // 5. API Keys & Workflow Automation (1 tool)
+  {
+    id: 'api_automation',
+    name: 'API Keys & Automation',
+    category: 'api_automation',
+    titleFa: 'کلیدهای API و اتوماسیون (API Keys / n8n / Make)',
+    titleEn: 'API Keys & Automation (OpenAI / Anthropic / n8n)',
+    descriptionFa: 'دریافت و مدیریت کلیدهای API، متغیرهای محیطی .env و پایپ‌لاین‌های خودکار بدون کد',
+    descriptionEn: 'Managing API keys, .env credentials, webhooks & visual automation workflows',
+    iconName: 'Key'
+  }
+];
