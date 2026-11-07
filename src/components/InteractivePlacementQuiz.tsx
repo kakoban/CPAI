@@ -56,7 +56,12 @@ import {
   User,
   Trophy,
   Sliders,
-  CheckSquare
+  CheckSquare,
+  Edit3,
+  Building2,
+  Phone,
+  Briefcase,
+  Hash
 } from 'lucide-react';
 
 import { UserProfile, AiFamiliarityLevel } from '../types/auth';
@@ -99,8 +104,19 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
   );
   const [toolRatings, setToolRatings] = useState<Record<string, ToolReadinessLevel>>({});
   const [candidateName, setCandidateName] = useState<string>(
-    currentUser?.displayName || 'مهندس / مدیر پروژه'
+    currentUser?.displayName || ''
   );
+  const [candidateSpecialty, setCandidateSpecialty] = useState<string>(
+    currentUser?.specialty || ''
+  );
+  const [candidatePhone, setCandidatePhone] = useState<string>(
+    currentUser?.phone || ''
+  );
+  const [candidateOrg, setCandidateOrg] = useState<string>('');
+  const [isEditingCandidate, setIsEditingCandidate] = useState<boolean>(false);
+  const [certificateSerial, setCertificateSerial] = useState<string>(() => {
+    return `OWJ-TRM-${Math.floor(100000 + Math.random() * 900000)}`;
+  });
   const [copiedReport, setCopiedReport] = useState<boolean>(false);
   const [savedResult, setSavedResult] = useState<{
     score: number;
@@ -109,17 +125,28 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
     track: string;
     date: string;
     toolRatings?: Record<string, ToolReadinessLevel>;
+    candidateName?: string;
+    candidateSpecialty?: string;
+    candidatePhone?: string;
+    candidateOrg?: string;
+    certificateSerial?: string;
   } | null>(null);
 
-  // Sync selected track with user profile if available
+  // Sync selected track and candidate details with user profile if available
   useEffect(() => {
     if (currentUser?.aiLevel) {
       setSelectedTrack(currentUser.aiLevel);
     }
-    if (currentUser?.displayName) {
+    if (currentUser?.displayName && !candidateName) {
       setCandidateName(currentUser.displayName);
     }
-  }, [currentUser?.aiLevel, currentUser?.displayName]);
+    if (currentUser?.specialty && !candidateSpecialty) {
+      setCandidateSpecialty(currentUser.specialty);
+    }
+    if (currentUser?.phone && !candidatePhone) {
+      setCandidatePhone(currentUser.phone);
+    }
+  }, [currentUser?.aiLevel, currentUser?.displayName, currentUser?.specialty, currentUser?.phone]);
 
   // Load previous result from localStorage on mount
   useEffect(() => {
@@ -131,6 +158,11 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
         if (parsed.toolRatings) {
           setToolRatings(parsed.toolRatings);
         }
+        if (parsed.candidateName) setCandidateName(parsed.candidateName);
+        if (parsed.candidateSpecialty) setCandidateSpecialty(parsed.candidateSpecialty);
+        if (parsed.candidatePhone) setCandidatePhone(parsed.candidatePhone);
+        if (parsed.candidateOrg) setCandidateOrg(parsed.candidateOrg);
+        if (parsed.certificateSerial) setCertificateSerial(parsed.certificateSerial);
       }
     } catch {
       // ignore
@@ -154,10 +186,12 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
     QUIZ_LEVELS.find((lvl) => currentPct >= lvl.minPercentage && currentPct <= lvl.maxPercentage) ||
     QUIZ_LEVELS[0];
 
-  const candidateDisplayName =
-    currentUser?.displayName || candidateName || 'مهندس / مدیر پروژه';
-  const candidateSpecialty = currentUser?.specialty || 'مدیریت و مهندسی پروژه';
-  const candidatePhone = currentUser?.phone || '';
+  const effectiveCandidateName =
+    candidateName.trim() || currentUser?.displayName || (lang === 'fa' ? 'مهندس / پژوهشگر هوش مصنوعی' : 'AI Engineer / Researcher');
+  const effectiveCandidateSpecialty =
+    candidateSpecialty.trim() || currentUser?.specialty || discMeta.titleFa;
+  const effectiveCandidatePhone = candidatePhone.trim() || currentUser?.phone || '';
+  const effectiveCandidateOrg = candidateOrg.trim() || '';
 
   const handleRateTool = (toolId: string, level: ToolReadinessLevel) => {
     setToolRatings((prev) => ({
@@ -205,6 +239,15 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
       levelKey: resultLevel.levelKey,
       track: selectedTrack,
       toolRatings,
+      candidateName: effectiveCandidateName,
+      candidateSpecialty: effectiveCandidateSpecialty,
+      candidatePhone: effectiveCandidatePhone,
+      candidateOrg: effectiveCandidateOrg,
+      certificateSerial,
+      disciplineId: effectiveDiscipline,
+      disciplineTitle: discMeta.titleFa,
+      industryTrackId: effectiveTrack,
+      industryTrackTitle: trackInfo.titleFa,
       date: new Date().toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US')
     };
 
@@ -276,25 +319,38 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
         ? `Evaluated Industry Track: Oil, Gas & Petrochemical Engineering (${discMeta.titleEn})`
         : `Evaluated Industry Track: Mega Civil & Transportation Infrastructure (${discMeta.titleEn})`;
 
-    const reportText = `🏆 کارنامه رسمی ماتریس آمادگی ابزارهای هوش مصنوعی و مهندسی
-مشاوران مدیریت کسب و کار اوج (OWJ)
-نام شرکت‌کننده: ${candidateDisplayName}
-تخصص / دیسیپلین: ${discMeta.titleFa}
-${lang === 'fa' ? domainTrackBadgeFa : domainTrackBadgeEn}
-${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح خوداظهاری پایه: ${trackLabelFa[selectedTrack]}
-امتیاز کل ابزارها: ${currentScore} از ${maxScore} (${currentPct}%)
+    const toolsListReport = TOOL_READINESS_ITEMS.map((item) => {
+      const r = toolRatings[item.id] ?? 0;
+      const meta = TOOL_RATING_LEVELS.find((l) => l.level === r) || TOOL_RATING_LEVELS[0];
+      return `  • ${item.name}: ${lang === 'fa' ? meta.labelFa : meta.labelEn} (${r}/3)`;
+    }).join('\n');
+
+    const reportText = `🏆 گواهینامه و کارنامه رسمی ماتریس آمادگی ابزارهای هوش مصنوعی
+گروه مشاوران مدیریت کسب‌وکار اوج (OWJ Business Council)
+--------------------------------------------------------
+شناسه رهگیری گواهی: ${certificateSerial}
+نام و نام خانوادگی متقاضی: ${effectiveCandidateName}
+سمت / تخصص حرفه‌ای: ${effectiveCandidateSpecialty}
+${effectiveCandidateOrg ? `سازمان / شرکت: ${effectiveCandidateOrg}\n` : ''}${effectiveCandidatePhone ? `شماره تماس: ${effectiveCandidatePhone}\n` : ''}${lang === 'fa' ? domainTrackBadgeFa : domainTrackBadgeEn}
+سطح ارزیابی پایه: ${trackLabelFa[selectedTrack]}
+تاریخ صدور: ${new Date().toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US')}
+
+📊 نتیجه ارزیابی جعبه‌ابزار:
+امتیاز کل: ${currentScore} از ${maxScore} (${currentPct}%)
 سطح احراز شده: ${lang === 'fa' ? currentResultLevel.titleFa : currentResultLevel.titleEn}
 نشان شایستگی: ${lang === 'fa' ? currentResultLevel.badgeFa : currentResultLevel.badgeEn}
-تاریخ ارزیابی: ${new Date().toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US')}
 
-تفکیک آمادگی در حوزه‌های پنج‌گانه ابزارها:
+تفکیک آمادگی در حوزه‌های پنج‌گانه:
 • مدل‌های زبانی و چت‌بات‌ها: ${getCategoryStats('chatbots').earnedScore}/${getCategoryStats('chatbots').maxScore} (${getCategoryStats('chatbots').percentage}%)
 • کنترل نسخه و گیت‌هاب: ${getCategoryStats('git_vcs').earnedScore}/${getCategoryStats('git_vcs').maxScore} (${getCategoryStats('git_vcs').percentage}%)
 • کدنویسی هوشمند و ایجنت‌ها: ${getCategoryStats('ai_coding_agents').earnedScore}/${getCategoryStats('ai_coding_agents').maxScore} (${getCategoryStats('ai_coding_agents').percentage}%)
 • مدیریت دانش و مغز دوم (RAG): ${getCategoryStats('pkm_docs').earnedScore}/${getCategoryStats('pkm_docs').maxScore} (${getCategoryStats('pkm_docs').percentage}%)
 • کلیدهای API و اتوماسیون: ${getCategoryStats('api_automation').earnedScore}/${getCategoryStats('api_automation').maxScore} (${getCategoryStats('api_automation').percentage}%)
 
-پلتفرم یادگیری هوش مصنوعی اوج: https://owjbc.com`;
+ریز وضعیت ۱۲ ابزار کلیدی:
+${toolsListReport}
+
+اعتبارسنجی و استعلام پلتفرم اوج: https://owjbc.com`;
 
     navigator.clipboard.writeText(reportText);
     setCopiedReport(true);
@@ -668,6 +724,76 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح خود
             })}
           </div>
 
+          {/* Candidate Identity Quick-Input Card */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.06] dark:border-white/[0.08] shadow-2xs space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-[#e0533c] dark:text-[#fb7185]" />
+                <span className="text-xs font-black text-[#1c2830] dark:text-[#e8ebe9]">
+                  {lang === 'fa' ? 'مشخصات متقاضی جهت درج دقیق در کارنامه رسمی:' : 'Candidate Information for Official Certificate:'}
+                </span>
+              </div>
+              <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                {lang === 'fa' ? 'این اطلاعات مستقیماً بر روی گواهینامه معتبر اوج چاپ و درج می‌شود' : 'Directly printed on OWJ certificate'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
+              <div>
+                <label className="text-[10px] font-bold text-[#5d6b73] dark:text-[#9aa8b0] block mb-1">
+                  {lang === 'fa' ? 'نام و نام خانوادگی:' : 'Full Name:'}
+                </label>
+                <input
+                  type="text"
+                  value={candidateName}
+                  onChange={(e) => setCandidateName(e.target.value)}
+                  placeholder={lang === 'fa' ? 'مثال: مهندس علی رضایی' : 'e.g. John Doe'}
+                  className="w-full px-3 py-2 rounded-xl border border-black/[0.1] dark:border-white/[0.1] bg-black/[0.02] dark:bg-white/[0.02] text-xs text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#e0533c]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-[#5d6b73] dark:text-[#9aa8b0] block mb-1">
+                  {lang === 'fa' ? 'سمت / تخصص حرفه‌ای:' : 'Job Title / Specialty:'}
+                </label>
+                <input
+                  type="text"
+                  value={candidateSpecialty}
+                  onChange={(e) => setCandidateSpecialty(e.target.value)}
+                  placeholder={lang === 'fa' ? 'مثال: مدیر دفتر فنی و کنترل پروژه' : 'e.g. Project Manager'}
+                  className="w-full px-3 py-2 rounded-xl border border-black/[0.1] dark:border-white/[0.1] bg-black/[0.02] dark:bg-white/[0.02] text-xs text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#e0533c]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-[#5d6b73] dark:text-[#9aa8b0] block mb-1">
+                  {lang === 'fa' ? 'شرکت / سازمان متبوع:' : 'Organization / Company:'}
+                </label>
+                <input
+                  type="text"
+                  value={candidateOrg}
+                  onChange={(e) => setCandidateOrg(e.target.value)}
+                  placeholder={lang === 'fa' ? 'مثال: شرکت مهندسی سپاسد' : 'e.g. Infrastructure Co'}
+                  className="w-full px-3 py-2 rounded-xl border border-black/[0.1] dark:border-white/[0.1] bg-black/[0.02] dark:bg-white/[0.02] text-xs text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#e0533c]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-[#5d6b73] dark:text-[#9aa8b0] block mb-1">
+                  {lang === 'fa' ? 'شماره تماس همراه (اختیاری):' : 'Phone Number (Optional):'}
+                </label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={candidatePhone}
+                  onChange={(e) => setCandidatePhone(e.target.value)}
+                  placeholder="0912..."
+                  className="w-full px-3 py-2 rounded-xl border border-black/[0.1] dark:border-white/[0.1] bg-black/[0.02] dark:bg-white/[0.02] text-xs text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#e0533c] font-mono"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Bottom Floating / Fixed Action Bar */}
           <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.08] dark:border-white/[0.1] shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
@@ -748,23 +874,166 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح خود
               </div>
 
               {/* Candidate Profile Strip */}
-              <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] text-xs">
-                <div className="flex items-center gap-2 text-[#1c2830] dark:text-[#e8ebe9]">
-                  <User className="w-4 h-4 text-[#e0533c] dark:text-[#fb7185]" />
-                  <span className="font-bold">{candidateDisplayName}</span>
-                  <span className="text-[#5d6b73] dark:text-[#9aa8b0]">({candidateSpecialty})</span>
+              <div className="p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] text-xs space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#e0533c]/20 to-[#9333ea]/20 text-[#e0533c] dark:text-[#fb7185] flex items-center justify-center font-black shrink-0">
+                      <User className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+                          {effectiveCandidateName}
+                        </span>
+                        {effectiveCandidateOrg && (
+                          <span className="text-[11px] px-2 py-0.5 rounded-md bg-black/5 dark:bg-white/10 text-[#5d6b73] dark:text-[#9aa8b0] font-medium">
+                            {effectiveCandidateOrg}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[#5d6b73] dark:text-[#9aa8b0] text-[11px] flex items-center gap-1.5 mt-0.5">
+                        <Briefcase className="w-3.5 h-3.5" />
+                        <span>{effectiveCandidateSpecialty}</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingCandidate((prev) => !prev)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-black/[0.08] dark:border-white/[0.1] hover:bg-black/5 dark:hover:bg-white/5 text-[11px] font-bold text-[#5d6b73] dark:text-[#9aa8b0] transition-colors"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>
+                        {isEditingCandidate
+                          ? (lang === 'fa' ? 'بستن ویرایش' : 'Close')
+                          : (lang === 'fa' ? 'ویرایش مشخصات گواهی' : 'Edit Profile')}
+                      </span>
+                    </button>
+                  </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2.5 text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
-                  {candidatePhone && (
-                    <span dir="ltr" className="font-mono">📱 {candidatePhone}</span>
-                  )}
-                  <span className="px-2.5 py-0.5 rounded-lg bg-[#e0533c]/10 dark:bg-[#fb7185]/10 text-[#e0533c] dark:text-[#fb7185] font-bold">
-                    {lang === 'fa' ? `سطح پایه: ${trackLabelFa[selectedTrack]}` : `Base Tier: ${trackLabelEn[selectedTrack]}`}
-                  </span>
-                  <span>
-                    📅 {new Date().toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US')}
-                  </span>
+
+                {/* Secondary Metadata Strip */}
+                <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2.5 border-t border-black/[0.04] dark:border-white/[0.06] text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/20">
+                      🎯 {discMeta.titleFa}
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-lg bg-blue-500/10 text-blue-700 dark:text-blue-400 font-medium border border-blue-500/20">
+                      🏢 {trackInfo.titleFa}
+                    </span>
+                    {effectiveCandidatePhone && (
+                      <span dir="ltr" className="font-mono flex items-center gap-1 px-2 py-0.5 rounded-lg bg-black/5 dark:bg-white/5">
+                        <Phone className="w-3 h-3" />
+                        <span>{effectiveCandidatePhone}</span>
+                      </span>
+                    )}
+                    <span className="px-2.5 py-0.5 rounded-lg bg-[#e0533c]/10 dark:bg-[#fb7185]/10 text-[#e0533c] dark:text-[#fb7185] font-bold">
+                      {lang === 'fa' ? `سطح پایه: ${trackLabelFa[selectedTrack]}` : `Base Tier: ${trackLabelEn[selectedTrack]}`}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3 font-mono">
+                    <span className="flex items-center gap-1 text-[#e0533c] dark:text-[#fb7185] font-bold">
+                      <Hash className="w-3 h-3" />
+                      <span>{certificateSerial}</span>
+                    </span>
+                    <span>
+                      📅 {new Date().toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US')}
+                    </span>
+                  </div>
                 </div>
+
+                {/* Inline Editable Drawer on Certificate */}
+                {isEditingCandidate && (
+                  <div className="p-4 rounded-xl bg-white dark:bg-[#12171b] border border-[#e0533c]/30 shadow-sm space-y-3 mt-3 animate-fadeIn">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
+                        <Edit3 className="w-3.5 h-3.5 text-[#e0533c]" />
+                        <span>{lang === 'fa' ? 'ویرایش مشخصات فردی و سازمانی درج‌شده در گواهی:' : 'Edit Candidate Information on Certificate:'}</span>
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
+                      <div>
+                        <label className="text-[10px] font-bold text-[#5d6b73] dark:text-[#9aa8b0] block mb-1">
+                          {lang === 'fa' ? 'نام و نام خانوادگی:' : 'Full Name:'}
+                        </label>
+                        <input
+                          type="text"
+                          value={candidateName}
+                          onChange={(e) => setCandidateName(e.target.value)}
+                          placeholder={lang === 'fa' ? 'مثال: مهندس علی رضایی' : 'e.g. John Doe'}
+                          className="w-full px-3 py-1.5 rounded-lg border border-black/[0.1] dark:border-white/[0.1] bg-transparent text-xs text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#e0533c]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-bold text-[#5d6b73] dark:text-[#9aa8b0] block mb-1">
+                          {lang === 'fa' ? 'سمت / تخصص حرفه‌ای:' : 'Job Title / Specialty:'}
+                        </label>
+                        <input
+                          type="text"
+                          value={candidateSpecialty}
+                          onChange={(e) => setCandidateSpecialty(e.target.value)}
+                          placeholder={lang === 'fa' ? 'مثال: مدیر دفتر فنی و کنترل پروژه' : 'e.g. Project Manager'}
+                          className="w-full px-3 py-1.5 rounded-lg border border-black/[0.1] dark:border-white/[0.1] bg-transparent text-xs text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#e0533c]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-bold text-[#5d6b73] dark:text-[#9aa8b0] block mb-1">
+                          {lang === 'fa' ? 'شرکت / سازمان متبوع:' : 'Organization / Company:'}
+                        </label>
+                        <input
+                          type="text"
+                          value={candidateOrg}
+                          onChange={(e) => setCandidateOrg(e.target.value)}
+                          placeholder={lang === 'fa' ? 'مثال: شرکت مهندسی سپاسد' : 'e.g. Infrastructure Co'}
+                          className="w-full px-3 py-1.5 rounded-lg border border-black/[0.1] dark:border-white/[0.1] bg-transparent text-xs text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#e0533c]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-bold text-[#5d6b73] dark:text-[#9aa8b0] block mb-1">
+                          {lang === 'fa' ? 'شماره تماس همراه:' : 'Phone Number:'}
+                        </label>
+                        <input
+                          type="text"
+                          dir="ltr"
+                          value={candidatePhone}
+                          onChange={(e) => setCandidatePhone(e.target.value)}
+                          placeholder="0912..."
+                          className="w-full px-3 py-1.5 rounded-lg border border-black/[0.1] dark:border-white/[0.1] bg-transparent text-xs text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#e0533c] font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsEditingCandidate(false);
+                          try {
+                            const stored = localStorage.getItem(STORAGE_QUIZ_KEY);
+                            if (stored) {
+                              const parsed = JSON.parse(stored);
+                              parsed.candidateName = effectiveCandidateName;
+                              parsed.candidateSpecialty = effectiveCandidateSpecialty;
+                              parsed.candidatePhone = effectiveCandidatePhone;
+                              parsed.candidateOrg = effectiveCandidateOrg;
+                              localStorage.setItem(STORAGE_QUIZ_KEY, JSON.stringify(parsed));
+                            }
+                          } catch {}
+                        }}
+                        className="px-4 py-1.5 rounded-lg bg-[#2f7d5b] text-white text-xs font-bold hover:bg-[#256347] transition-colors"
+                      >
+                        {lang === 'fa' ? 'ثبت و بروزرسانی گواهی' : 'Update Certificate'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Score Showcase Hero */}
