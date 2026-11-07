@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Language } from '../types/cpmai';
 import {
-  QUIZ_QUESTIONS,
   QUIZ_LEVELS,
-  QuizQuestion,
   QuizResultLevel,
-  QuizCategory,
-  getAdaptedQuizQuestions
+  ToolReadinessLevel,
+  ToolReadinessCategoryKey,
+  ToolReadinessItem,
+  ToolReadinessCategory,
+  TOOL_READINESS_ITEMS,
+  TOOL_READINESS_CATEGORIES,
+  TOOL_RATING_LEVELS
 } from '../data/placement_quiz_data';
 import {
   IndustryTrackId,
@@ -51,7 +54,9 @@ import {
   Layers,
   Lightbulb,
   User,
-  Trophy
+  Trophy,
+  Sliders,
+  CheckSquare
 } from 'lucide-react';
 
 import { UserProfile, AiFamiliarityLevel } from '../types/auth';
@@ -92,9 +97,7 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
   const [selectedTrack, setSelectedTrack] = useState<AiFamiliarityLevel>(
     currentUser?.aiLevel || 'intermediate'
   );
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
-  const [isAnswerRevealed, setIsAnswerRevealed] = useState<boolean>(false);
+  const [toolRatings, setToolRatings] = useState<Record<string, ToolReadinessLevel>>({});
   const [candidateName, setCandidateName] = useState<string>(
     currentUser?.displayName || 'مهندس / مدیر پروژه'
   );
@@ -105,6 +108,7 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
     levelKey: string;
     track: string;
     date: string;
+    toolRatings?: Record<string, ToolReadinessLevel>;
   } | null>(null);
 
   // Sync selected track with user profile if available
@@ -122,94 +126,85 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
     try {
       const stored = localStorage.getItem(STORAGE_QUIZ_KEY);
       if (stored) {
-        setSavedResult(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        setSavedResult(parsed);
+        if (parsed.toolRatings) {
+          setToolRatings(parsed.toolRatings);
+        }
       }
     } catch {
       // ignore
     }
   }, []);
 
-  // Filter and adapt questions for the active track and discipline
-  const trackQuestions: QuizQuestion[] = useMemo(() => {
-    return getAdaptedQuizQuestions(selectedTrack, effectiveDiscipline, effectiveTrack);
-  }, [selectedTrack, effectiveDiscipline, effectiveTrack]);
-  const totalQuestions = trackQuestions.length;
-  const currentQuestion: QuizQuestion =
-    trackQuestions[currentQuestionIndex] || trackQuestions[0];
+  const totalTools = TOOL_READINESS_ITEMS.length; // 12
+  const maxScore = totalTools * 3; // 36
 
-  const currentSelectedOption = currentQuestion ? selectedAnswers[currentQuestion.id] : undefined;
-  const hasAnsweredCurrent = currentSelectedOption !== undefined;
+  const ratedCount = useMemo(() => {
+    return Object.keys(toolRatings).length;
+  }, [toolRatings]);
+
+  const calculateScore = () => {
+    return TOOL_READINESS_ITEMS.reduce((sum, item) => sum + (toolRatings[item.id] ?? 0), 0);
+  };
+
+  const currentScore = calculateScore();
+  const currentPct = maxScore > 0 ? Math.round((currentScore / maxScore) * 100) : 0;
+  const currentResultLevel: QuizResultLevel =
+    QUIZ_LEVELS.find((lvl) => currentPct >= lvl.minPercentage && currentPct <= lvl.maxPercentage) ||
+    QUIZ_LEVELS[0];
 
   const candidateDisplayName =
     currentUser?.displayName || candidateName || 'مهندس / مدیر پروژه';
   const candidateSpecialty = currentUser?.specialty || 'مدیریت و مهندسی پروژه';
   const candidatePhone = currentUser?.phone || '';
 
-  const handleSwitchTrack = (track: AiFamiliarityLevel) => {
-    setSelectedTrack(track);
-    setCurrentQuestionIndex(0);
-    setSelectedAnswers({});
-    setIsAnswerRevealed(false);
+  const handleRateTool = (toolId: string, level: ToolReadinessLevel) => {
+    setToolRatings((prev) => ({
+      ...prev,
+      [toolId]: level
+    }));
+  };
+
+  const handleSelectAllLevel = (level: ToolReadinessLevel) => {
+    const all: Record<string, ToolReadinessLevel> = {};
+    TOOL_READINESS_ITEMS.forEach((tool) => {
+      all[tool.id] = level;
+    });
+    setToolRatings(all);
+  };
+
+  const handleResetRatings = () => {
+    setToolRatings({});
   };
 
   const handleStartQuiz = () => {
     setQuizState('question');
-    setCurrentQuestionIndex(0);
-    setSelectedAnswers({});
-    setIsAnswerRevealed(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSelectOption = (optionIndex: number) => {
-    if (isAnswerRevealed || !currentQuestion) return; // locked after revealing
-    setSelectedAnswers((prev) => ({
-      ...prev,
-      [currentQuestion.id]: optionIndex
-    }));
-    setIsAnswerRevealed(true);
-  };
-
-  const handleNextQuestion = () => {
-    if (currentQuestionIndex < totalQuestions - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1);
-      setIsAnswerRevealed(false);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      finishQuiz();
-    }
-  };
-
-  const handlePrevQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prev) => prev - 1);
-      setIsAnswerRevealed(true); // already answered
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  // Calculate final score for current track
-  const calculateScore = () => {
-    let score = 0;
-    trackQuestions.forEach((q) => {
-      if (selectedAnswers[q.id] === q.correctAnswerIndex) {
-        score += 1;
-      }
-    });
-    return score;
+  // Category Breakdown Calculations (5 Categories)
+  const getCategoryStats = (categoryKey: ToolReadinessCategoryKey) => {
+    const tools = TOOL_READINESS_ITEMS.filter((t) => t.category === categoryKey);
+    const earnedScore = tools.reduce((sum, t) => sum + (toolRatings[t.id] ?? 0), 0);
+    const totalCategoryMax = tools.length * 3;
+    const percentage = totalCategoryMax > 0 ? Math.round((earnedScore / totalCategoryMax) * 100) : 0;
+    return { earnedScore, maxScore: totalCategoryMax, percentage, count: tools.length };
   };
 
   const finishQuiz = () => {
     const finalScore = calculateScore();
-    const finalPercentage = totalQuestions > 0 ? Math.round((finalScore / totalQuestions) * 100) : 0;
+    const finalPercentage = Math.round((finalScore / maxScore) * 100);
     const resultLevel =
       QUIZ_LEVELS.find((lvl) => finalPercentage >= lvl.minPercentage && finalPercentage <= lvl.maxPercentage) ||
       QUIZ_LEVELS[0];
 
     const record = {
       score: finalScore,
-      total: totalQuestions,
+      total: maxScore,
       levelKey: resultLevel.levelKey,
       track: selectedTrack,
+      toolRatings,
       date: new Date().toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US')
     };
 
@@ -225,43 +220,27 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
       .submitAssessment({
         testedTier: selectedTrack,
         rawScore: finalScore,
-        maxScore: totalQuestions,
+        maxScore: maxScore,
         percentage: finalPercentage
       })
       .then((res) => {
         if (res.success && res.result?.alignmentIndex) {
           setAlignmentIndex(res.result.alignmentIndex);
         } else {
-          // Local fallback calculation
-          let localIdx: AlignmentIndex = finalPercentage < 60 ? 'Below Tier' : 'Matches';
-          if (selectedTrack === 'beginner' && finalPercentage >= 85) localIdx = 'Above Tier';
+          // Local fallback calculation based on percentage
+          let localIdx: AlignmentIndex = finalPercentage < 40 ? 'Below Tier' : 'Matches';
+          if (finalPercentage >= 75) localIdx = 'Above Tier';
           setAlignmentIndex(localIdx);
         }
       })
       .catch(() => {
-        let localIdx: AlignmentIndex = finalPercentage < 60 ? 'Below Tier' : 'Matches';
+        let localIdx: AlignmentIndex = finalPercentage < 40 ? 'Below Tier' : 'Matches';
+        if (finalPercentage >= 75) localIdx = 'Above Tier';
         setAlignmentIndex(localIdx);
       });
 
     setQuizState('result');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const currentScore = calculateScore();
-  const currentPct = totalQuestions > 0 ? Math.round((currentScore / totalQuestions) * 100) : 0;
-  const currentResultLevel: QuizResultLevel =
-    QUIZ_LEVELS.find((lvl) => currentPct >= lvl.minPercentage && currentPct <= lvl.maxPercentage) ||
-    QUIZ_LEVELS[0];
-
-  // Category Breakdown Calculations (filtered for active track)
-  const getCategoryStats = (category: QuizCategory) => {
-    const questionsInCategory = trackQuestions.filter((q) => q.category === category);
-    const correctCount = questionsInCategory.filter(
-      (q) => selectedAnswers[q.id] === q.correctAnswerIndex
-    ).length;
-    const totalCount = questionsInCategory.length;
-    const percentage = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
-    return { correctCount, totalCount, percentage };
   };
 
   const trackLabelFa: Record<AiFamiliarityLevel, string> = {
@@ -297,22 +276,23 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
         ? `Evaluated Industry Track: Oil, Gas & Petrochemical Engineering (${discMeta.titleEn})`
         : `Evaluated Industry Track: Mega Civil & Transportation Infrastructure (${discMeta.titleEn})`;
 
-    const reportText = `🏆 کارنامه رسمی آزمون سطح‌سنجی هوش مصنوعی و مهندسی
+    const reportText = `🏆 کارنامه رسمی ماتریس آمادگی ابزارهای هوش مصنوعی و مهندسی
 مشاوران مدیریت کسب و کار اوج (OWJ)
 نام شرکت‌کننده: ${candidateDisplayName}
 تخصص / دیسیپلین: ${discMeta.titleFa}
 ${lang === 'fa' ? domainTrackBadgeFa : domainTrackBadgeEn}
-${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوالات آزمون: ${trackLabelFa[selectedTrack]}
-امتیاز کل: ${currentScore} از ${totalQuestions} (${Math.round((currentScore / totalQuestions) * 100)}%)
+${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح خوداظهاری پایه: ${trackLabelFa[selectedTrack]}
+امتیاز کل ابزارها: ${currentScore} از ${maxScore} (${currentPct}%)
 سطح احراز شده: ${lang === 'fa' ? currentResultLevel.titleFa : currentResultLevel.titleEn}
-نشان: ${lang === 'fa' ? currentResultLevel.badgeFa : currentResultLevel.badgeEn}
-تاریخ آزمون: ${new Date().toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US')}
+نشان شایستگی: ${lang === 'fa' ? currentResultLevel.badgeFa : currentResultLevel.badgeEn}
+تاریخ ارزیابی: ${new Date().toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US')}
 
-تفکیک مهارت‌ها در سطح ${trackLabelFa[selectedTrack]}:
-• کنترل نسخه و گیت‌هاب: ${getCategoryStats('git_github').correctCount}/${getCategoryStats('git_github').totalCount} (${getCategoryStats('git_github').percentage}%)
-• مبانی مدل‌های زبانی و پرامپت: ${getCategoryStats('llm_fundamentals').correctCount}/${getCategoryStats('llm_fundamentals').totalCount} (${getCategoryStats('llm_fundamentals').percentage}%)
-• معماری RAG و نوت‌بوک ال‌ام: ${getCategoryStats('rag_notebooklm').correctCount}/${getCategoryStats('rag_notebooklm').totalCount} (${getCategoryStats('rag_notebooklm').percentage}%)
-• امنیت، APIها و داده‌های مهندسی: ${getCategoryStats('security_apis').correctCount}/${getCategoryStats('security_apis').totalCount} (${getCategoryStats('security_apis').percentage}%)
+تفکیک آمادگی در حوزه‌های پنج‌گانه ابزارها:
+• مدل‌های زبانی و چت‌بات‌ها: ${getCategoryStats('chatbots').earnedScore}/${getCategoryStats('chatbots').maxScore} (${getCategoryStats('chatbots').percentage}%)
+• کنترل نسخه و گیت‌هاب: ${getCategoryStats('git_vcs').earnedScore}/${getCategoryStats('git_vcs').maxScore} (${getCategoryStats('git_vcs').percentage}%)
+• کدنویسی هوشمند و ایجنت‌ها: ${getCategoryStats('ai_coding_agents').earnedScore}/${getCategoryStats('ai_coding_agents').maxScore} (${getCategoryStats('ai_coding_agents').percentage}%)
+• مدیریت دانش و مغز دوم (RAG): ${getCategoryStats('pkm_docs').earnedScore}/${getCategoryStats('pkm_docs').maxScore} (${getCategoryStats('pkm_docs').percentage}%)
+• کلیدهای API و اتوماسیون: ${getCategoryStats('api_automation').earnedScore}/${getCategoryStats('api_automation').maxScore} (${getCategoryStats('api_automation').percentage}%)
 
 پلتفرم یادگیری هوش مصنوعی اوج: https://owjbc.com`;
 
@@ -325,18 +305,18 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
     window.print();
   };
 
-  const renderCategoryIcon = (iconName: string, className = 'w-4 h-4') => {
+  const renderIcon = (iconName: string, className = 'w-4 h-4') => {
     switch (iconName) {
+      case 'Brain':
+        return <Brain className={className} />;
+      case 'Sparkles':
+        return <Sparkles className={className} />;
       case 'GitBranch':
         return <GitBranch className={className} />;
       case 'GitPullRequest':
         return <GitPullRequest className={className} />;
       case 'GitCommit':
         return <GitCommit className={className} />;
-      case 'Sparkles':
-        return <Sparkles className={className} />;
-      case 'Brain':
-        return <Brain className={className} />;
       case 'Cpu':
         return <Cpu className={className} />;
       case 'Database':
@@ -349,9 +329,10 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
         return <Key className={className} />;
       case 'FileSpreadsheet':
         return <FileSpreadsheet className={className} />;
-      case 'ShieldAlert':
+      case 'Sliders':
+        return <Sliders className={className} />;
       default:
-        return <ShieldAlert className={className} />;
+        return <Sparkles className={className} />;
     }
   };
 
@@ -364,216 +345,63 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
         <div className="space-y-6">
           {/* Main Hero Card */}
           <div className="p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <div className="rounded-[calc(1.5rem-0.375rem)] bg-gradient-to-br from-[#1f5163] via-[#0f4c5c] to-[#122b34] text-white p-6 sm:p-9 space-y-6 relative overflow-hidden">
+            <div className="rounded-[calc(1.5rem-0.375rem)] bg-gradient-to-br from-[#e0533c] via-[#9333ea] to-[#122b34] text-white p-6 sm:p-9 space-y-6 relative overflow-hidden">
               {/* Background ambient glow */}
               <div className="absolute top-0 right-0 w-96 h-96 bg-[#2f7d5b]/20 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#b87333]/20 rounded-full blur-3xl pointer-events-none" />
 
-              {/* Header Badges & Brand */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10 border-b border-white/10 pb-5">
-                <div className="flex items-center gap-3">
-                  <div className="bg-white p-2 rounded-xl shadow-xs">
-                    <img
-                      src={OWJ_LOGO}
-                      alt="OWJ Logo"
-                      className="h-8 w-auto object-contain"
-                      onError={(e) => {
-                        e.currentTarget.src = OWJ_LOGO_FALLBACK;
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <span className="text-[11px] font-bold tracking-wider uppercase text-[#99e2b4]">
-                      {lang === 'fa' ? 'مشاوران مدیریت کسب و کار اوج · پیش‌نیاز ورود به پلتفرم' : 'OWJ Business Council · Platform Entry Gate'}
-                    </span>
-                    <h3 className="text-xs font-semibold text-white/80">
-                      {lang === 'fa' ? 'سنجش مهارت و آمادگی شناختی مهندسی' : 'AI & Engineering Readiness Assessment'}
-                    </h3>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 self-start sm:self-auto">
-                  <span className="text-xs px-3 py-1.5 rounded-full font-bold bg-white/15 border border-white/20 text-white flex items-center gap-1.5 backdrop-blur-xs">
-                    <Target className="w-3.5 h-3.5 text-[#fbbf24]" />
-                    <span>
-                      {lang === 'fa'
-                        ? `${totalQuestions} سوال تخصصی · سطح ${
-                            selectedTrack === 'beginner'
-                              ? 'مقدماتی'
-                              : selectedTrack === 'intermediate'
-                              ? 'متوسط'
-                              : 'پیشرفته'
-                          }`
-                        : `${totalQuestions} Questions · ${selectedTrack.toUpperCase()}`}
-                    </span>
+              <div className="space-y-4 relative z-10">
+                {/* Header Badge */}
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-bold tracking-wide">
+                  <Sliders className="w-3.5 h-3.5 text-[#fbbf24]" />
+                  <span>
+                    {lang === 'fa'
+                      ? 'ماتریس سنجش جعبه‌ابزار هوش مصنوعی · ۱۲ ابزار کلیدی'
+                      : 'AI Tools Readiness Matrix · 12 Core Capabilities'}
                   </span>
                 </div>
-              </div>
 
-              {/* Title & Description */}
-              <div className="space-y-3 relative z-10 max-w-3xl">
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-black leading-snug tracking-tight text-white">
+                {/* Main Heading */}
+                <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
                   {lang === 'fa'
-                    ? '🎯 آزمون سطح‌سنجی تخصصی و هوشمند CPMAI'
-                    : '🎯 Adaptive CPMAI Engineering Readiness Assessment'}
+                    ? 'سنجش عملی سطح آشنایی با ابزارهای هوش مصنوعی'
+                    : 'Practical AI Tools Familiarity & Capability Diagnostic'}
                 </h1>
-                <p className="text-xs sm:text-sm text-white/85 leading-relaxed font-normal">
+
+                {/* Description */}
+                <p className="text-sm sm:text-base text-white/90 max-w-2xl leading-relaxed">
                   {lang === 'fa'
-                    ? `سوالات این آزمون دقیقاً متناسب با سطح آشنایی ثبت‌شده در پرونده آموزشی شما (${totalQuestions} سوال تخصصی) قفل و کالیبره شده است تا ارزیابی دقیقی از تسلط شما بر استانداردهای CPMAI به عمل آید.`
-                    : `Questions are calibrated to your declared student profile track (${totalQuestions} questions) to benchmark your proficiency against CPMAI standards.`}
+                    ? 'به جای سوالات تئوری چهارگزینه‌ای، سطح تسلط و کاربرد واقعی خود را در ۱۲ ابزار و پلتفرم کلیدی دوره‌های آموزشی مشخص کنید تا شناخت دقیقی از جعبه‌ابزار فعلی شما به دست آید.'
+                    : 'A rapid, self-declared readiness matrix across 12 frontier tools covering Chatbots, Git, Coding Agents, Second-Brain PKM, and API Automations.'}
                 </p>
-              </div>
 
-              {/* Candidate Profile & Track Selector Island */}
-              <div className="p-4 rounded-2xl bg-black/25 border border-white/15 backdrop-blur-md relative z-10 space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-white/10 text-xs">
-                  <div className="flex flex-wrap items-center gap-2 text-white">
-                    <User className="w-4 h-4 text-[#99e2b4]" />
-                    <span className="font-bold">{candidateDisplayName}</span>
-                    <span className="text-white/60">({candidateSpecialty})</span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-white/15 text-white text-[11px] font-semibold border border-white/20 flex items-center gap-1">
-                      <span>دیسیپلین:</span>
-                      <span className="text-[#99e2b4] font-bold">{discMeta.shortTitleFa}</span>
-                    </span>
-                  </div>
-                  {candidatePhone && (
-                    <div className="text-[11px] font-mono text-white/70" dir="ltr">
-                      📞 {candidatePhone}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                  <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-white/90 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                      <span>
-                        {currentUser?.role === 'admin'
-                          ? 'سطح آزمون (پیش‌نمایش مدیر سیستم):'
-                          : 'سطح آزمون اختصاص‌یافته در پرونده:'}
-                      </span>
-                    </span>
-                    <span className="text-[11px] text-white/60">
-                      {currentUser?.role === 'admin'
-                        ? 'دسترسی ادمین جهت تست و بررسی سوالات هر ۳ سطح'
-                        : 'کالیبره‌شده بر اساس ثبت‌نام شما (غیرقابل تغییر توسط دانشجو)'}
-                    </span>
+                {/* Target Track & Discipline Indicator */}
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 border border-white/15 text-xs">
+                    <span className="text-white/60">{lang === 'fa' ? 'حوزه تخصصی:' : 'Industry Track:'}</span>
+                    <span className="font-bold text-[#fbbf24]">{discMeta.titleFa}</span>
+                    <span className="text-[10px] text-white/50">({trackInfo.shortTitleFa})</span>
                   </div>
 
-                  {currentUser?.role === 'admin' ? (
-                    /* Admin Mode: Can inspect all 3 tracks */
-                    <div className="grid grid-cols-3 gap-2 w-full sm:w-auto">
-                      <button
-                        type="button"
-                        onClick={() => handleSwitchTrack('beginner')}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-                          selectedTrack === 'beginner'
-                            ? 'bg-emerald-500 text-white border-emerald-400 shadow-md scale-105'
-                            : 'bg-white/10 text-white/80 border-white/10 hover:bg-white/15'
-                        }`}
-                      >
-                        مقدماتی (۱۲ سوال)
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleSwitchTrack('intermediate')}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-                          selectedTrack === 'intermediate'
-                            ? 'bg-[#2563EB] text-white border-blue-400 shadow-md scale-105'
-                            : 'bg-white/10 text-white/80 border-white/10 hover:bg-white/15'
-                        }`}
-                      >
-                        متوسط (۱۲ سوال)
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleSwitchTrack('advanced')}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-                          selectedTrack === 'advanced'
-                            ? 'bg-purple-600 text-white border-purple-400 shadow-md scale-105'
-                            : 'bg-white/10 text-white/80 border-white/10 hover:bg-white/15'
-                        }`}
-                      >
-                        پیشرفته (۱۲ سوال)
-                      </button>
-                    </div>
-                  ) : (
-                    /* Student Mode: Locked to their declared level */
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`px-4 py-2 rounded-xl text-xs font-bold border flex items-center gap-2 shadow-md ${
-                          selectedTrack === 'beginner'
-                            ? 'bg-emerald-500 text-white border-emerald-400'
-                            : selectedTrack === 'intermediate'
-                            ? 'bg-[#2563EB] text-white border-blue-400'
-                            : 'bg-purple-600 text-white border-purple-400'
-                        }`}
-                      >
-                        <ShieldCheck className="w-4 h-4" />
-                        <span>
-                          {selectedTrack === 'beginner'
-                            ? `سطح مقدماتی (${totalQuestions} سوال)`
-                            : selectedTrack === 'intermediate'
-                            ? `سطح متوسط (${totalQuestions} سوال)`
-                            : `سطح پیشرفته (${totalQuestions} سوال)`}
-                        </span>
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 border border-white/15 text-xs">
+                    <span className="text-white/60">{lang === 'fa' ? 'مدت زمان سنجش:' : 'Estimated Time:'}</span>
+                    <span className="font-bold text-[#6ee7b7]">{lang === 'fa' ? 'کمتر از ۱ دقیقه' : '< 1 minute'}</span>
+                  </div>
                 </div>
               </div>
 
-              {/* 4 Pillars Preview Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 relative z-10 pt-2">
-                <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-xs space-y-1.5">
-                  <div className="flex items-center gap-2 text-[#99e2b4] font-bold text-xs">
-                    <GitBranch className="w-4 h-4 shrink-0" />
-                    <span>{lang === 'fa' ? '۱. گیت و گیت‌هاب' : '1. Git & GitHub'}</span>
+              {/* 5 Pillars Preview Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 relative z-10 pt-2">
+                {TOOL_READINESS_CATEGORIES.map((cat, idx) => (
+                  <div key={cat.key} className="p-3.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-xs space-y-1.5">
+                    <div className="flex items-center gap-2 text-[#fbbf24] font-bold text-xs">
+                      {renderIcon(cat.iconName, 'w-4 h-4 shrink-0')}
+                      <span className="truncate">{idx + 1}. {lang === 'fa' ? cat.titleFa : cat.titleEn}</span>
+                    </div>
+                    <p className="text-[11px] text-white/75 leading-relaxed line-clamp-2">
+                      {lang === 'fa' ? cat.descFa : cat.descEn}
+                    </p>
                   </div>
-                  <p className="text-[11px] text-white/75 leading-relaxed">
-                    {lang === 'fa'
-                      ? 'مخازن، کامیت، پول‌ریکوئست و برنچ‌ها برای کنترل نسخه پروژه‌ها'
-                      : 'Repositories, commits, PRs, and branch protection'}
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-xs space-y-1.5">
-                  <div className="flex items-center gap-2 text-[#fbbf24] font-bold text-xs">
-                    <Sparkles className="w-4 h-4 shrink-0" />
-                    <span>{lang === 'fa' ? '۲. مدل‌های زبانی و پرامپت' : '2. LLMs & Prompts'}</span>
-                  </div>
-                  <p className="text-[11px] text-white/75 leading-relaxed">
-                    {lang === 'fa'
-                      ? 'محاسبه توکن، فرمول RCTO، و مهندسی کنترل توهم'
-                      : 'Tokens, context windows, RCTO prompt framework'}
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-xs space-y-1.5">
-                  <div className="flex items-center gap-2 text-[#6ee7b7] font-bold text-xs">
-                    <Database className="w-4 h-4 shrink-0" />
-                    <span>{lang === 'fa' ? '۳. معماری RAG و نوت‌بوک' : '3. RAG & NotebookLM'}</span>
-                  </div>
-                  <p className="text-[11px] text-white/75 leading-relaxed">
-                    {lang === 'fa'
-                      ? 'بازیابی اسناد مهندسی، پادکست‌های صوتی و پاسخ‌های مستند'
-                      : 'Source-grounding, audio overviews, zero hallucination'}
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-xs space-y-1.5">
-                  <div className="flex items-center gap-2 text-[#fca5a5] font-bold text-xs">
-                    <Key className="w-4 h-4 shrink-0" />
-                    <span>{lang === 'fa' ? '۴. امنیت، API و داده‌ها' : '4. Security & APIs'}</span>
-                  </div>
-                  <p className="text-[11px] text-white/75 leading-relaxed">
-                    {lang === 'fa'
-                      ? 'کلیدهای محرمانه API، دیتاست‌های CSV و حریم خصوصی سازمان'
-                      : 'Secret credentials, clean CSV tables, data leakage'}
-                  </p>
-                </div>
+                ))}
               </div>
 
               {/* Action Buttons */}
@@ -582,8 +410,8 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
                   <CheckCircle2 className="w-4 h-4 text-[#99e2b4] shrink-0" />
                   <span>
                     {lang === 'fa'
-                      ? 'همراه با تحلیل و توضیح تشریحی آموزشی برای تک‌تک سوالات'
-                      : 'Includes immediate educational explanations for every concept'}
+                      ? '۴ سطح شفاف: نشنیده‌ام (۰) | فقط نامش را شنیده‌ام (۱) | استفاده معمولی (۲) | کاربر حرفه‌ای (۳)'
+                      : '4 Clear tiers: Never heard (0) | Heard of it (1) | Regular user (2) | Power user (3)'}
                   </span>
                 </div>
 
@@ -605,7 +433,7 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
                     onClick={handleStartQuiz}
                     className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#2f7d5b] hover:bg-[#256347] text-white font-extrabold text-sm shadow-md transition-all active:scale-[0.96] hover:scale-[1.02]"
                   >
-                    <span>{lang === 'fa' ? 'شروع آزمون سطح‌سنجی 🚀' : 'Start Readiness Quiz 🚀'}</span>
+                    <span>{lang === 'fa' ? 'شروع ماتریس سنجش ابزارها 🚀' : 'Start Tools Matrix 🚀'}</span>
                     {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                   </button>
                 </div>
@@ -616,26 +444,26 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
           {/* Quick Explanatory FAQ for Newcomers */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="p-4 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.06] dark:border-white/[0.08] shadow-2xs space-y-2">
-              <span className="text-xs font-bold text-[#1f5163] dark:text-[#6fb3c6] flex items-center gap-1.5">
+              <span className="text-xs font-bold text-[#e0533c] dark:text-[#fb7185] flex items-center gap-1.5">
                 <HelpCircle className="w-4 h-4" />
-                <span>{lang === 'fa' ? 'آیا نمره منفی وجود دارد؟' : 'Is there negative marking?'}</span>
+                <span>{lang === 'fa' ? 'چرا خوداظهاری ابزارها؟' : 'Why Self-Declared Tools?'}</span>
               </span>
               <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
                 {lang === 'fa'
-                  ? 'خیر! هدف این آزمون ارزش‌گذاری یا ارزیابی رسمی نیست، بلکه شناسایی شکاف‌های مهارتی و آموزش گام‌به‌گام اصطلاحات کاربردی است.'
-                  : 'No negative marking. The goal is self-discovery, learning key terminology, and pinpointing recommended study modules.'}
+                  ? 'هدف ما ایجاد اضطراب امتحان نیست، بلکه می‌خواهیم تصویری صادقانه و بی‌واسطه از تجربه کاری شما داشته باشیم تا آموزش دقیقاً از نقطه توانمندی شما آغاز شود.'
+                  : 'Zero exam anxiety. A frictionless diagnostic snapshot to tailor workshops and course materials directly to your actual toolkit.'}
               </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.06] dark:border-white/[0.08] shadow-2xs space-y-2">
               <span className="text-xs font-bold text-[#b87333] flex items-center gap-1.5">
                 <Lightbulb className="w-4 h-4" />
-                <span>{lang === 'fa' ? 'چرا اصطلاحات Git و GitHub؟' : 'Why Git & GitHub terms?'}</span>
+                <span>{lang === 'fa' ? 'اهمیت Git، Claude و NotebookLM' : 'Core 2026 AI Stack'}</span>
               </span>
               <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
                 {lang === 'fa'
-                  ? 'در پروژه‌های مدرن هوش مصنوعی، کدهای پایتون، دیتاست‌ها و حتی پرامپت‌ها در گیت‌هاب نسخه‌بندی می‌شوند. تسلط بر الفبای آن برای هر مدیر پروژه‌ای الزامی است.'
-                  : 'In modern AI, Python scripts, prompts, and datasets are versioned on GitHub. Knowing basic Git lingo is now a core managerial literacy.'}
+                  ? 'هوش مصنوعی مدرن فقط چت‌بات نیست؛ شامل کنترل نسخه، ایجنت‌های کدنویسی، حافظه دوم سازمانی و پایپ‌لاین‌های خودکار است.'
+                  : 'Engineering AI spans far beyond ChatGPT — it combines Git versioning, autonomous CLI agents, grounded PKM, and API pipelines.'}
               </p>
             </div>
 
@@ -646,8 +474,8 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
               </span>
               <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
                 {lang === 'fa'
-                  ? 'پس از اتمام آزمون، کارنامه رسمی با سطح مهارتی (برنزی، نقره‌ای، طلایی یا پلاتینیوم) و دکمه‌های مستقیم به صفحات یادگیری به شما اعطا می‌گردد.'
-                  : 'Receive an instant readiness certificate with custom level badges and one-click shortcuts to recommended workbook chapters.'}
+                  ? 'پس از تکمیل ماتریس، شاخص آمادگی ابزاری و تفکیک پنج‌گانه مهارت‌ها به همراه نقشه یادگیری اختصاصی صادر می‌شود.'
+                  : 'Instantly receive your official Tool Readiness Certificate with categorized capability breakdown and direct links to lessons.'}
               </p>
             </div>
           </div>
@@ -655,268 +483,233 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
       )}
 
       {/* ============================================================== */}
-      {/* 2. ACTIVE QUIZ QUESTION VIEW */}
+      {/* 2. ACTIVE TOOLS MATRIX VIEW */}
       {/* ============================================================== */}
       {quizState === 'question' && (
-        <div className="space-y-5">
-          {/* Top Progress & Navigation Bar */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.06] dark:border-white/[0.08] shadow-2xs space-y-3">
+        <div className="space-y-6">
+          {/* Top Sticky Progress & Status Bar */}
+          <div className="sticky top-2 z-20 p-4 sm:p-5 rounded-2xl bg-white/95 dark:bg-[#161e24]/95 backdrop-blur-md border border-black/[0.08] dark:border-white/[0.1] shadow-lg space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                <span className="px-3 py-1 rounded-xl bg-[#1f5163] text-white font-extrabold text-xs shadow-xs">
+                <span className="px-3 py-1 rounded-xl bg-[#e0533c] text-white font-black text-xs shadow-xs">
                   {lang === 'fa'
-                    ? `پرسش ${currentQuestionIndex + 1} از ${totalQuestions}`
-                    : `Question ${currentQuestionIndex + 1} of ${totalQuestions}`}
+                    ? `${ratedCount} از ${totalTools} ابزار ارزیابی شده`
+                    : `${ratedCount} of ${totalTools} tools evaluated`}
                 </span>
 
-                <span
-                  className={`px-2.5 py-1 rounded-xl text-xs font-bold ${
-                    selectedTrack === 'beginner'
-                      ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20'
-                      : selectedTrack === 'intermediate'
-                      ? 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/20'
-                      : 'bg-purple-500/15 text-purple-700 dark:text-purple-400 border border-purple-500/20'
-                  }`}
-                >
-                  {lang === 'fa'
-                    ? `سطح ${
-                        selectedTrack === 'beginner'
-                          ? 'مقدماتی'
-                          : selectedTrack === 'intermediate'
-                          ? 'متوسط'
-                          : 'پیشرفته'
-                      }`
-                    : `Level: ${selectedTrack.toUpperCase()}`}
-                </span>
-
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#5d6b73] dark:text-[#9aa8b0] flex-wrap">
-                  <span className="p-1 rounded-lg bg-black/5 dark:bg-white/10 text-[#1f5163] dark:text-[#6fb3c6]">
-                    {renderCategoryIcon(currentQuestion.categoryIcon)}
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[#5d6b73] dark:text-[#9aa8b0]">
+                  <span>{lang === 'fa' ? 'امتیاز فعلی:' : 'Current Score:'}</span>
+                  <span className="font-mono font-black text-sm text-[#e0533c] dark:text-[#fb7185]">
+                    {currentScore} / {maxScore}
                   </span>
-                  <span>
-                    {lang === 'fa' ? currentQuestion.categoryFa : currentQuestion.categoryEn}
-                  </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-sans font-normal">
-                    {discMeta.shortTitleFa}
+                  <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10">
+                    {currentPct}%
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 self-end sm:self-auto">
-                <span className="text-xs font-mono font-bold text-[#2f7d5b] dark:text-[#52b788] bg-[#2f7d5b]/10 px-2.5 py-0.5 rounded-lg">
-                  {lang === 'fa'
-                    ? `امتیاز فعلی: ${currentScore}`
-                    : `Score: ${currentScore}`}
-                </span>
+              {/* Quick Actions */}
+              <div className="flex items-center gap-2">
                 <button
+                  type="button"
+                  onClick={() => handleSelectAllLevel(2)}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold transition-colors"
+                  title={lang === 'fa' ? 'علامت‌گذاری همه ابزارها با سطح معمولی' : 'Mark all as regular user'}
+                >
+                  {lang === 'fa' ? 'انتخاب همه: معمولی (۲)' : 'All: Regular'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleResetRatings}
+                  className="px-2.5 py-1 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-[#5d6b73] dark:text-[#9aa8b0] text-[11px] font-bold transition-colors"
+                >
+                  {lang === 'fa' ? 'بازنشانی' : 'Reset'}
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => setQuizState('intro')}
                   className="text-xs font-medium text-[#5d6b73] dark:text-[#9aa8b0] hover:text-rose-600 transition-colors px-2 py-1"
                 >
-                  {lang === 'fa' ? 'انصراف / خروج' : 'Exit Quiz'}
+                  {lang === 'fa' ? 'بازگشت' : 'Back'}
                 </button>
               </div>
             </div>
 
-            {/* Smooth Animated Progress Bar */}
-            <div className="w-full h-2 bg-black/[0.05] dark:bg-white/[0.08] rounded-full overflow-hidden">
+            {/* Overall Progress Bar */}
+            <div className="w-full h-2 bg-black/[0.06] dark:bg-white/[0.08] rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-[#1f5163] via-[#00738c] to-[#2f7d5b] transition-all duration-300 rounded-full"
-                style={{
-                  width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`
-                }}
+                className="h-full bg-gradient-to-r from-[#e0533c] to-[#2f7d5b] rounded-full transition-all duration-300"
+                style={{ width: `${Math.round((ratedCount / totalTools) * 100)}%` }}
               />
             </div>
           </div>
 
-          {/* Question Card (Double-Bezel Island) */}
-          <div className="p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <div className="rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 sm:p-7 space-y-6">
-              {/* Real World Scenario (if available) */}
-              {currentQuestion.scenarioFa && (
-                <div className="p-3.5 rounded-xl bg-amber-500/[0.07] dark:bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5 leading-relaxed">
-                  <Lightbulb className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="font-bold">
-                      {lang === 'fa' ? 'سناریوی واقعی در کارگاه/سازمان: ' : 'Real-World Scenario: '}
-                    </strong>
-                    <span>
-                      {lang === 'fa' ? currentQuestion.scenarioFa : currentQuestion.scenarioEn}
-                    </span>
-                  </div>
-                </div>
-              )}
+          {/* Matrix Categories & Tool Cards */}
+          <div className="space-y-6">
+            {TOOL_READINESS_CATEGORIES.map((category) => {
+              const categoryTools = TOOL_READINESS_ITEMS.filter((t) => t.category === category.key);
+              const catStats = getCategoryStats(category.key);
 
-              {/* Question Text */}
-              <div className="space-y-1">
-                <h2 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed">
-                  {lang === 'fa' ? currentQuestion.questionFa : currentQuestion.questionEn}
-                </h2>
-              </div>
+              return (
+                <div
+                  key={category.key}
+                  className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#161e24] border border-black/[0.06] dark:border-white/[0.08] shadow-2xs space-y-4"
+                >
+                  {/* Category Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-black/[0.05] dark:border-white/[0.06]">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#e0533c]/15 to-[#9333ea]/15 dark:from-[#e0533c]/25 dark:to-[#9333ea]/25 text-[#e0533c] dark:text-[#fb7185] flex items-center justify-center shrink-0">
+                        {renderIcon(category.iconName, 'w-5 h-5')}
+                      </div>
+                      <div>
+                        <h2 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9]">
+                          {lang === 'fa' ? category.titleFa : category.titleEn}
+                        </h2>
+                        <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
+                          {lang === 'fa' ? category.descFa : category.descEn}
+                        </p>
+                      </div>
+                    </div>
 
-              {/* 4 Interactive Options */}
-              <div className="space-y-3">
-                {(lang === 'fa' ? currentQuestion.optionsFa : currentQuestion.optionsEn).map(
-                  (optionText, optIdx) => {
-                    const isSelected = currentSelectedOption === optIdx;
-                    const isCorrect = optIdx === currentQuestion.correctAnswerIndex;
-
-                    let btnStyles =
-                      'bg-white dark:bg-[#1a232a] border-black/[0.08] dark:border-white/[0.1] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#1f5163] dark:hover:border-[#6fb3c6] hover:bg-[#f4f7f6] dark:hover:bg-[#1f2a32]';
-                    let badgeStyles =
-                      'bg-black/5 dark:bg-white/10 text-[#5d6b73] dark:text-[#9aa8b0]';
-
-                    if (isAnswerRevealed) {
-                      if (isCorrect) {
-                        btnStyles =
-                          'bg-[#2f7d5b]/10 dark:bg-[#2f7d5b]/20 border-[#2f7d5b] text-[#1f5163] dark:text-[#99e2b4] font-bold ring-2 ring-[#2f7d5b]/30';
-                        badgeStyles = 'bg-[#2f7d5b] text-white';
-                      } else if (isSelected && !isCorrect) {
-                        btnStyles =
-                          'bg-rose-500/10 dark:bg-rose-500/20 border-rose-500 text-rose-700 dark:text-rose-300 line-through opacity-85';
-                        badgeStyles = 'bg-rose-500 text-white';
-                      } else {
-                        btnStyles =
-                          'bg-black/[0.02] dark:bg-white/[0.02] border-black/[0.05] dark:border-white/[0.06] text-[#5d6b73] dark:text-[#7f8e97] opacity-60';
-                      }
-                    }
-
-                    const optionLettersFa = ['الف', 'ب', 'ج', 'د'];
-                    const optionLettersEn = ['A', 'B', 'C', 'D'];
-
-                    return (
-                      <button
-                        key={optIdx}
-                        disabled={isAnswerRevealed}
-                        onClick={() => handleSelectOption(optIdx)}
-                        className={`w-full p-4 rounded-2xl border text-start flex items-start gap-3.5 transition-all duration-150 active:scale-[0.98] ${btnStyles}`}
-                      >
-                        <span
-                          className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 transition-colors ${badgeStyles}`}
-                        >
-                          {isAnswerRevealed && isCorrect ? (
-                            <Check className="w-3.5 h-3.5" />
-                          ) : isAnswerRevealed && isSelected && !isCorrect ? (
-                            <XCircle className="w-3.5 h-3.5" />
-                          ) : lang === 'fa' ? (
-                            optionLettersFa[optIdx]
-                          ) : (
-                            optionLettersEn[optIdx]
-                          )}
-                        </span>
-
-                        <span className="text-xs sm:text-sm leading-relaxed flex-1 select-text">
-                          {optionText}
-                        </span>
-                      </button>
-                    );
-                  }
-                )}
-              </div>
-
-              {/* Instant Educational Deep-Dive Drawer (Revealed after selection) */}
-              {isAnswerRevealed && (
-                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#00738c]/[0.05] to-[#2f7d5b]/[0.04] dark:from-[#00738c]/[0.1] dark:to-[#2f7d5b]/[0.08] border border-[#00738c]/25 space-y-3.5 animate-fadeIn">
-                  <div className="flex items-center gap-2 font-black text-xs sm:text-sm text-[#00738c] dark:text-[#6fb3c6]">
-                    {currentSelectedOption === currentQuestion.correctAnswerIndex ? (
-                      <>
-                        <CheckCircle2 className="w-5 h-5 text-[#2f7d5b] shrink-0" />
-                        <span>{lang === 'fa' ? 'آفرین! پاسخ شما کاملاً صحیح است.' : 'Excellent! Correct Answer.'}</span>
-                      </>
-                    ) : (
-                      <>
-                        <XCircle className="w-5 h-5 text-rose-500 shrink-0" />
-                        <span>{lang === 'fa' ? 'پاسخ نادرست بود. تحلیل مفهوم زیر را به خاطر بسپارید:' : 'Incorrect. Study the concept breakdown below:'}</span>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="space-y-2 text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed select-text">
-                    <p className="bg-white/80 dark:bg-[#12171b]/80 p-3.5 rounded-xl border border-black/[0.04] dark:border-white/[0.06]">
-                      <strong className="text-[#00738c] dark:text-[#6fb3c6] font-bold">
-                        {lang === 'fa' ? '💡 تشریح دقیق اصطلاح: ' : 'Concept Explanation: '}
-                      </strong>
-                      <span>
-                        {lang === 'fa'
-                          ? currentQuestion.explanationFa
-                          : currentQuestion.explanationEn}
-                      </span>
-                    </p>
-
-                    <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.04] dark:border-white/[0.06] text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-                      <strong className="text-[#b87333] font-bold">
-                        {lang === 'fa' ? '🏗️ کاربرد عملی در پروژه‌ها: ' : 'Engineering Application: '}
-                      </strong>
-                      <span>
-                        {lang === 'fa'
-                          ? currentQuestion.realWorldContextFa
-                          : currentQuestion.realWorldContextEn}
+                    <div className="flex items-center gap-2 self-start sm:self-auto">
+                      <span className="font-mono text-xs font-bold text-[#5d6b73] dark:text-[#9aa8b0] bg-black/5 dark:bg-white/5 px-2.5 py-1 rounded-lg">
+                        {catStats.earnedScore} / {catStats.maxScore} ({catStats.percentage}%)
                       </span>
                     </div>
                   </div>
-                </div>
-              )}
 
-              {/* Navigation Action Buttons */}
-              <div className="flex items-center justify-between pt-3 border-t border-black/[0.06] dark:border-white/[0.08]">
-                <button
-                  disabled={currentQuestionIndex === 0}
-                  onClick={handlePrevQuestion}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                    currentQuestionIndex === 0
-                      ? 'opacity-30 cursor-not-allowed text-[#5d6b73]'
-                      : 'hover:bg-black/5 dark:hover:bg-white/5 text-[#1c2830] dark:text-[#e8ebe9]'
-                  }`}
-                >
-                  {lang === 'fa' ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-                  <span>{lang === 'fa' ? 'پرسش قبلی' : 'Previous'}</span>
-                </button>
+                  {/* Tools Grid within this Category */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {categoryTools.map((tool) => {
+                      const currentRating = toolRatings[tool.id];
 
-                <div className="flex items-center gap-2">
-                  {isAnswerRevealed ? (
-                    <button
-                      onClick={handleNextQuestion}
-                      className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#2f7d5b] hover:bg-[#256347] text-white font-extrabold text-xs sm:text-sm shadow-xs transition-all active:scale-[0.96]"
-                    >
-                      <span>
-                        {currentQuestionIndex === totalQuestions - 1
-                          ? lang === 'fa'
-                            ? 'مشاهده کارنامه نهایی 🏆'
-                            : 'View Final Result 🏆'
-                          : lang === 'fa'
-                          ? 'پرسش بعدی'
-                          : 'Next Question'}
-                      </span>
-                      {lang === 'fa' ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                    </button>
-                  ) : (
-                    <span className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] italic">
-                      {lang === 'fa'
-                        ? 'لطفاً یکی از گزینه‌ها را برای مشاهده پاسخ انتخاب کنید'
-                        : 'Select an option to proceed'}
-                    </span>
-                  )}
+                      return (
+                        <div
+                          key={tool.id}
+                          className={`p-4 rounded-2xl border transition-all duration-150 space-y-3 ${
+                            currentRating !== undefined
+                              ? 'bg-[#f8f9fa] dark:bg-[#12171b] border-black/[0.08] dark:border-white/[0.12] shadow-xs'
+                              : 'bg-white dark:bg-[#141b21] border-black/[0.04] dark:border-white/[0.06]'
+                          }`}
+                        >
+                          {/* Tool Header */}
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-8 h-8 rounded-xl bg-black/5 dark:bg-white/10 text-[#e0533c] dark:text-[#fb7185] flex items-center justify-center shrink-0 font-bold text-xs">
+                                {renderIcon(tool.iconName, 'w-4 h-4')}
+                              </div>
+                              <div>
+                                <h3 className="text-sm font-black text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
+                                  <span>{tool.name}</span>
+                                  <span className="text-[11px] font-normal text-[#5d6b73] dark:text-[#9aa8b0]">
+                                    ({lang === 'fa' ? tool.titleFa : tool.titleEn})
+                                  </span>
+                                </h3>
+                              </div>
+                            </div>
+
+                            {currentRating !== undefined && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#2f7d5b]/15 text-[#2f7d5b] dark:text-[#52b788] border border-[#2f7d5b]/20">
+                                {TOOL_RATING_LEVELS.find((l) => l.level === currentRating)?.[lang === 'fa' ? 'labelFa' : 'labelEn']}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Tool Description */}
+                          <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                            {lang === 'fa' ? tool.descriptionFa : tool.descriptionEn}
+                          </p>
+
+                          {/* 4 Rating Buttons / Pills */}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1">
+                            {TOOL_RATING_LEVELS.map((tier) => {
+                              const isSelected = currentRating === tier.level;
+
+                              let activeStyles =
+                                'bg-black/[0.03] dark:bg-white/[0.04] border-black/[0.06] dark:border-white/[0.08] text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-black/5 dark:hover:bg-white/10';
+
+                              if (isSelected) {
+                                if (tier.level === 0) {
+                                  activeStyles = 'bg-slate-200 dark:bg-slate-800 border-slate-400 text-slate-800 dark:text-slate-200 font-bold ring-2 ring-slate-400/30';
+                                } else if (tier.level === 1) {
+                                  activeStyles = 'bg-blue-500/15 border-blue-500 text-blue-700 dark:text-blue-300 font-bold ring-2 ring-blue-500/30';
+                                } else if (tier.level === 2) {
+                                  activeStyles = 'bg-emerald-500/15 border-emerald-500 text-emerald-700 dark:text-emerald-300 font-bold ring-2 ring-emerald-500/30';
+                                } else {
+                                  activeStyles = 'bg-purple-500/15 border-purple-500 text-purple-700 dark:text-purple-300 font-bold ring-2 ring-purple-500/30';
+                                }
+                              }
+
+                              return (
+                                <button
+                                  key={tier.level}
+                                  type="button"
+                                  onClick={() => handleRateTool(tool.id, tier.level)}
+                                  className={`p-2 rounded-xl border text-center transition-all duration-150 flex flex-col items-center justify-center gap-0.5 active:scale-95 ${activeStyles}`}
+                                >
+                                  <span className="text-[11px] font-bold leading-tight">
+                                    {lang === 'fa' ? tier.labelFa : tier.labelEn}
+                                  </span>
+                                  <span className="text-[10px] font-mono opacity-60">
+                                    ({tier.level} {lang === 'fa' ? 'امتیاز' : 'pts'})
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              );
+            })}
+          </div>
+
+          {/* Bottom Floating / Fixed Action Bar */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.08] dark:border-white/[0.1] shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
+              <CheckSquare className="w-4 h-4 text-[#2f7d5b]" />
+              <span>
+                {ratedCount === totalTools
+                  ? (lang === 'fa' ? 'تمام ۱۲ ابزار تکمیل شده است. آماده صدور کارنامه هستید!' : 'All 12 tools evaluated. Ready to finalize!')
+                  : (lang === 'fa'
+                      ? `توجه: ${totalTools - ratedCount} ابزار ارزیابی نشده، نمره ۰ (نشنیده‌ام) در نظر گرفته خواهد شد.`
+                      : `Note: ${totalTools - ratedCount} unrated tools will be counted as 0.`)}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={finishQuiz}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#2f7d5b] to-[#256347] hover:from-[#256347] hover:to-[#1e5038] text-white font-black text-sm shadow-lg transition-all active:scale-[0.97]"
+              >
+                <Award className="w-4 h-4 text-[#fbbf24]" />
+                <span>{lang === 'fa' ? 'ثبت نهایی و صدور کارنامه رسمی 🏆' : 'Submit & Generate Certificate 🏆'}</span>
+              </button>
             </div>
           </div>
         </div>
       )}
 
       {/* ============================================================== */}
-      {/* 3. FINAL RESULTS & DIAGNOSTIC DASHBOARD VIEW */}
+      {/* 3. RESULT & READINESS CERTIFICATE VIEW */}
       {/* ============================================================== */}
       {quizState === 'result' && (
-        <div className="space-y-6">
-          {/* Hero Result Certificate Card */}
-          <div className="p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <div className="rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-6 sm:p-9 space-y-6 relative overflow-hidden">
-              {/* Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-black/[0.06] dark:border-white/[0.08]">
-                <div className="flex items-center gap-3">
-                  <div className="bg-white p-2 rounded-xl shadow-xs border border-black/[0.05]">
+        <div className="space-y-6 animate-fadeIn">
+          {/* Certificate Container */}
+          <div className="p-1 rounded-3xl bg-gradient-to-br from-[#e0533c]/20 via-[#9333ea]/20 to-[#2f7d5b]/20 border border-black/[0.08] dark:border-white/[0.1] shadow-xl">
+            <div className="bg-white dark:bg-[#161e24] rounded-[calc(1.5rem-0.25rem)] p-6 sm:p-9 space-y-6">
+              {/* Certificate Top Header */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-black/[0.06] dark:border-white/[0.08]">
+                <div className="flex items-center gap-3.5 text-center sm:text-start">
+                  <div className="h-12 w-12 rounded-2xl bg-black/[0.03] dark:bg-white/[0.05] p-2 flex items-center justify-center border border-black/[0.06] dark:border-white/[0.08] shrink-0">
                     <img
                       src={OWJ_LOGO}
-                      alt="OWJ"
+                      alt="OWJ Logo"
                       className="h-9 w-auto object-contain"
                       onError={(e) => {
                         e.currentTarget.src = OWJ_LOGO_FALLBACK;
@@ -924,13 +717,13 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
                     />
                   </div>
                   <div>
-                    <span className="text-[11px] font-bold uppercase text-[#1f5163] dark:text-[#6fb3c6]">
-                      {lang === 'fa' ? 'گروه مشاوران مدیریت اوج · کارنامه سطح‌سنجی' : 'OWJ Business Council · Placement Certificate'}
+                    <span className="text-[11px] font-bold uppercase text-[#e0533c] dark:text-[#fb7185]">
+                      {lang === 'fa' ? 'گروه مشاوران مدیریت اوج · کارنامه ماتریس ابزارها' : 'OWJ Business Council · AI Tools Certificate'}
                     </span>
                     <h2 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9]">
                       {lang === 'fa'
-                        ? 'گواهی سطح مهارت و سواد هوش مصنوعی'
-                        : 'AI Literacy & Engineering Readiness Certificate'}
+                        ? 'گواهی سنجش جعبه‌ابزار و سواد عملی هوش مصنوعی'
+                        : 'AI Tools Readiness & Practical Literacy Certificate'}
                     </h2>
                   </div>
                 </div>
@@ -957,7 +750,7 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
               {/* Candidate Profile Strip */}
               <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] text-xs">
                 <div className="flex items-center gap-2 text-[#1c2830] dark:text-[#e8ebe9]">
-                  <User className="w-4 h-4 text-[#1f5163] dark:text-[#6fb3c6]" />
+                  <User className="w-4 h-4 text-[#e0533c] dark:text-[#fb7185]" />
                   <span className="font-bold">{candidateDisplayName}</span>
                   <span className="text-[#5d6b73] dark:text-[#9aa8b0]">({candidateSpecialty})</span>
                 </div>
@@ -965,8 +758,8 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
                   {candidatePhone && (
                     <span dir="ltr" className="font-mono">📱 {candidatePhone}</span>
                   )}
-                  <span className="px-2.5 py-0.5 rounded-lg bg-[#1f5163]/10 dark:bg-[#6fb3c6]/10 text-[#1f5163] dark:text-[#6fb3c6] font-bold">
-                    {lang === 'fa' ? `سطح آزمون: ${trackLabelFa[selectedTrack]}` : `Track: ${trackLabelEn[selectedTrack]}`}
+                  <span className="px-2.5 py-0.5 rounded-lg bg-[#e0533c]/10 dark:bg-[#fb7185]/10 text-[#e0533c] dark:text-[#fb7185] font-bold">
+                    {lang === 'fa' ? `سطح پایه: ${trackLabelFa[selectedTrack]}` : `Base Tier: ${trackLabelEn[selectedTrack]}`}
                   </span>
                   <span>
                     📅 {new Date().toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US')}
@@ -998,18 +791,18 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
                 {/* Score Dial Big Card */}
                 <div className="p-5 rounded-2xl bg-white dark:bg-[#12171b] border border-black/[0.08] dark:border-white/[0.1] shadow-md flex flex-col items-center justify-center shrink-0 min-w-44 text-center">
                   <span className="text-[10px] uppercase font-bold tracking-wider text-[#5d6b73] dark:text-[#9aa8b0]">
-                    {lang === 'fa' ? 'امتیاز نهایی' : 'Final Score'}
+                    {lang === 'fa' ? 'امتیاز جعبه‌ابزار' : 'Toolbox Score'}
                   </span>
                   <div className="flex items-baseline gap-1 my-1">
                     <span className={`text-4xl sm:text-5xl font-black font-mono ${currentResultLevel.colorClass}`}>
                       {currentScore}
                     </span>
                     <span className="text-sm font-mono text-[#5d6b73] dark:text-[#9aa8b0]">
-                      / {totalQuestions}
+                      / {maxScore}
                     </span>
                   </div>
-                  <span className="text-xs font-bold text-[#1f5163] dark:text-[#6fb3c6] bg-black/5 dark:bg-white/10 px-2.5 py-0.5 rounded-full font-mono">
-                    {Math.round((currentScore / totalQuestions) * 100)} %
+                  <span className="text-xs font-bold text-[#e0533c] dark:text-[#fb7185] bg-black/5 dark:bg-white/10 px-2.5 py-0.5 rounded-full font-mono">
+                    {currentPct} %
                   </span>
                 </div>
               </div>
@@ -1046,7 +839,7 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-xs font-black uppercase tracking-wider">
-                          شاخص تطابق سطح (Tier Alignment Index):
+                          {lang === 'fa' ? 'شاخص تطابق سطح (Tier Alignment Index):' : 'Tier Alignment Index:'}
                         </span>
                         <span
                           className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold ${
@@ -1058,127 +851,97 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
                           }`}
                         >
                           {alignmentIndex === 'Matches'
-                            ? '✓ تطابق کامل با سطح انتخابی (Matches Claimed Level)'
+                            ? '✓ تطابق متوازن با سطح انتخابی (Balanced Toolset)'
                             : alignmentIndex === 'Above Tier'
-                            ? '🚀 فراتر از سطح انتخابی (Above Tier / High Potential)'
-                            : '⚠️ نیاز به تقویت مفاهیم پایه (Below Tier / Dunning-Kruger Gap)'}
+                            ? '🚀 ابزارشناسی فراتر از سطح (Advanced Toolset)'
+                            : '⚠️ نیاز به آشنایی با ابزارهای پایه (Early Stage Adoption)'}
                         </span>
                       </div>
                       <p className="text-xs leading-relaxed opacity-90">
                         {alignmentIndex === 'Matches'
-                          ? 'تبریک! امتیاز آزمون شما، سطح آشنایی اعلام‌شده در پرونده را کاملاً تصدیق کرد. آمادگی ورود به متدولوژی CPMAI را دارا هستید.'
+                          ? 'تسلط ابزاری شما با سطح تعریف‌شده همخوانی کامل دارد. آماده ورود به متدولوژی CPMAI و پیاده‌سازی کاربردی هستید.'
                           : alignmentIndex === 'Above Tier'
-                          ? 'بسیار درخشان! تسلط شما فراتر از سطح پایه انتخابی است و پیشنهاد می‌شود جلسات سطح پیشرفته را پیگیری فرمایید.'
-                          : 'توجه شناختی: نمره کسب‌شده نشان‌دهنده خطای برآورد مهارت (Dunning-Kruger Gap) است. مرور دقیق جلسات ۰ و ۱ کتاب‌کار جهت رفع شکاف‌های مفهومی قویاً توصیه می‌گردد.'}
+                          ? 'بسیار درخشان! تسلط شما بر ابزارهای نوین، ایجنت‌ها و مدیریت دانش فراتر از سطح است و امکان ورود سریع به پروژه‌های پیشرفته را دارید.'
+                          : 'پیشنهاد می‌شود قبل از ورود به فازهای پیچیده، کار با ابزارهای اولیه نظیر ChatGPT، Git و NotebookLM در صفحه ۰ را تمرین نمایید.'}
                       </p>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* 4 Category Breakdown Progress Bars */}
+              {/* 5 Category Breakdown Progress Bars */}
               <div className="space-y-3 pt-2">
                 <h4 className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-                  <Target className="w-4 h-4 text-[#1f5163] dark:text-[#6fb3c6]" />
-                  <span>{lang === 'fa' ? 'تفکیک مهارت در حوزه‌های چهارگانه آزمون:' : 'Performance Breakdown by Competency:'}</span>
+                  <Target className="w-4 h-4 text-[#e0533c] dark:text-[#fb7185]" />
+                  <span>{lang === 'fa' ? 'تفکیک مهارت در حوزه‌های پنج‌گانه ابزارها:' : 'Performance Breakdown by Tool Domain:'}</span>
                 </h4>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  {/* Category 1 */}
-                  {(() => {
-                    const stats = getCategoryStats('git_github');
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                  {TOOL_READINESS_CATEGORIES.map((cat) => {
+                    const stats = getCategoryStats(cat.key);
                     return (
-                      <div className="p-3.5 rounded-xl bg-[#f8f9fa] dark:bg-[#12171b] border border-black/[0.04] dark:border-white/[0.06] space-y-2">
+                      <div
+                        key={cat.key}
+                        className="p-3.5 rounded-xl bg-[#f8f9fa] dark:bg-[#12171b] border border-black/[0.04] dark:border-white/[0.06] space-y-2"
+                      >
                         <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-                            <GitBranch className="w-3.5 h-3.5 text-[#1f5163]" />
-                            <span>{lang === 'fa' ? 'کنترل نسخه و گیت‌هاب' : 'Git & GitHub'}</span>
+                          <span className="font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5 truncate">
+                            {renderIcon(cat.iconName, 'w-3.5 h-3.5 text-[#e0533c]')}
+                            <span className="truncate">{lang === 'fa' ? cat.titleFa : cat.titleEn}</span>
                           </span>
-                          <span className="font-mono text-[11px] font-bold text-[#1f5163] dark:text-[#6fb3c6]">
-                            {stats.correctCount} / {stats.totalCount} ({stats.percentage}%)
+                          <span className="font-mono text-[11px] font-bold text-[#e0533c] dark:text-[#fb7185]">
+                            {stats.earnedScore} / {stats.maxScore} ({stats.percentage}%)
                           </span>
                         </div>
                         <div className="w-full h-2 bg-black/[0.06] dark:bg-white/[0.08] rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-[#1f5163] rounded-full"
+                            className="h-full bg-gradient-to-r from-[#e0533c] to-[#9333ea] rounded-full"
                             style={{ width: `${stats.percentage}%` }}
                           />
                         </div>
                       </div>
                     );
-                  })()}
+                  })}
+                </div>
+              </div>
 
-                  {/* Category 2 */}
-                  {(() => {
-                    const stats = getCategoryStats('llm_fundamentals');
-                    return (
-                      <div className="p-3.5 rounded-xl bg-[#f8f9fa] dark:bg-[#12171b] border border-black/[0.04] dark:border-white/[0.06] space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-                            <Sparkles className="w-3.5 h-3.5 text-[#b87333]" />
-                            <span>{lang === 'fa' ? 'مدل‌های زبانی و پرامپت' : 'LLMs & Prompting'}</span>
-                          </span>
-                          <span className="font-mono text-[11px] font-bold text-[#b87333]">
-                            {stats.correctCount} / {stats.totalCount} ({stats.percentage}%)
-                          </span>
-                        </div>
-                        <div className="w-full h-2 bg-black/[0.06] dark:bg-white/[0.08] rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-[#b87333] rounded-full"
-                            style={{ width: `${stats.percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })()}
+              {/* Detailed Breakdown of All 12 Tools */}
+              <div className="space-y-3 pt-2">
+                <h4 className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
+                  <Sliders className="w-4 h-4 text-[#2f7d5b]" />
+                  <span>{lang === 'fa' ? 'وضعیت ثبت‌شده برای هر یک از ۱۲ ابزار:' : 'Detailed 12-Tool Status:'}</span>
+                </h4>
 
-                  {/* Category 3 */}
-                  {(() => {
-                    const stats = getCategoryStats('rag_notebooklm');
-                    return (
-                      <div className="p-3.5 rounded-xl bg-[#f8f9fa] dark:bg-[#12171b] border border-black/[0.04] dark:border-white/[0.06] space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-                            <Database className="w-3.5 h-3.5 text-[#00738c]" />
-                            <span>{lang === 'fa' ? 'معماری RAG و نوت‌بوک ال‌ام' : 'RAG & NotebookLM'}</span>
-                          </span>
-                          <span className="font-mono text-[11px] font-bold text-[#00738c] dark:text-[#6fb3c6]">
-                            {stats.correctCount} / {stats.totalCount} ({stats.percentage}%)
-                          </span>
-                        </div>
-                        <div className="w-full h-2 bg-black/[0.06] dark:bg-white/[0.08] rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-[#00738c] rounded-full"
-                            style={{ width: `${stats.percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })()}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                  {TOOL_READINESS_ITEMS.map((item) => {
+                    const rating = toolRatings[item.id] ?? 0;
+                    const meta = TOOL_RATING_LEVELS.find((l) => l.level === rating) || TOOL_RATING_LEVELS[0];
 
-                  {/* Category 4 */}
-                  {(() => {
-                    const stats = getCategoryStats('security_apis');
                     return (
-                      <div className="p-3.5 rounded-xl bg-[#f8f9fa] dark:bg-[#12171b] border border-black/[0.04] dark:border-white/[0.06] space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-                            <Key className="w-3.5 h-3.5 text-[#2f7d5b]" />
-                            <span>{lang === 'fa' ? 'امنیت، API و داده‌های مهندسی' : 'Security, APIs & Data'}</span>
-                          </span>
-                          <span className="font-mono text-[11px] font-bold text-[#2f7d5b] dark:text-[#52b788]">
-                            {stats.correctCount} / {stats.totalCount} ({stats.percentage}%)
-                          </span>
+                      <div
+                        key={item.id}
+                        className="p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between text-xs"
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          {renderIcon(item.iconName, 'w-3.5 h-3.5 text-[#5d6b73] shrink-0')}
+                          <span className="font-bold text-[#1c2830] dark:text-[#e8ebe9] truncate">{item.name}</span>
                         </div>
-                        <div className="w-full h-2 bg-black/[0.06] dark:bg-white/[0.08] rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-[#2f7d5b] rounded-full"
-                            style={{ width: `${stats.percentage}%` }}
-                          />
-                        </div>
+                        <span
+                          className={`px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0 ${
+                            rating === 3
+                              ? 'bg-purple-500/15 text-purple-700 dark:text-purple-300'
+                              : rating === 2
+                              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                              : rating === 1
+                              ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300'
+                              : 'bg-black/5 dark:bg-white/10 text-[#5d6b73]'
+                          }`}
+                        >
+                          {lang === 'fa' ? meta.labelFa : meta.labelEn}
+                        </span>
                       </div>
                     );
-                  })()}
+                  })}
                 </div>
               </div>
 
@@ -1186,7 +949,7 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
               <div className="p-4 sm:p-5 rounded-2xl bg-[#f8f9fa] dark:bg-[#12171b] border border-black/[0.05] dark:border-white/[0.06] space-y-3.5">
                 <h4 className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
                   <BookCheck className="w-4 h-4 text-[#2f7d5b]" />
-                  <span>{lang === 'fa' ? 'نقشه راه پیشنهادی متناسب با سطح شما:' : 'Personalized Learning Roadmap:'}</span>
+                  <span>{lang === 'fa' ? 'نقشه راه پیشنهادی متناسب با جعبه‌ابزار شما:' : 'Personalized Learning Roadmap:'}</span>
                 </h4>
 
                 <div className="space-y-2 text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
@@ -1211,7 +974,7 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
                   className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-black/[0.08] dark:border-white/[0.1] text-xs font-bold hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  <span>{lang === 'fa' ? 'آزمون مجدد (Retake Quiz)' : 'Retake Quiz'}</span>
+                  <span>{lang === 'fa' ? 'سنجش مجدد ماتریس (Retake Matrix)' : 'Retake Matrix'}</span>
                 </button>
 
                 <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
@@ -1230,10 +993,10 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
                       onNavigateToPage(0);
                       if (onCloseQuiz) onCloseQuiz();
                     }}
-                    className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#00738c] hover:bg-[#0f4c5c] text-white text-xs font-bold transition-all shadow-xs active:scale-[0.96]"
+                    className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#c026d3] hover:bg-[#9333ea] text-white text-xs font-bold transition-all shadow-xs active:scale-[0.96]"
                   >
                     <span>{lang === 'fa' ? 'ورود به صفحه ۰ (جعبه‌ابزار LLM)' : 'Open Page 0 (LLM Toolkit)'}</span>
-                    {lang === 'fa' ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
+                    {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                   </button>
 
                   <button
@@ -1244,7 +1007,7 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح سوا
                     className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#2f7d5b] hover:bg-[#256347] text-white text-xs font-bold transition-all shadow-xs active:scale-[0.96]"
                   >
                     <span>{lang === 'fa' ? 'ورود به فاز اول درک کسب‌وکار' : 'Proceed to Phase I'}</span>
-                    {lang === 'fa' ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
+                    {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
