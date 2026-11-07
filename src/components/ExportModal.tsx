@@ -221,7 +221,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             onClick={() => setActiveTab('markdown')}
             className={`py-2.5 px-4 text-xs sm:text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'markdown'
-                ? 'border-[#1f5163] text-[#1f5163] dark:border-[#6fb3c6] dark:text-[#6fb3c6]'
+                ? 'border-[#e0533c] text-[#e0533c] dark:border-[#fb7185] dark:text-[#fb7185]'
                 : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830]'
             }`}
           >
@@ -231,7 +231,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             onClick={() => setActiveTab('backup')}
             className={`py-2.5 px-4 text-xs sm:text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'backup'
-                ? 'border-[#1f5163] text-[#1f5163] dark:border-[#6fb3c6] dark:text-[#6fb3c6]'
+                ? 'border-[#e0533c] text-[#e0533c] dark:border-[#fb7185] dark:text-[#fb7185]'
                 : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830]'
             }`}
           >
@@ -251,7 +251,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 </span>
                 <button
                   onClick={handleCopyMarkdown}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e] hover:opacity-90"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] hover:opacity-90"
                 >
                   {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copied ? (lang === 'fa' ? 'کپی شد!' : 'Copied!') : t.copyMdBtn}</span>
@@ -279,7 +279,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 </p>
                 <button
                   onClick={handleDownloadJson}
-                  className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-lg bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e] hover:opacity-90"
+                  className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-lg bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] hover:opacity-90"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>{t.downloadJsonBtn}</span>

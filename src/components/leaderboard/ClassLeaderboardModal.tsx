@@ -384,7 +384,7 @@ export const ClassLeaderboardModal: React.FC<ClassLeaderboardModalProps> = ({
                               </td>
                               <td className="py-3 px-4">
                                 <div className="flex items-center gap-2.5">
-                                  <div className="w-7 h-7 rounded-full bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] flex items-center justify-center font-bold text-xs shrink-0">
+                                  <div className="w-7 h-7 rounded-full bg-[#e0533c]/10 text-[#e0533c] dark:text-[#fb7185] flex items-center justify-center font-bold text-xs shrink-0">
                                     {row.fullName.charAt(0)}
                                   </div>
                                   <div>

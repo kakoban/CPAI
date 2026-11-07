@@ -18,7 +18,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
             href="https://owjbc.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-[#1c2830] dark:text-[#e8ebe9] hover:text-[#1f5163] dark:hover:text-[#6fb3c6] transition-colors underline decoration-[#1f5163]/40 underline-offset-4"
+            className="font-medium text-[#1c2830] dark:text-[#e8ebe9] hover:text-[#e0533c] dark:hover:text-[#fb7185] transition-colors underline decoration-[#e0533c]/40 underline-offset-4"
           >
             {t.org}
           </a>
@@ -29,7 +29,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
             href="https://owjbc.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[#1f5163] dark:hover:text-[#6fb3c6] transition-colors"
+            className="hover:text-[#e0533c] dark:hover:text-[#fb7185] transition-colors"
           >
             owjbc.com
           </a>
@@ -38,7 +38,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
             href="https://www.instagram.com/owjbc/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[#1f5163] dark:hover:text-[#6fb3c6] transition-colors"
+            className="hover:text-[#e0533c] dark:hover:text-[#fb7185] transition-colors"
           >
             {t.instagram}
           </a>
@@ -47,7 +47,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
             href="https://t.me/OWJBC"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[#1f5163] dark:hover:text-[#6fb3c6] transition-colors"
+            className="hover:text-[#e0533c] dark:hover:text-[#fb7185] transition-colors"
           >
             {t.telegram}
           </a>

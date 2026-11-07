@@ -99,7 +99,7 @@ export const Page20AcceptableKpiPerformanceValues: React.FC<Page20Props> = ({
       titleFa: 'چت‌بات پشتیبانی مشتریان شرکت XYZ (مطالعه موردی رسمی CPMAI)',
       domainEn: 'Customer Support Automation & Service Desk',
       domainFa: 'اتوماسیون خدمات مشتریان و پشتیبانی سطح ۱',
-      badgeColor: 'bg-[#00738c] text-white',
+      badgeColor: 'bg-[#c026d3] text-white',
       monthlyTickets: 50000,
       currentCostPerTicket: 6.5,
       containmentRate: 40,
@@ -290,7 +290,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
   return (
     <div className="space-y-6 animate-fade-in" dir={lang === 'fa' ? 'rtl' : 'ltr'}>
       {/* Header Banner */}
-      <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1b3a4b] via-[#1f5163] to-[#00738c] text-white shadow-lg relative overflow-hidden">
+      <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1b3a4b] via-[#e0533c] to-[#c026d3] text-white shadow-lg relative overflow-hidden">
         <div className="absolute top-0 end-0 -mt-8 -me-8 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -320,10 +320,10 @@ Initial iteration thresholds are set conservatively to validate business feasibi
           <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
             <button
               onClick={handleApplyToCanvas}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white text-[#1f5163] hover:bg-[#e3f2ea] text-xs font-bold transition-all shadow-sm cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white text-[#e0533c] hover:bg-[#e3f2ea] text-xs font-bold transition-all shadow-sm cursor-pointer"
               title={lang === 'fa' ? 'تزریق مستقیم به بوم مستندات' : 'Inject directly into canvas'}
             >
-              <Zap className="w-4 h-4 text-[#00738c]" />
+              <Zap className="w-4 h-4 text-[#c026d3]" />
               <span>{lang === 'fa' ? 'تزریق به بوم' : 'Inject to Canvas'}</span>
             </button>
           </div>
@@ -334,7 +334,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
       <div className="p-4 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs">
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
-            <Target className="w-4 h-4 text-[#00738c]" />
+            <Target className="w-4 h-4 text-[#c026d3]" />
             <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
               {lang === 'fa' ? 'مطالعه موردی مرجع (بارگذاری سریع سناریو):' : 'Select Case Study Preset:'}
             </span>
@@ -358,7 +358,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
                 onClick={() => handleApplyPreset(preset)}
                 className={`p-3 rounded-lg border text-start transition-all cursor-pointer ${
                   isSelected
-                    ? 'border-[#00738c] bg-[#00738c]/10 dark:bg-[#00738c]/20 ring-1 ring-[#00738c]'
+                    ? 'border-[#c026d3] bg-[#c026d3]/10 dark:bg-[#c026d3]/20 ring-1 ring-[#c026d3]'
                     : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30'
                 }`}
               >
@@ -366,7 +366,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
                   <span className="font-bold text-xs text-gray-900 dark:text-white truncate">
                     {lang === 'fa' ? preset.titleFa : preset.titleEn}
                   </span>
-                  {isSelected && <Check className="w-3.5 h-3.5 text-[#00738c] shrink-0" />}
+                  {isSelected && <Check className="w-3.5 h-3.5 text-[#c026d3] shrink-0" />}
                 </div>
                 <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-tight">
                   {lang === 'fa' ? preset.domainFa : preset.domainEn}
@@ -381,7 +381,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Left Box: Description */}
         <div className="p-4 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs space-y-2">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#00738c] dark:text-[#6ee7b7] border-b border-gray-100 dark:border-gray-800 pb-2">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#c026d3] dark:text-[#6ee7b7] border-b border-gray-100 dark:border-gray-800 pb-2">
             <Info className="w-4 h-4" />
             <span>{lang === 'fa' ? 'شرح وظیفه (Description - متن رسمی اسلاید ۳۰)' : 'Description (Slide 30)'}</span>
           </div>
@@ -394,7 +394,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
 
         {/* Right Box: Task Artifacts */}
         <div className="p-4 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs space-y-2">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#1f5163] dark:text-[#99e2b4] border-b border-gray-100 dark:border-gray-800 pb-2">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#e0533c] dark:text-[#99e2b4] border-b border-gray-100 dark:border-gray-800 pb-2">
             <CheckSquare className="w-4 h-4" />
             <span>{lang === 'fa' ? 'مصنوعات وظیفه: سنجه‌های تجاری الزامی (Required Business KPIs)' : 'Task Artifacts: Required Business KPIs'}</span>
           </div>
@@ -412,7 +412,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
           onClick={() => setActiveTab('worksheet')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'worksheet'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -424,7 +424,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
           onClick={() => setActiveTab('calculator')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'calculator'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -436,7 +436,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
           onClick={() => setActiveTab('canvas')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'canvas'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -448,7 +448,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
           onClick={() => setActiveTab('guide')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'guide'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -472,27 +472,27 @@ Initial iteration thresholds are set conservatively to validate business feasibi
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Category 1: Efficiency & Cost Reduction */}
             <div className="p-5 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs space-y-3">
-              <div className="flex items-center gap-2 text-sm font-bold text-[#00738c] dark:text-[#6ee7b7] border-b border-gray-100 dark:border-gray-800 pb-2">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#c026d3] dark:text-[#6ee7b7] border-b border-gray-100 dark:border-gray-800 pb-2">
                 <Clock className="w-4 h-4" />
                 <span>{lang === 'fa' ? '۱. کارایی عملیاتی و کاهش هزینه (Desired Efficiency)' : '1. Operational Efficiency & Cost'}</span>
               </div>
               <ul className="text-xs text-gray-700 dark:text-gray-300 space-y-2 leading-relaxed">
                 <li className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00738c] mt-1.5 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#c026d3] mt-1.5 shrink-0" />
                   <div>
                     <strong>{lang === 'fa' ? 'نرخ مهار تیکت‌ها (Containment): ' : 'Containment Rate: '}</strong>
                     <span>{lang === 'fa' ? `${containmentRate}٪ حل خودکار بدون نیاز به اپراتور انسانی` : `${containmentRate}% automated tier-1 deflection`}</span>
                   </div>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00738c] mt-1.5 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#c026d3] mt-1.5 shrink-0" />
                   <div>
                     <strong>{lang === 'fa' ? 'میانگین زمان مکالمه (AHT): ' : 'Average Handling Time: '}</strong>
                     <span>{lang === 'fa' ? `کاهش از ۸.۵ دقیقه به زیر ${targetAhtMinutes} دقیقه` : `Reduced from 8.5m to < ${targetAhtMinutes}m`}</span>
                   </div>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00738c] mt-1.5 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#c026d3] mt-1.5 shrink-0" />
                   <div>
                     <strong>{lang === 'fa' ? 'هزینه هر تماس (Cost per Contact): ' : 'Cost per Contact: '}</strong>
                     <span>{lang === 'fa' ? `کاهش از ${currentCostPerTicket}$ به ${aiCostPerTicket}$ به ازای هر تیکت` : `Cut from $${currentCostPerTicket} to $${aiCostPerTicket} per inquiry`}</span>
@@ -503,27 +503,27 @@ Initial iteration thresholds are set conservatively to validate business feasibi
 
             {/* Category 2: Customer Experience & Satisfaction */}
             <div className="p-5 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs space-y-3">
-              <div className="flex items-center gap-2 text-sm font-bold text-[#1f5163] dark:text-[#99e2b4] border-b border-gray-100 dark:border-gray-800 pb-2">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#e0533c] dark:text-[#99e2b4] border-b border-gray-100 dark:border-gray-800 pb-2">
                 <Users className="w-4 h-4" />
                 <span>{lang === 'fa' ? '۲. رضایت و جذب مشتری (Customer Acquisition & CX)' : '2. Customer Experience & Acquisition'}</span>
               </div>
               <ul className="text-xs text-gray-700 dark:text-gray-300 space-y-2 leading-relaxed">
                 <li className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#1f5163] mt-1.5 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#e0533c] mt-1.5 shrink-0" />
                   <div>
                     <strong>{lang === 'fa' ? 'شاخص رضایت مشتری (CSAT): ' : 'Target CSAT Score: '}</strong>
                     <span>{lang === 'fa' ? `کسب حداقل ${targetCsat} از ۵ در نظرسنجی‌ها` : `>= ${targetCsat} / 5.0 on automated sessions`}</span>
                   </div>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#1f5163] mt-1.5 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#e0533c] mt-1.5 shrink-0" />
                   <div>
                     <strong>{lang === 'fa' ? 'شاخص وفاداری (NPS Uplift): ' : 'NPS Improvement: '}</strong>
                     <span>{lang === 'fa' ? 'ارتقای ۶ تا ۸ امتیازی ظرف ۶ ماه به دلیل سرعت و در دسترس بودن ۲۴ ساعته' : '+6 to +8 points within 6 months'}</span>
                   </div>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#1f5163] mt-1.5 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#e0533c] mt-1.5 shrink-0" />
                   <div>
                     <strong>{lang === 'fa' ? 'حل در اولین تماس (First Contact Resolution): ' : 'First Contact Resolution: '}</strong>
                     <span>{lang === 'fa' ? 'هدف‌گذاری بالای ۷۰٪ در سوالات متداول' : '>= 70% on tier-1 FAQ & tracking queries'}</span>
@@ -588,7 +588,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
         <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs space-y-6">
           <div className="border-b border-gray-100 dark:border-gray-800 pb-3">
             <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Calculator className="w-5 h-5 text-[#00738c]" />
+              <Calculator className="w-5 h-5 text-[#c026d3]" />
               <span>{lang === 'fa' ? 'شبیه‌ساز تعاملی توجیه اقتصادی و صرفه‌جویی هزینه تکرار هوش مصنوعی' : 'Interactive ROI & Cost Savings Simulator'}</span>
             </h2>
             <p className="text-xs text-gray-500 mt-1">
@@ -605,7 +605,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
                 <span className="font-bold text-gray-700 dark:text-gray-300">
                   {lang === 'fa' ? 'حجم تیکت‌های ماهانه:' : 'Monthly Inquiries Volume:'}
                 </span>
-                <span className="font-bold text-[#00738c] font-mono text-sm">
+                <span className="font-bold text-[#c026d3] font-mono text-sm">
                   {monthlyTickets.toLocaleString()}
                 </span>
               </div>
@@ -616,7 +616,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
                 step="5000"
                 value={monthlyTickets}
                 onChange={(e) => setMonthlyTickets(parseInt(e.target.value))}
-                className="w-full accent-[#00738c] cursor-pointer"
+                className="w-full accent-[#c026d3] cursor-pointer"
               />
             </div>
 
@@ -626,7 +626,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
                 <span className="font-bold text-gray-700 dark:text-gray-300">
                   {lang === 'fa' ? 'هزینه فعلی هر تیکت اپراتور انسانی:' : 'Current Cost per Human Ticket:'}
                 </span>
-                <span className="font-bold text-[#00738c] font-mono text-sm">
+                <span className="font-bold text-[#c026d3] font-mono text-sm">
                   ${currentCostPerTicket.toFixed(2)}
                 </span>
               </div>
@@ -637,7 +637,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
                 step="0.5"
                 value={currentCostPerTicket}
                 onChange={(e) => setCurrentCostPerTicket(parseFloat(e.target.value))}
-                className="w-full accent-[#00738c] cursor-pointer"
+                className="w-full accent-[#c026d3] cursor-pointer"
               />
             </div>
 
@@ -702,7 +702,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
               <span className="text-xs text-gray-500 block mb-1">
                 {lang === 'fa' ? 'صرفه‌جویی خالص ماهانه' : 'Monthly Net Savings'}
               </span>
-              <span className="text-2xl font-black text-[#00738c] dark:text-[#6ee7b7] font-mono">
+              <span className="text-2xl font-black text-[#c026d3] dark:text-[#6ee7b7] font-mono">
                 ${Math.round(monthlySavings).toLocaleString()}
               </span>
               <span className="text-[11px] text-gray-500 block mt-1">
@@ -731,7 +731,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-800 pb-3">
             <div>
               <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#00738c]" />
+                <FileText className="w-5 h-5 text-[#c026d3]" />
                 <span>{lang === 'fa' ? 'بوم مستندات کتاب کار CPMAI (اسلاید ۳۰)' : 'CPMAI Workbook Canvas (Slide 30)'}</span>
               </h2>
               <p className="text-xs text-gray-500 mt-1">
@@ -752,7 +752,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
 
               <button
                 onClick={handleApplyToCanvas}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00738c] text-white hover:bg-[#005f73] text-xs font-semibold cursor-pointer shadow-xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c026d3] text-white hover:bg-[#005f73] text-xs font-semibold cursor-pointer shadow-xs"
               >
                 <Zap className="w-3.5 h-3.5" />
                 <span>{lang === 'fa' ? 'تولید مجدد متن' : 'Regenerate'}</span>
@@ -764,7 +764,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
             value={content || generateCanvasMarkdown()}
             onChange={(e) => onChangeContent(e.target.value)}
             rows={16}
-            className="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 font-mono text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#00738c] transition-all resize-y"
+            className="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 font-mono text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#c026d3] transition-all resize-y"
             placeholder={lang === 'fa' ? 'سنجه‌های کلیدی کسب‌وکار در اینجا ثبت و به طور خودکار ذخیره می‌شوند...' : 'Document required business KPIs...'}
           />
 
@@ -791,7 +791,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
 
           <div className="space-y-4 text-xs sm:text-sm leading-relaxed text-gray-700 dark:text-gray-300">
             <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 space-y-1.5">
-              <span className="font-bold text-[#00738c] block text-sm">
+              <span className="font-bold text-[#c026d3] block text-sm">
                 {lang === 'fa' ? '۱. چرا سنجه‌های الگوریتمی مدل به تنهایی برای موفقیت پروژه کافی نیستند؟' : '1. Why Model Metrics Alone Are Insufficient'}
               </span>
               <p>
@@ -802,7 +802,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
             </div>
 
             <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 space-y-1.5">
-              <span className="font-bold text-[#00738c] block text-sm">
+              <span className="font-bold text-[#c026d3] block text-sm">
                 {lang === 'fa' ? '۲. اصل «آستانه پایین در اسپرینت اول، رشد تصاعدی در تکرارهای بعدی»:' : '2. The Conservative MVP Baseline Principle'}
               </span>
               <p>
@@ -832,7 +832,7 @@ Initial iteration thresholds are set conservatively to validate business feasibi
         {onGoToPage21 && (
           <button
             onClick={onGoToPage21}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#00738c] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#c026d3] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
           >
             <span>
               {lang === 'fa'

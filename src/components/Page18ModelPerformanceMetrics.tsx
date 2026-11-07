@@ -122,7 +122,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
       titleFa: 'چت‌بات پشتیبانی مشتریان شرکت XYZ (مطالعه موردی رسمی CPMAI)',
       domainEn: 'Customer Service & Conversational AI',
       domainFa: 'خدمات مشتریان و هوش مصنوعی محاوره‌ای',
-      badgeColor: 'bg-[#00738c] text-white',
+      badgeColor: 'bg-[#c026d3] text-white',
       tp: 170,
       fn: 30,
       fp: 18,
@@ -341,7 +341,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
   return (
     <div className="space-y-6 animate-fade-in" dir={lang === 'fa' ? 'rtl' : 'ltr'}>
       {/* Header Banner */}
-      <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1b3a4b] via-[#1f5163] to-[#00738c] text-white shadow-lg relative overflow-hidden">
+      <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1b3a4b] via-[#e0533c] to-[#c026d3] text-white shadow-lg relative overflow-hidden">
         <div className="absolute top-0 end-0 -mt-8 -me-8 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -371,10 +371,10 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
           <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
             <button
               onClick={handleApplyToCanvas}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white text-[#1f5163] hover:bg-[#e3f2ea] text-xs font-bold transition-all shadow-sm cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white text-[#e0533c] hover:bg-[#e3f2ea] text-xs font-bold transition-all shadow-sm cursor-pointer"
               title={lang === 'fa' ? 'تزریق مستقیم محاسبات به بوم مستندات' : 'Inject calculations into canvas'}
             >
-              <Zap className="w-4 h-4 text-[#00738c]" />
+              <Zap className="w-4 h-4 text-[#c026d3]" />
               <span>{lang === 'fa' ? 'تزریق به بوم' : 'Inject into Canvas'}</span>
             </button>
           </div>
@@ -385,7 +385,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
       <div className="p-4 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs">
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
-            <Target className="w-4 h-4 text-[#00738c]" />
+            <Target className="w-4 h-4 text-[#c026d3]" />
             <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
               {lang === 'fa' ? 'انتخاب مطالعه موردی پیش‌فرض (بارگذاری سریع مقادیر):' : 'Select Case Study Preset:'}
             </span>
@@ -409,7 +409,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
                 onClick={() => handleApplyPreset(preset)}
                 className={`p-3 rounded-lg border text-start transition-all cursor-pointer ${
                   isSelected
-                    ? 'border-[#00738c] bg-[#00738c]/10 dark:bg-[#00738c]/20 ring-1 ring-[#00738c]'
+                    ? 'border-[#c026d3] bg-[#c026d3]/10 dark:bg-[#c026d3]/20 ring-1 ring-[#c026d3]'
                     : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30'
                 }`}
               >
@@ -417,7 +417,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
                   <span className="font-bold text-xs text-gray-900 dark:text-white truncate">
                     {lang === 'fa' ? preset.titleFa : preset.titleEn}
                   </span>
-                  {isSelected && <Check className="w-3.5 h-3.5 text-[#00738c] shrink-0" />}
+                  {isSelected && <Check className="w-3.5 h-3.5 text-[#c026d3] shrink-0" />}
                 </div>
                 <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-tight">
                   {lang === 'fa' ? preset.domainFa : preset.domainEn}
@@ -434,7 +434,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
           onClick={() => setActiveTab('matrix')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'matrix'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -446,7 +446,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
           onClick={() => setActiveTab('artifacts')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'artifacts'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -458,7 +458,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
           onClick={() => setActiveTab('canvas')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'canvas'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -470,7 +470,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
           onClick={() => setActiveTab('guide')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'guide'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -487,7 +487,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 dark:border-gray-800 pb-4">
               <div>
                 <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Calculator className="w-5 h-5 text-[#00738c]" />
+                  <Calculator className="w-5 h-5 text-[#c026d3]" />
                   <span>
                     {lang === 'fa'
                       ? 'ماتریس درهم‌ریختگی برای طبقه‌بندی‌کننده باینری (Figure 3)'
@@ -869,7 +869,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
 
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-500">{lang === 'fa' ? 'آستانه تاییدشده:' : 'Target:'}</span>
-                  <span className="text-base font-extrabold text-[#00738c] font-mono">
+                  <span className="text-base font-extrabold text-[#c026d3] font-mono">
                     {targetAccuracy}%
                   </span>
                 </div>
@@ -881,7 +881,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
                 max="99"
                 value={targetAccuracy}
                 onChange={(e) => setTargetAccuracy(parseInt(e.target.value))}
-                className="w-full accent-[#00738c] cursor-pointer"
+                className="w-full accent-[#c026d3] cursor-pointer"
               />
 
               <div className="text-xs text-gray-600 dark:text-gray-300 space-y-1.5 leading-relaxed bg-gray-50 dark:bg-gray-800/40 p-3 rounded-lg">
@@ -1113,7 +1113,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-800 pb-3">
             <div>
               <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#00738c]" />
+                <FileText className="w-5 h-5 text-[#c026d3]" />
                 <span>{lang === 'fa' ? 'بوم مستندات کتاب کار CPMAI (اسلاید ۲۸)' : 'CPMAI Workbook Canvas (Slide 28)'}</span>
               </h2>
               <p className="text-xs text-gray-500 mt-1">
@@ -1134,7 +1134,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
 
               <button
                 onClick={handleApplyToCanvas}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00738c] text-white hover:bg-[#005f73] text-xs font-semibold cursor-pointer shadow-xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c026d3] text-white hover:bg-[#005f73] text-xs font-semibold cursor-pointer shadow-xs"
               >
                 <Zap className="w-3.5 h-3.5" />
                 <span>{lang === 'fa' ? 'تولید مجدد متن' : 'Regenerate'}</span>
@@ -1146,7 +1146,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
             value={content || generateCanvasMarkdown()}
             onChange={(e) => onChangeContent(e.target.value)}
             rows={16}
-            className="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 font-mono text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#00738c] transition-all resize-y"
+            className="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 font-mono text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#c026d3] transition-all resize-y"
             placeholder={lang === 'fa' ? 'محتوای بوم در اینجا ثبت و به طور خودکار ذخیره می‌شود...' : 'Workbook documentation content...'}
           />
 
@@ -1173,7 +1173,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
 
           <div className="space-y-4 text-xs sm:text-sm leading-relaxed text-gray-700 dark:text-gray-300">
             <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 space-y-1.5">
-              <span className="font-bold text-[#00738c] block text-sm">
+              <span className="font-bold text-[#c026d3] block text-sm">
                 {lang === 'fa' ? '۱. چرا دستیابی به دقت ۱۰۰٪ در هوش مصنوعی غیرممکن است؟' : '1. Why 100% Accuracy is Impossible in AI'}
               </span>
               <p>
@@ -1184,7 +1184,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
             </div>
 
             <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 space-y-1.5">
-              <span className="font-bold text-[#00738c] block text-sm">
+              <span className="font-bold text-[#c026d3] block text-sm">
                 {lang === 'fa' ? '۲. موازنه اساسی: چه زمانی Precision مهم‌تر است و چه زمانی Recall؟' : '2. The Trade-off: Precision vs Recall Priorities'}
               </span>
               <p>
@@ -1195,7 +1195,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
             </div>
 
             <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 space-y-1.5">
-              <span className="font-bold text-[#00738c] block text-sm">
+              <span className="font-bold text-[#c026d3] block text-sm">
                 {lang === 'fa' ? '۳. مدیریت نتایج نادقیق (Handling Inaccurate Results):' : '3. Managing Inaccurate Results & Fallback Protocols'}
               </span>
               <p>
@@ -1225,7 +1225,7 @@ export const Page18ModelPerformanceMetrics: React.FC<Page18Props> = ({
         {onGoToPage19 && (
           <button
             onClick={onGoToPage19}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#00738c] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#c026d3] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
           >
             <span>
               {lang === 'fa'

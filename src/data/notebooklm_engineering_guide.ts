@@ -105,7 +105,7 @@ export const UNIT_MANAGERS_MATRIX: DepartmentUseCase[] = [
     managerRoleFa: 'مدیر دفتر فنی و سرپرست مهندسی پروژه',
     managerRoleEn: 'Lead Technical Office Manager',
     iconName: 'Building2',
-    colorTheme: '#00738c',
+    colorTheme: '#c026d3',
     recommendedSourcesFa: [
       'مشخصات فنی عمومی و خصوصی پیمان (نظیر نشریه ۵۵ یا استانداردهای مترو)',
       'کدهای بین‌المللی پروژه (مانند ASME B31.8, API 1104, NFPA 130, BTS)',
@@ -187,7 +187,7 @@ Review all uploaded letters regarding the utility clash in Station 12.
     managerRoleFa: 'مدیر برنامه‌ریزی و کنترل پروژه (PMO Lead)',
     managerRoleEn: 'Lead Project Controls Manager',
     iconName: 'FileSpreadsheet',
-    colorTheme: '#0f4c5c',
+    colorTheme: '#9333ea',
     recommendedSourcesFa: [
       'گزارش‌های ماهانه و هفتگی پیشرفت فیزیکی ۱۲ ماه گذشته پروژه',
       'منشور پروژه و ساختار شکست کار (WBS Dictionary)',
@@ -310,7 +310,7 @@ Review all uploaded letters regarding the utility clash in Station 12.
     managerRoleFa: 'مدیر پروژه و سرپرست کل کارگاه‌های اجرایی',
     managerRoleEn: 'Project Director & Site General Superintendent',
     iconName: 'Layers',
-    colorTheme: '#1f5163',
+    colorTheme: '#e0533c',
     recommendedSourcesFa: [
       'گزارش‌های روزانه سرپرستان کارگاه و دفترچه گزارش‌های روزانه ناظر مقیم',
       'شناسنامه ماشین‌آلات و سوابق تعمیر و نگهداری تجهیزات سنگین (TBM, جرثقیل‌ها)',

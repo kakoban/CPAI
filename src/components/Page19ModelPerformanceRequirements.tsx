@@ -95,7 +95,7 @@ export const Page19ModelPerformanceRequirements: React.FC<Page19Props> = ({
       titleFa: 'چت‌بات پشتیبانی مشتریان شرکت XYZ (مطالعه موردی رسمی CPMAI)',
       domainEn: 'Conversational AI / Customer Support',
       domainFa: 'هوش مصنوعی محاوره‌ای و خدمات مشتریان',
-      badgeColor: 'bg-[#00738c] text-white',
+      badgeColor: 'bg-[#c026d3] text-white',
       maxFnr: 18,
       q1DesiredMetricsEn:
         '- Latency SLA: Sub-1.5s response time per conversational turn.\n- Accuracy: >= 85% overall query resolution.\n- Precision: >= 88% on intent recognition (avoiding misdirected answers).\n- Recall: >= 82% (Max acceptable FNR = 18%).\n- Automated Containment Rate: 40% of tier-1 support tickets fully resolved without human intervention.\n- CSAT (Customer Satisfaction): >= 4.2 / 5.0 on automated interactions.',
@@ -275,7 +275,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
   return (
     <div className="space-y-6 animate-fade-in" dir={lang === 'fa' ? 'rtl' : 'ltr'}>
       {/* Header Banner */}
-      <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1b3a4b] via-[#1f5163] to-[#00738c] text-white shadow-lg relative overflow-hidden">
+      <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1b3a4b] via-[#e0533c] to-[#c026d3] text-white shadow-lg relative overflow-hidden">
         <div className="absolute top-0 end-0 -mt-8 -me-8 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -305,10 +305,10 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
           <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
             <button
               onClick={handleApplyToCanvas}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white text-[#1f5163] hover:bg-[#e3f2ea] text-xs font-bold transition-all shadow-sm cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white text-[#e0533c] hover:bg-[#e3f2ea] text-xs font-bold transition-all shadow-sm cursor-pointer"
               title={lang === 'fa' ? 'تزریق مستقیم به بوم مستندات' : 'Inject directly into canvas'}
             >
-              <Zap className="w-4 h-4 text-[#00738c]" />
+              <Zap className="w-4 h-4 text-[#c026d3]" />
               <span>{lang === 'fa' ? 'تزریق به بوم' : 'Inject to Canvas'}</span>
             </button>
           </div>
@@ -319,7 +319,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
       <div className="p-4 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs">
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
-            <Target className="w-4 h-4 text-[#00738c]" />
+            <Target className="w-4 h-4 text-[#c026d3]" />
             <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
               {lang === 'fa' ? 'مطالعه موردی مرجع (بارگذاری سریع سناریو):' : 'Select Reference Case Study:'}
             </span>
@@ -343,7 +343,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
                 onClick={() => handleApplyPreset(preset)}
                 className={`p-3 rounded-lg border text-start transition-all cursor-pointer ${
                   isSelected
-                    ? 'border-[#00738c] bg-[#00738c]/10 dark:bg-[#00738c]/20 ring-1 ring-[#00738c]'
+                    ? 'border-[#c026d3] bg-[#c026d3]/10 dark:bg-[#c026d3]/20 ring-1 ring-[#c026d3]'
                     : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30'
                 }`}
               >
@@ -351,7 +351,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
                   <span className="font-bold text-xs text-gray-900 dark:text-white truncate">
                     {lang === 'fa' ? preset.titleFa : preset.titleEn}
                   </span>
-                  {isSelected && <Check className="w-3.5 h-3.5 text-[#00738c] shrink-0" />}
+                  {isSelected && <Check className="w-3.5 h-3.5 text-[#c026d3] shrink-0" />}
                 </div>
                 <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-tight">
                   {lang === 'fa' ? preset.domainFa : preset.domainEn}
@@ -427,7 +427,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
           onClick={() => setActiveTab('worksheet')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'worksheet'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -439,7 +439,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
           onClick={() => setActiveTab('genai')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'genai'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -451,7 +451,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
           onClick={() => setActiveTab('canvas')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'canvas'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -463,7 +463,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
           onClick={() => setActiveTab('guide')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'guide'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -477,7 +477,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
         <div className="space-y-6">
           {/* Question 1 Box */}
           <div className="p-5 rounded-2xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs space-y-4">
-            <div className="p-3.5 rounded-xl bg-[#00738c] text-white">
+            <div className="p-3.5 rounded-xl bg-[#c026d3] text-white">
               <span className="text-xs uppercase tracking-wider text-teal-200 font-bold block mb-1">
                 {lang === 'fa' ? 'پرسش اول اسلاید ۲۹ (Question 1)' : 'Slide 29 - Question 1'}
               </span>
@@ -498,7 +498,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
               value={q1Metrics}
               onChange={(e) => setQ1Metrics(e.target.value)}
               rows={6}
-              className="w-full p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 font-mono text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#00738c] resize-y"
+              className="w-full p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 font-mono text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#c026d3] resize-y"
               placeholder={lang === 'fa' ? 'سنجه‌های عملکردی مورد نیاز مدل را در این بخش یادداشت فرمایید...' : 'List required model performance metrics...'}
             />
           </div>
@@ -519,7 +519,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
             {/* Sub-part A: Binary Classifier Sensitivities */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
-                <Sliders className="w-3.5 h-3.5 text-[#00738c]" />
+                <Sliders className="w-3.5 h-3.5 text-[#c026d3]" />
                 <span>
                   {lang === 'fa'
                     ? 'بخش الف: تحلیل حساسیت به مثبت کاذب در برابر منفی کاذب (طبقه‌بندی‌کننده باینری)'
@@ -530,7 +530,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
                 value={q2BinarySensitivities}
                 onChange={(e) => setQ2BinarySensitivities(e.target.value)}
                 rows={4}
-                className="w-full p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 font-mono text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#00738c] resize-y"
+                className="w-full p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 font-mono text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#c026d3] resize-y"
                 placeholder={lang === 'fa' ? 'پیامدهای خطای نوع اول و نوع دوم...' : 'Type I vs Type II operational impacts...'}
               />
             </div>
@@ -549,7 +549,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
                 value={q2GenAiSensitivities}
                 onChange={(e) => setQ2GenAiSensitivities(e.target.value)}
                 rows={4}
-                className="w-full p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 font-mono text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#00738c] resize-y"
+                className="w-full p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 font-mono text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#c026d3] resize-y"
                 placeholder={lang === 'fa' ? 'خطرات توهم مدل زبانی و استراتژی‌های مهار...' : 'LLM hallucination risks and guardrails...'}
               />
             </div>
@@ -561,7 +561,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
       {activeTab === 'genai' && (
         <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs space-y-6">
           <div className="flex items-center gap-2 text-base font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-800 pb-3">
-            <Bot className="w-5 h-5 text-[#00738c]" />
+            <Bot className="w-5 h-5 text-[#c026d3]" />
             <span>
               {lang === 'fa'
                 ? 'ماتریس مدیریت ریسک و حساسیت‌های هوش مصنوعی مولد (GenAI Hallucination Containment)'
@@ -615,7 +615,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-800 pb-3">
             <div>
               <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#00738c]" />
+                <FileText className="w-5 h-5 text-[#c026d3]" />
                 <span>{lang === 'fa' ? 'بوم مستندات کتاب کار CPMAI (اسلاید ۲۹)' : 'CPMAI Workbook Canvas (Slide 29)'}</span>
               </h2>
               <p className="text-xs text-gray-500 mt-1">
@@ -636,7 +636,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
 
               <button
                 onClick={handleApplyToCanvas}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00738c] text-white hover:bg-[#005f73] text-xs font-semibold cursor-pointer shadow-xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c026d3] text-white hover:bg-[#005f73] text-xs font-semibold cursor-pointer shadow-xs"
               >
                 <Zap className="w-3.5 h-3.5" />
                 <span>{lang === 'fa' ? 'تولید مجدد متن' : 'Regenerate'}</span>
@@ -648,7 +648,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
             value={content || generateCanvasMarkdown()}
             onChange={(e) => onChangeContent(e.target.value)}
             rows={16}
-            className="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 font-mono text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#00738c] transition-all resize-y"
+            className="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 font-mono text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#c026d3] transition-all resize-y"
             placeholder={lang === 'fa' ? 'محتوای بوم در اینجا ثبت و ذخیره می‌شود...' : 'Workbook documentation content...'}
           />
 
@@ -675,7 +675,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
 
           <div className="space-y-4 text-xs sm:text-sm leading-relaxed text-gray-700 dark:text-gray-300">
             <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 space-y-1.5">
-              <span className="font-bold text-[#00738c] block text-sm">
+              <span className="font-bold text-[#c026d3] block text-sm">
                 {lang === 'fa' ? '۱. ماتریس نامتقارن هزینه خطاها (Asymmetric Cost of Errors):' : '1. Asymmetric Cost of Errors in AI'}
               </span>
               <p>
@@ -686,7 +686,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
             </div>
 
             <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 space-y-1.5">
-              <span className="font-bold text-[#00738c] block text-sm">
+              <span className="font-bold text-[#c026d3] block text-sm">
                 {lang === 'fa' ? '۲. تفاوت سنجه‌های سیستم‌های طبقه‌بندی سنتی با راهکارهای Generative AI:' : '2. Evaluating Classic Classifiers vs Generative AI Solutions'}
               </span>
               <p>
@@ -716,7 +716,7 @@ ${q2GenAiSensitivities || curPreset.q2GenAiSensitivitiesEn}
         {onGoToPage20 && (
           <button
             onClick={onGoToPage20}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#00738c] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#c026d3] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
           >
             <span>
               {lang === 'fa'

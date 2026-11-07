@@ -87,8 +87,8 @@ export const Page13WhichPatternsUsed: React.FC<Page13Props> = ({
       nameEn: 'Hyperpersonalization',
       nameFa: 'مشتری‌سازی بیش‌ازحد (شخصی‌سازی پیشرفته)',
       icon: 'sparkles',
-      badgeColor: '#00738c',
-      borderColor: 'border-[#00738c]/40',
+      badgeColor: '#c026d3',
+      borderColor: 'border-[#c026d3]/40',
       bgLight: 'bg-[#e3f4f7]',
       bgDark: 'dark:bg-[#122830]',
       summaryEn: 'Treat each individual human or customer uniquely as a "segment of one" based on context and preferences.',
@@ -112,8 +112,8 @@ export const Page13WhichPatternsUsed: React.FC<Page13Props> = ({
       nameEn: 'Conversational / Human Interaction',
       nameFa: 'سیستم‌های تعاملی و زبان طبیعی',
       icon: 'message',
-      badgeColor: '#1f5163',
-      borderColor: 'border-[#1f5163]/40',
+      badgeColor: '#e0533c',
+      borderColor: 'border-[#e0533c]/40',
       bgLight: 'bg-[#e8f1f4]',
       bgDark: 'dark:bg-[#162930]',
       summaryEn: 'Comprehend, reason, and converse with humans seamlessly using natural language (speech, audio, and text).',
@@ -537,14 +537,14 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
 
   const getPatternIcon = (iconName: string) => {
     switch (iconName) {
-      case 'sparkles': return <Sparkles className="w-5 h-5 text-[#00738c]" />;
-      case 'message': return <MessageSquare className="w-5 h-5 text-[#1f5163]" />;
+      case 'sparkles': return <Sparkles className="w-5 h-5 text-[#c026d3]" />;
+      case 'message': return <MessageSquare className="w-5 h-5 text-[#e0533c]" />;
       case 'trending': return <TrendingUp className="w-5 h-5 text-[#b87333]" />;
       case 'eye': return <Eye className="w-5 h-5 text-[#2f7d5b]" />;
       case 'bot': return <Bot className="w-5 h-5 text-[#d97706]" />;
       case 'target': return <Target className="w-5 h-5 text-[#7c3aed]" />;
       case 'search': return <Search className="w-5 h-5 text-[#dc2626]" />;
-      default: return <Brain className="w-5 h-5 text-[#00738c]" />;
+      default: return <Brain className="w-5 h-5 text-[#c026d3]" />;
     }
   };
 
@@ -564,10 +564,10 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
       <div className="p-6 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 text-xs font-semibold rounded bg-[#1f5163] text-white">
+            <span className="px-2.5 py-1 text-xs font-semibold rounded bg-[#e0533c] text-white">
               Phase I: Business Understanding
             </span>
-            <span className="px-2.5 py-1 text-xs font-medium rounded bg-[#e3eef1] dark:bg-[#1b2c32] text-[#1f5163] dark:text-[#6fb3c6]">
+            <span className="px-2.5 py-1 text-xs font-medium rounded bg-[#fdeee9] dark:bg-[#341528] text-[#e0533c] dark:text-[#fb7185]">
               {lang === 'fa' ? 'گروه وظایف: الزامات شناختی پروژه' : 'Task Group: Cognitive Project Requirements'}
             </span>
             <span className="px-2.5 py-1 text-xs font-medium rounded bg-[#f0f1ee] dark:bg-[#25323d] text-[#5d6b73] dark:text-[#9aa8b0]">
@@ -576,7 +576,7 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
           </div>
 
           <div className="flex items-center gap-2 text-xs font-medium text-[#5d6b73] dark:text-[#9aa8b0]">
-            <Workflow className="w-4 h-4 text-[#00738c] dark:text-[#6fb3c6]" />
+            <Workflow className="w-4 h-4 text-[#c026d3] dark:text-[#fb7185]" />
             <span>{lang === 'fa' ? 'اسلاید ۲۳ کتاب کار CPMAI' : 'CPMAI Workbook Slide 23'}</span>
           </div>
         </div>
@@ -584,7 +584,7 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
         {/* Slide 23 Title & Official Prompt */}
         <div className="mt-2">
           <h2 className="text-xl sm:text-2xl font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2.5">
-            <Layers className="w-6 h-6 text-[#00738c] dark:text-[#6fb3c6]" />
+            <Layers className="w-6 h-6 text-[#c026d3] dark:text-[#fb7185]" />
             <span>
               {lang === 'fa'
                 ? 'کدام الگوها در این پروژه مورد استفاده قرار می‌گیرند؟'
@@ -603,12 +603,12 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
           <span className="text-xs font-semibold text-[#1c2830] dark:text-[#e8ebe9]">
             {lang === 'fa' ? 'وضعیت انتخاب الگوها:' : 'Active Pattern Selection:'}
           </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#00738c] text-white">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#c026d3] text-white">
             <CheckCircle2 className="w-3.5 h-3.5" />
             {lang === 'fa' ? 'الگوی اصلی:' : 'Primary:'} {lang === 'fa' ? primaryObj.nameFa : primaryObj.nameEn}
           </span>
           {secondaryObjs.map(s => (
-            <span key={s.id} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#e3eef1] dark:bg-[#1b2c32] text-[#1f5163] dark:text-[#6fb3c6] border border-[#00738c]/30">
+            <span key={s.id} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#fdeee9] dark:bg-[#341528] text-[#e0533c] dark:text-[#fb7185] border border-[#c026d3]/30">
               <Split className="w-3.5 h-3.5" />
               {lang === 'fa' ? 'مکمل:' : 'Secondary:'} {lang === 'fa' ? s.nameFa : s.nameEn}
             </span>
@@ -627,7 +627,7 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
           onClick={() => setActiveTab('architect')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
             activeTab === 'architect'
-              ? 'border-[#00738c] text-[#00738c] dark:text-[#6fb3c6]'
+              ? 'border-[#c026d3] text-[#c026d3] dark:text-[#fb7185]'
               : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
           }`}
         >
@@ -639,7 +639,7 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
           onClick={() => setActiveTab('pipeline')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
             activeTab === 'pipeline'
-              ? 'border-[#00738c] text-[#00738c] dark:text-[#6fb3c6]'
+              ? 'border-[#c026d3] text-[#c026d3] dark:text-[#fb7185]'
               : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
           }`}
         >
@@ -651,7 +651,7 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
           onClick={() => setActiveTab('canvas')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
             activeTab === 'canvas'
-              ? 'border-[#00738c] text-[#00738c] dark:text-[#6fb3c6]'
+              ? 'border-[#c026d3] text-[#c026d3] dark:text-[#fb7185]'
               : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
           }`}
         >
@@ -663,7 +663,7 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
           onClick={() => setActiveTab('templates')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
             activeTab === 'templates'
-              ? 'border-[#00738c] text-[#00738c] dark:text-[#6fb3c6]'
+              ? 'border-[#c026d3] text-[#c026d3] dark:text-[#fb7185]'
               : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
           }`}
         >
@@ -675,7 +675,7 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
           onClick={() => setActiveTab('checklist')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
             activeTab === 'checklist'
-              ? 'border-[#00738c] text-[#00738c] dark:text-[#6fb3c6]'
+              ? 'border-[#c026d3] text-[#c026d3] dark:text-[#fb7185]'
               : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
           }`}
         >
@@ -693,9 +693,9 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
       {activeTab === 'architect' && (
         <div className="space-y-6">
           {/* Quick Architect Action Banner */}
-          <div className="p-4 rounded-xl bg-[#e3eef1] dark:bg-[#1b2c32] border border-[#1f5163]/20 flex flex-wrap items-center justify-between gap-3">
+          <div className="p-4 rounded-xl bg-[#fdeee9] dark:bg-[#341528] border border-[#e0533c]/20 flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
-              <h3 className="text-sm font-bold text-[#1f5163] dark:text-[#6fb3c6] flex items-center gap-2">
+              <h3 className="text-sm font-bold text-[#e0533c] dark:text-[#fb7185] flex items-center gap-2">
                 <Sliders className="w-4 h-4" />
                 <span>{lang === 'fa' ? 'پیکربندی سریع معماری الگوها' : 'Quick Pattern Architecture Generator'}</span>
               </h3>
@@ -708,7 +708,7 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
 
             <button
               onClick={handleGenerateArchitecture}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#00738c] hover:bg-[#1f5163] text-white text-xs font-semibold shadow-xs transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#c026d3] hover:bg-[#e0533c] text-white text-xs font-semibold shadow-xs transition-colors"
             >
               <Zap className="w-4 h-4" />
               <span>{lang === 'fa' ? 'تولید و درج معماری در بوم اسلاید ۲۳' : 'Generate & Insert into Canvas'}</span>
@@ -724,7 +724,7 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
                 onClick={() => setFilterCategory('all')}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                   filterCategory === 'all'
-                    ? 'bg-[#1f5163] text-white'
+                    ? 'bg-[#e0533c] text-white'
                     : 'bg-[#f0f1ee] dark:bg-[#25323d] text-[#1c2830] dark:text-[#e8ebe9]'
                 }`}
               >
@@ -734,7 +734,7 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
                 onClick={() => setFilterCategory('selected')}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                   filterCategory === 'selected'
-                    ? 'bg-[#00738c] text-white'
+                    ? 'bg-[#c026d3] text-white'
                     : 'bg-[#f0f1ee] dark:bg-[#25323d] text-[#1c2830] dark:text-[#e8ebe9]'
                 }`}
               >
@@ -771,9 +771,9 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
                   key={p.id}
                   className={`p-5 rounded-xl border transition-all ${
                     isPrimary
-                      ? 'border-[#00738c] bg-[#ffffff] dark:bg-[#1a2228] shadow-md ring-2 ring-[#00738c]/20'
+                      ? 'border-[#c026d3] bg-[#ffffff] dark:bg-[#1a2228] shadow-md ring-2 ring-[#c026d3]/20'
                       : isSecondary
-                      ? 'border-[#1f5163]/50 bg-[#ffffff] dark:bg-[#1a2228] shadow-xs'
+                      ? 'border-[#e0533c]/50 bg-[#ffffff] dark:bg-[#1a2228] shadow-xs'
                       : 'border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff]/60 dark:bg-[#1a2228]/60 opacity-80'
                   }`}
                 >
@@ -801,12 +801,12 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
                     {/* Role Badges */}
                     <div>
                       {isPrimary ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-[#00738c] text-white">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-[#c026d3] text-white">
                           <Check className="w-3 h-3 stroke-[3]" />
                           {lang === 'fa' ? 'الگوی اصلی' : 'Primary Pattern'}
                         </span>
                       ) : isSecondary ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#e3eef1] dark:bg-[#1b2c32] text-[#1f5163] dark:text-[#6fb3c6] border border-[#00738c]/40">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#fdeee9] dark:bg-[#341528] text-[#e0533c] dark:text-[#fb7185] border border-[#c026d3]/40">
                           <Split className="w-3 h-3" />
                           {lang === 'fa' ? 'الگوی مکمل' : 'Secondary'}
                         </span>
@@ -871,8 +871,8 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
                         disabled={isPrimary}
                         className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                           isPrimary
-                            ? 'bg-[#00738c] text-white cursor-default'
-                            : 'bg-[#f0f1ee] dark:bg-[#25323d] text-[#1c2830] dark:text-[#e8ebe9] hover:bg-[#00738c] hover:text-white'
+                            ? 'bg-[#c026d3] text-white cursor-default'
+                            : 'bg-[#f0f1ee] dark:bg-[#25323d] text-[#1c2830] dark:text-[#e8ebe9] hover:bg-[#c026d3] hover:text-white'
                         }`}
                       >
                         {isPrimary
@@ -887,8 +887,8 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
                           isPrimary
                             ? 'opacity-40 cursor-not-allowed text-[#5d6b73]'
                             : isSecondary
-                            ? 'bg-[#1f5163] text-white hover:bg-[#b87333]'
-                            : 'bg-[#f0f1ee] dark:bg-[#25323d] text-[#1c2830] dark:text-[#e8ebe9] hover:bg-[#e3eef1] dark:hover:bg-[#1b2c32]'
+                            ? 'bg-[#e0533c] text-white hover:bg-[#b87333]'
+                            : 'bg-[#f0f1ee] dark:bg-[#25323d] text-[#1c2830] dark:text-[#e8ebe9] hover:bg-[#fdeee9] dark:hover:bg-[#341528]'
                         }`}
                       >
                         {isSecondary
@@ -913,7 +913,7 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
         <div className="space-y-6">
           <div className="p-5 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs">
             <h3 className="text-base font-bold text-[#1c2830] dark:text-[#e8ebe9] mb-2 flex items-center gap-2">
-              <Workflow className="w-5 h-5 text-[#00738c] dark:text-[#6fb3c6]" />
+              <Workflow className="w-5 h-5 text-[#c026d3] dark:text-[#fb7185]" />
               <span>{lang === 'fa' ? 'جریان یکپارچگی خط لوله الگوهای انتخابی شما' : 'Pipeline Synergy & Data Flow'}</span>
             </h3>
             <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] mb-6 leading-relaxed">
@@ -936,18 +936,18 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
                   </span>
                 </div>
 
-                <div className="flex items-center text-[#00738c] dark:text-[#6fb3c6]">
+                <div className="flex items-center text-[#c026d3] dark:text-[#fb7185]">
                   <ChevronRight className="w-6 h-6 hidden sm:block rotate-0" />
                   <ArrowRight className="w-5 h-5 sm:hidden rotate-90" />
                 </div>
 
                 {/* Step 2: Primary Pattern Engine */}
-                <div className="flex-1 p-4 rounded-lg bg-[#ffffff] dark:bg-[#1a2228] border-2 border-[#00738c] shadow-sm">
+                <div className="flex-1 p-4 rounded-lg bg-[#ffffff] dark:bg-[#1a2228] border-2 border-[#c026d3] shadow-sm">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#00738c] text-white">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#c026d3] text-white">
                       {lang === 'fa' ? 'الگوی اصلی (Primary)' : 'Primary Engine'}
                     </span>
-                    <span className="text-xs font-mono font-bold text-[#00738c] dark:text-[#6fb3c6]">
+                    <span className="text-xs font-mono font-bold text-[#c026d3] dark:text-[#fb7185]">
                       #{primaryObj.number} {primaryObj.nameEn}
                     </span>
                   </div>
@@ -961,7 +961,7 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
                     <span className="font-semibold text-[#1c2830] dark:text-[#e8ebe9]">
                       {lang === 'fa' ? 'سیگنال میانی خروجی:' : 'Emitted Intermediate Signal:'}
                     </span>
-                    <span className="font-mono text-[#00738c] dark:text-[#6fb3c6]">
+                    <span className="font-mono text-[#c026d3] dark:text-[#fb7185]">
                       {lang === 'fa' ? primaryObj.outputFa : primaryObj.outputEn}
                     </span>
                   </div>
@@ -972,17 +972,17 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
               {secondaryObjs.length > 0 && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-center">
-                    <div className="h-6 w-0.5 bg-[#00738c]" />
+                    <div className="h-6 w-0.5 bg-[#c026d3]" />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {secondaryObjs.map(s => (
-                      <div key={s.id} className="p-4 rounded-lg bg-[#ffffff] dark:bg-[#1a2228] border border-[#1f5163]/40 shadow-xs">
+                      <div key={s.id} className="p-4 rounded-lg bg-[#ffffff] dark:bg-[#1a2228] border border-[#e0533c]/40 shadow-xs">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#e3eef1] dark:bg-[#1b2c32] text-[#1f5163] dark:text-[#6fb3c6]">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#fdeee9] dark:bg-[#341528] text-[#e0533c] dark:text-[#fb7185]">
                             {lang === 'fa' ? 'الگوی مکمل (Secondary)' : 'Supporting Pattern'}
                           </span>
-                          <span className="text-xs font-mono font-bold text-[#1f5163] dark:text-[#6fb3c6]">
+                          <span className="text-xs font-mono font-bold text-[#e0533c] dark:text-[#fb7185]">
                             #{s.number}
                           </span>
                         </div>
@@ -1032,7 +1032,7 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
             <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
               <div>
                 <h3 className="text-base font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-[#00738c] dark:text-[#6fb3c6]" />
+                  <FileText className="w-5 h-5 text-[#c026d3] dark:text-[#fb7185]" />
                   <span>{lang === 'fa' ? 'بوم نگارش رسمی اسلاید ۲۳ کتاب کار' : 'Official Slide 23 Canvas'}</span>
                 </h3>
                 <span className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
@@ -1045,7 +1045,7 @@ ${secondaryObjs.length > 0 ? secondaryObjs.map(s => `- Sequential Stage (${s.pip
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleGenerateArchitecture}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#00738c] text-[#00738c] dark:text-[#6fb3c6] hover:bg-[#00738c] hover:text-white text-xs font-medium transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#c026d3] text-[#c026d3] dark:text-[#fb7185] hover:bg-[#c026d3] hover:text-white text-xs font-medium transition-colors"
                 >
                   <Zap className="w-3.5 h-3.5" />
                   <span>{lang === 'fa' ? 'درج خودکار معماری انتخابی' : 'Insert Architecture'}</span>
@@ -1091,7 +1091,7 @@ Key sections to cover:
 4. Reusable open-source assets, benchmarks, and foundation weights`
               }
               rows={16}
-              className="w-full p-4 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#161c22] text-[#1c2830] dark:text-[#e8ebe9] font-mono text-xs sm:text-sm focus:ring-2 focus:ring-[#00738c] focus:outline-none transition-all leading-relaxed"
+              className="w-full p-4 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#161c22] text-[#1c2830] dark:text-[#e8ebe9] font-mono text-xs sm:text-sm focus:ring-2 focus:ring-[#c026d3] focus:outline-none transition-all leading-relaxed"
             />
 
             {/* Word / Char Counter */}
@@ -1135,14 +1135,14 @@ Key sections to cover:
                 className="p-5 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] space-y-3 shadow-xs"
               >
                 <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <h4 className="text-sm font-bold text-[#00738c] dark:text-[#6fb3c6] flex items-center gap-2">
+                  <h4 className="text-sm font-bold text-[#c026d3] dark:text-[#fb7185] flex items-center gap-2">
                     <Sparkles className="w-4 h-4" />
                     <span>{tmpl.title}</span>
                   </h4>
 
                   <button
                     onClick={() => handleInsertTemplate(tmpl.text)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00738c] hover:bg-[#1f5163] text-white text-xs font-semibold shadow-xs transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c026d3] hover:bg-[#e0533c] text-white text-xs font-semibold shadow-xs transition-colors"
                   >
                     <Copy className="w-3.5 h-3.5" />
                     <span>{lang === 'fa' ? 'درج این الگو در بوم' : 'Insert into Canvas'}</span>
@@ -1284,7 +1284,7 @@ Key sections to cover:
           {onGoToPage14 && (
             <button
               onClick={onGoToPage14}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#00738c] hover:bg-[#1f5163] text-white text-xs font-semibold shadow-xs transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#c026d3] hover:bg-[#e0533c] text-white text-xs font-semibold shadow-xs transition-colors"
             >
               <span>
                 {lang === 'fa'

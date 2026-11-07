@@ -1,3 +1,4 @@
+import { TutorMarkdownRenderer } from './TutorMarkdownRenderer';
 import React, { useState, useEffect, useRef } from 'react';
 import { AppPage } from '../../App';
 import { Language } from '../../types/cpmai';
@@ -654,15 +655,15 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
             title={lang === 'fa' ? 'برای تغییر عرض بکشید' : 'Drag to resize'}
             className="hidden lg:block absolute inset-y-0 -inset-inline-start-1 w-2.5 cursor-col-resize z-20 group/grip"
           >
-            <div className="w-0.5 h-full bg-[#1f5163] dark:bg-[#6fb3c6] opacity-0 group-hover/grip:opacity-100 transition-opacity mx-auto" />
+            <div className="w-0.5 h-full bg-[#e0533c] dark:bg-[#fb7185] opacity-0 group-hover/grip:opacity-100 transition-opacity mx-auto" />
           </div>
         )}
 
         {/* Top Header */}
-        <div className="p-4 pb-3 border-b border-white/60 dark:border-white/10 bg-gradient-to-b from-[#1f5163]/10 to-transparent space-y-2.5 shrink-0">
+        <div className="p-4 pb-3 border-b border-white/60 dark:border-white/10 bg-gradient-to-b from-[#e0533c]/10 to-transparent space-y-2.5 shrink-0">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1f5163] to-[#1e8f6b] text-white flex items-center justify-center shadow-sm shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#e0533c] to-[#1e8f6b] text-white flex items-center justify-center shadow-sm shrink-0">
                 <Bot className="w-5 h-5" />
               </div>
               <div className="min-w-0">
@@ -708,7 +709,7 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
           <div className="p-2.5 rounded-xl bg-white/75 dark:bg-[#152227]/90 border border-[#c3d4d4]/80 dark:border-[#274347] space-y-1.5 shadow-2xs">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 min-w-0">
-                <BookOpen className="w-3.5 h-3.5 text-[#1f5163] dark:text-[#6fb3c6] shrink-0" />
+                <BookOpen className="w-3.5 h-3.5 text-[#e0533c] dark:text-[#fb7185] shrink-0" />
                 <span className="text-[11px] font-bold text-[#12343b] dark:text-[#e4f0ee] truncate">
                   {lang === 'fa' ? pageMeta.titleFa : pageMeta.titleEn}
                 </span>
@@ -745,7 +746,7 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
         <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 no-scrollbar">
           {/* Methodology Grounding Summary Card */}
           <div className="p-3 rounded-xl bg-[#eaf2f1]/70 dark:bg-[#172d31]/60 border border-[#c3d4d4]/70 dark:border-[#274347] space-y-2">
-            <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#1f5163] dark:text-[#6fb3c6]">
+            <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#e0533c] dark:text-[#fb7185]">
               <Layers className="w-3.5 h-3.5 shrink-0" />
               <span>{lang === 'fa' ? 'چارچوب متدولوژی این صفحه:' : 'Page Methodology Context:'}</span>
             </div>
@@ -797,7 +798,7 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
                           : 'Please audit my current draft on this page against CPMAI Phase I standards. Highlight strengths, blind spots, and actionable improvements for my discipline.'
                       )
                     }
-                    className="w-full text-start p-2.5 rounded-xl bg-gradient-to-r from-[#1e8f6b]/15 to-[#1f5163]/15 hover:from-[#1e8f6b]/25 hover:to-[#1f5163]/25 border border-[#1e8f6b]/40 transition-all text-xs font-bold text-[#12343b] dark:text-[#e4f0ee] flex items-start gap-2 cursor-pointer shadow-2xs"
+                    className="w-full text-start p-2.5 rounded-xl bg-gradient-to-r from-[#1e8f6b]/15 to-[#e0533c]/15 hover:from-[#1e8f6b]/25 hover:to-[#e0533c]/25 border border-[#1e8f6b]/40 transition-all text-xs font-bold text-[#12343b] dark:text-[#e4f0ee] flex items-start gap-2 cursor-pointer shadow-2xs"
                   >
                     <Wand2 className="w-4 h-4 text-[#1e8f6b] shrink-0 mt-0.5" />
                     <span className="leading-snug">
@@ -822,11 +823,15 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
                 <div
                   className={`max-w-[92%] rounded-2xl p-3 text-xs leading-relaxed shadow-2xs ${
                     isUser
-                      ? 'bg-[#1f5163] text-white rounded-ee-xs'
+                      ? 'bg-[#e0533c] text-white rounded-ee-xs'
                       : 'bg-white/95 dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] border border-[#d9dad5]/80 dark:border-[#2d3942] rounded-es-xs'
                   }`}
                 >
-                  <div className="whitespace-pre-wrap break-words">{msg.text}</div>
+                  {isUser ? (
+                    <div className="whitespace-pre-wrap break-words font-medium">{msg.text}</div>
+                  ) : (
+                    <TutorMarkdownRenderer content={msg.text} lang={lang} />
+                  )}
 
                   <div
                     className={`mt-2 pt-1.5 border-t flex items-center justify-between gap-2 text-[10px] ${
@@ -840,7 +845,7 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
                       <button
                         type="button"
                         onClick={() => handleCopyMessage(msg.id, msg.text)}
-                        className="flex items-center gap-1 hover:text-[#1f5163] dark:hover:text-[#6fb3c6] transition-colors cursor-pointer"
+                        className="flex items-center gap-1 hover:text-[#e0533c] dark:hover:text-[#fb7185] transition-colors cursor-pointer"
                         title={lang === 'fa' ? 'کپی پاسخ' : 'Copy reply'}
                       >
                         {copiedId === msg.id ? (
@@ -945,12 +950,12 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
                   ? 'پرسش خود درباره متدولوژی CPMAI یا این صفحه را بنویسید...'
                   : 'Ask about CPMAI methodology or this page...'
               }
-              className="flex-1 resize-none rounded-xl border border-[#c3d4d4] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] px-3 py-2 text-xs text-[#1c2830] dark:text-[#e8ebe9] placeholder-[#587479] focus:outline-hidden focus:border-[#1f5163] dark:focus:border-[#6fb3c6]"
+              className="flex-1 resize-none rounded-xl border border-[#c3d4d4] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] px-3 py-2 text-xs text-[#1c2830] dark:text-[#e8ebe9] placeholder-[#587479] focus:outline-hidden focus:border-[#e0533c] dark:focus:border-[#fb7185]"
             />
             <button
               type="submit"
               disabled={!inputQuestion.trim() || isLoading}
-              className="h-9 px-3 rounded-xl bg-[#1f5163] hover:bg-[#163c4a] disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 shadow-xs"
+              className="h-9 px-3 rounded-xl bg-[#e0533c] hover:bg-[#c2410c] disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0 shadow-xs"
               title={lang === 'fa' ? 'ارسال پرسش (Enter)' : 'Send Question (Enter)'}
             >
               <Send className="w-3.5 h-3.5" />

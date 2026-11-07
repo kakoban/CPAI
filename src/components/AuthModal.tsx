@@ -573,7 +573,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             ) : (
               /* Profile Card & Info View */
               <div className="space-y-4">
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-[#2f7d5b]/10 to-[#00738c]/5 border border-[#2f7d5b]/25 flex items-center justify-between gap-4">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-[#2f7d5b]/10 to-[#c026d3]/5 border border-[#2f7d5b]/25 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3.5 min-w-0">
                     {currentUser.avatarUrl ? (
                       <img
@@ -582,7 +582,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         className="w-14 h-14 rounded-2xl object-cover border-2 border-white dark:border-[#161e24] shadow-md shrink-0"
                       />
                     ) : (
-                      <div className="w-14 h-14 rounded-2xl bg-[#00738c]/15 text-[#00738c] font-black text-xl flex items-center justify-center shrink-0">
+                      <div className="w-14 h-14 rounded-2xl bg-[#c026d3]/15 text-[#c026d3] font-black text-xl flex items-center justify-center shrink-0">
                         {currentUser.displayName.charAt(0)}
                       </div>
                     )}
@@ -684,7 +684,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.04] dark:border-white/[0.06] space-y-2 text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
-                      <Database className="w-3.5 h-3.5 text-[#00738c]" />
+                      <Database className="w-3.5 h-3.5 text-[#c026d3]" />
                       <span>{lang === 'fa' ? 'پایگاه داده:' : 'Database:'}</span>
                     </span>
                     <span className="font-mono text-[#1c2830] dark:text-[#e8ebe9] font-bold">
@@ -717,7 +717,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
                   <button
                     onClick={onClose}
-                    className="px-5 py-2.5 rounded-xl bg-[#1f5163] hover:bg-[#0f4c5c] text-white text-xs font-bold transition-all shadow-xs active:scale-[0.96] cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl bg-[#e0533c] hover:bg-[#9333ea] text-white text-xs font-bold transition-all shadow-xs active:scale-[0.96] cursor-pointer"
                   >
                     <span>{lang === 'fa' ? 'ورود به پلتفرم' : 'Continue'}</span>
                   </button>

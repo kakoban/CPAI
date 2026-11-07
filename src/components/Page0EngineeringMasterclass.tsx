@@ -238,7 +238,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
                 onClick={() => setSelectedVisionId(vc.id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   selectedVisionId === vc.id
-                    ? 'bg-[#1f5163] text-white shadow-xs'
+                    ? 'bg-[#e0533c] text-white shadow-xs'
                     : 'bg-[#ffffff] dark:bg-[#1a2228] text-[#5d6b73] dark:text-[#9aa8b0] border border-[#d9dad5] dark:border-[#2d3942] hover:bg-[#f4f4f1]'
                 }`}
               >
@@ -251,7 +251,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
           <div className="p-5 rounded-2xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#d9dad5]/60 dark:border-[#2d3942]/60 pb-3">
               <div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6]">
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]">
                   {lang === 'fa' ? activeVisionCase.categoryFa : activeVisionCase.categoryEn}
                 </span>
                 <h3 className="text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9] mt-1">
@@ -274,7 +274,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
             {/* Simulated Photo Scenario */}
             <div className="p-3 rounded-xl bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5]/60 dark:border-[#2d3942]/60 text-xs space-y-1">
               <span className="font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-                <Camera className="w-3.5 h-3.5 text-[#00738c]" />
+                <Camera className="w-3.5 h-3.5 text-[#c026d3]" />
                 <span>{lang === 'fa' ? 'سناریوی تصویر ارسالی در کلاس:' : 'Sample Image Scenario:'}</span>
               </span>
               <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
@@ -292,7 +292,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
                   <button
                     type="button"
                     onClick={() => onLoadToSandbox(lang === 'fa' ? activeVisionCase.promptFa : activeVisionCase.promptEn)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#00738c]/10 hover:bg-[#00738c]/20 text-[#00738c] dark:text-[#6fb3c6] transition-colors"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#c026d3]/10 hover:bg-[#c026d3]/20 text-[#c026d3] dark:text-[#fb7185] transition-colors"
                   >
                     <Play className="w-3 h-3" />
                     <span>{lang === 'fa' ? 'تست در سندباکس' : 'Load Sandbox'}</span>
@@ -417,7 +417,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
                     type="button"
                     onClick={() => copyToClipboard(NEGOTIATION_SIMULATOR.starterQueryFa, 'neg_pitch')}
                     className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
-                      copiedId === 'neg_pitch' ? 'bg-[#2f7d5b] text-white' : 'bg-[#1f5163] hover:bg-[#163f4e] text-white'
+                      copiedId === 'neg_pitch' ? 'bg-[#2f7d5b] text-white' : 'bg-[#e0533c] hover:bg-[#163f4e] text-white'
                     }`}
                   >
                     {copiedId === 'neg_pitch' ? (
@@ -461,8 +461,8 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
       {/* SUB-TAB 3: MERMAID ENGINEERING DIAGRAMS */}
       {activeSubTab === 'mermaid' && (
         <div className="space-y-4">
-          <div className="p-4 rounded-xl bg-gradient-to-r from-[#00738c]/10 via-[#0a7b97]/10 to-transparent border border-[#00738c]/20 flex items-start gap-3">
-            <Workflow className="w-5 h-5 text-[#00738c] dark:text-[#6fb3c6] shrink-0 mt-0.5" />
+          <div className="p-4 rounded-xl bg-gradient-to-r from-[#c026d3]/10 via-[#0a7b97]/10 to-transparent border border-[#c026d3]/20 flex items-start gap-3">
+            <Workflow className="w-5 h-5 text-[#c026d3] dark:text-[#fb7185] shrink-0 mt-0.5" />
             <div className="text-xs space-y-1">
               <span className="font-bold text-[#1c2830] dark:text-[#e8ebe9] block">
                 {lang === 'fa'
@@ -486,7 +486,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
                 onClick={() => setSelectedMermaidId(me.id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   selectedMermaidId === me.id
-                    ? 'bg-[#00738c] text-white shadow-xs'
+                    ? 'bg-[#c026d3] text-white shadow-xs'
                     : 'bg-[#ffffff] dark:bg-[#1a2228] text-[#5d6b73] dark:text-[#9aa8b0] border border-[#d9dad5] dark:border-[#2d3942] hover:bg-[#f4f4f1]'
                 }`}
               >
@@ -499,7 +499,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
           <div className="p-5 rounded-2xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#d9dad5]/60 dark:border-[#2d3942]/60 pb-3">
               <div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6]">
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]">
                   {lang === 'fa' ? activeMermaid.categoryFa : activeMermaid.categoryEn}
                 </span>
                 <h3 className="text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9] mt-1">
@@ -511,7 +511,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
                 <button
                   type="button"
                   onClick={() => onLoadToSandbox(lang === 'fa' ? activeMermaid.promptFa : activeMermaid.promptEn)}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#00738c]/10 hover:bg-[#00738c]/20 text-[#00738c] dark:text-[#6fb3c6] transition-colors"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#c026d3]/10 hover:bg-[#c026d3]/20 text-[#c026d3] dark:text-[#fb7185] transition-colors"
                 >
                   <Play className="w-3 h-3" />
                   <span>{lang === 'fa' ? 'سندباکس' : 'Sandbox'}</span>
@@ -522,7 +522,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
                   className={`flex items-center gap-1 px-3 py-1 rounded-md text-[11px] font-semibold transition-all ${
                     copiedId === `code_${activeMermaid.id}`
                       ? 'bg-[#2f7d5b] text-white'
-                      : 'bg-[#1f5163] hover:bg-[#163f4e] text-white'
+                      : 'bg-[#e0533c] hover:bg-[#163f4e] text-white'
                   }`}
                 >
                   {copiedId === `code_${activeMermaid.id}` ? (
@@ -594,7 +594,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
                 <button
                   type="button"
                   onClick={() => onLoadToSandbox(FEW_SHOT_GUIDE.promptTemplateFa)}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#00738c]/10 hover:bg-[#00738c]/20 text-[#00738c] dark:text-[#6fb3c6] transition-colors"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#c026d3]/10 hover:bg-[#c026d3]/20 text-[#c026d3] dark:text-[#fb7185] transition-colors"
                 >
                   <Play className="w-3 h-3" />
                   <span>{lang === 'fa' ? 'سندباکس' : 'Sandbox'}</span>
@@ -626,7 +626,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
             </pre>
 
             <div className="p-3 rounded-xl bg-[#f4f4f1] dark:bg-[#12171b] text-xs text-[#5d6b73] dark:text-[#9aa8b0] flex items-center gap-2">
-              <Info className="w-4 h-4 text-[#00738c] shrink-0" />
+              <Info className="w-4 h-4 text-[#c026d3] shrink-0" />
               <span>{lang === 'fa' ? FEW_SHOT_GUIDE.explanationFa : FEW_SHOT_GUIDE.explanationEn}</span>
             </div>
           </div>
@@ -700,7 +700,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
                 <button
                   type="button"
                   onClick={() => onLoadToSandbox(REASONING_GUIDE.caseStudyFa.optimizedReasoningPromptFa)}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#00738c]/10 hover:bg-[#00738c]/20 text-[#00738c] dark:text-[#6fb3c6] transition-colors"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#c026d3]/10 hover:bg-[#c026d3]/20 text-[#c026d3] dark:text-[#fb7185] transition-colors"
                 >
                   <Play className="w-3 h-3" />
                   <span>{lang === 'fa' ? 'سندباکس' : 'Sandbox'}</span>
@@ -739,7 +739,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
       {/* SUB-TAB 6: WEB GROUNDING */}
       {activeSubTab === 'web_grounding' && (
         <div className="space-y-4">
-          <div className="p-4 rounded-xl bg-gradient-to-r from-[#1a73e8]/10 via-[#00738c]/10 to-transparent border border-[#1a73e8]/20 flex items-start gap-3">
+          <div className="p-4 rounded-xl bg-gradient-to-r from-[#1a73e8]/10 via-[#c026d3]/10 to-transparent border border-[#1a73e8]/20 flex items-start gap-3">
             <Globe className="w-5 h-5 text-[#1a73e8] dark:text-[#60a5fa] shrink-0 mt-0.5" />
             <div className="text-xs space-y-1">
               <span className="font-bold text-[#1c2830] dark:text-[#e8ebe9] block">
@@ -782,7 +782,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
                 <button
                   type="button"
                   onClick={() => onLoadToSandbox(lang === 'fa' ? activeWeb.promptFa : activeWeb.promptEn)}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#00738c]/10 hover:bg-[#00738c]/20 text-[#00738c] dark:text-[#6fb3c6] transition-colors"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#c026d3]/10 hover:bg-[#c026d3]/20 text-[#c026d3] dark:text-[#fb7185] transition-colors"
                 >
                   <Play className="w-3 h-3" />
                   <span>{lang === 'fa' ? 'سندباکس' : 'Sandbox'}</span>
@@ -829,8 +829,8 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
       {/* SUB-TAB 7: STRUCTURED P6 & EXCEL */}
       {activeSubTab === 'p6_excel' && (
         <div className="space-y-4">
-          <div className="p-4 rounded-xl bg-gradient-to-r from-[#00738c]/10 via-[#0a7b97]/10 to-transparent border border-[#00738c]/20 flex items-start gap-3">
-            <FileSpreadsheet className="w-5 h-5 text-[#00738c] dark:text-[#6fb3c6] shrink-0 mt-0.5" />
+          <div className="p-4 rounded-xl bg-gradient-to-r from-[#c026d3]/10 via-[#0a7b97]/10 to-transparent border border-[#c026d3]/20 flex items-start gap-3">
+            <FileSpreadsheet className="w-5 h-5 text-[#c026d3] dark:text-[#fb7185] shrink-0 mt-0.5" />
             <div className="text-xs space-y-1">
               <span className="font-bold text-[#1c2830] dark:text-[#e8ebe9] block">
                 {lang === 'fa'
@@ -863,7 +863,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
                   type="button"
                   onClick={() => copyToClipboard(STRUCTURED_P6_GUIDE.conversionPromptFa, 'p6_prompt')}
                   className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
-                    copiedId === 'p6_prompt' ? 'bg-[#2f7d5b] text-white' : 'bg-[#00738c] hover:bg-[#005a6e] text-white'
+                    copiedId === 'p6_prompt' ? 'bg-[#2f7d5b] text-white' : 'bg-[#c026d3] hover:bg-[#005a6e] text-white'
                   }`}
                 >
                   {copiedId === 'p6_prompt' ? (
@@ -888,14 +888,14 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
             <div className="p-5 rounded-2xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs space-y-3">
               <div className="flex items-center justify-between border-b border-[#d9dad5]/60 dark:border-[#2d3942]/60 pb-2">
                 <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-                  <FileJson className="w-4 h-4 text-[#00738c]" />
+                  <FileJson className="w-4 h-4 text-[#c026d3]" />
                   <span>{lang === 'fa' ? '۳. خروجی استاندارد JSON برای P6:' : '3. Standard JSON for P6:'}</span>
                 </span>
                 <button
                   type="button"
                   onClick={() => copyToClipboard(STRUCTURED_P6_GUIDE.expectedOutputJsonFa, 'p6_json')}
                   className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
-                    copiedId === 'p6_json' ? 'bg-[#2f7d5b] text-white' : 'bg-[#1f5163] hover:bg-[#163f4e] text-white'
+                    copiedId === 'p6_json' ? 'bg-[#2f7d5b] text-white' : 'bg-[#e0533c] hover:bg-[#163f4e] text-white'
                   }`}
                 >
                   {copiedId === 'p6_json' ? (
@@ -995,7 +995,7 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
                 </div>
 
                 <div className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] flex items-center gap-1.5 pt-1">
-                  <Info className="w-3.5 h-3.5 text-[#00738c] shrink-0" />
+                  <Info className="w-3.5 h-3.5 text-[#c026d3] shrink-0" />
                   <span>{lang === 'fa' ? c.rationaleFa : c.rationaleFa}</span>
                 </div>
               </div>

@@ -116,7 +116,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between pb-3.5 border-b border-black/[0.06] dark:border-white/[0.08]">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-blue-500/10 text-[#2563EB] border border-blue-500/20 shadow-2xs">
+              <div className="p-2 rounded-xl bg-orange-500/10 text-[#e0533c] border border-orange-500/20 shadow-2xs">
                 <Film className="w-5 h-5" />
               </div>
               <div>
@@ -147,7 +147,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
               onClick={() => setActiveTab('presets')}
               className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl transition-all cursor-pointer ${
                 activeTab === 'presets'
-                  ? 'bg-white dark:bg-[#1f2933] text-[#2563EB] shadow-xs'
+                  ? 'bg-white dark:bg-[#1f2933] text-[#e0533c] shadow-xs'
                   : 'text-[#5d6b73] hover:text-[#1c2830]'
               }`}
             >
@@ -160,7 +160,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
               onClick={() => setActiveTab('url')}
               className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl transition-all cursor-pointer ${
                 activeTab === 'url'
-                  ? 'bg-white dark:bg-[#1f2933] text-[#2563EB] shadow-xs'
+                  ? 'bg-white dark:bg-[#1f2933] text-[#e0533c] shadow-xs'
                   : 'text-[#5d6b73] hover:text-[#1c2830]'
               }`}
             >
@@ -173,7 +173,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
               onClick={() => setActiveTab('upload')}
               className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl transition-all cursor-pointer ${
                 activeTab === 'upload'
-                  ? 'bg-white dark:bg-[#1f2933] text-[#2563EB] shadow-xs'
+                  ? 'bg-white dark:bg-[#1f2933] text-[#e0533c] shadow-xs'
                   : 'text-[#5d6b73] hover:text-[#1c2830]'
               }`}
             >
@@ -186,7 +186,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
               onClick={() => setActiveTab('settings')}
               className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl transition-all cursor-pointer ${
                 activeTab === 'settings'
-                  ? 'bg-white dark:bg-[#1f2933] text-[#2563EB] shadow-xs'
+                  ? 'bg-white dark:bg-[#1f2933] text-[#e0533c] shadow-xs'
                   : 'text-[#5d6b73] hover:text-[#1c2830]'
               }`}
             >
@@ -207,7 +207,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
                       onClick={() => handleSelectPreset(preset)}
                       className={`p-3.5 rounded-2xl border transition-all cursor-pointer text-left relative flex flex-col justify-between ${
                         isSelected
-                          ? 'border-[#2563EB] bg-blue-50/60 dark:bg-blue-950/30 shadow-xs'
+                          ? 'border-[#e0533c] bg-orange-50/60 dark:bg-orange-950/30 shadow-xs'
                           : 'border-black/[0.08] dark:border-white/[0.1] hover:border-blue-300 dark:hover:border-blue-700 bg-black/[0.01]'
                       }`}
                     >
@@ -215,9 +215,9 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1.5 text-xs font-black text-[#1c2830] dark:text-[#e8ebe9]">
                             {preset.type === 'video' ? (
-                              <Film className="w-4 h-4 text-[#2563EB]" />
+                              <Film className="w-4 h-4 text-[#e0533c]" />
                             ) : preset.type === 'canvas-neural' ? (
-                              <Cpu className="w-4 h-4 text-[#00738c]" />
+                              <Cpu className="w-4 h-4 text-[#c026d3]" />
                             ) : (
                               <Workflow className="w-4 h-4 text-emerald-600" />
                             )}
@@ -225,7 +225,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
                           </span>
 
                           {isSelected && (
-                            <span className="w-5 h-5 rounded-full bg-[#2563EB] text-white flex items-center justify-center shrink-0">
+                            <span className="w-5 h-5 rounded-full bg-[#e0533c] text-white flex items-center justify-center shrink-0">
                               <Check className="w-3 h-3 stroke-[3]" />
                             </span>
                           )}
@@ -256,7 +256,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
             <form onSubmit={handleApplyCustomUrl} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-                  <Link2 className="w-4 h-4 text-[#2563EB]" />
+                  <Link2 className="w-4 h-4 text-[#e0533c]" />
                   <span>آدرس مستقیم فایل ویدیو (Direct Video URL):</span>
                 </label>
                 <p className="text-[11px] text-[#5d6b73]">
@@ -268,7 +268,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
                   value={customUrlInput}
                   onChange={(e) => setCustomUrlInput(e.target.value)}
                   placeholder="https://example.com/videos/custom_hero_motion.mp4"
-                  className="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl border border-black/[0.1] dark:border-white/[0.15] bg-white dark:bg-[#12181d] text-[#1c2830] dark:text-[#e8ebe9] focus:ring-2 focus:ring-[#2563EB] focus:outline-hidden"
+                  className="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl border border-black/[0.1] dark:border-white/[0.15] bg-white dark:bg-[#12181d] text-[#1c2830] dark:text-[#e8ebe9] focus:ring-2 focus:ring-[#e0533c] focus:outline-hidden"
                 />
               </div>
 
@@ -286,7 +286,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white text-xs font-bold transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#e0533c] hover:bg-[#c2410c] text-white text-xs font-bold transition-all cursor-pointer"
                 >
                   <Check className="w-3.5 h-3.5" />
                   <span>اعمال و بارگذاری لینک</span>
@@ -299,7 +299,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
           {activeTab === 'upload' && (
             <div className="space-y-4">
               <div className="border-2 border-dashed border-black/15 dark:border-white/15 rounded-2xl p-6 text-center space-y-3 hover:border-blue-400 transition-colors">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-[#2563EB] flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-900/30 text-[#e0533c] flex items-center justify-center mx-auto">
                   <Upload className="w-6 h-6" />
                 </div>
                 <div>
@@ -311,7 +311,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
                   </p>
                 </div>
 
-                <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white text-xs font-bold shadow-md cursor-pointer transition-all active:scale-95">
+                <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#e0533c] hover:bg-[#c2410c] text-white text-xs font-bold shadow-md cursor-pointer transition-all active:scale-95">
                   <Film className="w-4 h-4" />
                   <span>انتخاب فایل ویدیو...</span>
                   <input
@@ -350,7 +350,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
                     }}
                     className={`p-3 rounded-xl border text-left cursor-pointer transition-all ${
                       tempConfig.playbackMode === 'scrub'
-                        ? 'border-[#2563EB] bg-blue-50/60 dark:bg-blue-950/30'
+                        ? 'border-[#e0533c] bg-orange-50/60 dark:bg-orange-950/30'
                         : 'border-black/[0.08] hover:border-black/20'
                     }`}
                   >
@@ -371,7 +371,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
                     }}
                     className={`p-3 rounded-xl border text-left cursor-pointer transition-all ${
                       tempConfig.playbackMode === 'loop'
-                        ? 'border-[#2563EB] bg-blue-50/60 dark:bg-blue-950/30'
+                        ? 'border-[#e0533c] bg-orange-50/60 dark:bg-orange-950/30'
                         : 'border-black/[0.08] hover:border-black/20'
                     }`}
                   >
@@ -406,7 +406,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
                       }}
                       className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
                         tempConfig.blendMode === item.mode
-                          ? 'border-[#2563EB] bg-blue-50/60 dark:bg-blue-950/30'
+                          ? 'border-[#e0533c] bg-orange-50/60 dark:bg-orange-950/30'
                           : 'border-black/[0.08]'
                       }`}
                     >
@@ -435,7 +435,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
                       setTempConfig(updated);
                       onApplyConfig(updated);
                     }}
-                    className="w-full accent-[#2563EB] cursor-pointer"
+                    className="w-full accent-[#e0533c] cursor-pointer"
                   />
                 </div>
 
@@ -455,7 +455,7 @@ export const MediaCustomizerModal: React.FC<MediaCustomizerModalProps> = ({
                       setTempConfig(updated);
                       onApplyConfig(updated);
                     }}
-                    className="w-full accent-[#2563EB] cursor-pointer"
+                    className="w-full accent-[#e0533c] cursor-pointer"
                   />
                 </div>
               </div>

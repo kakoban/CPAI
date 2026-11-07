@@ -124,7 +124,7 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
             </button>
             <button
               type="submit"
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded-lg bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e] hover:opacity-90"
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium rounded-lg bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] hover:opacity-90"
             >
               <Check className="w-3.5 h-3.5" />
               <span>{t.saveMetaBtn}</span>

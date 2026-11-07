@@ -603,7 +603,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
       {/* Top Breadcrumb & Badge */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#00738c]/10 text-[#00738c] dark:bg-[#00738c]/20 dark:text-[#6fb3c6] border border-[#00738c]/20">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#c026d3]/10 text-[#c026d3] dark:bg-[#c026d3]/20 dark:text-[#fb7185] border border-[#c026d3]/20">
             <Target className="w-3.5 h-3.5" />
             {text.badge}
           </span>
@@ -611,7 +611,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
 
         <button
           onClick={onGoToPage8}
-          className="flex items-center gap-1.5 text-xs text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#00738c] dark:hover:text-[#6fb3c6] transition-colors"
+          className="flex items-center gap-1.5 text-xs text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#c026d3] dark:hover:text-[#fb7185] transition-colors"
         >
           {lang === 'fa' ? <ArrowRight className="w-3.5 h-3.5" /> : <ArrowLeft className="w-3.5 h-3.5" />}
           <span>{text.prevPageBtn}</span>
@@ -621,7 +621,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
       {/* Main Slide Title & Official Prompt Box */}
       <div className="bg-[#ffffff] dark:bg-[#1a2228] rounded-xl p-6 border border-[#d9dad5] dark:border-[#2d3942] shadow-xs mb-6">
         <div className="flex items-start gap-4">
-          <div className="p-3 rounded-lg bg-[#00738c]/10 dark:bg-[#00738c]/20 text-[#00738c] dark:text-[#6fb3c6] shrink-0">
+          <div className="p-3 rounded-lg bg-[#c026d3]/10 dark:bg-[#c026d3]/20 text-[#c026d3] dark:text-[#fb7185] shrink-0">
             <Brain className="w-7 h-7" />
           </div>
           <div className="space-y-2">
@@ -638,8 +638,8 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
         </div>
 
         {/* Official Guidance Highlight Callout */}
-        <div className="mt-5 p-4 rounded-lg bg-[#00738c]/5 dark:bg-[#00738c]/15 border border-[#00738c]/25">
-          <div className="flex items-center gap-2 mb-1.5 text-[#00738c] dark:text-[#6fb3c6] font-semibold text-xs">
+        <div className="mt-5 p-4 rounded-lg bg-[#c026d3]/5 dark:bg-[#c026d3]/15 border border-[#c026d3]/25">
+          <div className="flex items-center gap-2 mb-1.5 text-[#c026d3] dark:text-[#fb7185] font-semibold text-xs">
             <Sparkles className="w-4 h-4" />
             <span>{text.coreInstructionTitle}</span>
           </div>
@@ -651,7 +651,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
         {/* 7 Patterns of AI Reference strip */}
         <div className="mt-4 pt-4 border-t border-[#d9dad5]/70 dark:border-[#2d3942]/70">
           <div className="text-xs font-semibold text-[#1c2830] dark:text-[#e8ebe9] mb-2 flex items-center gap-1.5">
-            <Boxes className="w-3.5 h-3.5 text-[#00738c] dark:text-[#6fb3c6]" />
+            <Boxes className="w-3.5 h-3.5 text-[#c026d3] dark:text-[#fb7185]" />
             <span>{text.sevenPatternsGuideTitle}</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
@@ -685,7 +685,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleInsertTemplate}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#00738c] text-white hover:bg-[#005f73] transition-colors shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#c026d3] text-white hover:bg-[#005f73] transition-colors shadow-2xs"
           >
             <FileText className="w-3.5 h-3.5" />
             <span>{text.templateBtn}</span>
@@ -693,15 +693,15 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
 
           <button
             onClick={handleLoadVideoCase}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#00738c] transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#c026d3] transition-colors"
           >
-            <Film className="w-3.5 h-3.5 text-[#00738c]" />
+            <Film className="w-3.5 h-3.5 text-[#c026d3]" />
             <span>{text.exampleVideoBtn}</span>
           </button>
 
           <button
             onClick={handleLoadFraudCase}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#00738c] transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#c026d3] transition-colors"
           >
             <Shield className="w-3.5 h-3.5 text-[#b87333]" />
             <span>{text.exampleFraudBtn}</span>
@@ -709,7 +709,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
 
           <button
             onClick={handleLoadChurnCase}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#00738c] transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#c026d3] transition-colors"
           >
             <BarChart3 className="w-3.5 h-3.5 text-[#2f7d5b]" />
             <span>{text.exampleChurnBtn}</span>
@@ -717,7 +717,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
 
           <button
             onClick={handleLoadMedicalCase}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#00738c] transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#c026d3] transition-colors"
           >
             <Zap className="w-3.5 h-3.5 text-[#7b2cbf]" />
             <span>{text.exampleMedicalBtn}</span>
@@ -735,9 +735,9 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
 
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#00738c] transition-colors shadow-2xs"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#c026d3] transition-colors shadow-2xs"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-[#2f7d5b]" /> : <Copy className="w-3.5 h-3.5 text-[#00738c]" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-[#2f7d5b]" /> : <Copy className="w-3.5 h-3.5 text-[#c026d3]" />}
             <span>{copied ? text.copiedToast : text.copyBtn}</span>
           </button>
         </div>
@@ -749,7 +749,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
           onClick={() => setActiveTab('objectives')}
           className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
             activeTab === 'objectives'
-              ? 'bg-[#00738c] text-white shadow-xs'
+              ? 'bg-[#c026d3] text-white shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#d9dad5]/30'
           }`}
         >
@@ -761,7 +761,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
           onClick={() => setActiveTab('noncogTech')}
           className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
             activeTab === 'noncogTech'
-              ? 'bg-[#00738c] text-white shadow-xs'
+              ? 'bg-[#c026d3] text-white shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#d9dad5]/30'
           }`}
         >
@@ -784,7 +784,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
             </div>
             <button
               onClick={handleAddObjective}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#1f5163] text-white hover:bg-[#163c4a] transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#e0533c] text-white hover:bg-[#c2410c] transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>{text.addObjectiveBtn}</span>
@@ -800,7 +800,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
               >
                 <div className="flex items-center justify-between pb-3 border-b border-[#d9dad5]/60 dark:border-[#2d3942]/60">
                   <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#00738c] text-white flex items-center justify-center text-xs font-bold">
+                    <span className="w-6 h-6 rounded-full bg-[#c026d3] text-white flex items-center justify-center text-xs font-bold">
                       {index + 1}
                     </span>
                     <span className="font-bold text-xs text-[#1c2830] dark:text-[#e8ebe9]">
@@ -830,7 +830,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
                       value={obj.title}
                       onChange={(e) => handleUpdateObjective(obj.id, 'title', e.target.value)}
                       placeholder={lang === 'fa' ? 'مثال: پیش‌بینی احتمال کلیک روی ویدیوها جهت مرتب‌سازی لیست' : 'e.g. Predicting video clicks to enable sorting by predicted total clicks'}
-                      className="w-full text-xs px-3 py-2 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#00738c]"
+                      className="w-full text-xs px-3 py-2 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#c026d3]"
                     />
                   </div>
 
@@ -842,7 +842,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
                     <select
                       value={obj.pattern}
                       onChange={(e) => handleUpdateObjective(obj.id, 'pattern', e.target.value)}
-                      className="w-full text-xs px-3 py-2 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#00738c]"
+                      className="w-full text-xs px-3 py-2 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#c026d3]"
                     >
                       <option value="Predictive Analytics">4. Predictive Analytics (تحلیل پیش‌بینانه)</option>
                       <option value="Hyperpersonalization">1. Hyperpersonalization (شخصی‌سازی)</option>
@@ -865,7 +865,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
                     value={obj.taskDesc}
                     onChange={(e) => handleUpdateObjective(obj.id, 'taskDesc', e.target.value)}
                     placeholder={lang === 'fa' ? 'محاسبه امتیاز احتمال کلیک (CTR Score) و برآورد مجموع کلیک‌های پیش‌بینی‌شده در این جلسه...' : 'Estimate Click-Through Rate (CTR) and predict expected total session clicks...'}
-                    className="w-full text-xs px-3 py-2 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#00738c]"
+                    className="w-full text-xs px-3 py-2 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#c026d3]"
                   />
                 </div>
 
@@ -880,7 +880,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
                       value={obj.inputs}
                       onChange={(e) => handleUpdateObjective(obj.id, 'inputs', e.target.value)}
                       placeholder={lang === 'fa' ? 'سابقه تماشا، دسته‌بندی موضوعی، زمان روز، پلتفرم...' : 'Watch history, category tags, time of day, client device...'}
-                      className="w-full text-xs p-2.5 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#00738c]"
+                      className="w-full text-xs p-2.5 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#c026d3]"
                     />
                   </div>
 
@@ -894,7 +894,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
                       value={obj.outputs}
                       onChange={(e) => handleUpdateObjective(obj.id, 'outputs', e.target.value)}
                       placeholder={lang === 'fa' ? 'امتیاز پیوسته [۰ تا ۱] و رتبه‌بندی کاندیدها...' : 'Continuous probability score [0 - 1] and ranked array...'}
-                      className="w-full text-xs p-2.5 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#00738c]"
+                      className="w-full text-xs p-2.5 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#c026d3]"
                     />
                   </div>
                 </div>
@@ -910,7 +910,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
                       value={obj.downstreamAction}
                       onChange={(e) => handleUpdateObjective(obj.id, 'downstreamAction', e.target.value)}
                       placeholder={lang === 'fa' ? 'مرتب‌سازی آنی محتوا در ردیف نخست صفحه اصلی اپلیکیشن...' : 'Sort carousel tiles dynamically in homepage API...'}
-                      className="w-full text-xs p-2.5 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#00738c]"
+                      className="w-full text-xs p-2.5 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#c026d3]"
                     />
                   </div>
 
@@ -924,7 +924,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
                       value={obj.targetMetric}
                       onChange={(e) => handleUpdateObjective(obj.id, 'targetMetric', e.target.value)}
                       placeholder={lang === 'fa' ? 'AUC-ROC >= 0.84، تاخیر زیر ۴۵ میلی‌ثانیه، ۱۰٪+ بهبود...' : 'AUC-ROC >= 0.84, latency < 45ms, +10% CTR lift...'}
-                      className="w-full text-xs p-2.5 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#00738c]"
+                      className="w-full text-xs p-2.5 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#c026d3]"
                     />
                   </div>
 
@@ -938,7 +938,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
                       value={obj.boundary}
                       onChange={(e) => handleUpdateObjective(obj.id, 'boundary', e.target.value)}
                       placeholder={lang === 'fa' ? 'تحلیل بصری فریم‌های داخل ویدیو در این تکرار خارج از محدوده است...' : 'Raw video frame vision processing excluded in iteration 1...'}
-                      className="w-full text-xs p-2.5 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#00738c]"
+                      className="w-full text-xs p-2.5 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#c026d3]"
                     />
                   </div>
                 </div>
@@ -950,7 +950,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
           <div className="flex justify-end">
             <button
               onClick={handleGenerateToCanvas}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold bg-[#00738c] text-white hover:bg-[#005f73] transition-colors shadow-sm"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold bg-[#c026d3] text-white hover:bg-[#005f73] transition-colors shadow-sm"
             >
               <Sparkles className="w-4 h-4" />
               <span>{text.generateToCanvasBtn}</span>
@@ -973,7 +973,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* UI Component */}
-            <div className={`p-3 rounded-lg border transition-all ${selectedComponents.includes('ui') ? 'bg-[#00738c]/5 border-[#00738c]/40' : 'bg-[#f4f4f1] dark:bg-[#12171b] border-[#d9dad5] dark:border-[#2d3942]'}`}>
+            <div className={`p-3 rounded-lg border transition-all ${selectedComponents.includes('ui') ? 'bg-[#c026d3]/5 border-[#c026d3]/40' : 'bg-[#f4f4f1] dark:bg-[#12171b] border-[#d9dad5] dark:border-[#2d3942]'}`}>
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9]">
                   {lang === 'fa' ? 'رابط کاربری و لایه نمایش (UI / Front-End)' : 'Presentation UI & Front-End'}
@@ -982,7 +982,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
                   type="checkbox"
                   checked={selectedComponents.includes('ui')}
                   onChange={() => toggleComponent('ui')}
-                  className="rounded text-[#00738c]"
+                  className="rounded text-[#c026d3]"
                 />
               </div>
               <input
@@ -995,7 +995,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
             </div>
 
             {/* API Component */}
-            <div className={`p-3 rounded-lg border transition-all ${selectedComponents.includes('api') ? 'bg-[#00738c]/5 border-[#00738c]/40' : 'bg-[#f4f4f1] dark:bg-[#12171b] border-[#d9dad5] dark:border-[#2d3942]'}`}>
+            <div className={`p-3 rounded-lg border transition-all ${selectedComponents.includes('api') ? 'bg-[#c026d3]/5 border-[#c026d3]/40' : 'bg-[#f4f4f1] dark:bg-[#12171b] border-[#d9dad5] dark:border-[#2d3942]'}`}>
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9]">
                   {lang === 'fa' ? 'سرویس‌های واسط و میکروسرویس‌ها (APIs / Gateway)' : 'API Gateway & Microservices'}
@@ -1004,7 +1004,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
                   type="checkbox"
                   checked={selectedComponents.includes('api')}
                   onChange={() => toggleComponent('api')}
-                  className="rounded text-[#00738c]"
+                  className="rounded text-[#c026d3]"
                 />
               </div>
               <input
@@ -1017,7 +1017,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
             </div>
 
             {/* Database Component */}
-            <div className={`p-3 rounded-lg border transition-all ${selectedComponents.includes('db') ? 'bg-[#00738c]/5 border-[#00738c]/40' : 'bg-[#f4f4f1] dark:bg-[#12171b] border-[#d9dad5] dark:border-[#2d3942]'}`}>
+            <div className={`p-3 rounded-lg border transition-all ${selectedComponents.includes('db') ? 'bg-[#c026d3]/5 border-[#c026d3]/40' : 'bg-[#f4f4f1] dark:bg-[#12171b] border-[#d9dad5] dark:border-[#2d3942]'}`}>
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9]">
                   {lang === 'fa' ? 'پایگاه داده و ذخیره‌سازی (Database & Cache)' : 'Persistence & Cache (DB/Redis)'}
@@ -1026,7 +1026,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
                   type="checkbox"
                   checked={selectedComponents.includes('db')}
                   onChange={() => toggleComponent('db')}
-                  className="rounded text-[#00738c]"
+                  className="rounded text-[#c026d3]"
                 />
               </div>
               <input
@@ -1039,7 +1039,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
             </div>
 
             {/* Rule Engine Guardrails */}
-            <div className={`p-3 rounded-lg border transition-all ${selectedComponents.includes('rules') ? 'bg-[#00738c]/5 border-[#00738c]/40' : 'bg-[#f4f4f1] dark:bg-[#12171b] border-[#d9dad5] dark:border-[#2d3942]'}`}>
+            <div className={`p-3 rounded-lg border transition-all ${selectedComponents.includes('rules') ? 'bg-[#c026d3]/5 border-[#c026d3]/40' : 'bg-[#f4f4f1] dark:bg-[#12171b] border-[#d9dad5] dark:border-[#2d3942]'}`}>
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9]">
                   {lang === 'fa' ? 'موتور قواعد قطعی و گاردریل‌ها (Deterministic Rules)' : 'Deterministic Rule Guardrails'}
@@ -1048,7 +1048,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
                   type="checkbox"
                   checked={selectedComponents.includes('rules')}
                   onChange={() => toggleComponent('rules')}
-                  className="rounded text-[#00738c]"
+                  className="rounded text-[#c026d3]"
                 />
               </div>
               <input
@@ -1061,7 +1061,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
             </div>
 
             {/* HITL Component */}
-            <div className={`p-3 rounded-lg border transition-all ${selectedComponents.includes('hitl') ? 'bg-[#00738c]/5 border-[#00738c]/40' : 'bg-[#f4f4f1] dark:bg-[#12171b] border-[#d9dad5] dark:border-[#2d3942]'}`}>
+            <div className={`p-3 rounded-lg border transition-all ${selectedComponents.includes('hitl') ? 'bg-[#c026d3]/5 border-[#c026d3]/40' : 'bg-[#f4f4f1] dark:bg-[#12171b] border-[#d9dad5] dark:border-[#2d3942]'}`}>
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9]">
                   {lang === 'fa' ? 'بازبینی انسانی (Human-in-the-Loop - HITL)' : 'Human-in-the-Loop Review Console'}
@@ -1070,7 +1070,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
                   type="checkbox"
                   checked={selectedComponents.includes('hitl')}
                   onChange={() => toggleComponent('hitl')}
-                  className="rounded text-[#00738c]"
+                  className="rounded text-[#c026d3]"
                 />
               </div>
               <input
@@ -1083,7 +1083,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
             </div>
 
             {/* Auth Component */}
-            <div className={`p-3 rounded-lg border transition-all ${selectedComponents.includes('auth') ? 'bg-[#00738c]/5 border-[#00738c]/40' : 'bg-[#f4f4f1] dark:bg-[#12171b] border-[#d9dad5] dark:border-[#2d3942]'}`}>
+            <div className={`p-3 rounded-lg border transition-all ${selectedComponents.includes('auth') ? 'bg-[#c026d3]/5 border-[#c026d3]/40' : 'bg-[#f4f4f1] dark:bg-[#12171b] border-[#d9dad5] dark:border-[#2d3942]'}`}>
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9]">
                   {lang === 'fa' ? 'امنیت و کنترل دسترسی (Security & RBAC)' : 'Security, RBAC & Governance'}
@@ -1092,7 +1092,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
                   type="checkbox"
                   checked={selectedComponents.includes('auth')}
                   onChange={() => toggleComponent('auth')}
-                  className="rounded text-[#00738c]"
+                  className="rounded text-[#c026d3]"
                 />
               </div>
               <input
@@ -1108,7 +1108,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
           <div className="pt-3 flex justify-end">
             <button
               onClick={handleGenerateToCanvas}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-[#1f5163] text-white hover:bg-[#163c4a] transition-colors shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-[#e0533c] text-white hover:bg-[#c2410c] transition-colors shadow-sm"
             >
               <Sparkles className="w-4 h-4" />
               <span>{text.generateToCanvasBtn}</span>
@@ -1121,7 +1121,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
       <div className="bg-[#ffffff] dark:bg-[#1a2228] rounded-xl border border-[#d9dad5] dark:border-[#2d3942] shadow-xs p-5 mb-8">
         <div className="flex items-center justify-between mb-2">
           <label className="text-xs font-bold uppercase tracking-wider text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-            <FileText className="w-4 h-4 text-[#00738c]" />
+            <FileText className="w-4 h-4 text-[#c026d3]" />
             <span>{lang === 'fa' ? 'بوم ثبت خروجی کاربرگ اسلاید ۱۹' : 'Slide 19 Output Deliverable Canvas'}</span>
           </label>
           <div className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] flex items-center gap-2">
@@ -1136,13 +1136,13 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
           value={content}
           onChange={(e) => onChangeContent(e.target.value)}
           placeholder={text.canvasPlaceholder}
-          className="w-full font-mono text-xs p-4 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#00738c] leading-relaxed transition-all resize-y"
+          className="w-full font-mono text-xs p-4 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#c026d3] leading-relaxed transition-all resize-y"
         />
 
         {/* Footer Disclaimer */}
         <div className="mt-4 pt-3 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 flex flex-wrap items-center justify-between text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] gap-2">
           <span>{text.pmiCopyright}</span>
-          <span className="font-semibold text-[#00738c] dark:text-[#6fb3c6]">Slide 19</span>
+          <span className="font-semibold text-[#c026d3] dark:text-[#fb7185]">Slide 19</span>
         </div>
       </div>
 
@@ -1158,7 +1158,7 @@ Cognitive Objective 2: Real-time Transaction Fraud Scoring & Anomaly Detection
 
         <button
           onClick={onGoToPage10}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#00738c] text-white text-xs font-medium hover:bg-[#005f73] transition-colors shadow-xs"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#c026d3] text-white text-xs font-medium hover:bg-[#005f73] transition-colors shadow-xs"
         >
           <span>{lang === 'fa' ? 'صفحه بعدی: صفحه ۱۰ (اسلاید ۲۰: نتایج شناختی)' : 'Next: Page 10 (Slide 20: Cognitive Outcomes)'}</span>
           {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}

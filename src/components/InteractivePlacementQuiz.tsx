@@ -499,10 +499,10 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح خود
 
                 <div className="flex items-center gap-1.5 text-xs font-bold text-[#5d6b73] dark:text-[#9aa8b0]">
                   <span>{lang === 'fa' ? 'امتیاز فعلی:' : 'Current Score:'}</span>
-                  <span className="font-mono font-black text-sm text-[#e0533c] dark:text-[#fb7185]">
+                  <span dir="ltr" className="font-mono font-black text-sm text-[#e0533c] dark:text-[#fb7185]">
                     {currentScore} / {maxScore}
                   </span>
-                  <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10">
+                  <span dir="ltr" className="font-mono text-xs px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10">
                     {currentPct}%
                   </span>
                 </div>
@@ -574,7 +574,7 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح خود
                     </div>
 
                     <div className="flex items-center gap-2 self-start sm:self-auto">
-                      <span className="font-mono text-xs font-bold text-[#5d6b73] dark:text-[#9aa8b0] bg-black/5 dark:bg-white/5 px-2.5 py-1 rounded-lg">
+                      <span dir="ltr" className="font-mono text-xs font-bold text-[#5d6b73] dark:text-[#9aa8b0] bg-black/5 dark:bg-white/5 px-2.5 py-1 rounded-lg">
                         {catStats.earnedScore} / {catStats.maxScore} ({catStats.percentage}%)
                       </span>
                     </div>
@@ -601,10 +601,10 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح خود
                                 {renderIcon(tool.iconName, 'w-4 h-4')}
                               </div>
                               <div>
-                                <h3 className="text-sm font-black text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
+                                <h3 className="text-sm font-black text-[#1c2830] dark:text-[#e8ebe9] flex flex-wrap items-center gap-1.5">
                                   <span>{tool.name}</span>
                                   <span className="text-[11px] font-normal text-[#5d6b73] dark:text-[#9aa8b0]">
-                                    ({lang === 'fa' ? tool.titleFa : tool.titleEn})
+                                    · {lang === 'fa' ? tool.titleFa : tool.titleEn}
                                   </span>
                                 </h3>
                               </div>
@@ -889,7 +889,7 @@ ${candidatePhone ? `شماره تماس: ${candidatePhone}\n` : ''}سطح خود
                             {renderIcon(cat.iconName, 'w-3.5 h-3.5 text-[#e0533c]')}
                             <span className="truncate">{lang === 'fa' ? cat.titleFa : cat.titleEn}</span>
                           </span>
-                          <span className="font-mono text-[11px] font-bold text-[#e0533c] dark:text-[#fb7185]">
+                          <span dir="ltr" className="font-mono text-[11px] font-bold text-[#e0533c] dark:text-[#fb7185]">
                             {stats.earnedScore} / {stats.maxScore} ({stats.percentage}%)
                           </span>
                         </div>

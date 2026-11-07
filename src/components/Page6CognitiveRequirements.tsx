@@ -422,7 +422,7 @@ Final Decision Gate Verdict: ${isAiGo ? 'AI GO (Approved for Cognitive Solution)
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Top Slide Header Banner */}
-      <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1b3a4b] via-[#1f5163] to-[#00738c] text-white shadow-md relative overflow-hidden border border-[#005f73]">
+      <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1b3a4b] via-[#e0533c] to-[#c026d3] text-white shadow-md relative overflow-hidden border border-[#005f73]">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -451,14 +451,14 @@ Final Decision Gate Verdict: ${isAiGo ? 'AI GO (Approved for Cognitive Solution)
       {/* Task Definition & CPMAI Heuristic Callout Card */}
       <div className="p-5 sm:p-6 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] space-y-4">
         <div className="flex items-start gap-3">
-          <div className="p-2.5 rounded-lg bg-[#e3eef1] dark:bg-[#1f5163]/30 text-[#00738c] dark:text-[#6fb3c6] shrink-0">
+          <div className="p-2.5 rounded-lg bg-[#fdeee9] dark:bg-[#e0533c]/30 text-[#c026d3] dark:text-[#fb7185] shrink-0">
             <FileText className="w-5 h-5" />
           </div>
           <div className="space-y-1.5">
             <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
               {t.taskTitle}
             </h2>
-            <h3 className="text-xs font-semibold text-[#1f5163] dark:text-[#6fb3c6] uppercase tracking-wider">
+            <h3 className="text-xs font-semibold text-[#e0533c] dark:text-[#fb7185] uppercase tracking-wider">
               {t.descTitle}
             </h3>
             <p className="text-xs sm:text-sm text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
@@ -492,18 +492,18 @@ Final Decision Gate Verdict: ${isAiGo ? 'AI GO (Approved for Cognitive Solution)
         {/* The 4 Action Items of this task */}
         <div className="pt-2 border-t border-[#d9dad5] dark:border-[#2d3942] space-y-2.5">
           <h4 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#00738c] dark:text-[#6fb3c6]" />
+            <Sparkles className="w-4 h-4 text-[#c026d3] dark:text-[#fb7185]" />
             <span>{t.fourTasksTitle}</span>
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-[#2c3b42] dark:text-[#c4d2d8]">
             <div className="p-2.5 rounded-lg bg-[#f4f6f7] dark:bg-[#202930] border border-[#e2e7ea] dark:border-[#2d3942]">
-              <span className="font-semibold text-[#00738c] dark:text-[#6fb3c6] block mb-1">{t.req1}</span>
+              <span className="font-semibold text-[#c026d3] dark:text-[#fb7185] block mb-1">{t.req1}</span>
               <span className="text-[#5d6b73] dark:text-[#9aa8b0] text-[11px]">
                 {lang === 'fa' ? 'اکسل، رویه دستی، فرمول‌های ساده، فهرست‌های ایستا یا قضاوت کارشناس' : 'Spreadsheets, manual reviews, static rankings, human heuristics'}
               </span>
             </div>
             <div className="p-2.5 rounded-lg bg-[#f4f6f7] dark:bg-[#202930] border border-[#e2e7ea] dark:border-[#2d3942]">
-              <span className="font-semibold text-[#00738c] dark:text-[#6fb3c6] block mb-1">{t.req2}</span>
+              <span className="font-semibold text-[#c026d3] dark:text-[#fb7185] block mb-1">{t.req2}</span>
               <span className="text-[#5d6b73] dark:text-[#9aa8b0] text-[11px]">
                 {lang === 'fa' ? 'آیا یک کوئری ساده SQL یا چند قانون شرطی If-Then نیاز را به حد کفایت برآورده می‌کند؟' : 'Could deterministic logic or heuristics satisfy the baseline requirement?'}
               </span>
@@ -531,7 +531,7 @@ Final Decision Gate Verdict: ${isAiGo ? 'AI GO (Approved for Cognitive Solution)
           <button
             type="button"
             onClick={insertTemplate}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#e3eef1] dark:bg-[#1f5163]/40 text-[#00738c] dark:text-[#6fb3c6] hover:bg-[#d0e5ea] text-xs font-semibold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#fdeee9] dark:bg-[#e0533c]/40 text-[#c026d3] dark:text-[#fb7185] hover:bg-[#d0e5ea] text-xs font-semibold transition-colors"
           >
             <FileText className="w-3.5 h-3.5" />
             <span>{t.templateBtn}</span>
@@ -544,7 +544,7 @@ Final Decision Gate Verdict: ${isAiGo ? 'AI GO (Approved for Cognitive Solution)
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] hover:bg-[#f4f4f1] dark:hover:bg-[#202930] text-xs text-[#1c2830] dark:text-[#e8ebe9] transition-colors"
             title="Recommendation Engine example from workbook"
           >
-            <Film className="w-3.5 h-3.5 text-[#00738c]" />
+            <Film className="w-3.5 h-3.5 text-[#c026d3]" />
             <span className="hidden md:inline">{t.exampleMovieBtn}</span>
             <span className="md:hidden">{lang === 'fa' ? 'پیشنهاد فیلم' : 'Movies'}</span>
           </button>
@@ -580,8 +580,8 @@ Final Decision Gate Verdict: ${isAiGo ? 'AI GO (Approved for Cognitive Solution)
           onClick={() => setShowGoNoGoTool(prev => !prev)}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             showGoNoGoTool
-              ? 'bg-[#1f5163] text-white shadow-xs'
-              : 'border border-[#1f5163] text-[#1f5163] dark:text-[#6fb3c6] hover:bg-[#1f5163]/10'
+              ? 'bg-[#e0533c] text-white shadow-xs'
+              : 'border border-[#e0533c] text-[#e0533c] dark:text-[#fb7185] hover:bg-[#e0533c]/10'
           }`}
         >
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
@@ -591,11 +591,11 @@ Final Decision Gate Verdict: ${isAiGo ? 'AI GO (Approved for Cognitive Solution)
 
       {/* AI Go/No-Go Assessment Tool (Interactive Evaluator) */}
       {showGoNoGoTool && (
-        <div className="p-5 rounded-2xl bg-gradient-to-b from-[#f9fbfa] to-[#eef4f2] dark:from-[#172228] dark:to-[#131b20] border-2 border-[#1f5163]/30 shadow-md space-y-4 animate-fade-in">
+        <div className="p-5 rounded-2xl bg-gradient-to-b from-[#f9fbfa] to-[#eef4f2] dark:from-[#172228] dark:to-[#131b20] border-2 border-[#e0533c]/30 shadow-md space-y-4 animate-fade-in">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <Brain className="w-5 h-5 text-[#00738c] dark:text-[#6fb3c6]" />
+                <Brain className="w-5 h-5 text-[#c026d3] dark:text-[#fb7185]" />
                 <h3 className="font-bold text-sm sm:text-base text-[#1c2830] dark:text-[#e8ebe9]">
                   {t.goNoGoTitle}
                 </h3>
@@ -819,7 +819,7 @@ Final Decision Gate Verdict: ${isAiGo ? 'AI GO (Approved for Cognitive Solution)
               <button
                 type="button"
                 onClick={appendAssessmentToCanvas}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00738c] text-white hover:bg-[#005f73] text-xs font-semibold transition-colors shrink-0"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c026d3] text-white hover:bg-[#005f73] text-xs font-semibold transition-colors shrink-0"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>{t.appendTestToCanvas}</span>
@@ -833,7 +833,7 @@ Final Decision Gate Verdict: ${isAiGo ? 'AI GO (Approved for Cognitive Solution)
       <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] space-y-3 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-[#d9dad5] dark:border-[#2d3942]">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#00738c]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#c026d3]" />
             <h3 className="font-bold text-sm sm:text-base text-[#1c2830] dark:text-[#e8ebe9]">
               {lang === 'fa' ? 'بوم ثبت الزامات شناختی و خط مبنای اکتشافی' : 'Cognitive Requirements & Heuristic Baseline Canvas'}
             </h3>
@@ -876,46 +876,46 @@ Final Decision Gate Verdict: ${isAiGo ? 'AI GO (Approved for Cognitive Solution)
           onChange={(e) => onChangeContent(e.target.value)}
           placeholder={t.canvasPlaceholder}
           rows={14}
-          className="w-full p-4 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#fdfdfc] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] text-xs sm:text-sm leading-relaxed focus:outline-hidden focus:ring-2 focus:ring-[#00738c] focus:border-transparent transition-all font-mono"
+          className="w-full p-4 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#fdfdfc] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] text-xs sm:text-sm leading-relaxed focus:outline-hidden focus:ring-2 focus:ring-[#c026d3] focus:border-transparent transition-all font-mono"
         />
 
         <div className="flex items-center justify-between text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] pt-1">
           <span>{t.pmiCopyright}</span>
-          <span className="font-semibold text-[#00738c] dark:text-[#6fb3c6]">CPMAI Slide 16</span>
+          <span className="font-semibold text-[#c026d3] dark:text-[#fb7185]">CPMAI Slide 16</span>
         </div>
       </div>
 
       {/* CPMAI Methodology Tips Box */}
       <div className="p-4 sm:p-5 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] space-y-2.5">
-        <h3 className="font-semibold text-xs sm:text-sm text-[#1f5163] dark:text-[#6fb3c6]">
+        <h3 className="font-semibold text-xs sm:text-sm text-[#e0533c] dark:text-[#fb7185]">
           {t.tipsTitle}
         </h3>
         <ul className="space-y-1.5 text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
           <li className="flex items-start gap-2">
-            <span className="text-[#00738c] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#c026d3] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip1}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#00738c] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#c026d3] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip2}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#00738c] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#c026d3] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip3}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#00738c] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#c026d3] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip4}</span>
           </li>
         </ul>
       </div>
 
       {/* Navigation Return to Page 5 and Forward to Page 7 */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-xl bg-[#e3eef1] dark:bg-[#1b2c32] border border-[#1f5163]/20">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-xl bg-[#fdeee9] dark:bg-[#341528] border border-[#e0533c]/20">
         <button
           type="button"
           onClick={onGoToPage5}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-white dark:bg-[#172026] text-[#1c2830] dark:text-[#e8ebe9] hover:bg-[#d8e6eb] dark:hover:bg-[#253840] border border-[#1f5163]/20 transition-colors shadow-2xs"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-white dark:bg-[#172026] text-[#1c2830] dark:text-[#e8ebe9] hover:bg-[#d8e6eb] dark:hover:bg-[#253840] border border-[#e0533c]/20 transition-colors shadow-2xs"
         >
           {lang === 'fa' ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
           <span>{lang === 'fa' ? 'صفحه قبل: برآورد ROI (صفحه ۵)' : 'Previous: Expected ROI (Page 5)'}</span>
@@ -925,7 +925,7 @@ Final Decision Gate Verdict: ${isAiGo ? 'AI GO (Approved for Cognitive Solution)
           <button
             type="button"
             onClick={onGoToPage7}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#00738c] hover:bg-[#005f73] text-white transition-colors shadow-xs"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#c026d3] hover:bg-[#005f73] text-white transition-colors shadow-xs"
           >
             <span>{lang === 'fa' ? 'صفحه بعد: چرا راه‌حل هوش مصنوعی؟ (اسلاید ۱۷)' : 'Next: Why is AI Needed? (Slide 17)'}</span>
             {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}

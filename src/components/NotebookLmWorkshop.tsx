@@ -101,7 +101,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
       titleEn: '0. Complete Mastery Guide',
       subtitleFa: 'نقشه ذهنی، ویدیو، نوت‌ها و فارسی‌سازی',
       subtitleEn: 'Mind Map, Video, Notes & Persian',
-      activeClass: 'bg-gradient-to-b from-[#0f4c5c] to-[#0a3642] text-white border-[#07262e] border-b-[#04181d] ring-2 ring-[#0f4c5c]/30',
+      activeClass: 'bg-gradient-to-b from-[#9333ea] to-[#0a3642] text-white border-[#07262e] border-b-[#04181d] ring-2 ring-[#9333ea]/30',
       icon: <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />,
     },
     {
@@ -111,7 +111,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
       titleEn: '1. 7-Department Matrix',
       subtitleFa: 'دفتر فنی، قراردادها، PMO، HSE و HR',
       subtitleEn: 'Tech Office, Contracts, PMO, HSE, HR',
-      activeClass: 'bg-gradient-to-b from-[#00738c] to-[#00596d] text-white border-[#004454] border-b-[#002f3a] ring-2 ring-[#00738c]/30',
+      activeClass: 'bg-gradient-to-b from-[#c026d3] to-[#00596d] text-white border-[#004454] border-b-[#002f3a] ring-2 ring-[#c026d3]/30',
       icon: <Building2 className="w-4 h-4 shrink-0 mt-0.5" />,
     },
     {
@@ -167,7 +167,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
             className={`group flex flex-col justify-between gap-2 p-3 rounded-xl text-right transition-all duration-100 cursor-pointer select-none border border-b-4 active:translate-y-[2px] active:border-b ${
               isSelected
                 ? `${tab.activeClass} shadow-md`
-                : 'bg-gradient-to-b from-white to-[#f6f8f7] dark:from-[#1d262d] dark:to-[#161d23] text-[#1c2830] dark:text-[#e8ebe9] border-black/10 dark:border-white/10 border-b-black/25 dark:border-b-black/60 hover:-translate-y-0.5 hover:border-[#00738c]/40 shadow-xs'
+                : 'bg-gradient-to-b from-white to-[#f6f8f7] dark:from-[#1d262d] dark:to-[#161d23] text-[#1c2830] dark:text-[#e8ebe9] border-black/10 dark:border-white/10 border-b-black/25 dark:border-b-black/60 hover:-translate-y-0.5 hover:border-[#c026d3]/40 shadow-xs'
             }`}
           >
             <div className="flex items-center justify-between gap-2 w-full">
@@ -359,14 +359,14 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
       <div className="space-y-2.5 pt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <span className="text-xs font-extrabold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-            <FileText className="w-4 h-4 text-[#00738c] dark:text-[#6fb3c6]" />
+            <FileText className="w-4 h-4 text-[#c026d3] dark:text-[#fb7185]" />
             <span>
               {lang === 'fa'
                 ? 'بارگذاری تفکیکی دو منبع در NotebookLM (از طریق گزینه Paste Text):'
                 : 'Copy Individual Sources for NotebookLM (Paste Text):'}
             </span>
           </span>
-          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6]">
+          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]">
             {lang === 'fa' ? '۲ منبع مجزا (الزامات پیمان + ضوابط داخلی پیمانکار)' : '2 Separate Sources'}
           </span>
         </div>
@@ -392,7 +392,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all active:scale-[0.96] ${
                     docCopiedId === sub.id
                       ? 'bg-[#2f7d5b] text-white'
-                      : 'bg-[#00738c] hover:bg-[#0f4c5c] text-white'
+                      : 'bg-[#c026d3] hover:bg-[#9333ea] text-white'
                   }`}
                 >
                   {docCopiedId === sub.id ? (
@@ -416,7 +416,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                 </button>
                 <button
                   onClick={() => setPreviewDocId(previewDocId === sub.id ? null : sub.id)}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#00738c]/30 text-[#00738c] dark:text-[#6fb3c6] text-[11px] font-semibold hover:bg-[#00738c]/10 transition-all"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#c026d3]/30 text-[#c026d3] dark:text-[#fb7185] text-[11px] font-semibold hover:bg-[#c026d3]/10 transition-all"
                 >
                   {previewDocId === sub.id ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                   <span>{lang === 'fa' ? (previewDocId === sub.id ? 'بستن متن' : 'مشاهده متن') : 'View'}</span>
@@ -467,7 +467,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
             <div className="space-y-2 max-w-3xl">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="px-3 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6] border border-[#00738c]/20 flex items-center gap-1.5">
+                <span className="px-3 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185] border border-[#c026d3]/20 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5" />
                   Google AI Studio & NotebookLM
                 </span>
@@ -490,7 +490,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                 href={NOTEBOOKLM_OVERVIEW.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-[#00738c] to-[#0f4c5c] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.96] border border-white/20"
+                className="group inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-[#c026d3] to-[#9333ea] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.96] border border-white/20"
               >
                 <span>{lang === 'fa' ? 'ورود به Google NotebookLM' : 'Open NotebookLM'}</span>
                 <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
@@ -508,7 +508,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                 <div className="text-[10px] sm:text-[11px] font-semibold text-[#5d6b73] dark:text-[#9aa8b0]">
                   {lang === 'fa' ? stat.labelFa : stat.labelEn}
                 </div>
-                <div className="text-sm sm:text-base font-black text-[#00738c] dark:text-[#6fb3c6] mt-0.5 tabular-nums">
+                <div className="text-sm sm:text-base font-black text-[#c026d3] dark:text-[#fb7185] mt-0.5 tabular-nums">
                   {stat.value}
                 </div>
               </div>
@@ -516,8 +516,8 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
           </div>
 
           {/* Why Engineers Love It */}
-          <div className="p-4 rounded-2xl bg-[#00738c]/[0.04] dark:bg-[#00738c]/[0.08] border border-[#00738c]/15 space-y-2.5">
-            <div className="flex items-center gap-2 text-[#00738c] dark:text-[#6fb3c6] font-bold text-xs">
+          <div className="p-4 rounded-2xl bg-[#c026d3]/[0.04] dark:bg-[#c026d3]/[0.08] border border-[#c026d3]/15 space-y-2.5">
+            <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185] font-bold text-xs">
               <CheckSquare className="w-4 h-4" />
               <span>{lang === 'fa' ? 'چرا نوت‌بوک ال‌ام بازی را برای مدیران پروژه عوض می‌کند؟' : 'Why NotebookLM is a Game Changer for Mega-Projects:'}</span>
             </div>
@@ -525,7 +525,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
               {(lang === 'fa' ? NOTEBOOKLM_OVERVIEW.whyEngineersLoveItFa : NOTEBOOKLM_OVERVIEW.whyEngineersLoveItEn).map(
                 (item, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#00738c] dark:bg-[#6fb3c6] mt-1.5 shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#c026d3] dark:bg-[#fb7185] mt-1.5 shrink-0" />
                     <span>{item}</span>
                   </div>
                 )
@@ -549,7 +549,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6] border border-[#00738c]/20">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185] border border-[#c026d3]/20">
                       راهنمای صفر تا صد کار با Google NotebookLM
                     </span>
                     <span className="text-[11px] font-semibold text-[#2f7d5b] dark:text-[#52b788]">
@@ -588,7 +588,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                   >
                     → مبحث قبلی
                   </button>
-                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-[#00738c]/15 text-[#00738c] dark:text-[#6fb3c6]">
+                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-[#c026d3]/15 text-[#c026d3] dark:text-[#fb7185]">
                     {activeMasteryIdx + 1} / {NOTEBOOKLM_MASTERY_MODULES.length}
                   </span>
                   <button
@@ -599,7 +599,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                         prev < NOTEBOOKLM_MASTERY_MODULES.length - 1 ? prev + 1 : 0
                       );
                     }}
-                    className="px-2.5 py-1.5 rounded-xl text-xs font-extrabold bg-[#00738c] text-white border border-[#004454] border-b-[3px] border-b-[#002f3a] active:translate-y-[2px] active:border-b cursor-pointer"
+                    className="px-2.5 py-1.5 rounded-xl text-xs font-extrabold bg-[#c026d3] text-white border border-[#004454] border-b-[3px] border-b-[#002f3a] active:translate-y-[2px] active:border-b cursor-pointer"
                   >
                     مبحث بعدی ←
                   </button>
@@ -621,15 +621,15 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                       }}
                       className={`p-3 rounded-xl border border-b-4 text-right transition-all duration-100 cursor-pointer flex items-start gap-2.5 select-none active:translate-y-[2px] active:border-b ${
                         isSelected
-                          ? 'bg-gradient-to-b from-[#00738c] to-[#00596d] text-white border-[#004454] border-b-[#002f3a] shadow-md ring-2 ring-[#00738c]/25'
-                          : 'bg-gradient-to-b from-white to-[#f6f8f7] dark:from-[#1b242b] dark:to-[#141b20] text-[#1c2830] dark:text-[#e8ebe9] border-black/10 dark:border-white/10 border-b-black/25 dark:border-b-black/60 hover:-translate-y-0.5 hover:border-[#00738c]/40 shadow-xs'
+                          ? 'bg-gradient-to-b from-[#c026d3] to-[#00596d] text-white border-[#004454] border-b-[#002f3a] shadow-md ring-2 ring-[#c026d3]/25'
+                          : 'bg-gradient-to-b from-white to-[#f6f8f7] dark:from-[#1b242b] dark:to-[#141b20] text-[#1c2830] dark:text-[#e8ebe9] border-black/10 dark:border-white/10 border-b-black/25 dark:border-b-black/60 hover:-translate-y-0.5 hover:border-[#c026d3]/40 shadow-xs'
                       }`}
                     >
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded border shrink-0 mt-0.5 ${
                           isSelected
                             ? 'bg-white/20 text-white border-white/25'
-                            : 'bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6] border-[#00738c]/20'
+                            : 'bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185] border-[#c026d3]/20'
                         }`}
                       >
                         {item.stepBadge}
@@ -646,9 +646,9 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
               {(() => {
                 const mod = NOTEBOOKLM_MASTERY_MODULES[activeMasteryIdx] || NOTEBOOKLM_MASTERY_MODULES[0];
                 return (
-                  <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#00738c]/[0.07] via-white to-[#2f7d5b]/[0.05] dark:from-[#00738c]/[0.15] dark:via-[#141c22] dark:to-[#2f7d5b]/[0.1] border-2 border-[#00738c]/35 space-y-5">
-                    <div className="flex items-center justify-between gap-2 flex-wrap pb-3 border-b border-[#00738c]/20">
-                      <span className="px-3.5 py-1 rounded-xl bg-[#00738c] text-white text-xs sm:text-sm font-black">
+                  <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#c026d3]/[0.07] via-white to-[#2f7d5b]/[0.05] dark:from-[#c026d3]/[0.15] dark:via-[#141c22] dark:to-[#2f7d5b]/[0.1] border-2 border-[#c026d3]/35 space-y-5">
+                    <div className="flex items-center justify-between gap-2 flex-wrap pb-3 border-b border-[#c026d3]/20">
+                      <span className="px-3.5 py-1 rounded-xl bg-[#c026d3] text-white text-xs sm:text-sm font-black">
                         {mod.stepBadge} — {mod.categoryFa}
                       </span>
                       <span dir="ltr" className="text-xs sm:text-sm font-mono font-bold text-[#334155] dark:text-[#cbd5e1]">
@@ -675,14 +675,14 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                         return (
                           <div
                             key={idx}
-                            className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#11171d] border border-[#00738c]/25 shadow-2xs space-y-2.5 flex flex-col justify-between"
+                            className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#11171d] border border-[#c026d3]/25 shadow-2xs space-y-2.5 flex flex-col justify-between"
                           >
                             <div className="space-y-2">
                               <div className="flex items-center gap-2.5">
-                                <span className="w-7 h-7 rounded-lg bg-[#00738c] text-white font-mono text-xs font-black flex items-center justify-center shrink-0">
+                                <span className="w-7 h-7 rounded-lg bg-[#c026d3] text-white font-mono text-xs font-black flex items-center justify-center shrink-0">
                                   {idx + 1}
                                 </span>
-                                <span className="text-sm sm:text-base font-black text-[#00738c] dark:text-[#6fb3c6] leading-snug">
+                                <span className="text-sm sm:text-base font-black text-[#c026d3] dark:text-[#fb7185] leading-snug">
                                   {heading || `گام اجرایی ${idx + 1}`}
                                 </span>
                               </div>
@@ -708,13 +708,13 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                     {mod.copyablePromptFa && (
                       <div className="p-4 sm:p-5 rounded-2xl bg-[#11161c] text-[#f1f5f9] space-y-2.5 border border-white/15">
                         <div className="flex items-center justify-between gap-2 flex-wrap">
-                          <span className="text-xs sm:text-sm font-black text-[#6fb3c6]">
+                          <span className="text-xs sm:text-sm font-black text-[#fb7185]">
                             {mod.copyablePromptTitleFa || 'پرامپت آماده کپی:'}
                           </span>
                           <button
                             type="button"
                             onClick={() => copyToClipboard(mod.copyablePromptFa!, `mastery_prompt_${mod.id}`)}
-                            className="px-3.5 py-1.5 rounded-xl bg-[#00738c] hover:bg-[#0f4c5c] text-white text-xs font-black flex items-center gap-1.5 cursor-pointer"
+                            className="px-3.5 py-1.5 rounded-xl bg-[#c026d3] hover:bg-[#9333ea] text-white text-xs font-black flex items-center gap-1.5 cursor-pointer"
                           >
                             {copiedId === `mastery_prompt_${mod.id}` ? (
                               <>
@@ -745,7 +745,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <Sliders className="w-5 h-5 text-[#00738c] dark:text-[#6fb3c6]" />
+                  <Sliders className="w-5 h-5 text-[#c026d3] dark:text-[#fb7185]" />
                   <h3 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9]">
                     {lang === 'fa'
                       ? 'جعبه ابزار پنل Studio در NotebookLM: آموزش ۶ خروجی جادویی + پرامپت‌های Customize'
@@ -784,8 +784,8 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                     }}
                     className={`p-3.5 rounded-2xl border border-b-4 text-right transition-all duration-100 cursor-pointer flex flex-col justify-between gap-2 select-none active:translate-y-[2px] active:border-b ${
                       isSelected
-                        ? 'bg-gradient-to-b from-[#0f4c5c] to-[#0a3642] text-white border-[#07262e] border-b-[#04181d] shadow-md ring-2 ring-[#0f4c5c]/25'
-                        : 'bg-gradient-to-b from-white to-[#f6f8f7] dark:from-[#1b242b] dark:to-[#141b20] text-[#1c2830] dark:text-[#e8ebe9] border-black/10 dark:border-white/10 border-b-black/25 dark:border-b-black/60 hover:-translate-y-0.5 hover:border-[#00738c]/40 shadow-xs'
+                        ? 'bg-gradient-to-b from-[#9333ea] to-[#0a3642] text-white border-[#07262e] border-b-[#04181d] shadow-md ring-2 ring-[#9333ea]/25'
+                        : 'bg-gradient-to-b from-white to-[#f6f8f7] dark:from-[#1b242b] dark:to-[#141b20] text-[#1c2830] dark:text-[#e8ebe9] border-black/10 dark:border-white/10 border-b-black/25 dark:border-b-black/60 hover:-translate-y-0.5 hover:border-[#c026d3]/40 shadow-xs'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2 w-full">
@@ -793,7 +793,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                         className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                           isSelected
                             ? 'bg-white/20 text-white'
-                            : 'bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6]'
+                            : 'bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]'
                         }`}
                       >
                         {tool.badgeFa}
@@ -813,7 +813,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
               const activeTool =
                 NOTEBOOKLM_STUDIO_TOOLS.find((t) => t.id === activeStudioToolId) || NOTEBOOKLM_STUDIO_TOOLS[0];
               return (
-                <div className="p-5 rounded-2xl bg-[#f8f9fa] dark:bg-[#12171b] border border-[#00738c]/25 space-y-4">
+                <div className="p-5 rounded-2xl bg-[#f8f9fa] dark:bg-[#12171b] border border-[#c026d3]/25 space-y-4">
                   <div className="space-y-1">
                     <h4 className="text-sm sm:text-base font-black text-[#1c2830] dark:text-[#e8ebe9]">
                       {activeTool.nameFa}
@@ -825,13 +825,13 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div className="p-4 rounded-xl bg-white dark:bg-[#161e24] border border-black/[0.06] dark:border-white/[0.08] space-y-2">
-                      <div className="text-xs font-extrabold text-[#00738c] dark:text-[#6fb3c6]">
+                      <div className="text-xs font-extrabold text-[#c026d3] dark:text-[#fb7185]">
                         🛠️ راهنمای گام‌به‌گام اجرا در NotebookLM:
                       </div>
                       <ul className="space-y-2 text-xs text-[#2c3840] dark:text-[#d1d7db] leading-relaxed">
                         {activeTool.howToUseFa.map((step, sIdx) => (
                           <li key={sIdx} className="flex items-start gap-2">
-                            <span className="font-bold text-[#00738c] dark:text-[#6fb3c6]">{sIdx + 1}.</span>
+                            <span className="font-bold text-[#c026d3] dark:text-[#fb7185]">{sIdx + 1}.</span>
                             <span>{step}</span>
                           </li>
                         ))}
@@ -841,7 +841,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                     <div className="p-4 rounded-xl bg-[#1e1e1e] text-[#d4d4d4] flex flex-col justify-between space-y-3">
                       <div className="space-y-2">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-xs font-bold text-[#6fb3c6]">
+                          <span className="text-xs font-bold text-[#fb7185]">
                             پرامپت سفارشی‌سازی فارسی (Customize / Chat Prompt):
                           </span>
                           <button
@@ -849,7 +849,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                             onClick={() =>
                               copyToClipboard(activeTool.customizePromptFa, `studio_tool_${activeTool.id}`)
                             }
-                            className="px-3 py-1 rounded-lg bg-[#00738c] hover:bg-[#0f4c5c] text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                            className="px-3 py-1 rounded-lg bg-[#c026d3] hover:bg-[#9333ea] text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
                           >
                             {copiedId === `studio_tool_${activeTool.id}` ? (
                               <>
@@ -896,7 +896,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                   }}
                   className={`p-3 rounded-2xl border text-right sm:text-center transition-all duration-150 active:scale-[0.96] flex flex-col items-center gap-2 justify-center ${
                     isSelected
-                      ? 'bg-white dark:bg-[#1a232a] border-[#00738c] dark:border-[#6fb3c6] shadow-md ring-2 ring-[#00738c]/20'
+                      ? 'bg-white dark:bg-[#1a232a] border-[#c026d3] dark:border-[#fb7185] shadow-md ring-2 ring-[#c026d3]/20'
                       : 'bg-white/60 dark:bg-[#151c22]/60 border-black/[0.05] dark:border-white/[0.06] hover:bg-white dark:hover:bg-[#1a232a]'
                   }`}
                 >
@@ -941,7 +941,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                       {lang === 'fa' ? selectedDepartment.departmentFa : selectedDepartment.departmentEn}
                     </h3>
                     <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] flex items-center gap-1.5 mt-0.5">
-                      <span className="font-semibold text-[#00738c] dark:text-[#6fb3c6]">
+                      <span className="font-semibold text-[#c026d3] dark:text-[#fb7185]">
                         {lang === 'fa' ? selectedDepartment.managerRoleFa : selectedDepartment.managerRoleEn}
                       </span>
                     </p>
@@ -961,11 +961,11 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                 {/* Recommended Sources to Upload */}
                 <div className="p-4 rounded-2xl bg-[#f8f9fa] dark:bg-[#12171b] border border-black/[0.05] dark:border-white/[0.06] space-y-3">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-[#00738c] dark:text-[#6fb3c6] font-bold text-xs">
+                    <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185] font-bold text-xs">
                       <Download className="w-4 h-4 shrink-0" />
                       <span>{lang === 'fa' ? 'مدارک و منابع پیشنهادی جهت بارگذاری:' : 'Recommended Sources to Upload:'}</span>
                     </div>
-                    <span dir="ltr" className="text-[10px] px-2 py-0.5 rounded font-mono bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6]">
+                    <span dir="ltr" className="text-[10px] px-2 py-0.5 rounded font-mono bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]">
                       PDF / MD / Sheets
                     </span>
                   </div>
@@ -976,7 +976,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                       : selectedDepartment.recommendedSourcesEn
                     ).map((source, sIdx) => (
                       <li key={sIdx} className="flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#00738c] dark:bg-[#6fb3c6] mt-1.5 shrink-0" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#c026d3] dark:bg-[#fb7185] mt-1.5 shrink-0" />
                         <span className="leading-relaxed">{source}</span>
                       </li>
                     ))}
@@ -1005,18 +1005,18 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
 
               {/* DEDICATED FULL-WIDTH SAMPLE SPECIMEN CARD FOR TESTING (Zero-Collision RTL Layout) */}
               {currentSampleDoc && (
-                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#00738c]/[0.04] to-[#2f7d5b]/[0.03] dark:from-[#00738c]/[0.08] dark:to-[#2f7d5b]/[0.05] border border-[#00738c]/25 space-y-3.5 shadow-2xs">
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#c026d3]/[0.04] to-[#2f7d5b]/[0.03] dark:from-[#c026d3]/[0.08] dark:to-[#2f7d5b]/[0.05] border border-[#c026d3]/25 space-y-3.5 shadow-2xs">
                   {/* Card Top Bar */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-start sm:items-center gap-2.5 min-w-0">
-                      <div className="p-2 rounded-xl bg-[#00738c]/15 text-[#00738c] dark:text-[#6fb3c6] shrink-0 mt-0.5 sm:mt-0">
+                      <div className="p-2 rounded-xl bg-[#c026d3]/15 text-[#c026d3] dark:text-[#fb7185] shrink-0 mt-0.5 sm:mt-0">
                         <FileCode className="w-5 h-5" />
                       </div>
                       <div className="min-w-0 space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span
                             dir="ltr"
-                            className="font-mono font-bold text-xs px-2.5 py-1 rounded-lg bg-white dark:bg-[#12171b] border border-black/[0.08] dark:border-white/[0.1] text-[#00738c] dark:text-[#6fb3c6]"
+                            className="font-mono font-bold text-xs px-2.5 py-1 rounded-lg bg-white dark:bg-[#12171b] border border-black/[0.08] dark:border-white/[0.1] text-[#c026d3] dark:text-[#fb7185]"
                           >
                             {currentSampleDoc.fileName}
                           </span>
@@ -1049,7 +1049,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
                         onClick={() => handleDownloadSpecimen(currentSampleDoc)}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#00738c] hover:bg-[#0f4c5c] text-white text-xs font-bold shadow-xs active:scale-[0.96] transition-all"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#c026d3] hover:bg-[#9333ea] text-white text-xs font-bold shadow-xs active:scale-[0.96] transition-all"
                       >
                         <Download className="w-3.5 h-3.5" />
                         <span>{lang === 'fa' ? 'دانلود فایل نمونه (.md)' : 'Download .md File'}</span>
@@ -1080,7 +1080,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                         onClick={() =>
                           setPreviewDocId(previewDocId === currentSampleDoc.id ? null : currentSampleDoc.id)
                         }
-                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-[#1a232a] border border-[#00738c]/30 text-[#00738c] dark:text-[#6fb3c6] text-xs font-bold hover:bg-[#00738c]/10 active:scale-[0.96] transition-all"
+                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-[#1a232a] border border-[#c026d3]/30 text-[#c026d3] dark:text-[#fb7185] text-xs font-bold hover:bg-[#c026d3]/10 active:scale-[0.96] transition-all"
                       >
                         {previewDocId === currentSampleDoc.id ? (
                           <>
@@ -1110,7 +1110,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                   {previewDocId === currentSampleDoc.id && (
                     <div className="p-4 rounded-xl bg-white dark:bg-[#12171b] border border-black/[0.08] dark:border-white/[0.1] max-h-80 overflow-y-auto space-y-2 mt-3 shadow-inner">
                       <div className="flex items-center justify-between pb-2 border-b border-black/[0.05] dark:border-white/[0.06] text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-                        <span dir="ltr" className="font-mono font-bold text-[#00738c] dark:text-[#6fb3c6]">
+                        <span dir="ltr" className="font-mono font-bold text-[#c026d3] dark:text-[#fb7185]">
                           {currentSampleDoc.fileName} (Markdown Specimen)
                         </span>
                         <span dir="ltr" className="font-mono text-[11px]">
@@ -1132,9 +1132,9 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
               )}
 
               {/* Ready-to-Copy Prompt for this Department */}
-              <div className="p-4 rounded-2xl bg-[#00738c]/[0.03] dark:bg-[#00738c]/[0.06] border border-[#00738c]/20 space-y-3">
+              <div className="p-4 rounded-2xl bg-[#c026d3]/[0.03] dark:bg-[#c026d3]/[0.06] border border-[#c026d3]/20 space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[#00738c] dark:text-[#6fb3c6] font-bold text-xs">
+                  <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185] font-bold text-xs">
                     <Sparkles className="w-4 h-4" />
                     <span>
                       {lang === 'fa'
@@ -1163,7 +1163,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                         lang === 'fa' ? selectedDepartment.samplePromptFa : selectedDepartment.samplePromptEn
                       )
                     }
-                    className="flex items-center gap-1.5 text-xs font-bold text-[#00738c] dark:text-[#6fb3c6] hover:underline"
+                    className="flex items-center gap-1.5 text-xs font-bold text-[#c026d3] dark:text-[#fb7185] hover:underline"
                   >
                     <Play className="w-3.5 h-3.5" />
                     <span>{lang === 'fa' ? 'تست در کارگاه پرامپت (Sandbox)' : 'Load to Sandbox'}</span>
@@ -1179,7 +1179,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                     className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-150 active:scale-[0.96] shadow-xs ${
                       copiedId === `dept_prompt_${selectedDepartment.id}`
                         ? 'bg-[#2f7d5b] text-white'
-                        : 'bg-[#00738c] hover:bg-[#0f4c5c] text-white'
+                        : 'bg-[#c026d3] hover:bg-[#9333ea] text-white'
                     }`}
                   >
                     {copiedId === `dept_prompt_${selectedDepartment.id}` ? (
@@ -1306,7 +1306,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
 
                 {/* DEDICATED SPECIMEN CARD FOR BLUEPRINT */}
                 {currentBlueprintSampleDoc && (
-                  <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#b87333]/[0.05] to-[#00738c]/[0.03] dark:from-[#b87333]/[0.08] dark:to-[#00738c]/[0.05] border border-[#b87333]/25 space-y-3.5 shadow-2xs">
+                  <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#b87333]/[0.05] to-[#c026d3]/[0.03] dark:from-[#b87333]/[0.08] dark:to-[#c026d3]/[0.05] border border-[#b87333]/25 space-y-3.5 shadow-2xs">
                     {/* Top Bar */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="flex items-start sm:items-center gap-2.5 min-w-0">
@@ -1581,7 +1581,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                     <span className="px-2.5 py-1 rounded-lg text-xs font-black bg-[#2f7d5b] text-white">
                       تمرین شماره {selectedExercise.exerciseNumber}
                     </span>
-                    <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6]">
+                    <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]">
                       {lang === 'fa' ? selectedExercise.targetDepartmentFa : selectedExercise.targetDepartmentEn}
                     </span>
                     <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400">
@@ -1599,7 +1599,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                     href="https://notebooklm.google.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#00738c]/10 hover:bg-[#00738c]/20 text-[#00738c] dark:text-[#6fb3c6] text-xs font-bold transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#c026d3]/10 hover:bg-[#c026d3]/20 text-[#c026d3] dark:text-[#fb7185] text-xs font-bold transition-colors"
                   >
                     <span>اجرای تمرین در NotebookLM</span>
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -1633,7 +1633,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
 
                 {/* SOURCE DOCUMENT SPECIMEN CARD FOR THE EXERCISE */}
                 {currentExerciseSampleDoc && (
-                  <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#2f7d5b]/[0.05] to-[#00738c]/[0.03] dark:from-[#2f7d5b]/[0.08] dark:to-[#00738c]/[0.05] border border-[#2f7d5b]/25 space-y-3.5 shadow-2xs">
+                  <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#2f7d5b]/[0.05] to-[#c026d3]/[0.03] dark:from-[#2f7d5b]/[0.08] dark:to-[#c026d3]/[0.05] border border-[#2f7d5b]/25 space-y-3.5 shadow-2xs">
                     {/* Card Top Bar */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="flex items-start sm:items-center gap-2.5 min-w-0">
@@ -1771,7 +1771,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
 
                 <div className="space-y-2">
                   <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-                    <CheckSquare className="w-4 h-4 text-[#00738c]" />
+                    <CheckSquare className="w-4 h-4 text-[#c026d3]" />
                     <span>{lang === 'fa' ? 'مراحل گام‌به‌گام انجام تمرین:' : 'Step-by-Step Instructions:'}</span>
                   </span>
                   <div className="space-y-2">
@@ -1781,7 +1781,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                           key={iIdx}
                           className="p-3 rounded-xl bg-[#f8f9fa] dark:bg-[#12171b] border border-black/[0.04] dark:border-white/[0.06] text-xs text-[#5d6b73] dark:text-[#9aa8b0] flex items-start gap-2.5"
                         >
-                          <span className="w-5 h-5 rounded-lg bg-[#00738c]/15 text-[#00738c] dark:text-[#6fb3c6] font-bold text-[11px] flex items-center justify-center shrink-0">
+                          <span className="w-5 h-5 rounded-lg bg-[#c026d3]/15 text-[#c026d3] dark:text-[#fb7185] font-bold text-[11px] flex items-center justify-center shrink-0">
                             {iIdx + 1}
                           </span>
                           <span className="leading-relaxed">{inst}</span>
@@ -1856,9 +1856,9 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
 
               {/* Multi-Scenario Workshop Section (e.g., Exercise 5 HR 4 Practice Scenarios) */}
               {selectedExercise.subScenarios && selectedExercise.subScenarios.length > 0 && (
-                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#00738c]/[0.05] to-[#2f7d5b]/[0.05] dark:from-[#00738c]/[0.1] dark:to-[#2f7d5b]/[0.08] border border-[#00738c]/25 space-y-4">
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#c026d3]/[0.05] to-[#2f7d5b]/[0.05] dark:from-[#c026d3]/[0.1] dark:to-[#2f7d5b]/[0.08] border border-[#c026d3]/25 space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
-                    <div className="flex items-center gap-2 text-[#00738c] dark:text-[#6fb3c6] font-extrabold text-xs sm:text-sm">
+                    <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185] font-extrabold text-xs sm:text-sm">
                       <Users className="w-4 h-4 shrink-0" />
                       <span>
                         {lang === 'fa'
@@ -1881,13 +1881,13 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                           onClick={() => setActiveScenarioIdx(idx)}
                           className={`p-3 rounded-xl border text-right transition-all active:scale-[0.97] flex flex-col justify-between gap-1.5 ${
                             isActive
-                              ? 'bg-[#00738c] text-white border-[#00738c] shadow-sm'
-                              : 'bg-white dark:bg-[#141b20] text-[#1c2830] dark:text-[#e8ebe9] border-black/[0.06] dark:border-white/[0.08] hover:border-[#00738c]/40'
+                              ? 'bg-[#c026d3] text-white border-[#c026d3] shadow-sm'
+                              : 'bg-white dark:bg-[#141b20] text-[#1c2830] dark:text-[#e8ebe9] border-black/[0.06] dark:border-white/[0.08] hover:border-[#c026d3]/40'
                           }`}
                         >
                           <span
                             className={`text-[10px] font-black px-2 py-0.5 rounded self-start ${
-                              isActive ? 'bg-white/20 text-white' : 'bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6]'
+                              isActive ? 'bg-white/20 text-white' : 'bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]'
                             }`}
                           >
                             {lang === 'fa' ? `سناریوی ${scen.number}` : `Scenario ${scen.number}`}
@@ -1915,7 +1915,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                               onClick={() =>
                                 onLoadToSandbox(lang === 'fa' ? activeScen.promptFa : activeScen.promptEn)
                               }
-                              className="flex items-center gap-1 text-[11px] font-bold text-[#00738c] dark:text-[#6fb3c6] hover:underline"
+                              className="flex items-center gap-1 text-[11px] font-bold text-[#c026d3] dark:text-[#fb7185] hover:underline"
                             >
                               <Play className="w-3.5 h-3.5" />
                               <span>{lang === 'fa' ? 'تست در کارگاه پرامپت' : 'Load to Sandbox'}</span>
@@ -1930,7 +1930,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
                                 copiedId === `scen_prompt_${activeScen.id}`
                                   ? 'bg-[#2f7d5b] text-white'
-                                  : 'bg-[#00738c] hover:bg-[#0f4c5c] text-white'
+                                  : 'bg-[#c026d3] hover:bg-[#9333ea] text-white'
                               }`}
                             >
                               {copiedId === `scen_prompt_${activeScen.id}` ? (
@@ -2081,10 +2081,10 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
       {/* ===================================================================== */}
       {/* BOTTOM SUB-TAB MECHANICAL KEYCAP DECK FOR NOTEBOOKLM WORKSHOP         */}
       {/* ===================================================================== */}
-      <div className="p-4 rounded-2xl bg-gradient-to-b from-white to-[#f4f6f5] dark:from-[#161e24] dark:to-[#11171b] border border-[#00738c]/25 space-y-3 shadow-xs">
+      <div className="p-4 rounded-2xl bg-gradient-to-b from-white to-[#f4f6f5] dark:from-[#161e24] dark:to-[#11171b] border border-[#c026d3]/25 space-y-3 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#00738c] animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-[#c026d3] animate-pulse" />
             <span className="text-xs font-black text-[#1c2830] dark:text-[#e8ebe9]">
               {lang === 'fa'
                 ? 'پنل پایین کارگاه NotebookLM: جابه‌جایی سریع بین ۵ بخش این کارگاه (بدون اسکرول به بالا):'
@@ -2097,7 +2097,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
               playTactileSound('switch');
               subTabNavRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }}
-            className="self-start sm:self-auto px-3 py-1 rounded-xl text-[11px] font-extrabold bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6] border border-[#00738c]/25 border-b-[3px] border-b-[#00738c]/40 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
+            className="self-start sm:self-auto px-3 py-1 rounded-xl text-[11px] font-extrabold bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185] border border-[#c026d3]/25 border-b-[3px] border-b-[#c026d3]/40 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
           >
             {lang === 'fa' ? '↑ پرش به بالای کارگاه NotebookLM' : '↑ Top of NotebookLM'}
           </button>

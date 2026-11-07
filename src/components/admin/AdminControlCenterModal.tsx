@@ -766,7 +766,7 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
                             </td>
                             <td className="py-3 px-4">
                               <div className="space-y-0.5">
-                                <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6]">
+                                <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#e0533c]/10 text-[#e0533c] dark:text-[#fb7185]">
                                   {user.disciplineId ? (DISCIPLINE_REGISTRY[user.disciplineId as keyof typeof DISCIPLINE_REGISTRY]?.shortTitleFa || user.disciplineId) : 'حفاری TBM'}
                                 </span>
                                 <span className="block text-[10px] text-gray-400 font-mono">

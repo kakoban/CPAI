@@ -113,7 +113,7 @@ export const VideoBackground: React.FC<VideoBackgroundProps> = ({ config }) => {
       vx: (Math.random() - 0.5) * 1.2,
       vy: (Math.random() - 0.5) * 1.2,
       size: Math.random() * 2.5 + 1.5,
-      color: Math.random() > 0.4 ? '#2563EB' : '#60A5FA'
+      color: Math.random() > 0.4 ? '#e0533c' : '#fb7185'
     }));
 
     const render = () => {
@@ -210,7 +210,7 @@ export const VideoBackground: React.FC<VideoBackgroundProps> = ({ config }) => {
         ctx.fillStyle = 'rgba(231, 234, 239, 0.15)'; // fades into site bg
         ctx.fillRect(0, 0, width, height);
 
-        ctx.fillStyle = '#2563EB';
+        ctx.fillStyle = '#e0533c';
         ctx.font = `${fontSize}px monospace`;
 
         for (let i = 0; i < drops.length; i++) {

@@ -135,12 +135,15 @@ export default function App() {
       const saved = localStorage.getItem('cpmai_sidebar_open');
       if (saved !== null) return saved === 'true';
     } catch {}
-    return true; // Default open on desktop
+    return typeof window !== 'undefined' ? window.innerWidth >= 1440 : false;
   });
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => {
       const nextVal = !prev;
+      if (nextVal && typeof window !== 'undefined' && window.innerWidth < 1440) {
+        setIsTutorOpen(false);
+      }
       try {
         localStorage.setItem('cpmai_sidebar_open', nextVal.toString());
       } catch {}
@@ -160,6 +163,9 @@ export default function App() {
   const toggleTutor = () => {
     setIsTutorOpen((prev) => {
       const nextVal = !prev;
+      if (nextVal && typeof window !== 'undefined' && window.innerWidth < 1440) {
+        setIsSidebarOpen(false);
+      }
       try {
         localStorage.setItem('cpmai_tutor_sidebar_open', nextVal.toString());
       } catch {}
@@ -933,7 +939,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-transparent text-[#1c2830] dark:text-[#e8ebe9] transition-colors flex flex-col selection:bg-[#1f5163]/20 selection:text-[#1f5163] dark:selection:bg-[#6fb3c6]/20 dark:selection:text-[#6fb3c6]">
+    <div className="min-h-[100dvh] bg-transparent text-[#1c2830] dark:text-[#e8ebe9] transition-colors flex flex-col selection:bg-[#e0533c]/20 selection:text-[#e0533c] dark:selection:bg-[#fb7185]/20 dark:selection:text-[#fb7185]">
       {/* OWJ Content Protection Shield (Anti-Copy, Anti-Print, Anti-Snipping with Smart Prompt Whitelist) */}
       <ContentProtectionShield lang={lang} isAdmin={isUserAdmin(currentUser)} />
 
@@ -948,8 +954,8 @@ export default function App() {
               onClick={toggleSidebar}
               className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all cursor-pointer shrink-0 shadow-2xs ${
                 isSidebarOpen
-                  ? 'border-[#1f5163]/30 bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6]'
-                  : 'border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.05] hover:bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6]'
+                  ? 'border-[#e0533c]/30 bg-[#e0533c]/10 text-[#e0533c] dark:text-[#fb7185]'
+                  : 'border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.05] hover:bg-[#e0533c]/10 text-[#e0533c] dark:text-[#fb7185]'
               }`}
               title={lang === 'fa' ? 'نمایش / پنهان‌سازی سایدبار سرفصل‌ها' : 'Toggle Curriculum Sidebar'}
             >
@@ -1071,7 +1077,7 @@ export default function App() {
             ) : (
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-gradient-to-r from-[#1f5163] to-[#00738c] hover:from-[#163c4a] hover:to-[#0f4c5c] text-white shadow-xs transition-all active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-gradient-to-r from-[#e0533c] to-[#c026d3] hover:from-[#c2410c] hover:to-[#9333ea] text-white shadow-xs transition-all active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
               >
                 <span>{lang === 'fa' ? 'ورود' : 'Sign In'}</span>
               </button>
@@ -1080,7 +1086,7 @@ export default function App() {
             {/* Language Switch */}
             <button
               onClick={() => setLang((prev) => (prev === 'fa' ? 'en' : 'fa'))}
-              className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#1f5163] transition-colors shrink-0 whitespace-nowrap"
+              className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#e0533c] transition-colors shrink-0 whitespace-nowrap"
             >
               <Globe className="w-3.5 h-3.5 shrink-0" />
               <span>{lang === 'fa' ? 'EN' : 'فا'}</span>
@@ -1157,6 +1163,7 @@ export default function App() {
             }}
             industryTrack={industryTrack}
             disciplineId={activeDiscipline}
+            isAdmin={isUserAdmin(currentUser)}
           />
         )}
 

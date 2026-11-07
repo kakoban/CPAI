@@ -159,12 +159,12 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
       {/* Phase Title Header */}
       <div className="border-b border-[#d9dad5] dark:border-[#2d3942] pb-6">
         <div className="flex items-center gap-3 mb-2">
-          <span className="w-1.5 h-7 rounded-xs bg-[#1f5163] dark:bg-[#6fb3c6]" />
+          <span className="w-1.5 h-7 rounded-xs bg-[#e0533c] dark:bg-[#fb7185]" />
           <h2 className="text-2xl sm:text-3xl font-semibold text-[#1c2830] dark:text-[#e8ebe9] font-serif-heading">
             {content.title}
           </h2>
         </div>
-        <p className="text-xs sm:text-sm font-medium text-[#1f5163] dark:text-[#6fb3c6] mb-1">
+        <p className="text-xs sm:text-sm font-medium text-[#e0533c] dark:text-[#fb7185] mb-1">
           {content.taskGroup}
         </p>
         <p className="text-sm text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
@@ -196,7 +196,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
             type="checkbox"
             checked={readChecked}
             onChange={(e) => onToggleRead(e.target.checked)}
-            className="w-5 h-5 rounded border-[#d9dad5] dark:border-[#2d3942] text-[#1f5163] focus:ring-[#2a6f97]"
+            className="w-5 h-5 rounded border-[#d9dad5] dark:border-[#2d3942] text-[#e0533c] focus:ring-[#2a6f97]"
           />
           <span className="text-sm font-medium text-[#1c2830] dark:text-[#e8ebe9]">
             {t.readCheckbox}
@@ -215,7 +215,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Description Box */}
-          <div className="p-4 sm:p-5 rounded-lg bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] border-t-3 border-t-[#1f5163] dark:border-t-[#6fb3c6]">
+          <div className="p-4 sm:p-5 rounded-lg bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] border-t-3 border-t-[#e0533c] dark:border-t-[#fb7185]">
             <h4 className="font-semibold text-sm text-[#1c2830] dark:text-[#e8ebe9] mb-3">
               {lang === 'fa' ? 'شرح وظایف کلیدی' : 'Key Responsibilities'}
             </h4>
@@ -227,14 +227,14 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
           </div>
 
           {/* Artifacts Box */}
-          <div className="p-4 sm:p-5 rounded-lg bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] border-t-3 border-t-[#1f5163] dark:border-t-[#6fb3c6]">
+          <div className="p-4 sm:p-5 rounded-lg bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] border-t-3 border-t-[#e0533c] dark:border-t-[#fb7185]">
             <h4 className="font-semibold text-sm text-[#1c2830] dark:text-[#e8ebe9] mb-3">
               {content.artifactsHeading}
             </h4>
             <div className="space-y-3">
               {content.artifacts.map((art, idx) => (
                 <div key={idx} className="text-xs sm:text-sm">
-                  <span className="font-semibold text-[#1f5163] dark:text-[#6fb3c6]">
+                  <span className="font-semibold text-[#e0533c] dark:text-[#fb7185]">
                     {art.chip}:{' '}
                   </span>
                   <span className="text-[#1c2830] dark:text-[#e8ebe9] font-medium">
@@ -265,7 +265,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
           {/* Example Toggle Button */}
           <button
             onClick={onToggleExample}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1f5163] dark:text-[#6fb3c6] hover:border-[#1f5163] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#e0533c] dark:text-[#fb7185] hover:border-[#e0533c] transition-colors"
           >
             <Lightbulb className="w-3.5 h-3.5" />
             <span>{showExample ? t.exHide : t.exShow}</span>
@@ -274,8 +274,8 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
 
         {/* Guided Example Callout */}
         {showExample && (
-          <div className="mb-6 p-4 rounded-lg bg-[#e3eef1] dark:bg-[#1b2c32] border border-[#1f5163]/20 dark:border-[#6fb3c6]/20 text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
-            <div className="flex items-center gap-2 mb-2 font-semibold text-[#1f5163] dark:text-[#6fb3c6]">
+          <div className="mb-6 p-4 rounded-lg bg-[#fdeee9] dark:bg-[#341528] border border-[#e0533c]/20 dark:border-[#fb7185]/20 text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+            <div className="flex items-center gap-2 mb-2 font-semibold text-[#e0533c] dark:text-[#fb7185]">
               <Lightbulb className="w-4 h-4" />
               <span>{content.example.title}</span>
             </div>
@@ -302,7 +302,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                     onClick={() => setP1(prev => ({ ...prev, activeSubPage: 1 }))}
                     className={`px-3.5 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors ${
                       p1.activeSubPage !== 2
-                        ? 'bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e] font-semibold'
+                        ? 'bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] font-semibold'
                         : 'bg-[#f4f4f1] dark:bg-[#12171b] text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
                     }`}
                   >
@@ -343,7 +343,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                       value={p1.userStory}
                       onChange={(e) => setP1(prev => ({ ...prev, userStory: e.target.value }))}
                       placeholder={lang === 'fa' ? 'به‌عنوان مدیر ارتباط با مشتری، می‌خواهم...' : 'As a Retention Manager, I want...'}
-                      className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#1f5163]"
+                      className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#e0533c]"
                     />
                   </div>
 
@@ -360,7 +360,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                       rows={3}
                       value={p1.background}
                       onChange={(e) => setP1(prev => ({ ...prev, background: e.target.value }))}
-                      className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#1f5163]"
+                      className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#e0533c]"
                     />
                   </div>
 
@@ -377,7 +377,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                       type="text"
                       value={p1.primaryObjective}
                       onChange={(e) => setP1(prev => ({ ...prev, primaryObjective: e.target.value }))}
-                      className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#1f5163]"
+                      className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#e0533c]"
                     />
                   </div>
 
@@ -458,7 +458,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                             setNewQuestionInput('');
                           }
                         }}
-                        className="px-4 py-2 text-xs font-medium rounded-lg bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e] hover:opacity-90"
+                        className="px-4 py-2 text-xs font-medium rounded-lg bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] hover:opacity-90"
                       >
                         {t.addBtn}
                       </button>
@@ -467,7 +467,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                     <ul className="space-y-2">
                       {p1.relatedQuestions.map((q, idx) => (
                         <li key={idx} className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] text-xs sm:text-sm">
-                          <span className="font-semibold text-[#1f5163] dark:text-[#6fb3c6] shrink-0">
+                          <span className="font-semibold text-[#e0533c] dark:text-[#fb7185] shrink-0">
                             {idx + 1}.
                           </span>
                           <span className="flex-1 text-[#1c2830] dark:text-[#e8ebe9]">{q}</span>
@@ -504,7 +504,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                 /* SUB-PAGE 2: What problem are you solving with AI in this iteration? */
                 <div className="space-y-6">
                   {/* Slide Container (matching the user's uploaded slide photo) */}
-                  <div className="rounded-xl border border-[#0a7b97]/40 dark:border-[#6fb3c6]/40 overflow-hidden shadow-xs bg-[#f0f4fb] dark:bg-[#15202a] relative">
+                  <div className="rounded-xl border border-[#0a7b97]/40 dark:border-[#fb7185]/40 overflow-hidden shadow-xs bg-[#f0f4fb] dark:bg-[#15202a] relative">
                     {/* Top Slide Header */}
                     <div className="bg-[#0a7b97] px-5 py-3 text-white flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -752,10 +752,10 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                               problemDef: { ...prev.problemDef, canvasNotes: e.target.value }
                             }))}
                             placeholder={lang === 'fa' ? 'یادداشت‌های آزاد، صورت‌جلسه توافق با ذی‌نفعان، فرضیات اولیه یا چارچوب‌بندی مسئله در این تکرار...' : 'Draft freeform notes, stakeholder workshop takeaways, hypotheses, or synthesis for this iteration...'}
-                            className="w-full p-4 text-xs sm:text-sm rounded-lg border border-[#0a7b97]/30 dark:border-[#6fb3c6]/30 bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#0a7b97] leading-relaxed"
+                            className="w-full p-4 text-xs sm:text-sm rounded-lg border border-[#0a7b97]/30 dark:border-[#fb7185]/30 bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#0a7b97] leading-relaxed"
                           />
                           {/* Geometric triangle pattern accent in corner (matching CPMAI slide footer watermark) */}
-                          <div className="absolute bottom-3 end-3 pointer-events-none opacity-20 dark:opacity-10 text-[#0a7b97] dark:text-[#6fb3c6]">
+                          <div className="absolute bottom-3 end-3 pointer-events-none opacity-20 dark:opacity-10 text-[#0a7b97] dark:text-[#fb7185]">
                             <svg width="40" height="30" viewBox="0 0 40 30" fill="currentColor">
                               <polygon points="40,30 20,30 40,10" />
                               <polygon points="30,30 10,30 30,10" />
@@ -803,7 +803,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                               }
                             }));
                           }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[#0a7b97] text-[#0a7b97] dark:text-[#6fb3c6] dark:border-[#6fb3c6] hover:bg-[#0a7b97]/10 transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[#0a7b97] text-[#0a7b97] dark:text-[#fb7185] dark:border-[#fb7185] hover:bg-[#0a7b97]/10 transition-colors"
                         >
                           <Lightbulb className="w-3.5 h-3.5" />
                           <span>{lang === 'fa' ? 'پر کردن خودکار نمونه راهنما (مطالعه موردی بانکداری)' : 'Quick-fill Guided Case Study'}</span>
@@ -880,7 +880,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                           setNewSourceInput({ source: '', format: '', volume: '', status: '' });
                         }
                       }}
-                      className="px-3 py-1.5 text-xs font-medium rounded bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e]"
+                      className="px-3 py-1.5 text-xs font-medium rounded bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e]"
                     >
                       {t.addBtn}
                     </button>
@@ -894,7 +894,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                         <span className="font-semibold text-[#1c2830] dark:text-[#e8ebe9]">{ds.source}</span>
                         <span className="text-[#5d6b73] dark:text-[#9aa8b0]">{ds.format}</span>
                         <span className="text-[#5d6b73] dark:text-[#9aa8b0]">{ds.volume}</span>
-                        <span className="text-[#1f5163] dark:text-[#6fb3c6]">{ds.status}</span>
+                        <span className="text-[#e0533c] dark:text-[#fb7185]">{ds.status}</span>
                       </div>
                       <button
                         type="button"
@@ -942,7 +942,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                         setNewQualityDefectInput('');
                       }
                     }}
-                    className="px-4 py-2 text-xs font-medium rounded-lg bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e]"
+                    className="px-4 py-2 text-xs font-medium rounded-lg bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e]"
                   >
                     {t.addBtn}
                   </button>
@@ -1035,7 +1035,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                         setNewFeatureInput({ feature: '', logic: '' });
                       }
                     }}
-                    className="px-4 py-1.5 text-xs font-medium rounded bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e]"
+                    className="px-4 py-1.5 text-xs font-medium rounded bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e]"
                   >
                     {t.addBtn}
                   </button>
@@ -1043,7 +1043,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                 <div className="space-y-1.5">
                   {p3.engineeredFeatures.map((f, idx) => (
                     <div key={idx} className="flex items-center justify-between p-2 rounded bg-[#f4f4f1] dark:bg-[#12171b] text-xs">
-                      <span><b className="text-[#1f5163] dark:text-[#6fb3c6]">{f.feature}:</b> {f.logic}</span>
+                      <span><b className="text-[#e0533c] dark:text-[#fb7185]">{f.feature}:</b> {f.logic}</span>
                       <button
                         type="button"
                         onClick={() => setP3(prev => ({ ...prev, engineeredFeatures: prev.engineeredFeatures.filter((_, i) => i !== idx) }))}
@@ -1162,7 +1162,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                           setNewMetricInput({ metric: '', target: '', achieved: '' });
                         }
                       }}
-                      className="px-3 py-1.5 text-xs font-medium rounded bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e]"
+                      className="px-3 py-1.5 text-xs font-medium rounded bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e]"
                     >
                       {t.addBtn}
                     </button>
@@ -1331,7 +1331,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
                         setNewDriftTriggerInput('');
                       }
                     }}
-                    className="px-4 py-2 text-xs font-medium rounded-lg bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e]"
+                    className="px-4 py-2 text-xs font-medium rounded-lg bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e]"
                   >
                     {t.addBtn}
                   </button>
@@ -1408,7 +1408,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
 
                 <div className="space-y-2">
                   {quiz.o.map((opt, oIdx) => {
-                    let optStyle = 'border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#1f5163]';
+                    let optStyle = 'border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#e0533c]';
 
                     if (hasAnswered) {
                       if (oIdx === quiz.ans) {
@@ -1452,7 +1452,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleCopySummary}
-            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-lg bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e] hover:opacity-90 transition-opacity"
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-lg bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] hover:opacity-90 transition-opacity"
           >
             <Copy className="w-3.5 h-3.5" />
             <span>{t.copyBtn}</span>
@@ -1487,7 +1487,7 @@ export const PhaseView: React.FC<PhaseViewProps> = ({
           {phaseId < 6 && (
             <button
               onClick={() => onNavigatePhase((phaseId + 1) as PhaseId)}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#e3eef1] dark:bg-[#1b2c32] text-[#1f5163] dark:text-[#6fb3c6] hover:opacity-90 font-medium"
+              className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#fdeee9] dark:bg-[#341528] text-[#e0533c] dark:text-[#fb7185] hover:opacity-90 font-medium"
             >
               <span>{lang === 'fa' ? `فاز بعدی (${phaseId + 1})` : `Phase ${phaseId + 1}`}</span>
               {lang === 'fa' ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}

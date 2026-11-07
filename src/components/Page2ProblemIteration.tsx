@@ -219,7 +219,7 @@ ${discContent.costBenefitSummaryFa} - ${discContent.roiEstimateFa}`;
       {/* Top Banner Information */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#d9dad5] dark:border-[#2d3942] pb-4">
         <div>
-          <span className="text-xs font-semibold text-[#1f5163] dark:text-[#6fb3c6]">
+          <span className="text-xs font-semibold text-[#e0533c] dark:text-[#fb7185]">
             {t.badge}
           </span>
           <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] mt-0.5">
@@ -241,7 +241,7 @@ ${discContent.costBenefitSummaryFa} - ${discContent.roiEstimateFa}`;
           <button
             type="button"
             onClick={handleInsertExample}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[#0a7b97] text-[#0a7b97] dark:text-[#6fb3c6] dark:border-[#6fb3c6] hover:bg-[#0a7b97]/10 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[#0a7b97] text-[#0a7b97] dark:text-[#fb7185] dark:border-[#fb7185] hover:bg-[#0a7b97]/10 transition-colors"
           >
             <Lightbulb className="w-3.5 h-3.5" />
             <span>{t.exampleBtn}</span>
@@ -276,7 +276,7 @@ ${discContent.costBenefitSummaryFa} - ${discContent.roiEstimateFa}`;
       {/* Slide Container (Authentic replica of Image 2) */}
       <div className="rounded-xl border border-[#0a7b97] dark:border-[#0a7b97]/80 overflow-hidden shadow-sm bg-[#ffffff] dark:bg-[#16202a]">
         {/* Teal Header Bar (Verbatim Image 2 Header) */}
-        <div className="bg-[#00738c] px-6 py-3.5 text-white flex items-center justify-between select-none">
+        <div className="bg-[#c026d3] px-6 py-3.5 text-white flex items-center justify-between select-none">
           <h2 className="font-semibold text-base sm:text-lg tracking-normal font-sans" dir="ltr">
             {t.slideTitle}
           </h2>
@@ -295,7 +295,7 @@ ${discContent.costBenefitSummaryFa} - ${discContent.roiEstimateFa}`;
                 ? 'پاسخ و تحلیل خود را برای این تکرار اینجا بنویسید...\n\nبرای شروع می‌توانید از دکمه‌های «درج قالب استاندارد CPMAI» یا «پر کردن با نمونه موردی» در بالا استفاده کنید.'
                 : 'Write your problem definition and iteration solution here...\n\nYou can also click "Insert CPMAI Template" or "Fill Retail Banking Churn Example" above to get started.'
             }
-            className="flex-1 w-full p-4 sm:p-5 rounded-lg bg-[#ffffff]/90 dark:bg-[#1a293d]/90 text-[#1c2830] dark:text-[#e8ebe9] border border-[#d2def2] dark:border-[#2d3f56] focus:border-[#00738c] focus:outline-none resize-y text-sm sm:text-[15px] leading-relaxed font-sans shadow-inner min-h-[460px]"
+            className="flex-1 w-full p-4 sm:p-5 rounded-lg bg-[#ffffff]/90 dark:bg-[#1a293d]/90 text-[#1c2830] dark:text-[#e8ebe9] border border-[#d2def2] dark:border-[#2d3f56] focus:border-[#c026d3] focus:outline-none resize-y text-sm sm:text-[15px] leading-relaxed font-sans shadow-inner min-h-[460px]"
           />
 
           {/* Footer Bar of Canvas */}
@@ -307,7 +307,7 @@ ${discContent.costBenefitSummaryFa} - ${discContent.roiEstimateFa}`;
             </div>
 
             {/* Corner Geometric Triangles (Watermark replica from Image 2) */}
-            <div className="opacity-25 dark:opacity-15 pointer-events-none text-[#00738c] dark:text-[#6fb3c6]">
+            <div className="opacity-25 dark:opacity-15 pointer-events-none text-[#c026d3] dark:text-[#fb7185]">
               <svg width="48" height="32" viewBox="0 0 48 32" fill="currentColor">
                 <polygon points="48,32 24,32 48,8" />
                 <polygon points="36,32 12,32 36,8" />
@@ -320,31 +320,31 @@ ${discContent.costBenefitSummaryFa} - ${discContent.roiEstimateFa}`;
 
       {/* CPMAI Methodology Tips Box */}
       <div className="p-4 sm:p-5 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] space-y-2.5">
-        <h3 className="font-semibold text-xs sm:text-sm text-[#1f5163] dark:text-[#6fb3c6]">
+        <h3 className="font-semibold text-xs sm:text-sm text-[#e0533c] dark:text-[#fb7185]">
           {t.tipsTitle}
         </h3>
         <ul className="space-y-1.5 text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
           <li className="flex items-start gap-2">
-            <span className="text-[#1f5163] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#e0533c] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip1}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#1f5163] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#e0533c] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip2}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#1f5163] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#e0533c] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip3}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#1f5163] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#e0533c] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip4}</span>
           </li>
         </ul>
       </div>
 
       {/* Navigation Toolbar between Pages */}
-      <div className="p-4 sm:p-5 rounded-xl bg-[#e3eef1] dark:bg-[#1b2c32] border border-[#1f5163]/20 flex flex-wrap items-center justify-between gap-3">
+      <div className="p-4 sm:p-5 rounded-xl bg-[#fdeee9] dark:bg-[#341528] border border-[#e0533c]/20 flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"
           onClick={onGoToPage1}
@@ -358,7 +358,7 @@ ${discContent.costBenefitSummaryFa} - ${discContent.roiEstimateFa}`;
           <button
             type="button"
             onClick={onGoToPage3}
-            className="flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#00738c] text-white hover:bg-[#005f73] transition-colors shadow-xs"
+            className="flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#c026d3] text-white hover:bg-[#005f73] transition-colors shadow-xs"
           >
             <span>{lang === 'fa' ? 'صفحه ۳: معیارهای موفقیت کسب‌وکار' : 'Page 3: Success Criteria'}</span>
             {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}

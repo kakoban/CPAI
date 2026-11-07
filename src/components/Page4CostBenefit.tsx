@@ -355,7 +355,7 @@ ${discContent.costBenefitSummaryFa}
       {/* Top Breadcrumb & Page Badge */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d9dad5] dark:border-[#2d3942] pb-3">
         <div className="flex items-center gap-2">
-          <span className="px-2.5 py-1 text-xs font-semibold rounded-md bg-[#00738c] text-white">
+          <span className="px-2.5 py-1 text-xs font-semibold rounded-md bg-[#c026d3] text-white">
             {t.badge}
           </span>
           <span className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
@@ -366,7 +366,7 @@ ${discContent.costBenefitSummaryFa}
         <button
           type="button"
           onClick={onGoToPage3}
-          className="flex items-center gap-1.5 text-xs font-medium text-[#00738c] dark:text-[#6fb3c6] hover:underline"
+          className="flex items-center gap-1.5 text-xs font-medium text-[#c026d3] dark:text-[#fb7185] hover:underline"
         >
           {lang === 'fa' ? <ArrowRight className="w-3.5 h-3.5" /> : <ArrowLeft className="w-3.5 h-3.5" />}
           <span>{t.prevPageBtn}</span>
@@ -408,7 +408,7 @@ ${discContent.costBenefitSummaryFa}
 
         {/* Question Header: Dark Cyan / Teal banner matching image */}
         <div className="px-5 sm:px-6">
-          <div className="bg-[#00738c] text-white px-5 py-3 rounded-t-lg font-bold text-sm sm:text-base flex items-center justify-between shadow-xs">
+          <div className="bg-[#c026d3] text-white px-5 py-3 rounded-t-lg font-bold text-sm sm:text-base flex items-center justify-between shadow-xs">
             <span dir="ltr" className="tracking-tight font-sans">
               {t.slideBanner}
             </span>
@@ -418,14 +418,14 @@ ${discContent.costBenefitSummaryFa}
           </div>
 
           {/* Interactive Workspace Canvas (Lavender/Periwinkle container matching image) */}
-          <div className="bg-[#e8edf9] dark:bg-[#141f30] border-2 border-t-0 border-[#00738c] rounded-b-lg p-4 sm:p-6 shadow-inner flex flex-col min-h-[480px]">
+          <div className="bg-[#e8edf9] dark:bg-[#141f30] border-2 border-t-0 border-[#c026d3] rounded-b-lg p-4 sm:p-6 shadow-inner flex flex-col min-h-[480px]">
             {/* Action Bar inside Canvas */}
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-3 border-b border-[#c8d4eb] dark:border-[#22334d]">
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={handleInsertTemplate}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-[#00738c] text-white hover:bg-[#005f73] transition-colors shadow-2xs"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-[#c026d3] text-white hover:bg-[#005f73] transition-colors shadow-2xs"
                 >
                   <FileText className="w-3.5 h-3.5" />
                   <span>{t.templateBtn}</span>
@@ -434,7 +434,7 @@ ${discContent.costBenefitSummaryFa}
                 <button
                   type="button"
                   onClick={handleInsertExample}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-[#00738c] text-[#00738c] dark:text-[#6fb3c6] dark:border-[#6fb3c6] bg-white/70 dark:bg-black/20 hover:bg-white transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-[#c026d3] text-[#c026d3] dark:text-[#fb7185] dark:border-[#fb7185] bg-white/70 dark:bg-black/20 hover:bg-white transition-colors"
                 >
                   <Lightbulb className="w-3.5 h-3.5" />
                   <span>{t.exampleBtn}</span>
@@ -480,9 +480,9 @@ ${discContent.costBenefitSummaryFa}
 
             {/* Optional Embedded Interactive Calculator Widget */}
             {showCalculator && (
-              <div className="mb-4 p-4 rounded-lg bg-[#ffffff] dark:bg-[#1a2536] border border-[#00738c]/30 shadow-xs text-xs space-y-3">
+              <div className="mb-4 p-4 rounded-lg bg-[#ffffff] dark:bg-[#1a2536] border border-[#c026d3]/30 shadow-xs text-xs space-y-3">
                 <div className="flex items-center justify-between pb-2 border-b border-[#d9dad5] dark:border-[#2d3942]">
-                  <div className="flex items-center gap-2 font-semibold text-[#00738c] dark:text-[#6fb3c6]">
+                  <div className="flex items-center gap-2 font-semibold text-[#c026d3] dark:text-[#fb7185]">
                     <Calculator className="w-4 h-4" />
                     <span>{t.calcTitle}</span>
                   </div>
@@ -610,7 +610,7 @@ ${discContent.costBenefitSummaryFa}
                 </div>
 
                 {/* Net Metric Result */}
-                <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 rounded bg-[#e3eef1] dark:bg-[#1b2c32] text-[#1f5163] dark:text-[#6fb3c6]">
+                <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 rounded bg-[#fdeee9] dark:bg-[#341528] text-[#e0533c] dark:text-[#fb7185]">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">{t.netBenefit}:</span>
                     <span className="font-bold text-sm text-[#2f7d5b] dark:text-[#63c496]">
@@ -619,7 +619,7 @@ ${discContent.costBenefitSummaryFa}
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">{t.roiRatio}:</span>
-                    <span className="font-bold text-sm px-2 py-0.5 rounded bg-[#00738c] text-white">
+                    <span className="font-bold text-sm px-2 py-0.5 rounded bg-[#c026d3] text-white">
                       {roiPercent}% ROI
                     </span>
                   </div>
@@ -636,7 +636,7 @@ ${discContent.costBenefitSummaryFa}
                   ? 'پاسخ و تحلیل هزینه-فایده این تکرار را در این کادر بنویسید:\n۱. بودجه هزینه‌ای (دستمزد، سرورهای ابری GPU، استخراج و پاکسازی داده، ابزارهای نگهداری)\n۲. بودجه زمانی و زمان‌بندی نقاط عطف اسپرینت\n۳. منافع مالی بالقوه (کاهش مستقیم هزینه، رشد درآمد، کاهش ریسک ریزش)\n۴. مقایسه مالی، نرخ بازگشت سرمایه (ROI) و دوره بازگشت سرمایه...'
                   : 'Write your cost-benefit and budget analysis here:\n1. Cost Budget breakdown (Talent, GPU cloud compute, data procurement, MLOps)\n2. Time Budget & iteration milestones\n3. Anticipated business benefits in monetary figures (Cost savings, revenue uplift, loss avoidance)\n4. Specific monetary comparison & net ROI justification...'
               }
-              className="flex-1 w-full p-4 sm:p-5 rounded-lg bg-[#ffffff]/90 dark:bg-[#1a293d]/90 text-[#1c2830] dark:text-[#e8ebe9] border border-[#c8d4eb] dark:border-[#22334d] focus:border-[#00738c] focus:outline-none resize-y text-sm sm:text-[15px] leading-relaxed font-sans shadow-inner min-h-[420px]"
+              className="flex-1 w-full p-4 sm:p-5 rounded-lg bg-[#ffffff]/90 dark:bg-[#1a293d]/90 text-[#1c2830] dark:text-[#e8ebe9] border border-[#c8d4eb] dark:border-[#22334d] focus:border-[#c026d3] focus:outline-none resize-y text-sm sm:text-[15px] leading-relaxed font-sans shadow-inner min-h-[420px]"
             />
 
             {/* Canvas Footer Bar */}
@@ -648,7 +648,7 @@ ${discContent.costBenefitSummaryFa}
               </div>
 
               {/* Corner Watermark Pattern matching bottom right of slide */}
-              <div className="opacity-25 dark:opacity-15 pointer-events-none text-[#00738c] dark:text-[#6fb3c6]">
+              <div className="opacity-25 dark:opacity-15 pointer-events-none text-[#c026d3] dark:text-[#fb7185]">
                 <svg width="48" height="32" viewBox="0 0 48 32" fill="currentColor">
                   <polygon points="48,32 24,32 48,8" />
                   <polygon points="36,32 12,32 36,8" />
@@ -672,31 +672,31 @@ ${discContent.costBenefitSummaryFa}
 
       {/* CPMAI Methodology Tips Box */}
       <div className="p-4 sm:p-5 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] space-y-2.5">
-        <h3 className="font-semibold text-xs sm:text-sm text-[#1f5163] dark:text-[#6fb3c6]">
+        <h3 className="font-semibold text-xs sm:text-sm text-[#e0533c] dark:text-[#fb7185]">
           {t.tipsTitle}
         </h3>
         <ul className="space-y-1.5 text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
           <li className="flex items-start gap-2">
-            <span className="text-[#00738c] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#c026d3] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip1}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#00738c] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#c026d3] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip2}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#00738c] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#c026d3] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip3}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#00738c] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#c026d3] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip4}</span>
           </li>
         </ul>
       </div>
 
       {/* Navigation Return Button to Page 3 and Next Page to Page 5 */}
-      <div className="p-4 sm:p-5 rounded-xl bg-[#e3eef1] dark:bg-[#1b2c32] border border-[#1f5163]/20 flex flex-wrap items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 rounded-xl bg-[#fdeee9] dark:bg-[#341528] border border-[#e0533c]/20 flex flex-wrap items-center justify-between gap-4">
         <button
           type="button"
           onClick={onGoToPage3}
@@ -710,7 +710,7 @@ ${discContent.costBenefitSummaryFa}
           <button
             type="button"
             onClick={onGoToPage5}
-            className="flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#00738c] text-white hover:bg-[#005f73] transition-colors shadow-xs"
+            className="flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#c026d3] text-white hover:bg-[#005f73] transition-colors shadow-xs"
           >
             <span>{t.nextPageBtn}</span>
             {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}

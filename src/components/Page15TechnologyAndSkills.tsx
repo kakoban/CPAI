@@ -270,7 +270,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
       id: 'xyz-retail',
       nameEn: 'XYZ Company — Customer Support Chatbot (Official PMI Sample)',
       nameFa: 'شرکت XYZ — چت‌بات پشتیبانی فروشگاهی (نمونه رسمی کتاب کار PMI)',
-      badgeColor: '#00738c',
+      badgeColor: '#c026d3',
       domainEn: 'E-Commerce Retail (Personalized Gifts)',
       domainFa: 'خرده‌فروشی آنلاین هدایای سفارشی',
       techResourcesEn: `1. An AI-powered chatbot platform and NLP classification library (Scikit-Learn / Transformers).
@@ -345,7 +345,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
       <div className="bg-[#ffffff] dark:bg-[#1a2228] p-5 sm:p-6 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] shadow-xs">
         <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-[#e6f4f7] dark:bg-[#102a33] text-[#00738c] dark:text-[#6fb3c6]">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-[#e6f4f7] dark:bg-[#102a33] text-[#c026d3] dark:text-[#fb7185]">
               <HardDrive className="w-3.5 h-3.5" />
               <span>{lang === 'fa' ? 'فاز اول CPMAI · صفحه ۱۵ (اسلاید ۲۵)' : 'CPMAI Phase I · Page 15 (Slide 25)'}</span>
             </span>
@@ -356,7 +356,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
 
           <button
             onClick={handleCopyBoth}
-            className="flex items-center gap-1.5 text-xs text-[#00738c] dark:text-[#6fb3c6] hover:underline cursor-pointer"
+            className="flex items-center gap-1.5 text-xs text-[#c026d3] dark:text-[#fb7185] hover:underline cursor-pointer"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-[#2f7d5b]" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copied ? (lang === 'fa' ? 'کپی شد!' : 'Copied!') : (lang === 'fa' ? 'کپی کل کاربرگ' : 'Copy All')}</span>
@@ -380,7 +380,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
             onClick={() => setActiveTab('canvas')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0 ${
               activeTab === 'canvas'
-                ? 'bg-[#00738c] text-white shadow-2xs font-semibold'
+                ? 'bg-[#c026d3] text-white shadow-2xs font-semibold'
                 : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#e2e8f0] dark:hover:bg-[#25323d]'
             }`}
           >
@@ -392,7 +392,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
             onClick={() => setActiveTab('tech_catalog')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0 ${
               activeTab === 'tech_catalog'
-                ? 'bg-[#00738c] text-white shadow-2xs font-semibold'
+                ? 'bg-[#c026d3] text-white shadow-2xs font-semibold'
                 : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#e2e8f0] dark:hover:bg-[#25323d]'
             }`}
           >
@@ -404,7 +404,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
             onClick={() => setActiveTab('skills_matrix')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0 ${
               activeTab === 'skills_matrix'
-                ? 'bg-[#00738c] text-white shadow-2xs font-semibold'
+                ? 'bg-[#c026d3] text-white shadow-2xs font-semibold'
                 : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#e2e8f0] dark:hover:bg-[#25323d]'
             }`}
           >
@@ -416,7 +416,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
             onClick={() => setActiveTab('gap_analysis')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0 ${
               activeTab === 'gap_analysis'
-                ? 'bg-[#00738c] text-white shadow-2xs font-semibold'
+                ? 'bg-[#c026d3] text-white shadow-2xs font-semibold'
                 : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#e2e8f0] dark:hover:bg-[#25323d]'
             }`}
           >
@@ -428,7 +428,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
             onClick={() => setActiveTab('samples')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0 ${
               activeTab === 'samples'
-                ? 'bg-[#00738c] text-white shadow-2xs font-semibold'
+                ? 'bg-[#c026d3] text-white shadow-2xs font-semibold'
                 : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#e2e8f0] dark:hover:bg-[#25323d]'
             }`}
           >
@@ -440,7 +440,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
             onClick={() => setActiveTab('readiness')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0 ${
               activeTab === 'readiness'
-                ? 'bg-[#00738c] text-white shadow-2xs font-semibold'
+                ? 'bg-[#c026d3] text-white shadow-2xs font-semibold'
                 : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#e2e8f0] dark:hover:bg-[#25323d]'
             }`}
           >
@@ -465,7 +465,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
             </div>
 
             {/* Cyan Header Box (Matching Screenshot Box 1) */}
-            <div className="bg-[#00738c] px-4 py-3 text-white flex items-center justify-between">
+            <div className="bg-[#c026d3] px-4 py-3 text-white flex items-center justify-between">
               <h2 className="text-sm sm:text-base font-bold tracking-tight">
                 {lang === 'fa'
                   ? 'به چه منابع فناوری برای این پروژه نیاز دارید؟'
@@ -487,7 +487,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
                     ? 'مثال: کتابخانه NLP، سرورهای ابری امن با GPU، وب‌هوک اتصال به سامانه CRM، پایپ‌لاین CI/CD و پایگاه داده تیکت‌ها...'
                     : 'e.g., An AI-powered chatbot platform or NLP library, a secure cloud hosting environment with scalable infrastructure, access to CRM via REST APIs, version control and CI/CD pipelines...'
                 }
-                className="w-full p-3.5 rounded-lg bg-white dark:bg-[#1a2228] border border-[#b8cce6] dark:border-[#2b3e52] text-[#1c2830] dark:text-[#e8ebe9] text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-[#00738c] resize-y leading-relaxed font-sans shadow-2xs"
+                className="w-full p-3.5 rounded-lg bg-white dark:bg-[#1a2228] border border-[#b8cce6] dark:border-[#2b3e52] text-[#1c2830] dark:text-[#e8ebe9] text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-[#c026d3] resize-y leading-relaxed font-sans shadow-2xs"
               />
               <div className="flex items-center justify-between mt-2 flex-wrap gap-2 text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
                 <span>
@@ -517,7 +517,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
             </div>
 
             {/* Cyan Header Box (Matching Screenshot Box 2) */}
-            <div className="bg-[#00738c] px-4 py-3 text-white flex items-center justify-between">
+            <div className="bg-[#c026d3] px-4 py-3 text-white flex items-center justify-between">
               <h2 className="text-sm sm:text-base font-bold tracking-tight">
                 {lang === 'fa'
                   ? 'برای این تکرار پروژه به چه مهارت‌هایی نیاز دارید؟'
@@ -539,7 +539,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
                     ? 'مثال: تخصص پردازش متن NLP، مهندس یکپارچه‌سازی API، مدیر چابک پروژه (CPMAI)، کارشناس ارشد پشتیبانی برای تدوین سوالات پرتکرار و سناریوهای ارجاع، تامین شکاف دیتا ساینس با مشاور خارجی...'
                     : 'e.g., NLP expertise for model training, software engineering capabilities to build and integrate APIs, data privacy & security knowledge, agile project management, customer service domain knowledge. Skill gaps mitigated via external consultancy...'
                 }
-                className="w-full p-3.5 rounded-lg bg-white dark:bg-[#1a2228] border border-[#b8cce6] dark:border-[#2b3e52] text-[#1c2830] dark:text-[#e8ebe9] text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-[#00738c] resize-y leading-relaxed font-sans shadow-2xs"
+                className="w-full p-3.5 rounded-lg bg-white dark:bg-[#1a2228] border border-[#b8cce6] dark:border-[#2b3e52] text-[#1c2830] dark:text-[#e8ebe9] text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-[#c026d3] resize-y leading-relaxed font-sans shadow-2xs"
               />
               <div className="flex items-center justify-between mt-2 flex-wrap gap-2 text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
                 <span>
@@ -569,7 +569,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
                 onClick={() => setTechFilter(cat)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0 ${
                   techFilter === cat
-                    ? 'bg-[#00738c] text-white font-semibold'
+                    ? 'bg-[#c026d3] text-white font-semibold'
                     : 'bg-[#ffffff] dark:bg-[#1a2228] text-[#5d6b73] dark:text-[#9aa8b0] border border-[#d9dad5] dark:border-[#2d3942]'
                 }`}
               >
@@ -590,7 +590,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-xs font-bold text-[#00738c] dark:text-[#6fb3c6]">
+                    <span className="text-xs font-bold text-[#c026d3] dark:text-[#fb7185]">
                       {lang === 'fa' ? item.titleFa : item.titleEn}
                     </span>
                     <span className="text-[10px] px-2 py-0.5 rounded bg-[#f4f4f1] dark:bg-[#12171b] text-[#5d6b73] dark:text-[#9aa8b0] font-mono">
@@ -604,7 +604,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
                     <strong className="text-[#1c2830] dark:text-[#e8ebe9]">
                       {lang === 'fa' ? 'توصیه استاندارد CPMAI:' : 'CPMAI Recommendation:'}
                     </strong>
-                    <p className="text-[#00738c] dark:text-[#6fb3c6] mt-0.5 font-medium">
+                    <p className="text-[#c026d3] dark:text-[#fb7185] mt-0.5 font-medium">
                       {lang === 'fa' ? item.recommendationFa : item.recommendationEn}
                     </p>
                   </div>
@@ -615,7 +615,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
                     {item.exampleTools.map(tool => (
                       <span
                         key={tool}
-                        className="text-[10px] px-2 py-0.5 rounded bg-[#e8eef8] dark:bg-[#131d27] text-[#1f5163] dark:text-[#9cc4db] font-mono"
+                        className="text-[10px] px-2 py-0.5 rounded bg-[#e8eef8] dark:bg-[#131d27] text-[#e0533c] dark:text-[#9cc4db] font-mono"
                       >
                         {tool}
                       </span>
@@ -628,7 +628,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
                         : `\n• ${item.titleEn}: ${item.recommendationEn}`;
                       handleUpdate((techInput + snippet).trim(), skillInput);
                     }}
-                    className="text-xs text-[#00738c] dark:text-[#6fb3c6] hover:underline font-semibold cursor-pointer"
+                    className="text-xs text-[#c026d3] dark:text-[#fb7185] hover:underline font-semibold cursor-pointer"
                   >
                     {lang === 'fa' ? '+ افزودن به کاربرگ' : '+ Insert'}
                   </button>
@@ -649,7 +649,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
                 onClick={() => setSkillFilter(role)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0 ${
                   skillFilter === role
-                    ? 'bg-[#00738c] text-white font-semibold'
+                    ? 'bg-[#c026d3] text-white font-semibold'
                     : 'bg-[#ffffff] dark:bg-[#1a2228] text-[#5d6b73] dark:text-[#9aa8b0] border border-[#d9dad5] dark:border-[#2d3942]'
                 }`}
               >
@@ -673,7 +673,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
                     <h3 className="text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9]">
                       {lang === 'fa' ? role.titleFa : role.titleEn}
                     </h3>
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-[#e6f4f7] dark:bg-[#102a33] text-[#00738c] dark:text-[#6fb3c6] font-medium">
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-[#e6f4f7] dark:bg-[#102a33] text-[#c026d3] dark:text-[#fb7185] font-medium">
                       {lang === 'fa' ? role.allocationFa : role.allocationEn}
                     </span>
                   </div>
@@ -713,7 +713,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
                         : `\n• ${role.titleEn} (${role.allocationEn}): ${role.essentialCompetenciesEn.join(', ')}`;
                       handleUpdate(techInput, (skillInput + snippet).trim());
                     }}
-                    className="text-xs text-[#00738c] dark:text-[#6fb3c6] hover:underline font-semibold cursor-pointer shrink-0 ml-2"
+                    className="text-xs text-[#c026d3] dark:text-[#fb7185] hover:underline font-semibold cursor-pointer shrink-0 ml-2"
                   >
                     {lang === 'fa' ? '+ افزودن به کاربرگ' : '+ Insert'}
                   </button>
@@ -740,7 +740,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl bg-[#fafaf8] dark:bg-[#151c21] border border-[#d9dad5] dark:border-[#2d3942] space-y-2">
-              <div className="w-8 h-8 rounded-lg bg-[#e8eef8] dark:bg-[#131d27] text-[#00738c] flex items-center justify-center font-bold">
+              <div className="w-8 h-8 rounded-lg bg-[#e8eef8] dark:bg-[#131d27] text-[#c026d3] flex items-center justify-center font-bold">
                 ۱
               </div>
               <h4 className="text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9]">
@@ -754,7 +754,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
             </div>
 
             <div className="p-4 rounded-xl bg-[#fafaf8] dark:bg-[#151c21] border border-[#d9dad5] dark:border-[#2d3942] space-y-2">
-              <div className="w-8 h-8 rounded-lg bg-[#e6f4f7] dark:bg-[#102a33] text-[#00738c] flex items-center justify-center font-bold">
+              <div className="w-8 h-8 rounded-lg bg-[#e6f4f7] dark:bg-[#102a33] text-[#c026d3] flex items-center justify-center font-bold">
                 ۲
               </div>
               <h4 className="text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9]">
@@ -787,7 +787,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
       {/* TAB 5: SAMPLES */}
       {activeTab === 'samples' && (
         <div className="space-y-4">
-          <div className="p-4 rounded-xl bg-[#e6f4f7] dark:bg-[#102a33] border border-[#b2e1eb] dark:border-[#1d4d5e] text-xs text-[#00738c] dark:text-[#6fb3c6]">
+          <div className="p-4 rounded-xl bg-[#e6f4f7] dark:bg-[#102a33] border border-[#b2e1eb] dark:border-[#1d4d5e] text-xs text-[#c026d3] dark:text-[#fb7185]">
             {lang === 'fa'
               ? 'نمونه‌های رسمی زیر را مشاهده کنید. با کلیک روی دکمه «درج در کاربرگ»، این متن‌ها مستقیماً وارد فرم کتاب کار شما می‌شوند:'
               : 'Review official case studies below. Click "Apply to Canvas" to insert them directly into your workbook canvas:'}
@@ -812,7 +812,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
 
                   <button
                     onClick={() => handleApplySample(sample)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#00738c] text-white hover:bg-[#005f73] transition-colors cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#c026d3] text-white hover:bg-[#005f73] transition-colors cursor-pointer"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>{lang === 'fa' ? 'درج در کاربرگ من' : 'Apply to Canvas'}</span>
@@ -821,7 +821,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                   <div className="p-3.5 rounded-lg bg-[#fafaf8] dark:bg-[#151c21] border border-[#d9dad5] dark:border-[#2d3942] space-y-1.5">
-                    <strong className="text-[#00738c] dark:text-[#6fb3c6]">
+                    <strong className="text-[#c026d3] dark:text-[#fb7185]">
                       {lang === 'fa' ? '۱. منابع فناوری مورد نیاز:' : '1. Technology Resources Needed:'}
                     </strong>
                     <p className="text-[#5d6b73] dark:text-[#9aa8b0] whitespace-pre-line leading-relaxed">
@@ -830,7 +830,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
                   </div>
 
                   <div className="p-3.5 rounded-lg bg-[#fafaf8] dark:bg-[#151c21] border border-[#d9dad5] dark:border-[#2d3942] space-y-1.5">
-                    <strong className="text-[#00738c] dark:text-[#6fb3c6]">
+                    <strong className="text-[#c026d3] dark:text-[#fb7185]">
                       {lang === 'fa' ? '۲. مهارت‌های مورد نیاز و پوشش شکاف‌ها:' : '2. Skills Needed & Skill Gaps:'}
                     </strong>
                     <p className="text-[#5d6b73] dark:text-[#9aa8b0] whitespace-pre-line leading-relaxed">
@@ -898,7 +898,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
                 key={item.id}
                 className="p-3.5 rounded-lg bg-[#fafaf8] dark:bg-[#141b20] border border-[#d9dad5] dark:border-[#2d3942] flex items-start gap-3"
               >
-                <span className="w-5 h-5 rounded-full bg-[#00738c] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                <span className="w-5 h-5 rounded-full bg-[#c026d3] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                   ✓
                 </span>
                 <div>
@@ -932,7 +932,7 @@ export const Page15TechnologyAndSkills: React.FC<Page15Props> = ({
         {onGoToPage16 && (
           <button
             onClick={onGoToPage16}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#00738c] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#c026d3] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
           >
             <span>
               {lang === 'fa'

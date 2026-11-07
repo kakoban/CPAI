@@ -397,7 +397,7 @@ Why are they NOT being used for this project iteration?
       <div className="bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] rounded-xl p-5 shadow-2xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#e5e7eb] dark:border-[#2d3942] pb-4 mb-4">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#00738c]/10 text-[#00738c] dark:bg-[#00738c]/20 dark:text-[#6ee7b7]">
+            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#c026d3]/10 text-[#c026d3] dark:bg-[#c026d3]/20 dark:text-[#6ee7b7]">
               <span>Task Group: Cognitive Project Requirements</span>
               <span>•</span>
               <span>Task: Cognitive Requirements</span>
@@ -422,7 +422,7 @@ Why are they NOT being used for this project iteration?
                     : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830]'
                 }`}
               >
-                <Eye className="w-3.5 h-3.5 text-[#00738c]" />
+                <Eye className="w-3.5 h-3.5 text-[#c026d3]" />
                 <span>{lang === 'fa' ? 'نمای کاربرگ اسلاید ۱۸' : 'Slide 18 Worksheet'}</span>
               </button>
 
@@ -434,7 +434,7 @@ Why are they NOT being used for this project iteration?
                     : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830]'
                 }`}
               >
-                <Settings className="w-3.5 h-3.5 text-[#00738c]" />
+                <Settings className="w-3.5 h-3.5 text-[#c026d3]" />
                 <span>{lang === 'fa' ? 'سازنده پرسش‌ها' : 'Question Builder'}</span>
               </button>
 
@@ -446,7 +446,7 @@ Why are they NOT being used for this project iteration?
                     : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830]'
                 }`}
               >
-                <Boxes className="w-3.5 h-3.5 text-[#00738c]" />
+                <Boxes className="w-3.5 h-3.5 text-[#c026d3]" />
                 <span>{lang === 'fa' ? 'معماری مکمل سیستم' : 'System Architecture'}</span>
               </button>
             </div>
@@ -462,21 +462,21 @@ Why are they NOT being used for this project iteration?
         {/* Quick Action Case Study Presets */}
         <div className="mt-4 pt-3 border-t border-[#e5e7eb] dark:border-[#2d3942] flex flex-wrap items-center gap-2">
           <span className="text-xs font-semibold text-[#5d6b73] dark:text-[#9aa8b0] flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-[#00738c]" />
+            <Sparkles className="w-3.5 h-3.5 text-[#c026d3]" />
             {lang === 'fa' ? 'نمونه‌های آماده صنایع:' : 'Industry Case Presets:'}
           </span>
 
           <button
             onClick={() => handleLoadCaseStudy('streaming')}
-            className="px-2.5 py-1 text-xs rounded-md border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] hover:border-[#00738c] text-[#1c2830] dark:text-[#e8ebe9] transition-colors flex items-center gap-1"
+            className="px-2.5 py-1 text-xs rounded-md border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] hover:border-[#c026d3] text-[#1c2830] dark:text-[#e8ebe9] transition-colors flex items-center gap-1"
           >
-            <Film className="w-3 h-3 text-[#00738c]" />
+            <Film className="w-3 h-3 text-[#c026d3]" />
             <span>{lang === 'fa' ? 'استریمینگ ویدیو' : 'Video Streaming'}</span>
           </button>
 
           <button
             onClick={() => handleLoadCaseStudy('fraud')}
-            className="px-2.5 py-1 text-xs rounded-md border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] hover:border-[#00738c] text-[#1c2830] dark:text-[#e8ebe9] transition-colors flex items-center gap-1"
+            className="px-2.5 py-1 text-xs rounded-md border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] hover:border-[#c026d3] text-[#1c2830] dark:text-[#e8ebe9] transition-colors flex items-center gap-1"
           >
             <Shield className="w-3 h-3 text-[#b3432f]" />
             <span>{lang === 'fa' ? 'کشف تقلب مالی' : 'Fraud Detection'}</span>
@@ -484,15 +484,15 @@ Why are they NOT being used for this project iteration?
 
           <button
             onClick={() => handleLoadCaseStudy('churn')}
-            className="px-2.5 py-1 text-xs rounded-md border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] hover:border-[#00738c] text-[#1c2830] dark:text-[#e8ebe9] transition-colors flex items-center gap-1"
+            className="px-2.5 py-1 text-xs rounded-md border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] hover:border-[#c026d3] text-[#1c2830] dark:text-[#e8ebe9] transition-colors flex items-center gap-1"
           >
-            <Users className="w-3 h-3 text-[#0f4c5c]" />
+            <Users className="w-3 h-3 text-[#9333ea]" />
             <span>{lang === 'fa' ? 'ریزش مشتریان' : 'Customer Churn'}</span>
           </button>
 
           <button
             onClick={() => handleLoadCaseStudy('health')}
-            className="px-2.5 py-1 text-xs rounded-md border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] hover:border-[#00738c] text-[#1c2830] dark:text-[#e8ebe9] transition-colors flex items-center gap-1"
+            className="px-2.5 py-1 text-xs rounded-md border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] hover:border-[#c026d3] text-[#1c2830] dark:text-[#e8ebe9] transition-colors flex items-center gap-1"
           >
             <Zap className="w-3 h-3 text-[#2f7d5b]" />
             <span>{lang === 'fa' ? 'تریاژ تصویربرداری پزشکی' : 'Radiology Triage'}</span>
@@ -500,7 +500,7 @@ Why are they NOT being used for this project iteration?
 
           <button
             onClick={handleInsertTemplate}
-            className="ml-auto px-3 py-1 text-xs font-semibold rounded-md bg-[#00738c] text-white hover:bg-[#005a6e] transition-colors flex items-center gap-1"
+            className="ml-auto px-3 py-1 text-xs font-semibold rounded-md bg-[#c026d3] text-white hover:bg-[#005a6e] transition-colors flex items-center gap-1"
           >
             <FileText className="w-3 h-3" />
             <span>{lang === 'fa' ? 'درج قالب استاندارد اسلاید ۱۸' : 'Insert Slide 18 Template'}</span>
@@ -516,7 +516,7 @@ Why are they NOT being used for this project iteration?
             {/* Slide Header Banner */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#cbd5e1] dark:border-[#2a3842] mb-6">
               <div>
-                <p className="text-xs uppercase tracking-wider font-semibold text-[#00738c] dark:text-[#6ee7b7]">
+                <p className="text-xs uppercase tracking-wider font-semibold text-[#c026d3] dark:text-[#6ee7b7]">
                   Task Group: Cognitive Project Requirements
                 </p>
                 <h2 className="text-lg sm:text-xl font-bold text-[#1c2830] dark:text-[#e8ebe9]">
@@ -640,7 +640,7 @@ Why are they NOT being used for this project iteration?
                     }}
                     className={`px-2.5 py-1 rounded-md font-medium border transition-colors ${
                       q2AutoAlternativesPossible === 'partial'
-                        ? 'bg-[#0f4c5c] text-white border-[#0f4c5c]'
+                        ? 'bg-[#9333ea] text-white border-[#9333ea]'
                         : 'bg-white dark:bg-[#0f172a] text-[#1c2830] dark:text-[#e8ebe9] border-[#fbcfe8] dark:border-[#831843]'
                     }`}
                   >
@@ -701,7 +701,7 @@ Why are they NOT being used for this project iteration?
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#e5e7eb] dark:border-[#2d3942] pb-3">
               <div>
                 <h3 className="text-base font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-[#00738c]" />
+                  <FileText className="w-4 h-4 text-[#c026d3]" />
                   <span>{lang === 'fa' ? 'بوم جامع پاسخ‌های اسلاید ۱۸' : 'Slide 18 Consolidated Answer Canvas'}</span>
                 </h3>
                 <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
@@ -714,7 +714,7 @@ Why are they NOT being used for this project iteration?
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCopyCanvas}
-                  className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#00738c] transition-colors flex items-center gap-1.5"
+                  className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#c026d3] transition-colors flex items-center gap-1.5"
                 >
                   {copied ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copied ? (lang === 'fa' ? 'کپی شد!' : 'Copied!') : (lang === 'fa' ? 'کپی کل بوم' : 'Copy Canvas')}</span>
@@ -739,7 +739,7 @@ Why are they NOT being used for this project iteration?
                   ? 'متن کامل کاربرگ اسلاید ۱۸ در اینجا ذخیره می‌شود...'
                   : 'Consolidated text for Slide 18 will appear here...'
               }
-              className="w-full text-sm leading-relaxed font-mono p-4 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#fdfdfc] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:ring-2 focus:ring-[#00738c] resize-y"
+              className="w-full text-sm leading-relaxed font-mono p-4 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#fdfdfc] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:ring-2 focus:ring-[#c026d3] resize-y"
             />
 
             <div className="flex items-center justify-between text-xs text-[#5d6b73] dark:text-[#9aa8b0] pt-2">
@@ -763,7 +763,7 @@ Why are they NOT being used for this project iteration?
           <div className="bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] rounded-xl p-5 shadow-2xs space-y-5">
             <div>
               <h2 className="text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-                <Settings className="w-5 h-5 text-[#00738c]" />
+                <Settings className="w-5 h-5 text-[#c026d3]" />
                 <span>{lang === 'fa' ? 'سازنده گام‌به‌گام بخش‌های غیرشناختی (پرسش ۱)' : 'Step-by-Step Noncognitive Architecture Builder (Question 1)'}</span>
               </h2>
               <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
@@ -777,7 +777,7 @@ Why are they NOT being used for this project iteration?
               {/* Layer 1: UI / UX */}
               <div className="p-3.5 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f9fafb] dark:bg-[#12171b] space-y-2">
                 <label className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-                  <Eye className="w-3.5 h-3.5 text-[#00738c]" />
+                  <Eye className="w-3.5 h-3.5 text-[#c026d3]" />
                   <span>{lang === 'fa' ? '۱. لایه رابط و تجربه کاربری (UI/UX)' : '1. Presentation / UI Layer'}</span>
                 </label>
                 <input
@@ -785,14 +785,14 @@ Why are they NOT being used for this project iteration?
                   value={q1UiUx}
                   onChange={(e) => setQ1UiUx(e.target.value)}
                   placeholder={lang === 'fa' ? 'مثال: پنل مدیریت تحت وب واکنش‌گرا و اپلیکیشن موبایل...' : 'e.g., Responsive React web portal & iOS app...'}
-                  className="w-full text-xs p-2.5 rounded border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] focus:outline-none focus:ring-1 focus:ring-[#00738c]"
+                  className="w-full text-xs p-2.5 rounded border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] focus:outline-none focus:ring-1 focus:ring-[#c026d3]"
                 />
               </div>
 
               {/* Layer 2: Database */}
               <div className="p-3.5 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f9fafb] dark:bg-[#12171b] space-y-2">
                 <label className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-                  <Database className="w-3.5 h-3.5 text-[#0f4c5c]" />
+                  <Database className="w-3.5 h-3.5 text-[#9333ea]" />
                   <span>{lang === 'fa' ? '۲. پایگاه داده و ذخیره‌سازی (Data Store)' : '2. Persistence & Data Layer'}</span>
                 </label>
                 <input
@@ -800,7 +800,7 @@ Why are they NOT being used for this project iteration?
                   value={q1DataStorage}
                   onChange={(e) => setQ1DataStorage(e.target.value)}
                   placeholder={lang === 'fa' ? 'مثال: پایگاه داده رابطه‌ای PostgreSQL برای تراکنش‌ها و انبار داده...' : 'e.g., PostgreSQL for transactions & Snowflake lakehouse...'}
-                  className="w-full text-xs p-2.5 rounded border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] focus:outline-none focus:ring-1 focus:ring-[#00738c]"
+                  className="w-full text-xs p-2.5 rounded border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] focus:outline-none focus:ring-1 focus:ring-[#c026d3]"
                 />
               </div>
 
@@ -815,7 +815,7 @@ Why are they NOT being used for this project iteration?
                   value={q1BusinessLogic}
                   onChange={(e) => setQ1BusinessLogic(e.target.value)}
                   placeholder={lang === 'fa' ? 'مثال: فیلترهای سنی، بلک‌لیست‌های امنیتی و قوانین قطعی Fallback...' : 'e.g., Content filters, AML blacklists, safety thresholds...'}
-                  className="w-full text-xs p-2.5 rounded border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] focus:outline-none focus:ring-1 focus:ring-[#00738c]"
+                  className="w-full text-xs p-2.5 rounded border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] focus:outline-none focus:ring-1 focus:ring-[#c026d3]"
                 />
               </div>
 
@@ -830,7 +830,7 @@ Why are they NOT being used for this project iteration?
                   value={q1Apis}
                   onChange={(e) => setQ1Apis(e.target.value)}
                   placeholder={lang === 'fa' ? 'مثال: درگاه API با پروتکل REST/gRPC و صف پیام Kafka...' : 'e.g., REST/gRPC API gateway & Kafka telemetry broker...'}
-                  className="w-full text-xs p-2.5 rounded border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] focus:outline-none focus:ring-1 focus:ring-[#00738c]"
+                  className="w-full text-xs p-2.5 rounded border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] focus:outline-none focus:ring-1 focus:ring-[#c026d3]"
                 />
               </div>
             </div>
@@ -846,7 +846,7 @@ Why are they NOT being used for this project iteration?
                 value={q1Hitl}
                 onChange={(e) => setQ1Hitl(e.target.value)}
                 placeholder={lang === 'fa' ? 'مثال: کنسول ویژه کارشناسان برای تریاژ موارد با احتمال عدم قطعیت بالا...' : 'e.g., Analyst review console for borderline/uncertainty scores...'}
-                className="w-full text-xs p-2.5 rounded border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] focus:outline-none focus:ring-1 focus:ring-[#00738c]"
+                className="w-full text-xs p-2.5 rounded border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] focus:outline-none focus:ring-1 focus:ring-[#c026d3]"
               />
             </div>
 
@@ -868,7 +868,7 @@ Why are they NOT being used for this project iteration?
                   setActiveTab('worksheet');
                 }
               }}
-              className="w-full py-2.5 rounded-lg bg-[#00738c] text-white text-xs font-bold hover:bg-[#005a6e] transition-colors flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-lg bg-[#c026d3] text-white text-xs font-bold hover:bg-[#005a6e] transition-colors flex items-center justify-center gap-2"
             >
               <Sparkles className="w-4 h-4" />
               <span>{lang === 'fa' ? 'انتقال این ساختار به کادر پرسش ۱ کاربرگ' : 'Apply Structured Inputs to Question 1 Box'}</span>
@@ -882,7 +882,7 @@ Why are they NOT being used for this project iteration?
         <div className="bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] rounded-xl p-5 shadow-2xs space-y-6">
           <div className="border-b border-[#e5e7eb] dark:border-[#2d3942] pb-3">
             <h2 className="text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-              <Boxes className="w-5 h-5 text-[#00738c]" />
+              <Boxes className="w-5 h-5 text-[#c026d3]" />
               <span>{lang === 'fa' ? 'نقشه معماری پیوند شناختی / غیرشناختی (CPMAI System Architecture)' : 'Cognitive / Noncognitive Hybrid Architecture Blueprint'}</span>
             </h2>
             <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
@@ -920,14 +920,14 @@ Why are they NOT being used for this project iteration?
             </div>
 
             {/* Box 3: COGNITIVE CORE */}
-            <div className="p-4 rounded-xl border-2 border-[#00738c] bg-[#00738c]/10 dark:bg-[#00738c]/20 space-y-2 shadow-sm">
-              <div className="w-10 h-10 mx-auto rounded-full bg-[#00738c] text-white flex items-center justify-center font-bold shadow-xs">
+            <div className="p-4 rounded-xl border-2 border-[#c026d3] bg-[#c026d3]/10 dark:bg-[#c026d3]/20 space-y-2 shadow-sm">
+              <div className="w-10 h-10 mx-auto rounded-full bg-[#c026d3] text-white flex items-center justify-center font-bold shadow-xs">
                 AI
               </div>
-              <h4 className="text-xs font-extrabold text-[#00738c] dark:text-[#6ee7b7]">
+              <h4 className="text-xs font-extrabold text-[#c026d3] dark:text-[#6ee7b7]">
                 {lang === 'fa' ? 'هسته مدل شناختی' : 'Cognitive ML Core'}
               </h4>
-              <p className="text-[11px] text-[#00738c] dark:text-[#6ee7b7] leading-tight font-medium">
+              <p className="text-[11px] text-[#c026d3] dark:text-[#6ee7b7] leading-tight font-medium">
                 {lang === 'fa' ? 'استنتاج، امتیازدهی، و پیش‌بینی الگوهای چندبعدی' : 'Model inference, predictive scoring, pattern recognition'}
               </p>
             </div>
@@ -984,7 +984,7 @@ Why are they NOT being used for this project iteration?
 
         <button
           onClick={onGoToPage9}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#00738c] text-white hover:bg-[#005a6e] transition-colors font-medium text-xs shadow-xs"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#c026d3] text-white hover:bg-[#005a6e] transition-colors font-medium text-xs shadow-xs"
         >
           <span>{lang === 'fa' ? 'صفحه بعدی: صفحه ۹ (اسلاید ۱۹: اهداف شناختی)' : 'Next: Page 9 (Slide 19: Cognitive Objectives)'}</span>
           {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}

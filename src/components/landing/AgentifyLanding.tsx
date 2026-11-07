@@ -97,7 +97,7 @@ export const AgentifyLanding: React.FC<AgentifyLandingProps> = ({
             className="flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-white/90 dark:bg-gray-900/90 hover:bg-white dark:hover:bg-black text-[#0A101D] dark:text-white text-xs font-bold shadow-2xl border border-gray-300 dark:border-white/10 backdrop-blur-md transition-all hover:scale-105 active:scale-95 group cursor-pointer"
             title="Click to change or upload landing background video/media"
           >
-            <div className="p-1 rounded-lg bg-blue-500/10 text-[#2563EB]">
+            <div className="p-1 rounded-lg bg-orange-500/10 text-[#e0533c]">
               <Film className="w-4 h-4 group-hover:rotate-12 transition-transform" />
             </div>
             <div className="flex flex-col text-left">
@@ -106,7 +106,7 @@ export const AgentifyLanding: React.FC<AgentifyLandingProps> = ({
                 {mediaConfig.title}
               </span>
             </div>
-            <span className="w-2 h-2 rounded-full bg-[#2563EB] animate-pulse ml-1" />
+            <span className="w-2 h-2 rounded-full bg-[#e0533c] animate-pulse ml-1" />
           </button>
         </div>
 
@@ -139,7 +139,7 @@ export const AgentifyLanding: React.FC<AgentifyLandingProps> = ({
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 text-white">
               <div className="flex items-center gap-2">
-                <Play className="w-4 h-4 text-[#2563EB] fill-[#2563EB]" />
+                <Play className="w-4 h-4 text-[#e0533c] fill-[#e0533c]" />
                 <span className="font-orbitron font-bold text-sm tracking-wider">
                   OWJ BUSINESS COUNCIL · {mediaConfig.title.toUpperCase()}
                 </span>
@@ -187,7 +187,7 @@ export const AgentifyLanding: React.FC<AgentifyLandingProps> = ({
                       setIsVideoModalOpen(false);
                       setIsMediaModalOpen(true);
                     }}
-                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-bold"
+                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-[#c2410c] text-xs font-bold"
                   >
                     Configure Canvas
                   </button>

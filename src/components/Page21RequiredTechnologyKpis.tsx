@@ -81,7 +81,7 @@ export const Page21RequiredTechnologyKpis: React.FC<Page21Props> = ({
       titleFa: 'چت‌بات پشتیبانی مشتریان شرکت XYZ (مطالعه موردی رسمی CPMAI)',
       domainEn: 'Conversational AI / Customer Support Stack',
       domainFa: 'هوش مصنوعی محاوره‌ای و خدمات مشتریان',
-      badgeColor: 'bg-[#00738c] text-white',
+      badgeColor: 'bg-[#c026d3] text-white',
       targetP95LatencySec: 1.5,
       uptimeTarget: 99.9,
       maxConcurrency: 250,
@@ -270,7 +270,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
   return (
     <div className="space-y-6 animate-fade-in" dir={lang === 'fa' ? 'rtl' : 'ltr'}>
       {/* Header Banner */}
-      <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1b3a4b] via-[#1f5163] to-[#00738c] text-white shadow-lg relative overflow-hidden">
+      <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1b3a4b] via-[#e0533c] to-[#c026d3] text-white shadow-lg relative overflow-hidden">
         <div className="absolute top-0 end-0 -mt-8 -me-8 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -300,10 +300,10 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
           <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
             <button
               onClick={handleApplyToCanvas}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white text-[#1f5163] hover:bg-[#e3f2ea] text-xs font-bold transition-all shadow-sm cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white text-[#e0533c] hover:bg-[#e3f2ea] text-xs font-bold transition-all shadow-sm cursor-pointer"
               title={lang === 'fa' ? 'تزریق مستقیم به بوم مستندات' : 'Inject directly into canvas'}
             >
-              <Zap className="w-4 h-4 text-[#00738c]" />
+              <Zap className="w-4 h-4 text-[#c026d3]" />
               <span>{lang === 'fa' ? 'تزریق به بوم' : 'Inject to Canvas'}</span>
             </button>
           </div>
@@ -314,7 +314,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
       <div className="p-4 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs">
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
-            <Target className="w-4 h-4 text-[#00738c]" />
+            <Target className="w-4 h-4 text-[#c026d3]" />
             <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
               {lang === 'fa' ? 'مطالعه موردی مرجع (بارگذاری سریع سناریو):' : 'Select Case Study Preset:'}
             </span>
@@ -338,7 +338,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
                 onClick={() => handleApplyPreset(preset)}
                 className={`p-3 rounded-lg border text-start transition-all cursor-pointer ${
                   isSelected
-                    ? 'border-[#00738c] bg-[#00738c]/10 dark:bg-[#00738c]/20 ring-1 ring-[#00738c]'
+                    ? 'border-[#c026d3] bg-[#c026d3]/10 dark:bg-[#c026d3]/20 ring-1 ring-[#c026d3]'
                     : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30'
                 }`}
               >
@@ -346,7 +346,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
                   <span className="font-bold text-xs text-gray-900 dark:text-white truncate">
                     {lang === 'fa' ? preset.titleFa : preset.titleEn}
                   </span>
-                  {isSelected && <Check className="w-3.5 h-3.5 text-[#00738c] shrink-0" />}
+                  {isSelected && <Check className="w-3.5 h-3.5 text-[#c026d3] shrink-0" />}
                 </div>
                 <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-tight">
                   {lang === 'fa' ? preset.domainFa : preset.domainEn}
@@ -376,7 +376,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
           onClick={() => setActiveTab('worksheet')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'worksheet'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -388,7 +388,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
           onClick={() => setActiveTab('simulator')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'simulator'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -400,7 +400,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
           onClick={() => setActiveTab('canvas')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'canvas'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -412,7 +412,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
           onClick={() => setActiveTab('guide')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'guide'
-              ? 'bg-white dark:bg-[#1a2228] text-[#00738c] dark:text-[#6ee7b7] shadow-xs font-bold'
+              ? 'bg-white dark:bg-[#1a2228] text-[#c026d3] dark:text-[#6ee7b7] shadow-xs font-bold'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
           }`}
         >
@@ -427,27 +427,27 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Pillar 1: Latency & Response Times */}
             <div className="p-5 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs space-y-3">
-              <div className="flex items-center gap-2 text-sm font-bold text-[#00738c] dark:text-[#6ee7b7] border-b border-gray-100 dark:border-gray-800 pb-2">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#c026d3] dark:text-[#6ee7b7] border-b border-gray-100 dark:border-gray-800 pb-2">
                 <Clock className="w-4 h-4" />
                 <span>{lang === 'fa' ? '۱. زمان پاسخ‌دهی و تاخیر استنتاج (Response Time SLAs)' : '1. Response Time & Latency SLAs'}</span>
               </div>
               <ul className="text-xs text-gray-700 dark:text-gray-300 space-y-2 leading-relaxed">
                 <li className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00738c] mt-1.5 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#c026d3] mt-1.5 shrink-0" />
                   <div>
                     <strong>{lang === 'fa' ? 'آستانه تاخیر صدک ۹۵ (P95 Latency): ' : 'P95 Latency SLA: '}</strong>
                     <span>{lang === 'fa' ? `حداکثر ${targetP95LatencySec} ثانیه در هر نوبت گفت‌وگو` : `<= ${targetP95LatencySec}s per turn`}</span>
                   </div>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00738c] mt-1.5 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#c026d3] mt-1.5 shrink-0" />
                   <div>
                     <strong>{lang === 'fa' ? 'دریافت اولین توکن (TTFT): ' : 'Time to First Token: '}</strong>
                     <span>{lang === 'fa' ? 'کمتر از ۴۰۰ میلی‌ثانیه برای پاسخ‌های جریانی' : '< 400ms for streaming responses'}</span>
                   </div>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00738c] mt-1.5 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#c026d3] mt-1.5 shrink-0" />
                   <div>
                     <strong>{lang === 'fa' ? 'بازیابی برداری RAG (Vector Search): ' : 'Vector Retrieval: '}</strong>
                     <span>{lang === 'fa' ? `کمتر از ${vectorSearchLatencyMs} میلی‌ثانیه برای جستجوی اسناد پایگاه دانش` : `< ${vectorSearchLatencyMs}ms across FAQ index`}</span>
@@ -458,27 +458,27 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
 
             {/* Pillar 2: Cloud / Server Resource & FinOps */}
             <div className="p-5 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs space-y-3">
-              <div className="flex items-center gap-2 text-sm font-bold text-[#1f5163] dark:text-[#99e2b4] border-b border-gray-100 dark:border-gray-800 pb-2">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#e0533c] dark:text-[#99e2b4] border-b border-gray-100 dark:border-gray-800 pb-2">
                 <Cpu className="w-4 h-4" />
                 <span>{lang === 'fa' ? '۲. مصرف سرور، ابر و هزینه‌ها (Server & Cloud Usage)' : '2. Server & Cloud Compute (FinOps)'}</span>
               </div>
               <ul className="text-xs text-gray-700 dark:text-gray-300 space-y-2 leading-relaxed">
                 <li className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#1f5163] mt-1.5 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#e0533c] mt-1.5 shrink-0" />
                   <div>
                     <strong>{lang === 'fa' ? 'سقف هزینه ابری ماهانه: ' : 'Monthly Cloud Cap: '}</strong>
                     <span>{lang === 'fa' ? `حداکثر $${cloudMonthlyBudget.toLocaleString('fa-IR')} دلار در ماه برای فاز MVP` : `Capped at $${cloudMonthlyBudget.toLocaleString()} / month`}</span>
                   </div>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#1f5163] mt-1.5 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#e0533c] mt-1.5 shrink-0" />
                   <div>
                     <strong>{lang === 'fa' ? 'بهره‌وری سرورهای گرافیکی (GPU Load): ' : 'GPU Utilization: '}</strong>
                     <span>{lang === 'fa' ? 'میانگین ۶۵٪ تا ۷۵٪ و مقیاس‌پذیری خودکار با عبور از ۸۰٪' : '65-75% sustained load; auto-scale at 80%'}</span>
                   </div>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#1f5163] mt-1.5 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#e0533c] mt-1.5 shrink-0" />
                   <div>
                     <strong>{lang === 'fa' ? 'ردپای حافظه مدل (VRAM Footprint): ' : 'Memory Footprint: '}</strong>
                     <span>{lang === 'fa' ? 'کوانتیزاسیون ۸ بیتی با مصرف حداکثر ۱۶ گیگابایت حافظه' : '<= 16GB VRAM per worker node'}</span>
@@ -550,7 +550,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
         <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs space-y-6">
           <div className="border-b border-gray-100 dark:border-gray-800 pb-3">
             <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Sliders className="w-5 h-5 text-[#00738c]" />
+              <Sliders className="w-5 h-5 text-[#c026d3]" />
               <span>{lang === 'fa' ? 'شبیه‌ساز و تنظیم‌کننده توافق‌نامه سطح خدمات (SLA & Infrastructure Tuning)' : 'Infrastructure SLA & Capacity Tuning Simulator'}</span>
             </h2>
             <p className="text-xs text-gray-500 mt-1">
@@ -567,7 +567,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
                 <span className="font-bold text-gray-700 dark:text-gray-300">
                   {lang === 'fa' ? 'آستانه تاخیر استنتاج صدک ۹۵ (P95 Latency):' : 'P95 Latency SLA:'}
                 </span>
-                <span className="font-bold text-[#00738c] font-mono text-sm">
+                <span className="font-bold text-[#c026d3] font-mono text-sm">
                   {targetP95LatencySec} s
                 </span>
               </div>
@@ -578,7 +578,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
                 step="0.1"
                 value={targetP95LatencySec}
                 onChange={(e) => setTargetP95LatencySec(parseFloat(e.target.value))}
-                className="w-full accent-[#00738c] cursor-pointer"
+                className="w-full accent-[#c026d3] cursor-pointer"
               />
             </div>
 
@@ -588,7 +588,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
                 <span className="font-bold text-gray-700 dark:text-gray-300">
                   {lang === 'fa' ? 'پایداری و دسترسی‌پذیری ماهانه (Uptime SLA):' : 'Monthly Uptime SLA:'}
                 </span>
-                <span className="font-bold text-[#00738c] font-mono text-sm">
+                <span className="font-bold text-[#c026d3] font-mono text-sm">
                   {uptimeTarget}%
                 </span>
               </div>
@@ -599,7 +599,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
                 step="0.05"
                 value={uptimeTarget}
                 onChange={(e) => setUptimeTarget(parseFloat(e.target.value))}
-                className="w-full accent-[#00738c] cursor-pointer"
+                className="w-full accent-[#c026d3] cursor-pointer"
               />
             </div>
 
@@ -609,7 +609,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
                 <span className="font-bold text-gray-700 dark:text-gray-300">
                   {lang === 'fa' ? 'حداکثر سقف جلسات همزمان (Peak Concurrency):' : 'Peak Concurrent Chats:'}
                 </span>
-                <span className="font-bold text-[#00738c] font-mono text-sm">
+                <span className="font-bold text-[#c026d3] font-mono text-sm">
                   {maxConcurrency}
                 </span>
               </div>
@@ -620,7 +620,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
                 step="50"
                 value={maxConcurrency}
                 onChange={(e) => setMaxConcurrency(parseInt(e.target.value))}
-                className="w-full accent-[#00738c] cursor-pointer"
+                className="w-full accent-[#c026d3] cursor-pointer"
               />
             </div>
 
@@ -630,7 +630,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
                 <span className="font-bold text-gray-700 dark:text-gray-300">
                   {lang === 'fa' ? 'سقف بودجه ابری ماهانه (Cloud FinOps Cap):' : 'Monthly Cloud Budget Cap:'}
                 </span>
-                <span className="font-bold text-[#00738c] font-mono text-sm">
+                <span className="font-bold text-[#c026d3] font-mono text-sm">
                   ${cloudMonthlyBudget.toLocaleString()}
                 </span>
               </div>
@@ -641,15 +641,15 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
                 step="500"
                 value={cloudMonthlyBudget}
                 onChange={(e) => setCloudMonthlyBudget(parseInt(e.target.value))}
-                className="w-full accent-[#00738c] cursor-pointer"
+                className="w-full accent-[#c026d3] cursor-pointer"
               />
             </div>
           </div>
 
           {/* Real-time SLA Benchmark Status */}
-          <div className="p-4 rounded-xl bg-gradient-to-r from-teal-500/10 via-[#00738c]/10 to-blue-500/10 border border-teal-300 dark:border-teal-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="p-4 rounded-xl bg-gradient-to-r from-teal-500/10 via-[#c026d3]/10 to-blue-500/10 border border-teal-300 dark:border-teal-800 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-[#00738c]" />
+              <ShieldCheck className="w-5 h-5 text-[#c026d3]" />
               <div>
                 <span className="font-bold text-xs text-gray-900 dark:text-white block">
                   {lang === 'fa' ? 'وضعیت ارزیابی معماری فنی:' : 'Architecture SLA Grade:'}
@@ -675,7 +675,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-800 pb-3">
             <div>
               <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#00738c]" />
+                <FileText className="w-5 h-5 text-[#c026d3]" />
                 <span>{lang === 'fa' ? 'بوم مستندات کتاب کار CPMAI (اسلاید ۳۱)' : 'CPMAI Workbook Canvas (Slide 31)'}</span>
               </h2>
               <p className="text-xs text-gray-500 mt-1">
@@ -696,7 +696,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
 
               <button
                 onClick={handleApplyToCanvas}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00738c] text-white hover:bg-[#005f73] text-xs font-semibold cursor-pointer shadow-xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c026d3] text-white hover:bg-[#005f73] text-xs font-semibold cursor-pointer shadow-xs"
               >
                 <Zap className="w-3.5 h-3.5" />
                 <span>{lang === 'fa' ? 'تولید مجدد متن' : 'Regenerate'}</span>
@@ -708,7 +708,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
             value={content || generateCanvasMarkdown()}
             onChange={(e) => onChangeContent(e.target.value)}
             rows={16}
-            className="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 font-mono text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#00738c] transition-all resize-y"
+            className="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/60 font-mono text-xs sm:text-sm text-gray-800 dark:text-gray-200 leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#c026d3] transition-all resize-y"
             placeholder={lang === 'fa' ? 'سنجه‌های کلیدی عملکرد فناوری را در اینجا مستند و ذخیره فرمایید...' : 'Document required technology KPIs...'}
           />
 
@@ -735,7 +735,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
 
           <div className="space-y-4 text-xs sm:text-sm leading-relaxed text-gray-700 dark:text-gray-300">
             <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 space-y-1.5">
-              <span className="font-bold text-[#00738c] block text-sm">
+              <span className="font-bold text-[#c026d3] block text-sm">
                 {lang === 'fa' ? '۱. چرا سنجه‌های فناوری برای تیم IT در پروژه‌های شناختی حیاتی است؟' : '1. Why Technology KPIs Are Mission-Critical for IT Teams'}
               </span>
               <p>
@@ -746,7 +746,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
             </div>
 
             <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-800 space-y-1.5">
-              <span className="font-bold text-[#00738c] block text-sm">
+              <span className="font-bold text-[#c026d3] block text-sm">
                 {lang === 'fa' ? '۲. مهار تاخیر و زنجیره خطای سیستم‌های بیرونی (Circuit Breaker Design):' : '2. Graceful Degradation & Circuit Breakers'}
               </span>
               <p>
@@ -776,7 +776,7 @@ These metrics must be quantifiable and monitorable in real-time via enterprise A
         {onGoToPage22 && (
           <button
             onClick={onGoToPage22}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#00738c] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#c026d3] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
           >
             <span>
               {lang === 'fa'

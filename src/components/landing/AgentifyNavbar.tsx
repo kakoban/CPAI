@@ -92,10 +92,10 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
 
           <div className="flex flex-col text-left">
             <div className="flex items-center gap-1.5">
-              <span className="font-orbitron font-extrabold text-base lg:text-lg tracking-[0.14em] text-[#0A101D] group-hover:text-[#2563EB] transition-colors">
+              <span className="font-orbitron font-extrabold text-base lg:text-lg tracking-[0.14em] text-[#0A101D] group-hover:text-[#e0533c] transition-colors">
                 OWJ
               </span>
-              <span className="font-orbitron font-bold text-xs tracking-wider text-[#2563EB]">
+              <span className="font-orbitron font-bold text-xs tracking-wider text-[#e0533c]">
                 AI·CPMAI
               </span>
             </div>
@@ -172,9 +172,9 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
             <button
               onClick={onOpenMediaCustomizer}
               title="Customize Background Motion Media"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold text-[#0A101D] hover:bg-black/5 hover:text-[#2563EB] transition-all cursor-pointer border border-gray-200/80 bg-white/60 shadow-2xs group"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold text-[#0A101D] hover:bg-black/5 hover:text-[#e0533c] transition-all cursor-pointer border border-gray-200/80 bg-white/60 shadow-2xs group"
             >
-              <Film className="w-3.5 h-3.5 text-[#2563EB] group-hover:rotate-12 transition-transform" />
+              <Film className="w-3.5 h-3.5 text-[#e0533c] group-hover:rotate-12 transition-transform" />
               <span>Media</span>
             </button>
           )}
@@ -184,7 +184,7 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
             className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-[#0A101D] hover:bg-black/5 transition-all cursor-pointer border border-gray-200/80"
           >
             {currentUser ? (
-              <span className="flex items-center gap-1.5 text-[#2563EB] font-bold">
+              <span className="flex items-center gap-1.5 text-[#e0533c] font-bold">
                 <User className="w-3.5 h-3.5" />
                 <span className="max-w-[130px] truncate">{currentUser.displayName}</span>
               </span>
@@ -195,7 +195,7 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
 
           <button
             onClick={() => handleProtectedAction(onEnterApp)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#2563EB] hover:bg-blue-700 text-white text-[14px] font-semibold shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer group active:scale-95"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-[#e0533c] to-[#c026d3] hover:from-[#c2410c] hover:to-[#9333ea] text-white text-[14px] font-semibold shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer group active:scale-95"
           >
             <span>Start CPMAI</span>
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -206,7 +206,7 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
         <div className="flex items-center gap-2.5 lg:hidden">
           <button
             onClick={() => handleProtectedAction(onEnterApp)}
-            className="px-3 py-1.5 rounded-xl bg-[#2563EB] text-white text-xs font-semibold"
+            className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#e0533c] to-[#c026d3] text-white text-xs font-semibold"
           >
             Workbook
           </button>
@@ -260,7 +260,7 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
                     setIsMobileMenuOpen(false);
                     item.onClick?.();
                   }}
-                  className="text-left py-2 hover:text-[#2563EB] transition-colors border-b border-gray-100"
+                  className="text-left py-2 hover:text-[#e0533c] transition-colors border-b border-gray-100"
                 >
                   {item.label}
                 </button>
@@ -321,7 +321,7 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
                   className="w-full flex items-center justify-between py-2 text-left font-semibold text-[#0A101D] border-b border-gray-100"
                 >
                   <span className="flex items-center gap-2">
-                    <Film className="w-4 h-4 text-[#2563EB]" />
+                    <Film className="w-4 h-4 text-[#e0533c]" />
                     <span>Customize Background Media</span>
                   </span>
                   <Sliders className="w-3.5 h-3.5 text-gray-400" />
@@ -346,7 +346,7 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
                 setIsMobileMenuOpen(false);
                 handleProtectedAction(onEnterApp);
               }}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full bg-[#2563EB] text-white text-sm font-semibold shadow-lg"
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full bg-[#e0533c] text-white text-sm font-semibold shadow-lg"
             >
               <span>Access CPMAI Workbook</span>
               <ArrowRight className="w-4 h-4" />

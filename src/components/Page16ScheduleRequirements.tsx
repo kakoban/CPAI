@@ -323,7 +323,7 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
             onClick={() => setActiveTab('canvas')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
               activeTab === 'canvas'
-                ? 'bg-[#00738c] text-white shadow-xs font-bold'
+                ? 'bg-[#c026d3] text-white shadow-xs font-bold'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
             }`}
           >
@@ -335,7 +335,7 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
             onClick={() => setActiveTab('milestones')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
               activeTab === 'milestones'
-                ? 'bg-[#00738c] text-white shadow-xs font-bold'
+                ? 'bg-[#c026d3] text-white shadow-xs font-bold'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
             }`}
           >
@@ -347,7 +347,7 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
             onClick={() => setActiveTab('constraints')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
               activeTab === 'constraints'
-                ? 'bg-[#00738c] text-white shadow-xs font-bold'
+                ? 'bg-[#c026d3] text-white shadow-xs font-bold'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
             }`}
           >
@@ -359,7 +359,7 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
             onClick={() => setActiveTab('guide')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
               activeTab === 'guide'
-                ? 'bg-[#00738c] text-white shadow-xs font-bold'
+                ? 'bg-[#c026d3] text-white shadow-xs font-bold'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
             }`}
           >
@@ -373,7 +373,7 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
       {activeTab === 'canvas' && (
         <div className="space-y-4">
           {/* Blue Header Banner matching the Workbook Slide */}
-          <div className="bg-[#00738c] text-white px-5 py-3 rounded-t-xl font-bold text-sm flex items-center justify-between shadow-xs">
+          <div className="bg-[#c026d3] text-white px-5 py-3 rounded-t-xl font-bold text-sm flex items-center justify-between shadow-xs">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               <span>
@@ -428,7 +428,7 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
               placeholder={lang === 'fa'
                 ? 'الزامات زمان‌بندی، اسپرینت‌ها، مایلستون‌ها و محدودیت‌های تکرار این پروژه هوش مصنوعی را در اینجا یادداشت کنید...'
                 : 'Detail your project iteration schedule requirements, agile sprint cadences, milestones, and constraints here...'}
-              className="w-full h-80 p-4 rounded-xl bg-white dark:bg-[#131b26] border border-blue-200 dark:border-blue-800 text-gray-900 dark:text-gray-100 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#00738c] font-sans resize-y shadow-inner"
+              className="w-full h-80 p-4 rounded-xl bg-white dark:bg-[#131b26] border border-blue-200 dark:border-blue-800 text-gray-900 dark:text-gray-100 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#c026d3] font-sans resize-y shadow-inner"
             />
 
             {/* Action Bar */}
@@ -462,7 +462,7 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
           <div className="p-4 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#00738c]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#c026d3]" />
                 <span>{lang === 'fa' ? 'نمونه‌های آماده مطالعه موردی جهت درج سریع:' : 'Case Study Presets for Instant Insertion:'}</span>
               </span>
 
@@ -478,7 +478,7 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
                   onClick={() => setSelectedCase(cs.id)}
                   className={`p-3 rounded-lg border text-xs cursor-pointer transition-all ${
                     selectedCase === cs.id
-                      ? 'border-[#00738c] bg-[#00738c]/5 shadow-xs'
+                      ? 'border-[#c026d3] bg-[#c026d3]/5 shadow-xs'
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                   }`}
                 >
@@ -498,7 +498,7 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
                   <div className="mt-2 flex justify-end">
                     <button
                       onClick={(e) => { e.stopPropagation(); handleApplyPreset(cs); }}
-                      className="text-[11px] font-semibold text-[#00738c] hover:underline flex items-center gap-1"
+                      className="text-[11px] font-semibold text-[#c026d3] hover:underline flex items-center gap-1"
                     >
                       <span>{lang === 'fa' ? 'درج در بوم' : 'Insert to Canvas'}</span>
                       <ArrowRight className="w-3 h-3" />
@@ -531,7 +531,7 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
                   className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40 space-y-2 relative"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#00738c] text-white">
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#c026d3] text-white">
                       {lang === 'fa' ? m.monthFa : m.month}
                     </span>
                     <span className="text-xs text-gray-400 font-mono">
@@ -632,7 +632,7 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
 
           <div className="space-y-3">
             <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
-              <span className="font-bold text-[#00738c] block mb-1">
+              <span className="font-bold text-[#c026d3] block mb-1">
                 {lang === 'fa' ? '۱. چرا پروژه‌های هوش مصنوعی نیازمند زمان‌بندی تکرارشونده هستند؟' : '1. Why AI Projects Need Iterative Scheduling?'}
               </span>
               <p>
@@ -643,7 +643,7 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
             </div>
 
             <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
-              <span className="font-bold text-[#00738c] block mb-1">
+              <span className="font-bold text-[#c026d3] block mb-1">
                 {lang === 'fa' ? '۲. ممیزی قانونی مجوز استفاده از داده (Data Rights Checklist)' : '2. Data Rights & Legal Permission Checklist'}
               </span>
               <p>
@@ -654,7 +654,7 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
             </div>
 
             <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
-              <span className="font-bold text-[#00738c] block mb-1">
+              <span className="font-bold text-[#c026d3] block mb-1">
                 {lang === 'fa' ? '۳. مدیریت وابستگی‌ها با تیم‌های غیر هوش مصنوعی' : '3. Managing Non-AI System Dependencies'}
               </span>
               <p>
@@ -680,7 +680,7 @@ export const Page16ScheduleRequirements: React.FC<Page16Props> = ({
         {onGoToPage17 && (
           <button
             onClick={onGoToPage17}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#00738c] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#c026d3] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
           >
             <span>
               {lang === 'fa'

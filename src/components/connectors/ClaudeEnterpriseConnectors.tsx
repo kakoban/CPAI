@@ -448,7 +448,7 @@ export const ClaudeEnterpriseConnectors: React.FC<ClaudeEnterpriseConnectorsProp
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
                     {lang === 'fa' ? 'آدرس سرور رسمی MCP نوشن:' : 'Official Hosted MCP Server URL:'}
                   </span>
-                  <div className="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-white dark:bg-[#1a2228] border border-black/[0.05] dark:border-white/[0.08] font-mono text-xs text-[#1f5163] dark:text-[#6fb3c6]">
+                  <div className="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-white dark:bg-[#1a2228] border border-black/[0.05] dark:border-white/[0.08] font-mono text-xs text-[#e0533c] dark:text-[#fb7185]">
                     <span className="truncate select-all">https://mcp.notion.com/mcp</span>
                     <button
                       onClick={() => copyToClipboard('https://mcp.notion.com/mcp', 'notion_mcp_url')}

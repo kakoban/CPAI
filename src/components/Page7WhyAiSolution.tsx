@@ -617,16 +617,16 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
   return (
     <div className="space-y-6 sm:space-y-8" dir={lang === 'fa' ? 'rtl' : 'ltr'}>
       {/* Header Banner */}
-      <div className="p-5 sm:p-7 rounded-2xl bg-[#ffffff] dark:bg-[#172026] border border-[#1f5163]/20 shadow-xs relative overflow-hidden">
-        <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-[#00738c] via-[#10b981] to-[#f59e0b]" />
+      <div className="p-5 sm:p-7 rounded-2xl bg-[#ffffff] dark:bg-[#172026] border border-[#e0533c]/20 shadow-xs relative overflow-hidden">
+        <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-[#c026d3] via-[#10b981] to-[#f59e0b]" />
 
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#00738c]/10 dark:bg-[#6fb3c6]/15 flex items-center justify-center text-[#00738c] dark:text-[#6fb3c6]">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#c026d3]/10 dark:bg-[#fb7185]/15 flex items-center justify-center text-[#c026d3] dark:text-[#fb7185]">
               <Brain className="w-6 h-6 sm:w-7 sm:h-7" />
             </div>
             <div>
-              <span className="inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#00738c]/10 dark:bg-[#6fb3c6]/20 text-[#00738c] dark:text-[#6fb3c6] mb-1">
+              <span className="inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#c026d3]/10 dark:bg-[#fb7185]/20 text-[#c026d3] dark:text-[#fb7185] mb-1">
                 {text.badge}
               </span>
               <h2 className="text-xl sm:text-2xl font-bold text-[#1c2830] dark:text-[#e8ebe9]">
@@ -640,17 +640,17 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
             <button
               type="button"
               onClick={handleInsertTemplate}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] hover:bg-[#e8ebe9] dark:hover:bg-[#25323a] text-[#1c2830] dark:text-[#e8ebe9] transition-colors border border-[#1f5163]/20 cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] hover:bg-[#e8ebe9] dark:hover:bg-[#25323a] text-[#1c2830] dark:text-[#e8ebe9] transition-colors border border-[#e0533c]/20 cursor-pointer"
               title={text.templateBtn}
             >
-              <FileText className="w-3.5 h-3.5 text-[#00738c] dark:text-[#6fb3c6]" />
+              <FileText className="w-3.5 h-3.5 text-[#c026d3] dark:text-[#fb7185]" />
               <span>{lang === 'fa' ? 'درج قالب ۳ سوال اسلاید ۱۷' : 'Insert Slide 17 Template'}</span>
             </button>
 
             <button
               type="button"
               onClick={handleCopy}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#00738c] hover:bg-[#005f73] text-white transition-colors shadow-xs cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#c026d3] hover:bg-[#005f73] text-white transition-colors shadow-xs cursor-pointer"
               title={text.copyBtn}
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-300" /> : <Copy className="w-3.5 h-3.5" />}
@@ -664,9 +664,9 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
         </p>
 
         {/* Methodology Reminder Callout */}
-        <div className="mt-4 p-3.5 sm:p-4 rounded-xl bg-[#e3eef1] dark:bg-[#1b2c32] border border-[#1f5163]/20 flex items-start gap-3">
-          <Lightbulb className="w-5 h-5 text-[#00738c] dark:text-[#6fb3c6] shrink-0 mt-0.5" />
-          <div className="text-xs text-[#1f5163] dark:text-[#6fb3c6] leading-relaxed">
+        <div className="mt-4 p-3.5 sm:p-4 rounded-xl bg-[#fdeee9] dark:bg-[#341528] border border-[#e0533c]/20 flex items-start gap-3">
+          <Lightbulb className="w-5 h-5 text-[#c026d3] dark:text-[#fb7185] shrink-0 mt-0.5" />
+          <div className="text-xs text-[#e0533c] dark:text-[#fb7185] leading-relaxed">
             <span className="font-bold block mb-1">
               {lang === 'fa' ? '۳ پرسش اساسی اسلاید ۱۷ کتاب کار متدولوژی CPMAI:' : 'Official CPMAI Slide 17 Questions:'}
             </span>
@@ -676,28 +676,28 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
       </div>
 
       {/* PROMINENT SHOWCASE OF THE 3 EXACT SLIDE 17 QUESTIONS */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#ffffff] via-[#f7fafc] to-[#eef6f8] dark:from-[#172026] dark:via-[#1a252c] dark:to-[#172329] border-2 border-[#00738c]/30 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-[#00738c]/15 pb-3">
+      <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#ffffff] via-[#f7fafc] to-[#eef6f8] dark:from-[#172026] dark:via-[#1a252c] dark:to-[#172329] border-2 border-[#c026d3]/30 shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-[#c026d3]/15 pb-3">
           <div className="flex items-center gap-2.5">
-            <CheckSquare className="w-5 h-5 text-[#00738c] dark:text-[#6fb3c6]" />
+            <CheckSquare className="w-5 h-5 text-[#c026d3] dark:text-[#fb7185]" />
             <h3 className="text-sm sm:text-base font-bold text-[#1c2830] dark:text-[#e8ebe9]">
               {lang === 'fa' ? 'پرسش‌های رسمی و دقیق اسلاید ۱۷ (Slide 17 Questions):' : 'Official Slide 17 Exact Questions:'}
             </h3>
           </div>
-          <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6]">
+          <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]">
             CPMAI Workbook Slide 17
           </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {/* Card 1 */}
-          <div className="p-4 rounded-xl bg-white dark:bg-[#1f282e] border border-[#00738c]/20 shadow-2xs hover:border-[#00738c] transition-all flex flex-col justify-between">
+          <div className="p-4 rounded-xl bg-white dark:bg-[#1f282e] border border-[#c026d3]/20 shadow-2xs hover:border-[#c026d3] transition-all flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="w-6 h-6 rounded-md bg-[#00738c] text-white flex items-center justify-center text-xs font-bold shrink-0">
+                <span className="w-6 h-6 rounded-md bg-[#c026d3] text-white flex items-center justify-center text-xs font-bold shrink-0">
                   1
                 </span>
-                <span className="text-xs font-bold text-[#00738c] dark:text-[#6fb3c6]">
+                <span className="text-xs font-bold text-[#c026d3] dark:text-[#fb7185]">
                   {lang === 'fa' ? 'پرسش اول' : 'Question 1'}
                 </span>
               </div>
@@ -713,7 +713,7 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
           </div>
 
           {/* Card 2 */}
-          <div className="p-4 rounded-xl bg-white dark:bg-[#1f282e] border border-[#00738c]/20 shadow-2xs hover:border-[#00738c] transition-all flex flex-col justify-between">
+          <div className="p-4 rounded-xl bg-white dark:bg-[#1f282e] border border-[#c026d3]/20 shadow-2xs hover:border-[#c026d3] transition-all flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="w-6 h-6 rounded-md bg-[#f59e0b] text-white flex items-center justify-center text-xs font-bold shrink-0">
@@ -735,7 +735,7 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
           </div>
 
           {/* Card 3 */}
-          <div className="p-4 rounded-xl bg-white dark:bg-[#1f282e] border border-[#00738c]/20 shadow-2xs hover:border-[#00738c] transition-all flex flex-col justify-between">
+          <div className="p-4 rounded-xl bg-white dark:bg-[#1f282e] border border-[#c026d3]/20 shadow-2xs hover:border-[#c026d3] transition-all flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="w-6 h-6 rounded-md bg-[#10b981] text-white flex items-center justify-center text-xs font-bold shrink-0">
@@ -759,29 +759,29 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
       </div>
 
       {/* 5 Cognitive Value Vectors Banner (Supporting Question 3) */}
-      <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-r from-[#00738c]/10 via-[#10b981]/10 to-[#6366f1]/10 dark:from-[#00738c]/20 dark:via-[#10b981]/20 dark:to-[#6366f1]/20 border border-[#00738c]/20">
-        <h3 className="text-xs sm:text-sm font-bold text-[#1f5163] dark:text-[#6fb3c6] flex items-center gap-2 mb-2.5">
-          <TrendingUp className="w-4 h-4 text-[#00738c] dark:text-[#6fb3c6]" />
+      <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-r from-[#c026d3]/10 via-[#10b981]/10 to-[#6366f1]/10 dark:from-[#c026d3]/20 dark:via-[#10b981]/20 dark:to-[#6366f1]/20 border border-[#c026d3]/20">
+        <h3 className="text-xs sm:text-sm font-bold text-[#e0533c] dark:text-[#fb7185] flex items-center gap-2 mb-2.5">
+          <TrendingUp className="w-4 h-4 text-[#c026d3] dark:text-[#fb7185]" />
           <span>{text.fiveVectorsTitle}</span>
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 text-xs text-[#1c2830] dark:text-[#e8ebe9]">
-          <div className="p-2.5 rounded-lg bg-white/70 dark:bg-[#172026]/80 border border-[#1f5163]/10">
-            <span className="font-bold text-[#00738c] dark:text-[#6fb3c6] block mb-0.5">۱. Better (بهتر)</span>
+          <div className="p-2.5 rounded-lg bg-white/70 dark:bg-[#172026]/80 border border-[#e0533c]/10">
+            <span className="font-bold text-[#c026d3] dark:text-[#fb7185] block mb-0.5">۱. Better (بهتر)</span>
             <span className="text-[#5d6b73] dark:text-[#9aa8b0] leading-normal">{text.v1}</span>
           </div>
-          <div className="p-2.5 rounded-lg bg-white/70 dark:bg-[#172026]/80 border border-[#1f5163]/10">
+          <div className="p-2.5 rounded-lg bg-white/70 dark:bg-[#172026]/80 border border-[#e0533c]/10">
             <span className="font-bold text-[#10b981] dark:text-emerald-400 block mb-0.5">۲. Faster (سریع‌تر)</span>
             <span className="text-[#5d6b73] dark:text-[#9aa8b0] leading-normal">{text.v2}</span>
           </div>
-          <div className="p-2.5 rounded-lg bg-white/70 dark:bg-[#172026]/80 border border-[#1f5163]/10">
+          <div className="p-2.5 rounded-lg bg-white/70 dark:bg-[#172026]/80 border border-[#e0533c]/10">
             <span className="font-bold text-[#f59e0b] dark:text-amber-400 block mb-0.5">۳. Cheaper (ارزان‌تر)</span>
             <span className="text-[#5d6b73] dark:text-[#9aa8b0] leading-normal">{text.v3}</span>
           </div>
-          <div className="p-2.5 rounded-lg bg-white/70 dark:bg-[#172026]/80 border border-[#1f5163]/10">
+          <div className="p-2.5 rounded-lg bg-white/70 dark:bg-[#172026]/80 border border-[#e0533c]/10">
             <span className="font-bold text-[#6366f1] dark:text-indigo-400 block mb-0.5">۴. More Reliable (مطمئن‌تر)</span>
             <span className="text-[#5d6b73] dark:text-[#9aa8b0] leading-normal">{text.v4}</span>
           </div>
-          <div className="p-2.5 rounded-lg bg-white/70 dark:bg-[#172026]/80 border border-[#1f5163]/10">
+          <div className="p-2.5 rounded-lg bg-white/70 dark:bg-[#172026]/80 border border-[#e0533c]/10">
             <span className="font-bold text-[#ec4899] dark:text-pink-400 block mb-0.5">۵. Scalable (مقیاس‌پذیر)</span>
             <span className="text-[#5d6b73] dark:text-[#9aa8b0] leading-normal">{text.v5}</span>
           </div>
@@ -789,10 +789,10 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
       </div>
 
       {/* Case Studies / Industry Presets Bar */}
-      <div className="p-4 sm:p-5 rounded-xl bg-[#ffffff] dark:bg-[#172026] border border-[#1f5163]/20 shadow-xs">
+      <div className="p-4 sm:p-5 rounded-xl bg-[#ffffff] dark:bg-[#172026] border border-[#e0533c]/20 shadow-xs">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#00738c] dark:text-[#6fb3c6]" />
+            <Sparkles className="w-4 h-4 text-[#c026d3] dark:text-[#fb7185]" />
             <h3 className="text-xs sm:text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9]">
               {lang === 'fa' ? 'نمونه‌های آماده پاسخ به ۳ پرسش اسلاید ۱۷ بر اساس صنایع واقعی:' : 'Real-World 3-Question Case Studies (Click to Load):'}
             </h3>
@@ -803,9 +803,9 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
           <button
             type="button"
             onClick={handleExampleMovie}
-            className="flex items-start gap-2.5 p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] hover:bg-[#e3eef1] dark:hover:bg-[#1b2c32] text-start border border-[#1f5163]/15 transition-all group cursor-pointer"
+            className="flex items-start gap-2.5 p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] hover:bg-[#fdeee9] dark:hover:bg-[#341528] text-start border border-[#e0533c]/15 transition-all group cursor-pointer"
           >
-            <Film className="w-4 h-4 text-[#00738c] dark:text-[#6fb3c6] shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+            <Film className="w-4 h-4 text-[#c026d3] dark:text-[#fb7185] shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
             <div>
               <span className="text-xs font-semibold text-[#1c2830] dark:text-[#e8ebe9] block leading-tight">
                 {lang === 'fa' ? 'پیشنهادگر فیلم و مدیا' : 'Streaming Media Recs'}
@@ -819,7 +819,7 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
           <button
             type="button"
             onClick={handleExampleChurn}
-            className="flex items-start gap-2.5 p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] hover:bg-[#e3eef1] dark:hover:bg-[#1b2c32] text-start border border-[#1f5163]/15 transition-all group cursor-pointer"
+            className="flex items-start gap-2.5 p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] hover:bg-[#fdeee9] dark:hover:bg-[#341528] text-start border border-[#e0533c]/15 transition-all group cursor-pointer"
           >
             <Users className="w-4 h-4 text-[#10b981] dark:text-emerald-400 shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
             <div>
@@ -835,7 +835,7 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
           <button
             type="button"
             onClick={handleExampleFraud}
-            className="flex items-start gap-2.5 p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] hover:bg-[#e3eef1] dark:hover:bg-[#1b2c32] text-start border border-[#1f5163]/15 transition-all group cursor-pointer"
+            className="flex items-start gap-2.5 p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] hover:bg-[#fdeee9] dark:hover:bg-[#341528] text-start border border-[#e0533c]/15 transition-all group cursor-pointer"
           >
             <ShieldAlert className="w-4 h-4 text-[#f59e0b] dark:text-amber-400 shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
             <div>
@@ -851,7 +851,7 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
           <button
             type="button"
             onClick={handleExampleHealth}
-            className="flex items-start gap-2.5 p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] hover:bg-[#e3eef1] dark:hover:bg-[#1b2c32] text-start border border-[#1f5163]/15 transition-all group cursor-pointer"
+            className="flex items-start gap-2.5 p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] hover:bg-[#fdeee9] dark:hover:bg-[#341528] text-start border border-[#e0533c]/15 transition-all group cursor-pointer"
           >
             <Activity className="w-4 h-4 text-[#6366f1] dark:text-indigo-400 shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
             <div>
@@ -867,11 +867,11 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
       </div>
 
       {/* Structured 3-Question Builder Accordion / Toggle */}
-      <div className="p-4 sm:p-5 rounded-xl bg-[#ffffff] dark:bg-[#172026] border border-[#1f5163]/20 shadow-xs">
+      <div className="p-4 sm:p-5 rounded-xl bg-[#ffffff] dark:bg-[#172026] border border-[#e0533c]/20 shadow-xs">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h3 className="text-xs sm:text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[#00738c] dark:text-[#6fb3c6]" />
+              <Layers className="w-4 h-4 text-[#c026d3] dark:text-[#fb7185]" />
               <span>{text.builderTitle}</span>
             </h3>
             <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] mt-0.5">
@@ -881,7 +881,7 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
           <button
             type="button"
             onClick={() => setShowBuilder(!showBuilder)}
-            className="text-xs text-[#00738c] dark:text-[#6fb3c6] hover:underline font-medium cursor-pointer"
+            className="text-xs text-[#c026d3] dark:text-[#fb7185] hover:underline font-medium cursor-pointer"
           >
             {showBuilder ? (lang === 'fa' ? 'بستن فرم سازنده' : 'Collapse Builder') : (lang === 'fa' ? 'نمایش فرم سازنده' : 'Expand Builder')}
           </button>
@@ -890,9 +890,9 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
         {showBuilder && (
           <div className="space-y-4 pt-2">
             {/* Input 1: Question 1 */}
-            <div className="p-3.5 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] border border-[#00738c]/20">
+            <div className="p-3.5 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] border border-[#c026d3]/20">
               <div className="flex items-center gap-2 mb-1">
-                <span className="w-5 h-5 rounded-full bg-[#00738c] text-white flex items-center justify-center text-[11px] font-bold shrink-0">
+                <span className="w-5 h-5 rounded-full bg-[#c026d3] text-white flex items-center justify-center text-[11px] font-bold shrink-0">
                   1
                 </span>
                 <label className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9]">
@@ -907,7 +907,7 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
                 onChange={(e) => setQ1Alternatives(e.target.value)}
                 placeholder={text.question1Placeholder}
                 rows={3}
-                className="w-full text-xs p-2.5 rounded-lg bg-white dark:bg-[#172026] text-[#1c2830] dark:text-[#e8ebe9] border border-[#1f5163]/20 focus:outline-hidden focus:border-[#00738c] dark:focus:border-[#6fb3c6] resize-y"
+                className="w-full text-xs p-2.5 rounded-lg bg-white dark:bg-[#172026] text-[#1c2830] dark:text-[#e8ebe9] border border-[#e0533c]/20 focus:outline-hidden focus:border-[#c026d3] dark:focus:border-[#fb7185] resize-y"
               />
             </div>
 
@@ -929,7 +929,7 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
                 onChange={(e) => setQ2WhyNotFeasible(e.target.value)}
                 placeholder={text.question2Placeholder}
                 rows={3}
-                className="w-full text-xs p-2.5 rounded-lg bg-white dark:bg-[#172026] text-[#1c2830] dark:text-[#e8ebe9] border border-[#1f5163]/20 focus:outline-hidden focus:border-[#00738c] dark:focus:border-[#6fb3c6] resize-y"
+                className="w-full text-xs p-2.5 rounded-lg bg-white dark:bg-[#172026] text-[#1c2830] dark:text-[#e8ebe9] border border-[#e0533c]/20 focus:outline-hidden focus:border-[#c026d3] dark:focus:border-[#fb7185] resize-y"
               />
             </div>
 
@@ -951,14 +951,14 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
                 onChange={(e) => setQ3WhyNotUsedIfFeasible(e.target.value)}
                 placeholder={text.question3Placeholder}
                 rows={3}
-                className="w-full text-xs p-2.5 rounded-lg bg-white dark:bg-[#172026] text-[#1c2830] dark:text-[#e8ebe9] border border-[#1f5163]/20 focus:outline-hidden focus:border-[#00738c] dark:focus:border-[#6fb3c6] resize-y"
+                className="w-full text-xs p-2.5 rounded-lg bg-white dark:bg-[#172026] text-[#1c2830] dark:text-[#e8ebe9] border border-[#e0533c]/20 focus:outline-hidden focus:border-[#c026d3] dark:focus:border-[#fb7185] resize-y"
               />
             </div>
 
             <button
               type="button"
               onClick={handleApplyBuilder}
-              className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-lg bg-[#00738c] hover:bg-[#005f73] text-white text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+              className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-lg bg-[#c026d3] hover:bg-[#005f73] text-white text-xs font-semibold transition-colors shadow-xs cursor-pointer"
             >
               <Zap className="w-4 h-4" />
               <span>{text.applyBuilderBtn}</span>
@@ -968,9 +968,9 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
       </div>
 
       {/* Interactive AI Go / No-Go Decision Gate */}
-      <div className="p-4 sm:p-5 rounded-xl bg-[#ffffff] dark:bg-[#172026] border border-[#1f5163]/20 shadow-xs">
+      <div className="p-4 sm:p-5 rounded-xl bg-[#ffffff] dark:bg-[#172026] border border-[#e0533c]/20 shadow-xs">
         <div className="flex items-center gap-2 mb-2">
-          <Cpu className="w-5 h-5 text-[#00738c] dark:text-[#6fb3c6]" />
+          <Cpu className="w-5 h-5 text-[#c026d3] dark:text-[#fb7185]" />
           <div>
             <h3 className="text-xs sm:text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9]">
               {text.goNoGoTitle}
@@ -983,7 +983,7 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
 
         <div className="mt-4 space-y-3">
           {/* Question 1 */}
-          <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] border border-[#1f5163]/10">
+          <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] border border-[#e0533c]/10">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <span className="text-xs font-medium text-[#1c2830] dark:text-[#e8ebe9]">
                 {text.q1}
@@ -1019,7 +1019,7 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
           </div>
 
           {/* Question 2 */}
-          <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] border border-[#1f5163]/10">
+          <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] border border-[#e0533c]/10">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <span className="text-xs font-medium text-[#1c2830] dark:text-[#e8ebe9]">
                 {text.q2}
@@ -1055,7 +1055,7 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
           </div>
 
           {/* Question 3 */}
-          <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] border border-[#1f5163]/10">
+          <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] border border-[#e0533c]/10">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <span className="text-xs font-medium text-[#1c2830] dark:text-[#e8ebe9]">
                 {text.q3}
@@ -1091,7 +1091,7 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
           </div>
 
           {/* Question 4 */}
-          <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] border border-[#1f5163]/10">
+          <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] border border-[#e0533c]/10">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <span className="text-xs font-medium text-[#1c2830] dark:text-[#e8ebe9]">
                 {text.q4}
@@ -1127,7 +1127,7 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
           </div>
 
           {/* Question 5 */}
-          <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] border border-[#1f5163]/10">
+          <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#1f282e] border border-[#e0533c]/10">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <span className="text-xs font-medium text-[#1c2830] dark:text-[#e8ebe9]">
                 {text.q5}
@@ -1188,10 +1188,10 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
       </div>
 
       {/* Main Interactive Canvas Textarea */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-[#ffffff] dark:bg-[#172026] border border-[#1f5163]/20 shadow-xs space-y-3">
+      <div className="p-5 sm:p-6 rounded-2xl bg-[#ffffff] dark:bg-[#172026] border border-[#e0533c]/20 shadow-xs space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-[#00738c] dark:text-[#6fb3c6]" />
+            <FileText className="w-4 h-4 text-[#c026d3] dark:text-[#fb7185]" />
             <h3 className="text-xs sm:text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9]">
               {text.canvasTitle}
             </h3>
@@ -1220,20 +1220,20 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
           onChange={(e) => onChangeContent(e.target.value)}
           placeholder={text.canvasPlaceholder}
           rows={16}
-          className="w-full text-xs sm:text-sm p-4 rounded-xl bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] border border-[#1f5163]/20 focus:outline-hidden focus:border-[#00738c] dark:focus:border-[#6fb3c6] transition-colors leading-relaxed font-mono"
+          className="w-full text-xs sm:text-sm p-4 rounded-xl bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] border border-[#e0533c]/20 focus:outline-hidden focus:border-[#c026d3] dark:focus:border-[#fb7185] transition-colors leading-relaxed font-mono"
         />
 
         {/* Bottom PMI Copyright Notice matching Slide 17 */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 border-t border-[#1f5163]/10 text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 border-t border-[#e0533c]/10 text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
           <span>{text.pmiCopyright}</span>
-          <span className="font-semibold text-[#00738c] dark:text-[#6fb3c6]">
+          <span className="font-semibold text-[#c026d3] dark:text-[#fb7185]">
             {lang === 'fa' ? 'اسلاید ۱۷ کتاب کار رسمی CPMAI' : 'CPMAI Official Course Slide 17'}
           </span>
         </div>
       </div>
 
       {/* Navigation Return Button to Page 6 & Forward to Page 8 */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-xl bg-[#e3eef1] dark:bg-[#1b2c32] border border-[#1f5163]/20">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-xl bg-[#fdeee9] dark:bg-[#341528] border border-[#e0533c]/20">
         <button
           type="button"
           onClick={onGoToPage6}
@@ -1247,7 +1247,7 @@ Conclusion: Cognitive solution is strictly required because noncognitive alterna
           <button
             type="button"
             onClick={onGoToPage8}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg bg-[#00738c] text-white hover:bg-[#005f73] transition-colors shadow-sm cursor-pointer"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg bg-[#c026d3] text-white hover:bg-[#005f73] transition-colors shadow-sm cursor-pointer"
           >
             <span>{text.nextPageBtn}</span>
             {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}

@@ -58,7 +58,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           />
         </div>
         <div className="flex flex-col">
-          <span className="font-semibold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9] group-hover:text-[#1f5163] dark:group-hover:text-[#6fb3c6] transition-colors leading-tight">
+          <span className="font-semibold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9] group-hover:text-[#e0533c] dark:group-hover:text-[#fb7185] transition-colors leading-tight">
             {t.org}
           </span>
           <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] mt-0.5">
@@ -94,15 +94,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => onSelectPhase(phaseId)}
                   className={`w-full text-start flex items-center justify-between px-3 py-2 rounded-lg text-xs sm:text-sm transition-all ${
                     isActive
-                      ? 'bg-[#e3eef1] dark:bg-[#1b2c32] text-[#1f5163] dark:text-[#6fb3c6] font-semibold shadow-xs'
-                      : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#f4f4f1] dark:hover:bg-[#1a2228] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+                      ? 'bg-[#fdeee9] dark:bg-[#341528] text-[#e0533c] dark:text-[#fb7185] font-semibold shadow-xs'
+                      : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#fbf2ec] dark:hover:bg-[#201729] hover:text-[#261a1d] dark:hover:text-[#faedf3]'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 truncate">
                     <span
                       className={`font-serif font-bold text-xs px-1.5 py-0.5 rounded ${
                         isActive
-                          ? 'bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e]'
+                          ? 'bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e]'
                           : 'bg-[#d9dad5]/50 dark:bg-[#2d3942] text-[#5d6b73] dark:text-[#9aa8b0]'
                       }`}
                     >
@@ -133,13 +133,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="mb-6 p-3.5 rounded-lg bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942]">
         <div className="flex items-center justify-between text-xs text-[#5d6b73] dark:text-[#9aa8b0] mb-2">
           <span>{t.phaseProg}</span>
-          <span className="font-mono font-medium text-[#1f5163] dark:text-[#6fb3c6]">
+          <span className="font-mono font-medium text-[#e0533c] dark:text-[#fb7185]">
             {currentProgress}%
           </span>
         </div>
         <div className="w-full h-2 bg-[#d9dad5] dark:bg-[#2d3942] rounded-full overflow-hidden">
           <div
-            className="h-full bg-[#1f5163] dark:bg-[#6fb3c6] transition-all duration-300"
+            className="h-full bg-[#e0533c] dark:bg-[#fb7185] transition-all duration-300"
             style={{ width: `${currentProgress}%` }}
           />
         </div>

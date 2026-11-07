@@ -210,7 +210,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- معیار شماره ${i + 1}
     <div className="space-y-6 animate-fade-in">
       {/* Page Header (Matching Image 3) */}
       <div className="border-b border-[#d9dad5] dark:border-[#2d3942] pb-5">
-        <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-[#1f5163] dark:text-[#6fb3c6]">
+        <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-[#e0533c] dark:text-[#fb7185]">
           <span>{t.badge}</span>
         </div>
         <h1 className="text-xl sm:text-2xl font-semibold text-[#1c2830] dark:text-[#e8ebe9] tracking-tight font-sans">
@@ -219,7 +219,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- معیار شماره ${i + 1}
       </div>
 
       {/* Top Description Box (Verbatim matching the top card in Image 3) */}
-      <div className="relative p-5 sm:p-6 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] border-t-3 border-t-[#1f5163] dark:border-t-[#6fb3c6] shadow-xs">
+      <div className="relative p-5 sm:p-6 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] border-t-3 border-t-[#e0533c] dark:border-t-[#fb7185] shadow-xs">
         <p className="text-xs sm:text-sm leading-relaxed text-[#2c3840] dark:text-[#cfd6db]">
           <b className="text-[#1c2830] dark:text-[#e8ebe9] font-semibold">{t.criteriaLabel} </b>
           {t.criteriaText}
@@ -252,7 +252,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- معیار شماره ${i + 1}
           <button
             type="button"
             onClick={handleInsertExample}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[#0a7b97] text-[#0a7b97] dark:text-[#6fb3c6] dark:border-[#6fb3c6] hover:bg-[#0a7b97]/10 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[#0a7b97] text-[#0a7b97] dark:text-[#fb7185] dark:border-[#fb7185] hover:bg-[#0a7b97]/10 transition-colors"
           >
             <Lightbulb className="w-3.5 h-3.5" />
             <span>{t.exampleBtn}</span>
@@ -287,7 +287,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- معیار شماره ${i + 1}
       {/* Slide Container (Authentic replica of Image 3) */}
       <div className="rounded-xl border border-[#0a7b97] dark:border-[#0a7b97]/80 overflow-hidden shadow-sm bg-[#ffffff] dark:bg-[#16202a]">
         {/* Teal Header Bar (Verbatim Image 3 Teal Header) */}
-        <div className="bg-[#00738c] px-6 py-3.5 text-white flex items-center justify-between select-none">
+        <div className="bg-[#c026d3] px-6 py-3.5 text-white flex items-center justify-between select-none">
           <h2 className="font-semibold text-base sm:text-lg tracking-normal font-sans" dir="ltr">
             {t.slideTitle}
           </h2>
@@ -306,7 +306,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- معیار شماره ${i + 1}
                 ? 'معیارهای عینی و سنجش‌پذیر موفقیت برای این تکرار پروژه را اینجا بنویسید...\n\nبرای شروع می‌توانید از دکمه‌های «درج قالب استاندارد معیارها» یا «پر کردن با نمونه موردی» در بالا استفاده کنید.'
                 : 'Write your objective measures of success for this project iteration here...\n\nYou can also click "Insert Criteria Template" or "Fill Retail Banking Churn Example" above to get started.'
             }
-            className="flex-1 w-full p-4 sm:p-5 rounded-lg bg-[#ffffff]/90 dark:bg-[#1a293d]/90 text-[#1c2830] dark:text-[#e8ebe9] border border-[#d2def2] dark:border-[#2d3f56] focus:border-[#00738c] focus:outline-none resize-y text-sm sm:text-[15px] leading-relaxed font-sans shadow-inner min-h-[420px]"
+            className="flex-1 w-full p-4 sm:p-5 rounded-lg bg-[#ffffff]/90 dark:bg-[#1a293d]/90 text-[#1c2830] dark:text-[#e8ebe9] border border-[#d2def2] dark:border-[#2d3f56] focus:border-[#c026d3] focus:outline-none resize-y text-sm sm:text-[15px] leading-relaxed font-sans shadow-inner min-h-[420px]"
           />
 
           {/* Footer Bar of Canvas */}
@@ -318,7 +318,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- معیار شماره ${i + 1}
             </div>
 
             {/* Corner Geometric Triangles (Watermark replica from bottom right of slide) */}
-            <div className="opacity-25 dark:opacity-15 pointer-events-none text-[#00738c] dark:text-[#6fb3c6]">
+            <div className="opacity-25 dark:opacity-15 pointer-events-none text-[#c026d3] dark:text-[#fb7185]">
               <svg width="48" height="32" viewBox="0 0 48 32" fill="currentColor">
                 <polygon points="48,32 24,32 48,8" />
                 <polygon points="36,32 12,32 36,8" />
@@ -331,31 +331,31 @@ ${discContent.successCriteriaFa.map((sc, i) => `- معیار شماره ${i + 1}
 
       {/* CPMAI Methodology Tips Box */}
       <div className="p-4 sm:p-5 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] space-y-2.5">
-        <h3 className="font-semibold text-xs sm:text-sm text-[#1f5163] dark:text-[#6fb3c6]">
+        <h3 className="font-semibold text-xs sm:text-sm text-[#e0533c] dark:text-[#fb7185]">
           {t.tipsTitle}
         </h3>
         <ul className="space-y-1.5 text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
           <li className="flex items-start gap-2">
-            <span className="text-[#1f5163] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#e0533c] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip1}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#1f5163] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#e0533c] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip2}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#1f5163] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#e0533c] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip3}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#1f5163] dark:text-[#6fb3c6] font-bold">•</span>
+            <span className="text-[#e0533c] dark:text-[#fb7185] font-bold">•</span>
             <span>{t.tip4}</span>
           </li>
         </ul>
       </div>
 
       {/* Navigation Return Button to Page 2 and Next Page to Page 4 */}
-      <div className="p-4 sm:p-5 rounded-xl bg-[#e3eef1] dark:bg-[#1b2c32] border border-[#1f5163]/20 flex flex-wrap items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 rounded-xl bg-[#fdeee9] dark:bg-[#341528] border border-[#e0533c]/20 flex flex-wrap items-center justify-between gap-4">
         <button
           type="button"
           onClick={onGoToPage2}
@@ -369,7 +369,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- معیار شماره ${i + 1}
           <button
             type="button"
             onClick={onGoToPage4}
-            className="flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#00738c] text-white hover:bg-[#005f73] transition-colors shadow-xs"
+            className="flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#c026d3] text-white hover:bg-[#005f73] transition-colors shadow-xs"
           >
             <span>{t.nextPageBtn}</span>
             {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}

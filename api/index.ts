@@ -1686,6 +1686,7 @@ app.get(['/api/health', '/health'], async (req, res) => {
     client.release();
 
     const hasAiGatewayKey = !!process.env.AI_GATEWAY_API_KEY;
+    const hasOpenRouterKey = !!process.env.OPENROUTER_API_KEY;
 
     res.json({
       status: 'ok',
@@ -1693,7 +1694,9 @@ app.get(['/api/health', '/health'], async (req, res) => {
       database: 'Neon PostgreSQL Connected',
       dbVersion: result.rows[0].version,
       timestamp: result.rows[0].current_time,
-      aiGatewayConfigured: hasAiGatewayKey
+      aiGatewayConfigured: hasAiGatewayKey,
+      openRouterConfigured: hasOpenRouterKey,
+      aiModel: process.env.OPENROUTER_MODEL || 'z-ai/glm-5.3-flash'
     });
   } catch (err: any) {
     res.status(500).json({
@@ -1889,6 +1892,8 @@ app.post(['/api/ai/tutor', '/ai/tutor'], async (req, res) => {
     });
   }
 
+  const openRouterKey = process.env.OPENROUTER_API_KEY;
+  const openRouterModel = process.env.OPENROUTER_MODEL || 'z-ai/glm-5.3-flash';
   const geminiKey = process.env.GEMINI_API_KEY;
   const gatewayKey = process.env.AI_GATEWAY_API_KEY;
 
@@ -1927,7 +1932,57 @@ ${userDraft ? userDraft.slice(0, 6000) : '(The user has not written their draft 
    - If the user asks you to review or critique their current draft, evaluate what they wrote in "User's Current Live Workbook Content" against CPMAI Phase I standards (strengths, blind spots, and an actionable improvement).
    - Keep responses structured, scannable (using concise bullet points and bold key terms), and under 300 words unless deep technical detail is requested.`;
 
-  // 1. Primary path: Official @google/genai SDK with gemini-3.8-flash
+  // 1. Primary path: OpenRouter API with z-ai/glm-5.3-flash
+  if (openRouterKey) {
+    try {
+      const messages = [
+        { role: 'system', content: systemInstruction },
+        ...(Array.isArray(history)
+          ? history.slice(-8).map((m: any) => ({
+              role: m.role === 'model' || m.role === 'assistant' ? 'assistant' : 'user',
+              content: String(m.text || m.content || '')
+            }))
+          : []),
+        { role: 'user', content: question.trim() }
+      ];
+
+      const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openRouterKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://owjbc.vercel.app',
+          'X-Title': 'CPMAI AI Tutor'
+        },
+        body: JSON.stringify({
+          model: openRouterModel,
+          messages,
+          temperature: 0.3
+        })
+      });
+
+      const aiData: any = await aiResponse.json();
+      if (aiData.error) {
+        throw new Error(aiData.error.message || 'OpenRouter error');
+      }
+
+      const replyText = aiData.choices?.[0]?.message?.content || (lang === 'fa' ? 'پاسخی دریافت نشد.' : 'No response generated.');
+      return res.json({
+        reply: replyText,
+        model: aiData.model || openRouterModel,
+        groundedPage: pageNumber
+      });
+    } catch (err: any) {
+      console.error('OpenRouter API error in /api/ai/tutor:', err?.message || err);
+      if (!geminiKey && !gatewayKey) {
+        return res.status(500).json({
+          error: err?.message || 'Failed to generate response from OpenRouter AI Tutor.'
+        });
+      }
+    }
+  }
+
+  // 2. Secondary path: Official @google/genai SDK with gemini-3.8-flash
   if (geminiKey) {
     try {
       const ai = new GoogleGenAI({
@@ -2023,8 +2078,8 @@ ${userDraft ? userDraft.slice(0, 6000) : '(The user has not written their draft 
 
   return res.status(500).json({
     error: lang === 'fa'
-      ? 'کلید API هوش مصنوعی در تنظیمات سرور فعال نشده است. لطفاً از بخش Settings > Secrets کلید GEMINI_API_KEY را بررسی فرمایید.'
-      : 'AI API key is not configured on the server. Please check GEMINI_API_KEY in Settings > Secrets.'
+      ? 'کلید API هوش مصنوعی در تنظیمات سرور فعال نشده است. لطفاً متغیر OPENROUTER_API_KEY یا GEMINI_API_KEY را بررسی فرمایید.'
+      : 'AI API key is not configured on the server. Please check OPENROUTER_API_KEY or GEMINI_API_KEY in server environment.'
   });
 });
 

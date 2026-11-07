@@ -326,10 +326,10 @@ Task: Cognitive Requirements - Cognitive Outcomes
   return (
     <div className="space-y-8 animate-fadeIn" dir={lang === 'fa' ? 'rtl' : 'ltr'}>
       {/* Header Banner */}
-      <div className="p-6 rounded-xl bg-gradient-to-br from-[#00738c]/10 via-[#2f7d5b]/10 to-transparent border border-[#00738c]/20 dark:border-[#00738c]/30 shadow-xs">
+      <div className="p-6 rounded-xl bg-gradient-to-br from-[#c026d3]/10 via-[#2f7d5b]/10 to-transparent border border-[#c026d3]/20 dark:border-[#c026d3]/30 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#00738c]/15 text-[#00738c] dark:bg-[#00738c]/30 dark:text-[#6fb3c6]">
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#c026d3]/15 text-[#c026d3] dark:bg-[#c026d3]/30 dark:text-[#fb7185]">
               {text.badgePhase}
             </span>
             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#2f7d5b]/15 text-[#2f7d5b] dark:bg-[#2f7d5b]/30 dark:text-[#6ee7b7]">
@@ -341,13 +341,13 @@ Task: Cognitive Requirements - Cognitive Outcomes
           </div>
 
           <div className="flex items-center gap-2 text-xs font-mono text-[#5d6b73] dark:text-[#9aa8b0] bg-white/70 dark:bg-[#1e262c]/70 px-3 py-1 rounded-md border border-[#d9dad5] dark:border-[#2d3942]">
-            <Brain className="w-3.5 h-3.5 text-[#00738c]" />
+            <Brain className="w-3.5 h-3.5 text-[#c026d3]" />
             <span>Slide 20 / 40+ · Phase I</span>
           </div>
         </div>
 
         <div className="flex items-start gap-3">
-          <div className="p-2.5 rounded-lg bg-[#00738c] text-white shrink-0 mt-1 shadow-xs">
+          <div className="p-2.5 rounded-lg bg-[#c026d3] text-white shrink-0 mt-1 shadow-xs">
             <Target className="w-6 h-6" />
           </div>
           <div>
@@ -363,7 +363,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
 
       {/* Official Slide 20 Reference Card (Highlighting Document Categorization) */}
       <div className="p-5 rounded-xl bg-white dark:bg-[#1e262c] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs">
-        <div className="flex items-center gap-2 mb-3 text-xs font-semibold uppercase tracking-wider text-[#00738c] dark:text-[#6fb3c6]">
+        <div className="flex items-center gap-2 mb-3 text-xs font-semibold uppercase tracking-wider text-[#c026d3] dark:text-[#fb7185]">
           <Award className="w-4 h-4" />
           <span>{text.slideExampleTitle}</span>
         </div>
@@ -403,7 +403,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
 
         {/* Translation Guidance Note */}
         <div className="mt-4 p-3.5 rounded-lg bg-[#f8fafc] dark:bg-[#172027] border border-[#e2e8f0] dark:border-[#2d3942] text-xs text-[#475569] dark:text-[#94a3b8] flex items-start gap-2.5">
-          <Info className="w-4 h-4 text-[#00738c] shrink-0 mt-0.5" />
+          <Info className="w-4 h-4 text-[#c026d3] shrink-0 mt-0.5" />
           <div>
             <span className="font-semibold text-[#1c2830] dark:text-[#e8ebe9]">
               {text.translationRuleTitle}:
@@ -416,14 +416,14 @@ Task: Cognitive Requirements - Cognitive Outcomes
       {/* 4 Core Questions of Slide 20 */}
       <div className="p-5 rounded-xl bg-white dark:bg-[#1e262c] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs">
         <h2 className="text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9] mb-4 flex items-center gap-2">
-          <HelpCircle className="w-4 h-4 text-[#00738c]" />
+          <HelpCircle className="w-4 h-4 text-[#c026d3]" />
           <span>{text.questionsHeader}</span>
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 rounded-lg bg-[#f8fafc] dark:bg-[#172027] border border-[#d9dad5] dark:border-[#2d3942]">
-            <div className="flex items-center gap-2 text-xs font-semibold text-[#00738c] dark:text-[#6fb3c6] mb-1">
-              <span className="w-5 h-5 rounded-full bg-[#00738c]/15 text-[#00738c] flex items-center justify-center font-bold">1</span>
+            <div className="flex items-center gap-2 text-xs font-semibold text-[#c026d3] dark:text-[#fb7185] mb-1">
+              <span className="w-5 h-5 rounded-full bg-[#c026d3]/15 text-[#c026d3] flex items-center justify-center font-bold">1</span>
               <span>{text.q1Title}</span>
             </div>
             <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
@@ -469,7 +469,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
           onClick={() => setActiveTab('overview')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all whitespace-nowrap ${
             activeTab === 'overview'
-              ? 'border-[#00738c] text-[#00738c] dark:text-[#6fb3c6]'
+              ? 'border-[#c026d3] text-[#c026d3] dark:text-[#fb7185]'
               : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830]'
           }`}
         >
@@ -481,7 +481,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
           onClick={() => setActiveTab('builder')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all whitespace-nowrap ${
             activeTab === 'builder'
-              ? 'border-[#00738c] text-[#00738c] dark:text-[#6fb3c6]'
+              ? 'border-[#c026d3] text-[#c026d3] dark:text-[#fb7185]'
               : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830]'
           }`}
         >
@@ -493,7 +493,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
           onClick={() => setActiveTab('criteria')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all whitespace-nowrap ${
             activeTab === 'criteria'
-              ? 'border-[#00738c] text-[#00738c] dark:text-[#6fb3c6]'
+              ? 'border-[#c026d3] text-[#c026d3] dark:text-[#fb7185]'
               : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830]'
           }`}
         >
@@ -505,7 +505,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
           onClick={() => setActiveTab('examples')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all whitespace-nowrap ${
             activeTab === 'examples'
-              ? 'border-[#00738c] text-[#00738c] dark:text-[#6fb3c6]'
+              ? 'border-[#c026d3] text-[#c026d3] dark:text-[#fb7185]'
               : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830]'
           }`}
         >
@@ -519,7 +519,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
         <div className="space-y-6">
           <div className="p-5 rounded-xl bg-white dark:bg-[#1e262c] border border-[#d9dad5] dark:border-[#2d3942] space-y-4 shadow-xs">
             <h3 className="text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#00738c]" />
+              <TrendingUp className="w-4 h-4 text-[#c026d3]" />
               <span>
                 {lang === 'fa'
                   ? 'فرآیند گام‌به‌گام ترجمه اهداف کسب‌وکار به دستاوردهای شناختی در CPMAI'
@@ -530,7 +530,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-lg bg-[#f8fafc] dark:bg-[#172027] border border-[#d9dad5] dark:border-[#2d3942] flex flex-col justify-between">
                 <div>
-                  <div className="text-xs font-bold text-[#00738c] mb-1">
+                  <div className="text-xs font-bold text-[#c026d3] mb-1">
                     {lang === 'fa' ? 'گام ۱: تعریف هدف کسب‌وکار' : 'Step 1: State Business Objective'}
                   </div>
                   <div className="text-xs font-medium text-[#1c2830] dark:text-[#e8ebe9] mb-2">
@@ -542,7 +542,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
                       : 'Express organizational pain points or desires (saving labor, reducing churn, accelerating triage, elevating throughput).'}
                   </p>
                 </div>
-                <div className="mt-3 text-[11px] font-mono text-[#00738c] bg-[#00738c]/10 p-2 rounded">
+                <div className="mt-3 text-[11px] font-mono text-[#c026d3] bg-[#c026d3]/10 p-2 rounded">
                   {lang === 'fa' ? 'مثال: کاهش زمان و زحمت پرسنل در دسته‌بندی' : 'Ex: Decrease time and effort to categorize docs'}
                 </div>
               </div>
@@ -596,7 +596,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-                  <Sliders className="w-4 h-4 text-[#00738c]" />
+                  <Sliders className="w-4 h-4 text-[#c026d3]" />
                   <span>
                     {lang === 'fa'
                       ? 'سازنده تعاملی ماتریس نتایج شناختی و معیارهای ارزیابی'
@@ -613,7 +613,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleAddOutcome}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00738c] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c026d3] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>{lang === 'fa' ? 'افزودن سطر نتیجه' : 'Add Outcome Row'}</span>
@@ -621,7 +621,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
 
                 <button
                   onClick={handleCopyFromBuilder}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#00738c] text-[#00738c] dark:text-[#6fb3c6] text-xs font-semibold hover:bg-[#00738c]/10 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#c026d3] text-[#c026d3] dark:text-[#fb7185] text-xs font-semibold hover:bg-[#c026d3]/10 transition-colors"
                 >
                   <FileText className="w-3.5 h-3.5" />
                   <span>{lang === 'fa' ? 'انتقال به بوم پاسخ' : 'Transfer to Canvas'}</span>
@@ -636,7 +636,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
                   className="p-4 rounded-lg bg-[#f8fafc] dark:bg-[#172027] border border-[#d9dad5] dark:border-[#2d3942] space-y-3"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#00738c] dark:text-[#6fb3c6]">
+                    <span className="text-xs font-bold text-[#c026d3] dark:text-[#fb7185]">
                       #{idx + 1} · {lang === 'fa' ? 'مولفه شناختی و دستاورد تجاری' : 'Cognitive Outcome Mapping'}
                     </span>
                     {outcomeItems.length > 1 && (
@@ -751,7 +751,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Quantitative Criteria Guide */}
             <div className="p-5 rounded-xl bg-white dark:bg-[#1e262c] border border-[#d9dad5] dark:border-[#2d3942] space-y-4 shadow-xs">
-              <div className="flex items-center gap-2 text-sm font-bold text-[#00738c] dark:text-[#6fb3c6]">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#c026d3] dark:text-[#fb7185]">
                 <Gauge className="w-5 h-5" />
                 <span>
                   {lang === 'fa'
@@ -769,7 +769,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
                 <div className="p-3 rounded-lg bg-[#f8fafc] dark:bg-[#172027] border border-[#d9dad5] dark:border-[#2d3942]">
                   <div className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center justify-between">
                     <span>{lang === 'fa' ? 'دقت پیش‌بینی (Predictive Accuracy)' : 'Predictive Accuracy / F1-Score'}</span>
-                    <span className="text-[10px] font-mono text-[#00738c] bg-[#00738c]/10 px-2 py-0.5 rounded">Accuracy &ge; 90%</span>
+                    <span className="text-[10px] font-mono text-[#c026d3] bg-[#c026d3]/10 px-2 py-0.5 rounded">Accuracy &ge; 90%</span>
                   </div>
                   <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] mt-1">
                     {lang === 'fa'
@@ -869,12 +869,12 @@ Task: Cognitive Requirements - Cognitive Outcomes
             {/* Example 1: Document Categorization (Slide 20 Reference) */}
             <div className="p-5 rounded-xl bg-white dark:bg-[#1e262c] border border-[#d9dad5] dark:border-[#2d3942] space-y-4 shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#00738c]/15 text-[#00738c] dark:text-[#6fb3c6]">
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#c026d3]/15 text-[#c026d3] dark:text-[#fb7185]">
                   {lang === 'fa' ? 'نمونه رسمی کتاب کار: دسته‌بندی اسناد' : 'Official Slide 20: Document Categorization'}
                 </span>
                 <button
                   onClick={handleCopyTemplate}
-                  className="flex items-center gap-1 text-xs text-[#00738c] hover:underline cursor-pointer"
+                  className="flex items-center gap-1 text-xs text-[#c026d3] hover:underline cursor-pointer"
                 >
                   <Copy className="w-3.5 h-3.5" />
                   <span>{lang === 'fa' ? 'درج در بوم' : 'Insert into Canvas'}</span>
@@ -891,7 +891,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
                     : 'Decrease the time and effort to categorize documents.'}
                 </p>
                 <p>
-                  <strong className="text-[#00738c] dark:text-[#6fb3c6]">
+                  <strong className="text-[#c026d3] dark:text-[#fb7185]">
                     {lang === 'fa' ? 'هدف شناختی:' : 'Cognitive Goal:'}
                   </strong>{' '}
                   {lang === 'fa'
@@ -950,7 +950,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
                     : 'Predict click probabilities with NDCG@5 >= 0.85 under 40ms latency.'}
                 </p>
                 <p>
-                  <strong className="text-[#00738c] dark:text-[#6fb3c6]">
+                  <strong className="text-[#c026d3] dark:text-[#fb7185]">
                     {lang === 'fa' ? 'معیار ارزیابی عینی:' : 'Evaluation Criteria:'}
                   </strong>{' '}
                   {lang === 'fa'
@@ -975,7 +975,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
       <div className="p-6 rounded-xl bg-white dark:bg-[#1e262c] border border-[#d9dad5] dark:border-[#2d3942] space-y-4 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-[#00738c]" />
+            <FileText className="w-5 h-5 text-[#c026d3]" />
             <h2 className="text-sm sm:text-base font-bold text-[#1c2830] dark:text-[#e8ebe9]">
               {text.canvasHeader}
             </h2>
@@ -984,7 +984,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={handleCopyTemplate}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00738c] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c026d3] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>{text.copyTemplate}</span>
@@ -1057,13 +1057,13 @@ Task: Cognitive Requirements - Cognitive Outcomes
           value={content}
           onChange={(e) => onChangeContent(e.target.value)}
           placeholder={text.canvasPlaceholder}
-          className="w-full font-mono text-xs p-4 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#00738c] leading-relaxed transition-all resize-y"
+          className="w-full font-mono text-xs p-4 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#c026d3] leading-relaxed transition-all resize-y"
         />
 
         {/* Footer Disclaimer */}
         <div className="mt-4 pt-3 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 flex flex-wrap items-center justify-between text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] gap-2">
           <span>{text.pmiCopyright}</span>
-          <span className="font-semibold text-[#00738c] dark:text-[#6fb3c6]">Slide 20</span>
+          <span className="font-semibold text-[#c026d3] dark:text-[#fb7185]">Slide 20</span>
         </div>
       </div>
 
@@ -1086,7 +1086,7 @@ Task: Cognitive Requirements - Cognitive Outcomes
           {onGoToPage11 && (
             <button
               onClick={onGoToPage11}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1f5163] dark:bg-[#6fb3c6] text-white dark:text-[#0f1a1e] text-xs font-semibold hover:opacity-90 transition-opacity"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#e0533c] dark:bg-[#fb7185] text-white dark:text-[#0f1a1e] text-xs font-semibold hover:opacity-90 transition-opacity"
             >
               <span>{lang === 'fa' ? 'صفحه بعدی: صفحه ۱۱ (اسلاید ۲۱: معیارهای موفقیت AI)' : 'Next: Page 11 (Slide 21: AI Success Criteria)'}</span>
               {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}

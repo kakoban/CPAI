@@ -6,6 +6,36 @@ export type AlignmentIndex = 'Matches' | 'Below Tier' | 'Above Tier';
 
 export type PerformanceBand = 'Low' | 'Proficient' | 'Mastery';
 
+export type ToolSenseId =
+  | 'google_drive'
+  | 'google_workspace'
+  | 'chatgpt_gemini'
+  | 'claude'
+  | 'notebooklm'
+  | 'github_markdown'
+  | 'ai_skills'
+  | 'mcp_connectors';
+
+export type ToolFamiliarityChoice = 'unheard' | 'heard_only' | 'used';
+export type ToolDepthChoice = 'basic' | 'practical' | 'power';
+
+export interface ToolSenseItemRecord {
+  familiarity: ToolFamiliarityChoice;
+  depth?: ToolDepthChoice;
+  score: number; // 0..4
+  labelFa: string;
+  subTags?: string[]; // e.g. ['chatgpt', 'gemini']
+}
+
+export interface ToolSenseProfilePayload {
+  version: number;
+  calibratedLevel: 'beginner' | 'intermediate' | 'advanced';
+  personaKey: 'explorer' | 'practitioner' | 'builder' | 'architect';
+  personaTitleFa: string;
+  tools: Partial<Record<ToolSenseId, ToolSenseItemRecord>>;
+  completedAt: string;
+}
+
 export interface ClassEntity {
   id: string;
   code: string;
@@ -37,6 +67,7 @@ export interface AssessmentResultEntity {
   maxScore: number;
   percentage: number;
   alignmentIndex: AlignmentIndex;
+  toolProfile?: ToolSenseProfilePayload;
   completedAt: string;
 }
 
@@ -83,6 +114,7 @@ export interface UserRegistryItem {
     rawScore: number;
     percentage: number;
     alignmentIndex: AlignmentIndex;
+    toolProfile?: ToolSenseProfilePayload;
     completedAt: string;
   };
   createdAt: string;

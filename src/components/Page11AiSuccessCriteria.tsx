@@ -490,13 +490,13 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
       <div className="bg-[#ffffff] dark:bg-[#161c22] rounded-xl p-5 sm:p-6 border border-[#d9dad5] dark:border-[#2d3942] shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#e3eef1] dark:bg-[#1b2c32] text-[#1f5163] dark:text-[#6fb3c6]">
+            <span className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#fdeee9] dark:bg-[#341528] text-[#e0533c] dark:text-[#fb7185]">
               {text.badgePhase}
             </span>
             <span className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-[#f0f1ee] dark:bg-[#1f282e] text-[#5d6b73] dark:text-[#9aa8b0]">
               {text.badgeTaskGroup}
             </span>
-            <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e]">
+            <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e]">
               {text.badgeTask}
             </span>
           </div>
@@ -509,7 +509,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
         </div>
 
         <h1 className="text-xl sm:text-2xl font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2.5">
-          <Award className="w-6 h-6 text-[#00738c] dark:text-[#6fb3c6] shrink-0" />
+          <Award className="w-6 h-6 text-[#c026d3] dark:text-[#fb7185] shrink-0" />
           <span>{text.pageTitle}</span>
         </h1>
         <p className="text-xs sm:text-sm text-[#5d6b73] dark:text-[#9aa8b0] mt-1.5 leading-relaxed">
@@ -520,7 +520,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
       {/* Slide 21 Official Questions Breakdown Cards */}
       <div className="bg-[#ffffff] dark:bg-[#161c22] rounded-xl p-5 sm:p-6 border border-[#d9dad5] dark:border-[#2d3942] shadow-xs">
         <div className="flex items-center gap-2 mb-4 pb-2 border-b border-[#d9dad5] dark:border-[#2d3942]">
-          <HelpCircle className="w-5 h-5 text-[#00738c] dark:text-[#6fb3c6]" />
+          <HelpCircle className="w-5 h-5 text-[#c026d3] dark:text-[#fb7185]" />
           <h2 className="text-sm sm:text-base font-bold text-[#1c2830] dark:text-[#e8ebe9]">
             {text.questionsHeader}
           </h2>
@@ -579,7 +579,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
           onClick={() => setActiveTab('overview')}
           className={`flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg whitespace-nowrap transition-all ${
             activeTab === 'overview'
-              ? 'bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e] font-semibold shadow-xs'
+              ? 'bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#f4f4f1] dark:hover:bg-[#1a2228]'
           }`}
         >
@@ -591,7 +591,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
           onClick={() => setActiveTab('comparison')}
           className={`flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg whitespace-nowrap transition-all ${
             activeTab === 'comparison'
-              ? 'bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e] font-semibold shadow-xs'
+              ? 'bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#f4f4f1] dark:hover:bg-[#1a2228]'
           }`}
         >
@@ -606,7 +606,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
           onClick={() => setActiveTab('skeptics')}
           className={`flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg whitespace-nowrap transition-all ${
             activeTab === 'skeptics'
-              ? 'bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e] font-semibold shadow-xs'
+              ? 'bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#f4f4f1] dark:hover:bg-[#1a2228]'
           }`}
         >
@@ -621,7 +621,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
           onClick={() => setActiveTab('examples')}
           className={`flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg whitespace-nowrap transition-all ${
             activeTab === 'examples'
-              ? 'bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e] font-semibold shadow-xs'
+              ? 'bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#f4f4f1] dark:hover:bg-[#1a2228]'
           }`}
         >
@@ -633,7 +633,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
           onClick={() => setActiveTab('checklist')}
           className={`flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg whitespace-nowrap transition-all ${
             activeTab === 'checklist'
-              ? 'bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e] font-semibold shadow-xs'
+              ? 'bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] font-semibold shadow-xs'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#f4f4f1] dark:hover:bg-[#1a2228]'
           }`}
         >
@@ -725,7 +725,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleAddComparison}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e] text-xs font-semibold hover:opacity-90 transition-opacity"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] text-xs font-semibold hover:opacity-90 transition-opacity"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>{lang === 'fa' ? 'افزودن بعد مقایسه' : 'Add Dimension'}</span>
@@ -733,7 +733,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
 
                 <button
                   onClick={handleInsertMatrixToCanvas}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#00738c] text-[#00738c] dark:text-[#6fb3c6] text-xs font-medium hover:bg-[#00738c]/10 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#c026d3] text-[#c026d3] dark:text-[#fb7185] text-xs font-medium hover:bg-[#c026d3]/10 transition-colors"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>{lang === 'fa' ? 'درج ماتریس در بوم' : 'Insert to Canvas'}</span>
@@ -749,14 +749,14 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
                 >
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <div className="flex items-center gap-2 flex-1">
-                      <span className="w-5 h-5 rounded-full bg-[#1f5163] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+                      <span className="w-5 h-5 rounded-full bg-[#e0533c] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
                         {index + 1}
                       </span>
                       <input
                         type="text"
                         value={item.dimension}
                         onChange={(e) => handleUpdateComparison(item.id, 'dimension', e.target.value)}
-                        className="w-full text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] bg-transparent border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-[#00738c] focus:outline-none px-1"
+                        className="w-full text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] bg-transparent border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-[#c026d3] focus:outline-none px-1"
                         placeholder="عنوان بعد مقایسه..."
                       />
                     </div>
@@ -826,7 +826,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <div>
                 <h3 className="text-sm sm:text-base font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-[#00738c] dark:text-[#6fb3c6]" />
+                  <ShieldCheck className="w-4 h-4 text-[#c026d3] dark:text-[#fb7185]" />
                   <span>
                     {lang === 'fa'
                       ? 'اقناع شکاکان تیم: پروتکل اثبات عینی و کاهش ریسک (Satisfying Team Skeptics)'
@@ -843,7 +843,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleAddSkeptic}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e] text-xs font-semibold hover:opacity-90 transition-opacity"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] text-xs font-semibold hover:opacity-90 transition-opacity"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>{lang === 'fa' ? 'افزودن دغدغه شکاکان' : 'Add Concern'}</span>
@@ -851,7 +851,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
 
                 <button
                   onClick={handleInsertSkepticsToCanvas}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#00738c] text-[#00738c] dark:text-[#6fb3c6] text-xs font-medium hover:bg-[#00738c]/10 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#c026d3] text-[#c026d3] dark:text-[#fb7185] text-xs font-medium hover:bg-[#c026d3]/10 transition-colors"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>{lang === 'fa' ? 'درج استراتژی در بوم' : 'Insert to Canvas'}</span>
@@ -874,7 +874,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
                         type="text"
                         value={item.concern}
                         onChange={(e) => handleUpdateSkeptic(item.id, 'concern', e.target.value)}
-                        className="w-full text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] bg-transparent border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-[#00738c] focus:outline-none px-1"
+                        className="w-full text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] bg-transparent border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-[#c026d3] focus:outline-none px-1"
                         placeholder="دغدغه یا نگرانی اصلی شکاکان..."
                       />
                     </div>
@@ -939,7 +939,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
         <div className="space-y-4">
           <div className="bg-[#ffffff] dark:bg-[#161c22] rounded-xl p-5 sm:p-6 border border-[#d9dad5] dark:border-[#2d3942] shadow-xs">
             <h3 className="text-sm sm:text-base font-bold text-[#1c2830] dark:text-[#e8ebe9] mb-3 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#00738c] dark:text-[#6fb3c6]" />
+              <Sparkles className="w-4 h-4 text-[#c026d3] dark:text-[#fb7185]" />
               <span>
                 {lang === 'fa'
                   ? 'نمونه‌های رسمی و استاندارد اسلاید ۲۱ کتاب کار CPMAI'
@@ -1114,7 +1114,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
       <div className="bg-[#ffffff] dark:bg-[#161c22] rounded-xl p-5 sm:p-6 border border-[#d9dad5] dark:border-[#2d3942] shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-[#00738c] dark:text-[#6fb3c6]" />
+            <FileText className="w-5 h-5 text-[#c026d3] dark:text-[#fb7185]" />
             <h2 className="text-sm sm:text-base font-bold text-[#1c2830] dark:text-[#e8ebe9]">
               {text.canvasHeader}
             </h2>
@@ -1123,7 +1123,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={handleCopyTemplate}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e] text-xs font-semibold hover:opacity-90 transition-opacity"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] text-xs font-semibold hover:opacity-90 transition-opacity"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>{text.copyTemplate}</span>
@@ -1183,13 +1183,13 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
           value={content}
           onChange={(e) => onChangeContent(e.target.value)}
           placeholder={text.canvasPlaceholder}
-          className="w-full font-mono text-xs p-4 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#00738c] leading-relaxed transition-all resize-y"
+          className="w-full font-mono text-xs p-4 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#c026d3] leading-relaxed transition-all resize-y"
         />
 
         {/* Footer Disclaimer */}
         <div className="mt-4 pt-3 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 flex flex-wrap items-center justify-between text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] gap-2">
           <span>{text.pmiCopyright}</span>
-          <span className="font-semibold text-[#00738c] dark:text-[#6fb3c6]">Slide 21</span>
+          <span className="font-semibold text-[#c026d3] dark:text-[#fb7185]">Slide 21</span>
         </div>
       </div>
 
@@ -1220,7 +1220,7 @@ Topic: AI Success Criteria (Slide 21) · Document Intelligence Project
           {onGoToPage12 && (
             <button
               onClick={onGoToPage12}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#00738c] text-white text-xs font-medium hover:bg-[#005f73] transition-colors shadow-xs"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#c026d3] text-white text-xs font-medium hover:bg-[#005f73] transition-colors shadow-xs"
             >
               <span>
                 {lang === 'fa'

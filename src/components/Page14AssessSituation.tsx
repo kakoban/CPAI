@@ -342,7 +342,7 @@ export const Page14AssessSituation: React.FC<Page14Props> = ({
       nameFa: 'کشف تقلب و تخلفات تراکنش‌های مالی',
       domainEn: 'FinTech / Banking',
       domainFa: 'بانکداری و فین‌تک',
-      badgeColor: '#00738c',
+      badgeColor: '#c026d3',
       sprintCadenceEn: '2-week sprint cycles',
       sprintCadenceFa: 'اسپرینت‌های ۲ هفته‌ای چابک',
       totalTimeboxEn: '6-week Phase I-VI initial iteration',
@@ -698,7 +698,7 @@ D. Critical Path Dependencies & Lead Times:
     <div className="space-y-8 animate-fadeIn">
       {/* Slide 24 CPMAI Banner Header */}
       <div className="rounded-xl overflow-hidden shadow-sm border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228]">
-        <div className="bg-gradient-to-r from-[#1b3a4b] via-[#1f5163] to-[#00738c] text-white p-6 sm:p-8">
+        <div className="bg-gradient-to-r from-[#1b3a4b] via-[#e0533c] to-[#c026d3] text-white p-6 sm:p-8">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-1 rounded-md text-xs font-bold tracking-wider uppercase bg-[#ffffff]/20 text-white backdrop-blur-xs">
@@ -730,7 +730,7 @@ D. Critical Path Dependencies & Lead Times:
         <div className="p-4 sm:p-6 bg-[#f4f4f1] dark:bg-[#141b20] border-b border-[#d9dad5] dark:border-[#2d3942]">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
             <div className="flex items-start gap-3 p-3.5 rounded-lg bg-white dark:bg-[#1c2830] border border-[#d9dad5] dark:border-[#2d3942]">
-              <Users className="w-5 h-5 text-[#00738c] shrink-0 mt-0.5" />
+              <Users className="w-5 h-5 text-[#c026d3] shrink-0 mt-0.5" />
               <div>
                 <strong className="block text-[#1c2830] dark:text-[#e8ebe9] font-medium mb-1">
                   {lang === 'fa' ? 'مهارت‌ها در برابر تئوری' : 'Talent & Domain SMEs'}
@@ -744,7 +744,7 @@ D. Critical Path Dependencies & Lead Times:
             </div>
 
             <div className="flex items-start gap-3 p-3.5 rounded-lg bg-white dark:bg-[#1c2830] border border-[#d9dad5] dark:border-[#2d3942]">
-              <HardDrive className="w-5 h-5 text-[#1f5163] shrink-0 mt-0.5" />
+              <HardDrive className="w-5 h-5 text-[#e0533c] shrink-0 mt-0.5" />
               <div>
                 <strong className="block text-[#1c2830] dark:text-[#e8ebe9] font-medium mb-1">
                   {lang === 'fa' ? 'سخت‌افزار و زیرساخت محاسبه' : 'Compute & FinOps Reality'}
@@ -779,7 +779,7 @@ D. Critical Path Dependencies & Lead Times:
             onClick={() => setActiveTab('resources')}
             className={`flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'resources'
-                ? 'border-[#00738c] text-[#00738c] dark:text-[#99e2b4] font-semibold'
+                ? 'border-[#c026d3] text-[#c026d3] dark:text-[#99e2b4] font-semibold'
                 : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
             }`}
           >
@@ -791,7 +791,7 @@ D. Critical Path Dependencies & Lead Times:
             onClick={() => setActiveTab('schedule')}
             className={`flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'schedule'
-                ? 'border-[#00738c] text-[#00738c] dark:text-[#99e2b4] font-semibold'
+                ? 'border-[#c026d3] text-[#c026d3] dark:text-[#99e2b4] font-semibold'
                 : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
             }`}
           >
@@ -803,7 +803,7 @@ D. Critical Path Dependencies & Lead Times:
             onClick={() => setActiveTab('templates')}
             className={`flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'templates'
-                ? 'border-[#00738c] text-[#00738c] dark:text-[#99e2b4] font-semibold'
+                ? 'border-[#c026d3] text-[#c026d3] dark:text-[#99e2b4] font-semibold'
                 : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
             }`}
           >
@@ -815,7 +815,7 @@ D. Critical Path Dependencies & Lead Times:
             onClick={() => setActiveTab('canvas')}
             className={`flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'canvas'
-                ? 'border-[#00738c] text-[#00738c] dark:text-[#99e2b4] font-semibold'
+                ? 'border-[#c026d3] text-[#c026d3] dark:text-[#99e2b4] font-semibold'
                 : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
             }`}
           >
@@ -832,7 +832,7 @@ D. Critical Path Dependencies & Lead Times:
             onClick={() => setActiveTab('audit')}
             className={`flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-all cursor-pointer ${
               activeTab === 'audit'
-                ? 'border-[#00738c] text-[#00738c] dark:text-[#99e2b4] font-semibold'
+                ? 'border-[#c026d3] text-[#c026d3] dark:text-[#99e2b4] font-semibold'
                 : 'border-transparent text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
             }`}
           >
@@ -858,7 +858,7 @@ D. Critical Path Dependencies & Lead Times:
                     onClick={() => setResourceSubCategory(cat)}
                     className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
                       resourceSubCategory === cat
-                        ? 'bg-[#00738c] text-white shadow-xs'
+                        ? 'bg-[#c026d3] text-white shadow-xs'
                         : 'bg-[#f4f4f1] dark:bg-[#25323d] text-[#5d6b73] dark:text-[#9aa8b0] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
                     }`}
                   >
@@ -876,7 +876,7 @@ D. Critical Path Dependencies & Lead Times:
               onClick={() => {
                 setActiveTab('canvas');
               }}
-              className="px-3 py-1.5 rounded-lg bg-[#e3f4f7] dark:bg-[#122830] text-[#00738c] dark:text-[#99e2b4] text-xs font-medium hover:bg-[#d0ecf1] dark:hover:bg-[#1b3a44] transition-all flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-lg bg-[#e3f4f7] dark:bg-[#122830] text-[#c026d3] dark:text-[#99e2b4] text-xs font-medium hover:bg-[#d0ecf1] dark:hover:bg-[#1b3a44] transition-all flex items-center gap-1.5"
             >
               <FileText className="w-3.5 h-3.5" />
               <span>{lang === 'fa' ? 'انتقال به کاربرگ اصلی' : 'Open in Workbook'}</span>
@@ -967,7 +967,7 @@ D. Critical Path Dependencies & Lead Times:
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 className="text-base font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-[#00738c]" />
+                  <Clock className="w-4 h-4 text-[#c026d3]" />
                   <span>{lang === 'fa' ? 'پیکربندی ریتم چابک و جعبه زمانی چرخه' : 'Agile Sprint Cadence & Timebox Sizing'}</span>
                 </h3>
                 <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] mt-0.5">
@@ -989,7 +989,7 @@ D. Critical Path Dependencies & Lead Times:
                         onClick={() => setSelectedSprintLength(w)}
                         className={`px-2.5 py-1 rounded text-xs font-semibold ${
                           selectedSprintLength === w
-                            ? 'bg-[#1f5163] text-white'
+                            ? 'bg-[#e0533c] text-white'
                             : 'bg-[#f4f4f1] dark:bg-[#25323d] text-[#5d6b73] dark:text-[#9aa8b0]'
                         }`}
                       >
@@ -1010,7 +1010,7 @@ D. Critical Path Dependencies & Lead Times:
                         onClick={() => setSelectedIterationWeeks(w)}
                         className={`px-2.5 py-1 rounded text-xs font-semibold ${
                           selectedIterationWeeks === w
-                            ? 'bg-[#00738c] text-white'
+                            ? 'bg-[#c026d3] text-white'
                             : 'bg-[#f4f4f1] dark:bg-[#25323d] text-[#5d6b73] dark:text-[#9aa8b0]'
                         }`}
                       >
@@ -1022,9 +1022,9 @@ D. Critical Path Dependencies & Lead Times:
               </div>
             </div>
 
-            <div className="p-3.5 rounded-lg bg-[#e3eef1] dark:bg-[#122830] border border-[#00738c]/20 text-xs text-[#1f5163] dark:text-[#99e2b4] flex items-center justify-between flex-wrap gap-2">
+            <div className="p-3.5 rounded-lg bg-[#fdeee9] dark:bg-[#122830] border border-[#c026d3]/20 text-xs text-[#e0533c] dark:text-[#99e2b4] flex items-center justify-between flex-wrap gap-2">
               <span className="flex items-center gap-1.5 font-medium">
-                <Info className="w-4 h-4 text-[#00738c]" />
+                <Info className="w-4 h-4 text-[#c026d3]" />
                 {lang === 'fa'
                   ? `برنامه منتخب: چرخه ${selectedIterationWeeks} هفته‌ای مشتمل بر ${Math.ceil(selectedIterationWeeks / selectedSprintLength)} اسپرینت ${selectedSprintLength} هفته‌ای چابک.`
                   : `Configured Plan: ${selectedIterationWeeks}-week iteration comprising ${Math.ceil(selectedIterationWeeks / selectedSprintLength)} agile sprints of ${selectedSprintLength} weeks each.`}
@@ -1050,14 +1050,14 @@ D. Critical Path Dependencies & Lead Times:
               {MILESTONES.map((gate, index) => (
                 <div
                   key={index}
-                  className="p-4 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] hover:border-[#00738c] transition-all"
+                  className="p-4 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] hover:border-[#c026d3] transition-all"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-full bg-[#1f5163] text-white text-xs font-bold flex items-center justify-center shrink-0">
+                      <span className="w-6 h-6 rounded-full bg-[#e0533c] text-white text-xs font-bold flex items-center justify-center shrink-0">
                         {index + 1}
                       </span>
-                      <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#00738c]/10 text-[#00738c] dark:text-[#99e2b4]">
+                      <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#c026d3]/10 text-[#c026d3] dark:text-[#99e2b4]">
                         {gate.phase}
                       </span>
                       <h4 className="text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9]">
@@ -1065,7 +1065,7 @@ D. Critical Path Dependencies & Lead Times:
                       </h4>
                     </div>
 
-                    <span className="text-xs font-mono font-medium text-[#1f5163] dark:text-[#99e2b4] bg-[#f4f4f1] dark:bg-[#25323d] px-2.5 py-1 rounded">
+                    <span className="text-xs font-mono font-medium text-[#e0533c] dark:text-[#99e2b4] bg-[#f4f4f1] dark:bg-[#25323d] px-2.5 py-1 rounded">
                       {lang === 'fa' ? gate.targetWeekFa : gate.targetWeekEn}
                     </span>
                   </div>
@@ -1114,7 +1114,7 @@ D. Critical Path Dependencies & Lead Times:
                 ? 'نمونه‌های آماده زیر، مشخصات واقعی منابع، زمان‌بندی و گیت‌های مرحله‌ای را برای صنایع مختلف به تصویر می‌کشند.'
                 : 'These curated industry references demonstrate real-world resource, schedule, and stage-gate planning.'}
             </span>
-            <span className="font-semibold text-[#00738c] dark:text-[#99e2b4]">
+            <span className="font-semibold text-[#c026d3] dark:text-[#99e2b4]">
               {lang === 'fa' ? 'قابلیت اعمال مستقیم روی کاربرگ' : '1-Click Insert into Slide 24'}
             </span>
           </div>
@@ -1145,7 +1145,7 @@ D. Critical Path Dependencies & Lead Times:
 
                   <button
                     onClick={() => handleApplyTemplate(template)}
-                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#00738c] hover:bg-[#1f5163] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#c026d3] hover:bg-[#e0533c] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>{lang === 'fa' ? 'درج در بوم اسلاید ۲۴' : 'Insert into Canvas'}</span>
@@ -1155,7 +1155,7 @@ D. Critical Path Dependencies & Lead Times:
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                   <div className="p-3.5 rounded-lg bg-[#f4f4f1] dark:bg-[#141b20] border border-[#d9dad5] dark:border-[#2d3942]">
                     <strong className="block text-[#1c2830] dark:text-[#e8ebe9] font-semibold mb-1 flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-[#00738c]" />
+                      <Users className="w-3.5 h-3.5 text-[#c026d3]" />
                       {lang === 'fa' ? 'خلاصه منابع و زیرساخت (Resources):' : 'Resource Allocation Summary:'}
                     </strong>
                     <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
@@ -1205,7 +1205,7 @@ D. Critical Path Dependencies & Lead Times:
 
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00738c] text-white text-xs font-semibold hover:bg-[#1f5163] transition-colors shadow-xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c026d3] text-white text-xs font-semibold hover:bg-[#e0533c] transition-colors shadow-xs"
               >
                 {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copied ? (lang === 'fa' ? 'کپی شد!' : 'Copied!') : (lang === 'fa' ? 'کپی پاسخ' : 'Copy')}</span>
@@ -1224,7 +1224,7 @@ D. Critical Path Dependencies & Lead Times:
                   : 'Document your project resource requirements (talent, compute, software/data, budget) and schedule requirements (agile cadence, stage-gates, hard deadlines, dependencies)...'
               }
               rows={22}
-              className="w-full p-4 rounded-xl font-mono text-xs sm:text-sm leading-relaxed border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#141b20] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:ring-2 focus:ring-[#00738c] shadow-inner"
+              className="w-full p-4 rounded-xl font-mono text-xs sm:text-sm leading-relaxed border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#141b20] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:ring-2 focus:ring-[#c026d3] shadow-inner"
             />
           </div>
 
@@ -1301,7 +1301,7 @@ D. Critical Path Dependencies & Lead Times:
                   key={item.id}
                   className="p-3.5 rounded-lg bg-[#f4f4f1] dark:bg-[#141b20] border border-[#d9dad5] dark:border-[#2d3942] flex items-start gap-3"
                 >
-                  <span className="w-5 h-5 rounded-full bg-[#00738c] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                  <span className="w-5 h-5 rounded-full bg-[#c026d3] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                     ✓
                   </span>
                   <div>
@@ -1336,7 +1336,7 @@ D. Critical Path Dependencies & Lead Times:
         {onGoToPage15 && (
           <button
             onClick={onGoToPage15}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#00738c] text-white text-xs font-medium hover:bg-[#005f73] transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#c026d3] text-white text-xs font-medium hover:bg-[#005f73] transition-colors cursor-pointer"
           >
             <span>
               {lang === 'fa'

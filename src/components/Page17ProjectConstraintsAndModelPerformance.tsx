@@ -275,9 +275,9 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
 
         {/* Top Prompt Instruction (Matching Slide 27 Top text) */}
         <div className="mt-4 p-4 rounded-xl bg-[#f4f7fa] dark:bg-[#182330] border border-[#d2dfec] dark:border-[#2a3c50] flex items-start gap-3">
-          <Info className="w-5 h-5 text-[#00738c] shrink-0 mt-0.5" />
+          <Info className="w-5 h-5 text-[#c026d3] shrink-0 mt-0.5" />
           <div className="text-xs leading-relaxed text-[#2c3e50] dark:text-[#c4d7ed] space-y-1">
-            <span className="font-bold text-sm block text-[#00738c] dark:text-[#4da3b8]">
+            <span className="font-bold text-sm block text-[#c026d3] dark:text-[#4da3b8]">
               {lang === 'fa' ? 'راهنمای اسلاید ۲۷ کتاب کار:' : 'Slide 27 Workbook Instruction:'}
             </span>
             <p>
@@ -294,7 +294,7 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
             onClick={() => setActiveTab('canvas')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
               activeTab === 'canvas'
-                ? 'bg-[#00738c] text-white shadow-xs font-bold'
+                ? 'bg-[#c026d3] text-white shadow-xs font-bold'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
             }`}
           >
@@ -306,7 +306,7 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
             onClick={() => setActiveTab('categories')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
               activeTab === 'categories'
-                ? 'bg-[#00738c] text-white shadow-xs font-bold'
+                ? 'bg-[#c026d3] text-white shadow-xs font-bold'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
             }`}
           >
@@ -318,7 +318,7 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
             onClick={() => setActiveTab('performance_intro')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
               activeTab === 'performance_intro'
-                ? 'bg-[#00738c] text-white shadow-xs font-bold'
+                ? 'bg-[#c026d3] text-white shadow-xs font-bold'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
             }`}
           >
@@ -330,7 +330,7 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
             onClick={() => setActiveTab('guide')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
               activeTab === 'guide'
-                ? 'bg-[#00738c] text-white shadow-xs font-bold'
+                ? 'bg-[#c026d3] text-white shadow-xs font-bold'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
             }`}
           >
@@ -344,7 +344,7 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
       {activeTab === 'canvas' && (
         <div className="space-y-4">
           {/* Blue Header Banner matching Slide 27 */}
-          <div className="bg-[#00738c] text-white px-5 py-3 rounded-t-xl font-bold text-sm flex items-center justify-between shadow-xs">
+          <div className="bg-[#c026d3] text-white px-5 py-3 rounded-t-xl font-bold text-sm flex items-center justify-between shadow-xs">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
               <span>
@@ -400,7 +400,7 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
               placeholder={lang === 'fa'
                 ? 'محدودیت‌های منابع، بودجه، داده‌ها، معماری فنی، انطباق با مقررات و ریسک‌های فصلی این اسپرینت را بنویسید...'
                 : 'Detail all project constraints including resource availability, dataset limitations, technical bottlenecks, and legal boundaries here...'}
-              className="w-full h-80 p-4 rounded-xl bg-white dark:bg-[#131b26] border border-blue-200 dark:border-blue-800 text-gray-900 dark:text-gray-100 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#00738c] font-sans resize-y shadow-inner"
+              className="w-full h-80 p-4 rounded-xl bg-white dark:bg-[#131b26] border border-blue-200 dark:border-blue-800 text-gray-900 dark:text-gray-100 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#c026d3] font-sans resize-y shadow-inner"
             />
 
             {/* Action Bar */}
@@ -434,7 +434,7 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
           <div className="p-4 rounded-xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#00738c]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#c026d3]" />
                 <span>{lang === 'fa' ? 'نمونه‌های آماده مطالعه موردی جهت جایگذاری سریع:' : 'Case Study Presets:'}</span>
               </span>
 
@@ -450,7 +450,7 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
                   onClick={() => setSelectedCase(preset.id)}
                   className={`p-3.5 rounded-xl border text-xs cursor-pointer transition-all ${
                     selectedCase === preset.id
-                      ? 'border-[#00738c] bg-[#00738c]/5 shadow-xs'
+                      ? 'border-[#c026d3] bg-[#c026d3]/5 shadow-xs'
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                   }`}
                 >
@@ -470,7 +470,7 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
                   <div className="mt-3 flex justify-end">
                     <button
                       onClick={(e) => { e.stopPropagation(); handleApplyPreset(preset); }}
-                      className="text-[11px] font-semibold text-[#00738c] hover:underline flex items-center gap-1"
+                      className="text-[11px] font-semibold text-[#c026d3] hover:underline flex items-center gap-1"
                     >
                       <span>{lang === 'fa' ? 'درج در بوم' : 'Insert to Canvas'}</span>
                       <ArrowRight className="w-3 h-3" />
@@ -503,7 +503,7 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
                   className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/40 space-y-3"
                 >
                   <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-2">
-                    <div className="p-1.5 rounded-lg bg-[#00738c]/10 text-[#00738c]">
+                    <div className="p-1.5 rounded-lg bg-[#c026d3]/10 text-[#c026d3]">
                       {cat.id === 'tech_data' && <Database className="w-4 h-4" />}
                       {cat.id === 'resource_talent' && <Users className="w-4 h-4" />}
                       {cat.id === 'legal_compliance' && <ShieldCheck className="w-4 h-4" />}
@@ -610,7 +610,7 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
           {/* Sneak Peek to Slide 28 (Confusion Matrix) */}
           <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-xs flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <BarChart3 className="w-5 h-5 text-[#00738c] shrink-0" />
+              <BarChart3 className="w-5 h-5 text-[#c026d3] shrink-0" />
               <div>
                 <span className="font-bold text-gray-900 dark:text-white block">
                   {lang === 'fa' ? 'گام بعدی در اسلاید ۲۸: ماتریس درهم‌ریختگی (Confusion Matrix)' : 'Coming up in Slide 28: Confusion Matrix (Figure 3)'}
@@ -626,7 +626,7 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
             {onGoToPage18 && (
               <button
                 onClick={onGoToPage18}
-                className="px-3 py-1.5 rounded-lg bg-[#00738c] text-white font-semibold shrink-0 hover:bg-[#005f73] transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-[#c026d3] text-white font-semibold shrink-0 hover:bg-[#005f73] transition-colors"
               >
                 {lang === 'fa' ? 'مشاهده اسلاید ۲۸' : 'View Slide 28'}
               </button>
@@ -645,7 +645,7 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
 
           <div className="space-y-3">
             <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
-              <span className="font-bold text-[#00738c] block mb-1">
+              <span className="font-bold text-[#c026d3] block mb-1">
                 {lang === 'fa' ? '۱. چرا تعیین محدودیت‌های فنی و حجمی داده‌ها قبل از مدل‌سازی حیاتی است؟' : '1. Why Set Data & Technological Constraints Early?'}
               </span>
               <p>
@@ -656,7 +656,7 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
             </div>
 
             <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
-              <span className="font-bold text-[#00738c] block mb-1">
+              <span className="font-bold text-[#c026d3] block mb-1">
                 {lang === 'fa' ? '۲. اصل «آستانه پایین در اسپرینت‌های اولیه، رشد در تکرارهای بعدی»' : '2. The Threshold Progression Principle'}
               </span>
               <p>
@@ -682,7 +682,7 @@ export const Page17ProjectConstraintsAndModelPerformance: React.FC<Page17Props> 
         {onGoToPage18 && (
           <button
             onClick={onGoToPage18}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#00738c] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#c026d3] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors cursor-pointer shadow-xs"
           >
             <span>
               {lang === 'fa'

@@ -201,7 +201,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
     <div className="space-y-8 animate-fade-in">
       {/* Page Header (Matching Image 1) */}
       <div className="border-b border-[#d9dad5] dark:border-[#2d3942] pb-6">
-        <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-[#1f5163] dark:text-[#6fb3c6]">
+        <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-[#e0533c] dark:text-[#fb7185]">
           <span>{t.badge}</span>
         </div>
         <div className="flex items-center gap-3 mb-4">
@@ -236,7 +236,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
         {/* Two-Box Cards (Description & Task Artifacts matching Image 1 layout) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-1">
           {/* Box 1: Description */}
-          <div className="relative p-5 sm:p-6 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] border-t-3 border-t-[#1f5163] dark:border-t-[#6fb3c6] shadow-xs">
+          <div className="relative p-5 sm:p-6 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] border-t-3 border-t-[#e0533c] dark:border-t-[#fb7185] shadow-xs">
             <h4 className="font-semibold text-sm sm:text-base text-[#1c2830] dark:text-[#e8ebe9] mb-3">
               {t.descTitle}
             </h4>
@@ -244,7 +244,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
               {t.descBody}
             </p>
             {/* Subtle corner triangle matching slide art */}
-            <div className="absolute top-4 end-4 opacity-15 pointer-events-none text-[#1f5163] dark:text-[#6fb3c6]">
+            <div className="absolute top-4 end-4 opacity-15 pointer-events-none text-[#e0533c] dark:text-[#fb7185]">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                 <polygon points="12,2 22,22 2,22" />
               </svg>
@@ -252,7 +252,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
           </div>
 
           {/* Box 2: Task Artifacts */}
-          <div className="relative p-5 sm:p-6 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] border-t-3 border-t-[#1f5163] dark:border-t-[#6fb3c6] shadow-xs">
+          <div className="relative p-5 sm:p-6 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] border-t-3 border-t-[#e0533c] dark:border-t-[#fb7185] shadow-xs">
             <h4 className="font-semibold text-sm sm:text-base text-[#1c2830] dark:text-[#e8ebe9] mb-3">
               {t.artTitle}
             </h4>
@@ -270,7 +270,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
               </p>
             </div>
             {/* Subtle corner triangle matching slide art */}
-            <div className="absolute top-4 end-4 opacity-15 pointer-events-none text-[#1f5163] dark:text-[#6fb3c6]">
+            <div className="absolute top-4 end-4 opacity-15 pointer-events-none text-[#e0533c] dark:text-[#fb7185]">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                 <polygon points="12,2 22,22 2,22" />
               </svg>
@@ -284,7 +284,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
             type="checkbox"
             checked={read}
             onChange={(e) => onToggleRead(e.target.checked)}
-            className="w-5 h-5 rounded border-[#d9dad5] dark:border-[#2d3942] text-[#1f5163] focus:ring-[#1f5163]"
+            className="w-5 h-5 rounded border-[#d9dad5] dark:border-[#2d3942] text-[#e0533c] focus:ring-[#e0533c]"
           />
           <span className="text-xs sm:text-sm font-medium text-[#1c2830] dark:text-[#e8ebe9]">
             {t.readChk}
@@ -306,7 +306,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
           <button
             type="button"
             onClick={() => setShowExample(!showExample)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#1f5163] dark:text-[#6fb3c6] hover:bg-[#f4f4f1] dark:hover:bg-[#12171b]"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#e0533c] dark:text-[#fb7185] hover:bg-[#f4f4f1] dark:hover:bg-[#12171b]"
           >
             <Lightbulb className="w-3.5 h-3.5" />
             <span>{showExample ? t.exBtnHide : t.exBtnShow}</span>
@@ -314,8 +314,8 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
         </div>
 
         {showExample && (
-          <div className="p-3.5 rounded-lg bg-[#e3eef1] dark:bg-[#1b2c32] text-xs text-[#1c2830] dark:text-[#e8ebe9]">
-            <b className="text-[#1f5163] dark:text-[#6fb3c6]">{t.exTitle} </b>
+          <div className="p-3.5 rounded-lg bg-[#fdeee9] dark:bg-[#341528] text-xs text-[#1c2830] dark:text-[#e8ebe9]">
+            <b className="text-[#e0533c] dark:text-[#fb7185]">{t.exTitle} </b>
             <span>{t.exText}</span>
           </div>
         )}
@@ -333,7 +333,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
             value={story}
             onChange={(e) => onChangeStory(e.target.value)}
             placeholder={t.storyPh}
-            className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#1f5163]"
+            className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#e0533c]"
           />
         </div>
 
@@ -349,7 +349,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
             rows={3}
             value={bg}
             onChange={(e) => onChangeBg(e.target.value)}
-            className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#1f5163]"
+            className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#e0533c]"
           />
         </div>
 
@@ -365,7 +365,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
             type="text"
             value={obj}
             onChange={(e) => onChangeObj(e.target.value)}
-            className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#1f5163]"
+            className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#e0533c]"
           />
         </div>
 
@@ -403,7 +403,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
                   setNewQ('');
                 }
               }}
-              className="px-4 py-2 text-xs font-medium rounded-lg bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0f1a1e] hover:opacity-90"
+              className="px-4 py-2 text-xs font-medium rounded-lg bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] hover:opacity-90"
             >
               {t.add}
             </button>
@@ -412,7 +412,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
           <ul className="space-y-2">
             {qs.map((qItem, idx) => (
               <li key={idx} className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] text-xs sm:text-sm">
-                <span className="font-semibold text-[#1f5163] dark:text-[#6fb3c6] shrink-0">
+                <span className="font-semibold text-[#e0533c] dark:text-[#fb7185] shrink-0">
                   {idx + 1}.
                 </span>
                 <span className="flex-1 text-[#1c2830] dark:text-[#e8ebe9]">{qItem}</span>
@@ -455,7 +455,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
 
                 <div className="space-y-1.5">
                   {quiz.opts.map((opt, oIdx) => {
-                    let optStyle = 'border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#1f5163]';
+                    let optStyle = 'border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#e0533c]';
                     if (isAnswered) {
                       if (oIdx === quiz.correct) {
                         optStyle = 'border-[#2f7d5b] bg-[#e3f2ea] text-[#2f7d5b] dark:bg-[#173025] dark:text-[#63c496] font-medium';
@@ -490,12 +490,12 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       </div>
 
       {/* Bottom Navigation Buttons */}
-      <div className="p-4 sm:p-5 rounded-xl bg-[#e3eef1] dark:bg-[#1b2c32] border border-[#1f5163]/20 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 rounded-xl bg-[#fdeee9] dark:bg-[#341528] border border-[#e0533c]/20 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         {onGoToPage0 ? (
           <button
             type="button"
             onClick={onGoToPage0}
-            className="flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg border border-[#1f5163]/30 bg-white dark:bg-[#16252b] text-[#1f5163] dark:text-[#6fb3c6] hover:bg-[#1f5163]/10 transition-colors shadow-2xs"
+            className="flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg border border-[#e0533c]/30 bg-white dark:bg-[#2a1220] text-[#e0533c] dark:text-[#fb7185] hover:bg-[#e0533c]/10 transition-colors shadow-2xs"
           >
             {lang === 'fa' ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
             <span>{lang === 'fa' ? 'صفحه ۰ (جعبه‌ابزار و مبانی LLM)' : 'Page 0 (LLM Toolkit)'}</span>
@@ -504,7 +504,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <div className="hidden md:block text-right">
-            <span className="text-[10px] font-semibold text-[#1f5163] dark:text-[#6fb3c6] block">
+            <span className="text-[10px] font-semibold text-[#e0533c] dark:text-[#fb7185] block">
               {lang === 'fa' ? 'گام بعدی' : 'Next Step'}
             </span>
             <span className="text-xs text-[#1c2830] dark:text-[#e8ebe9] font-medium">

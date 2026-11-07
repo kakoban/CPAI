@@ -43,7 +43,10 @@ import {
   VolumeX,
   ChevronUp,
   ChevronDown,
-  LayoutGrid
+  LayoutGrid,
+  Monitor,
+  GitBranch,
+  FolderTree
 } from 'lucide-react';
 import { ENGINEERING_DATASETS } from '../data/engineering_sample_datasets';
 import { ENGINEERING_CONTRACTS } from '../data/engineering_sample_contracts';
@@ -52,6 +55,25 @@ import { NotebookLmWorkshop } from './NotebookLmWorkshop';
 import { HrArtifactsCanvasWorkshop } from './HrArtifactsCanvasWorkshop';
 import { ClaudeEnterpriseConnectors } from './connectors/ClaudeEnterpriseConnectors';
 import { ObsidianBrainSkillsWorkshop } from './obsidian/ObsidianBrainSkillsWorkshop';
+import { ProjectorSlideModal } from './ProjectorSlideModal';
+import {
+  DiagramWrapper,
+  PipelineArchitectureDiagram,
+  VisualTableComparisonDiagram,
+  GitHubDccWorkflowDiagram,
+  GitHubAnnotatedUiMockup,
+  ContractAuditArchitectureDiagram,
+  RctoFrameworkDiagram
+} from './visuals/EngineeringVisualDiagrams';
+import {
+  S1_DEMO_SLIDES,
+  S1_DRIVE_SLIDES,
+  S1_MARKDOWN_SLIDES,
+  S1_GITHUB_SLIDES,
+  S5_CAPSTONE_SLIDES,
+  SAMPLE_ENGINEERING_README_MD,
+  SAMPLE_CLEAN_CSV_CONTENT
+} from '../data/session1_and_5_curriculum';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../data/logo';
 import { IndustryTrackId, DisciplineId } from '../types/industryTrack';
 import {
@@ -72,6 +94,7 @@ interface Page0Props {
   onOpenQuiz?: () => void;
   industryTrack?: IndustryTrackId;
   disciplineId?: DisciplineId;
+  isAdmin?: boolean;
 }
 
 interface PromptItem {
@@ -94,7 +117,8 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   onGoToPage1,
   onOpenQuiz,
   industryTrack = 'CIVIL_INFRA',
-  disciplineId
+  disciplineId,
+  isAdmin = false
 }) => {
   const effectiveDiscipline: DisciplineId =
     disciplineId ||
@@ -102,21 +126,80 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
 
   const discMeta = getDisciplineMetadata(effectiveDiscipline);
   const disciplinePromptPair = getDisciplinePromptShowcase(effectiveDiscipline);
+  const [activeSessionId, setActiveSessionId] = useState<'s1' | 's2' | 's3' | 's4' | 's5'>('s1');
   const [activeTab, setActiveTab] = useState<
+    | null
     | 'all'
+    | 's1_demo'
+    | 's1_drive'
+    | 's1_markdown'
+    | 's1_github'
     | 'tools'
     | 'prompting'
     | 'prompts_library'
     | 'advanced_features'
     | 'engineering_dashboards'
-    | 'contracts_and_gems'
-    | 'connectors'
-    | 'obsidian_brain'
     | 'notebooklm'
-    | 'masterclass'
+    | 'contracts_and_gems'
+    | 'skills_lab'
+    | 'mcp_lab'
+    | 'connectors'
     | 'safety'
-    | 'sandbox'
-  >('all');
+    | 'obsidian_brain'
+    | 's5_orchestration'
+    | 'masterclass'
+    | 's5_vibecoding'
+  >(null);
+  const [isSandboxOpen, setIsSandboxOpen] = useState<boolean>(false);
+  const [completedSessions, setCompletedSessions] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('cpmai_page0_completed_sessions_v1');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const toggleSessionCompletion = (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAdmin) return;
+    playTactileSound('success');
+    setCompletedSessions((prev) => {
+      const next = { ...prev, [sessionId]: !prev[sessionId] };
+      try {
+        localStorage.setItem('cpmai_page0_completed_sessions_v1', JSON.stringify(next));
+      } catch {
+        // ignore storage error
+      }
+      return next;
+    });
+  };
+  const [s1ProjectorDeck, setS1ProjectorDeck] = useState<
+    null | 's1_demo' | 's1_drive' | 's1_markdown' | 's1_github' | 's5_capstone'
+  >(null);
+  const [s1SlideIndex, setS1SlideIndex] = useState<number>(0);
+
+  const openS1Projector = (
+    deck: 's1_demo' | 's1_drive' | 's1_markdown' | 's1_github' | 's5_capstone',
+    startIndex = 0
+  ) => {
+    playTactileSound('thock');
+    setS1SlideIndex(startIndex);
+    setS1ProjectorDeck(deck);
+  };
+
+  const downloadTextFile = (fileName: string, textContent: string, mime = 'text/plain;charset=utf-8;') => {
+    playTactileSound('success');
+    const blob = new Blob([textContent], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() => isTactileSoundEnabled());
   const [isQuickDrawerOpen, setIsQuickDrawerOpen] = useState<boolean>(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -130,152 +213,278 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
 
   const navPillsRef = useRef<HTMLDivElement | null>(null);
 
-  const MODULE_NAV_ITEMS = [
+  const TRACK_METAPHORS = {
+    CIVIL_INFRA: {
+      trackLabelFa: 'راه و ابنیه (مترو و عمرانی)',
+      driveFa: 'Drive: میز مشترک کارگاه و گزارش‌های روزانه',
+      githubFa: 'GitHub: دفتر فنی و سیستم کنترل مدارک (DCC)',
+      skillFa: 'Skill: دستورالعمل اجرایی کارگاهی (WI)',
+      mcpFa: 'MCP: پایپ‌لاین اتصال داده‌های کارگاه به مغز AI'
+    },
+    ENERGY_PETRO: {
+      trackLabelFa: 'نفت، گاز و پتروشیمی (EPC)',
+      driveFa: 'Drive: میز کار واحد و اکسل‌های MTO/MDR',
+      githubFa: 'GitHub: آرشیو فنی و کنترل ریویژن مدارک (DCC)',
+      skillFa: 'Skill: روش اجرایی استاندارد پالایشگاه (SOP / WI)',
+      mcpFa: 'MCP: پایپ‌لاین انتقال خوراک داده (Data Pipeline) به واحد AI'
+    },
+    GENERAL_EVERYDAY: {
+      trackLabelFa: 'روزمره، خانواده و کسب‌وکار فردی',
+      driveFa: 'Drive: پوشه مشترک اسناد و بودجه خانواده',
+      githubFa: 'GitHub: آلبوم نسخه‌دار اسناد و قالب‌های دائمی',
+      skillFa: 'Skill: دستور پخت و چک‌لیست استاندارد روزانه',
+      mcpFa: 'MCP: پایپ‌لاین ارتباطی هوشمند بین AI، فایل‌ها و تقویم'
+    }
+  } as const;
+
+  const activeTrackMetaphor =
+    TRACK_METAPHORS[industryTrack || 'CIVIL_INFRA'] || TRACK_METAPHORS.CIVIL_INFRA;
+
+  type ModuleTabId = Exclude<typeof activeTab, null | 'all'>;
+  interface SessionModuleMeta {
+    id: ModuleTabId;
+    sessionId: 's1' | 's2' | 's3' | 's4' | 's5';
+    num: string;
+    titleFa: string;
+    subFa: string;
+    titleEn: string;
+    subEn: string;
+  }
+  interface CurriculumSessionGroup {
+    id: 's1' | 's2' | 's3' | 's4' | 's5';
+    numFa: string;
+    hoursFa: string;
+    titleFa: string;
+    titleEn: string;
+    metaphorFa: string;
+    modules: SessionModuleMeta[];
+  }
+
+  const FIVE_SESSIONS: CurriculumSessionGroup[] = [
     {
-      id: 'tools' as const,
-      num: '۰۱',
-      keyHint: 'F1',
-      titleFa: 'سه غول هوش مصنوعی',
-      subFa: 'ChatGPT · Claude · Gemini',
-      titleEn: 'Top 3 LLMs',
-      subEn: 'ChatGPT, Claude, Gemini',
-      activeBg: 'bg-gradient-to-br from-[#00738c] to-[#0a5366]',
-      activeBorder: 'border-[#053b49]',
-      badgeColor: 'text-[#00738c] dark:text-[#6fb3c6]'
+      id: 's1' as const,
+      numFa: 'جلسه ۱',
+      hoursFa: '۴ ساعت',
+      titleFa: 'زیرساخت داده: Drive، Markdown و GitHub',
+      titleEn: 'Session 1: Data Infrastructure (Drive, Markdown & GitHub)',
+      metaphorFa: `${activeTrackMetaphor.driveFa} · ${activeTrackMetaphor.githubFa}`,
+      modules: [
+        {
+          id: 's1_demo' as const,
+          sessionId: 's1' as const,
+          num: '۱-۱',
+          titleFa: 'دموی ۱۵ دقیقه‌ای خروجی نهایی دوره',
+          subFa: 'چشم‌انداز خط تولید اتوماتیک جلسه ۵',
+          titleEn: '15-Min End-to-End Demo',
+          subEn: 'Vision of Session 5 Pipeline'
+        },
+        {
+          id: 's1_drive' as const,
+          sessionId: 's1' as const,
+          num: '۱-۲',
+          titleFa: 'گوگل درایو و استانداردسازی جداول',
+          subFa: 'حذف سلول‌های Merge و ساختار ماشین‌خوان',
+          titleEn: 'Google Drive & Clean Tables',
+          subEn: 'Machine-Readable Docs & Sheets'
+        },
+        {
+          id: 's1_markdown' as const,
+          sessionId: 's1' as const,
+          num: '۱-۳',
+          titleFa: 'زبان Markdown؛ زبان مشترک مهندس و AI',
+          subFa: 'چرا فایل Word پر از نویز است؟ (.md)',
+          titleEn: 'Markdown (.md) Standard',
+          subEn: 'Zero-Noise Format for LLMs & Git'
+        },
+        {
+          id: 's1_github' as const,
+          sessionId: 's1' as const,
+          num: '۱-۴',
+          titleFa: 'گیت‌هاب به زبان دفتر فنی و DCC',
+          subFa: 'Repo · Commit (Rev) · Branch & PR',
+          titleEn: 'GitHub as Engineering DCC',
+          subEn: 'Repo, Commit, Branch & Pull Request'
+        }
+      ]
     },
     {
-      id: 'prompting' as const,
-      num: '۰۲',
-      keyHint: 'F2',
-      titleFa: 'فرمول طلایی مهندسی پرامپت',
-      subFa: 'چارچوب ۴ مرحله‌ای RCTO',
-      titleEn: 'RCTO Prompt Framework',
-      subEn: 'Role, Context, Task, Output',
-      activeBg: 'bg-gradient-to-br from-[#0f4c5c] to-[#08303b]',
-      activeBorder: 'border-[#051f26]',
-      badgeColor: 'text-[#0f4c5c] dark:text-[#6fb3c6]'
+      id: 's2' as const,
+      numFa: 'جلسه ۲',
+      hoursFa: '۴ ساعت',
+      titleFa: 'کالبدشکافی LLMها، پرامپت‌نویسی و میز کار',
+      titleEn: 'Session 2: LLMs, RCTO Prompting, Gems, Projects & Artifacts',
+      metaphorFa: 'استخدام «مشاوران مقیم» (Gems/Projects) و ساخت «ابزارهای محاسباتی و داشبورد» (Artifacts/Canvas)',
+      modules: [
+        {
+          id: 'tools' as const,
+          sessionId: 's2' as const,
+          num: '۲-۱',
+          titleFa: 'سه غول هوش مصنوعی و مهندسی زمینه',
+          subFa: 'ChatGPT · Claude · Gemini · Context',
+          titleEn: 'Top 3 LLMs & Context',
+          subEn: 'ChatGPT, Claude, Gemini'
+        },
+        {
+          id: 'prompting' as const,
+          sessionId: 's2' as const,
+          num: '۲-۲',
+          titleFa: 'فرمول طلایی مهندسی پرامپت (RCTO)',
+          subFa: 'چارچوب ۴ مرحله‌ای Role, Context, Task, Output',
+          titleEn: 'RCTO Prompt Framework',
+          subEn: 'Role, Context, Task, Output'
+        },
+        {
+          id: 'prompts_library' as const,
+          sessionId: 's2' as const,
+          num: '۲-۳',
+          titleFa: 'کتابخانه پرامپت‌های آماده دیسیپلین‌ها',
+          subFa: 'پرامپت‌های تخصصی و روزمره قابل کپی',
+          titleEn: 'Ready Prompt Library',
+          subEn: 'Copyable Domain Prompts'
+        },
+        {
+          id: 'advanced_features' as const,
+          sessionId: 's2' as const,
+          num: '۲-۴',
+          titleFa: 'میز کار هوشمند: Gems و Projects',
+          subFa: 'ساخت مشاور مقیم با دانش پایه اختصاصی',
+          titleEn: 'Gems & Claude Projects',
+          subEn: 'Custom Knowledge Workspaces'
+        },
+        {
+          id: 'engineering_dashboards' as const,
+          sessionId: 's2' as const,
+          num: '۲-۵',
+          titleFa: 'ساخت داشبورد و ابزار در Artifacts و Canvas',
+          subFa: 'تولید نرم‌افزار و نمودار بدون کدنویسی',
+          titleEn: 'Artifacts & Canvas Lab',
+          subEn: 'Interactive Dashboards & Calculators'
+        }
+      ]
     },
     {
-      id: 'prompts_library' as const,
-      num: '۰۳',
-      keyHint: 'F3',
-      titleFa: 'کتابخانه پرامپت‌های آماده',
-      subFa: 'پرامپت‌های تخصصی و روزمره',
-      titleEn: 'Ready Prompt Library',
-      subEn: 'Copyable Domain Prompts',
-      activeBg: 'bg-gradient-to-br from-[#b87333] to-[#8f5622]',
-      activeBorder: 'border-[#663c16]',
-      badgeColor: 'text-[#b87333] dark:text-[#eab308]'
+      id: 's3' as const,
+      numFa: 'جلسه ۳',
+      hoursFa: '۴ ساعت',
+      titleFa: 'سنتز دانش و معماری مهارت‌ها (Skills)',
+      titleEn: 'Session 3: NotebookLM, Contract Audit & AI Skills (SKILL.md)',
+      metaphorFa: `${activeTrackMetaphor.skillFa} · اتصال دانش پایه به دستورالعمل گام‌به‌گام و مخزن GitHub`,
+      modules: [
+        {
+          id: 'notebooklm' as const,
+          sessionId: 's3' as const,
+          num: '۳-۱',
+          titleFa: 'کارگاه جامع Google NotebookLM',
+          subFa: 'تحلیل اسناد سنگین، نقشه ذهنی و پادکست',
+          titleEn: 'Google NotebookLM Lab',
+          subEn: 'Zero-Hallucination Document Synthesis'
+        },
+        {
+          id: 'contracts_and_gems' as const,
+          sessionId: 's3' as const,
+          num: '۳-۲',
+          titleFa: 'کارگاه ممیزی قراردادها و ادعاها',
+          subFa: 'نشریه ۴۳۱۱، فیدیک و سیستم‌های خبره',
+          titleEn: 'Contracts & Claims Lab',
+          subEn: 'FIDIC & EPC Clauses Audit'
+        },
+        {
+          id: 'skills_lab' as const,
+          sessionId: 's3' as const,
+          num: '۳-۳',
+          titleFa: 'معماری AI Skills (استاندارد SKILL.md)',
+          subFa: 'ساخت مهارت دائمی در Claude و اتصال در Gemini',
+          titleEn: 'AI Skills (SKILL.md) Lab',
+          subEn: 'SOPs, Trap Testing & Live Skill Builder'
+        }
+      ]
     },
     {
-      id: 'advanced_features' as const,
-      num: '۰۴',
-      keyHint: 'F4',
-      titleFa: 'سیستم‌های خبره سازمانی',
-      subFa: 'Claude Projects و Gemini Gems',
-      titleEn: 'Enterprise Gems & Projects',
-      subEn: 'Custom Knowledge Workspaces',
-      activeBg: 'bg-gradient-to-br from-[#1b3a4b] to-[#102530]',
-      activeBorder: 'border-[#09161d]',
-      badgeColor: 'text-[#1b3a4b] dark:text-[#93c5fd]'
+      id: 's4' as const,
+      numFa: 'جلسه ۴',
+      hoursFa: '۴ ساعت',
+      titleFa: 'انقلاب MCP، امنیت و مغز دوم Obsidian',
+      titleEn: 'Session 4: MCP Piping, Connectors, Security & Obsidian Second Brain',
+      metaphorFa: `${activeTrackMetaphor.mcpFa} · پایان دوران کپی-پیست دستی`,
+      modules: [
+        {
+          id: 'mcp_lab' as const,
+          sessionId: 's4' as const,
+          num: '۴-۱',
+          titleFa: 'پروتکل MCP؛ پایپ‌لاین اتصال داده به هارد و گیت‌هاب',
+          subFa: 'Filesystem · GitHub MCP · پیش‌نیازهای نصب',
+          titleEn: 'MCP Protocol & Servers',
+          subEn: 'Filesystem, GitHub & SQLite MCP'
+        },
+        {
+          id: 'connectors' as const,
+          sessionId: 's4' as const,
+          num: '۴-۲',
+          titleFa: 'کانکتورهای گوگل، Slack و Workspace',
+          subFa: 'اتصال زنده به ایمیل، درایو و تقویم',
+          titleEn: 'Workspace & Tool Connectors',
+          subEn: 'Google Drive, Gmail, Calendar & Slack'
+        },
+        {
+          id: 'safety' as const,
+          sessionId: 's4' as const,
+          num: '۴-۳',
+          titleFa: 'خطوط قرمز امنیتی، حفاظت از توکن و توهم',
+          subFa: 'امنیت PAT گیت‌هاب، دسترسی پوشه و Human-in-the-Loop',
+          titleEn: 'Security & Token Guardrails',
+          subEn: 'PAT Safety, Least Privilege & Verification'
+        },
+        {
+          id: 'obsidian_brain' as const,
+          sessionId: 's4' as const,
+          num: '۴-۴',
+          titleFa: 'مغز دوم Obsidian + اتصال Claude و Hermes',
+          subFa: 'حافظه دائمی رایگان روی هارد شخصی',
+          titleEn: 'Obsidian Second Brain',
+          subEn: '13-Chapter Vault + Claude & Hermes Course'
+        }
+      ]
     },
     {
-      id: 'engineering_dashboards' as const,
-      num: '۰۵',
-      keyHint: 'F5',
-      titleFa: 'داشبورد داده‌های مهندسی و HR',
-      subFa: 'ساخت ابزار در Artifacts و Canvas',
-      titleEn: 'Engineering & HR Dashboards',
-      subEn: 'Claude Artifacts & Gemini Canvas',
-      activeBg: 'bg-gradient-to-br from-[#0284c7] to-[#0369a1]',
-      activeBorder: 'border-[#075985]',
-      badgeColor: 'text-[#0284c7] dark:text-[#38bdf8]'
-    },
-    {
-      id: 'contracts_and_gems' as const,
-      num: '۰۶',
-      keyHint: 'F6',
-      titleFa: 'کارگاه ممیزی قراردادها',
-      subFa: 'نشریه ۴۳۱۱، فیدیک و ادعاها',
-      titleEn: 'Contracts & Claims Lab',
-      subEn: 'FIDIC & EPC Clauses Audit',
-      activeBg: 'bg-gradient-to-br from-[#d97706] to-[#b45309]',
-      activeBorder: 'border-[#78350f]',
-      badgeColor: 'text-[#d97706] dark:text-[#fbbf24]'
-    },
-    {
-      id: 'connectors' as const,
-      num: '۰۷',
-      keyHint: 'F7',
-      titleFa: 'کانکتورهای گوگل، Slack و MCP',
-      subFa: 'اتصال به ایمیل، درایو و تقویم',
-      titleEn: 'Google, Slack & MCP',
-      subEn: 'Workspace & Tool Connectors',
-      activeBg: 'bg-gradient-to-br from-[#2563eb] to-[#1d4ed8]',
-      activeBorder: 'border-[#1e3a8a]',
-      badgeColor: 'text-[#2563eb] dark:text-[#60a5fa]'
-    },
-    {
-      id: 'obsidian_brain' as const,
-      num: '۰۸',
-      keyHint: 'F8',
-      titleFa: 'مسترکلاس AI Skills و مغز دوم Obsidian',
-      subFa: 'ساخت SKILL.md · آبسیدین + Hermes · باکس MCP',
-      titleEn: 'AI Skills, Obsidian Brain & MCP',
-      subEn: 'SKILL.md · Obsidian + Hermes · MCP Box',
-      activeBg: 'bg-gradient-to-br from-[#7c3aed] to-[#5b21b6]',
-      activeBorder: 'border-[#4c1d95]',
-      badgeColor: 'text-[#7c3aed] dark:text-[#a78bfa]'
-    },
-    {
-      id: 'notebooklm' as const,
-      num: '۰۹',
-      keyHint: 'F9',
-      titleFa: 'کارگاه جامع Google NotebookLM',
-      subFa: 'نقشه ذهنی، ویدیو، پادکست و تمرینات',
-      titleEn: 'Google NotebookLM Workshop',
-      subEn: 'Mind Map, Video, Audio & Labs',
-      activeBg: 'bg-gradient-to-br from-[#0d9488] to-[#0f766e]',
-      activeBorder: 'border-[#115e59]',
-      badgeColor: 'text-[#0d9488] dark:text-[#2dd4bf]'
-    },
-    {
-      id: 'masterclass' as const,
-      num: '۱۰',
-      keyHint: 'F10',
-      titleFa: 'مسترکلاس مهندسی با LLM',
-      subFa: 'تکنیک‌های پیشرفته تحلیل فنی',
-      titleEn: 'Engineering Masterclass',
-      subEn: 'Advanced Technical Workflows',
-      activeBg: 'bg-gradient-to-br from-[#6d28d9] to-[#4c1d95]',
-      activeBorder: 'border-[#3b0764]',
-      badgeColor: 'text-[#6d28d9] dark:text-[#c4b5fd]'
-    },
-    {
-      id: 'safety' as const,
-      num: '۱۱',
-      keyHint: 'F11',
-      titleFa: 'خطوط قرمز امنیتی و توهم',
-      subFa: 'محرمانگی داده‌ها و راستی‌آزمایی',
-      titleEn: 'Safety & Hallucinations',
-      subEn: 'Data Privacy & Verification',
-      activeBg: 'bg-gradient-to-br from-[#b91c1c] to-[#991b1b]',
-      activeBorder: 'border-[#7f1d1d]',
-      badgeColor: 'text-[#b91c1c] dark:text-[#f87171]'
-    },
-    {
-      id: 'sandbox' as const,
-      num: '۱۲',
-      keyHint: 'F12',
-      titleFa: 'کارگاه عملی تست پرامپت',
-      subFa: 'سندباکس تمرین و آزمایش زنده',
-      titleEn: 'Interactive Prompt Sandbox',
-      subEn: 'Test & Refine Your Prompts',
-      activeBg: 'bg-gradient-to-br from-[#15803d] to-[#166534]',
-      activeBorder: 'border-[#14532d]',
-      badgeColor: 'text-[#15803d] dark:text-[#4ade80]'
+      id: 's5' as const,
+      numFa: 'جلسه ۵',
+      hoursFa: '۴ ساعت',
+      titleFa: 'ارکستراسیون کامل و پل ورود به Vibe Coding',
+      titleEn: 'Session 5: Full Orchestration, Masterclass & Bridge to Vibe Coding',
+      metaphorFa: 'خط تولید تمام‌اتوماتیک: خواندن داده با MCP ← پردازش با Skill ← ساخت داشبورد Artifact ← ثبت در GitHub',
+      modules: [
+        {
+          id: 's5_orchestration' as const,
+          sessionId: 's5' as const,
+          num: '۵-۱',
+          titleFa: 'پروژه جامع End-to-End (ترکیب تمام ابزارها)',
+          subFa: 'Drive + MCP + Skill + Artifact + GitHub Pages',
+          titleEn: 'End-to-End Capstone Project',
+          subEn: 'Full Automated Engineering Workflow'
+        },
+        {
+          id: 'masterclass' as const,
+          sessionId: 's5' as const,
+          num: '۵-۲',
+          titleFa: 'مسترکلاس مهندسی پیشرفته با LLM',
+          subFa: 'تکنیک‌های پیشرفته استدلال و تحلیل فنی',
+          titleEn: 'Advanced Engineering Masterclass',
+          subEn: 'Deep Technical Reasoning Workflows'
+        },
+        {
+          id: 's5_vibecoding' as const,
+          sessionId: 's5' as const,
+          num: '۵-۳',
+          titleFa: 'پل ورود به Vibe Coding؛ فردا چه می‌کنیم؟',
+          subFa: 'انتقال مغز AI، اسکیل‌ها و MCP به محیط IDE حرفه‌ای',
+          titleEn: 'Bridge to Vibe Coding',
+          subEn: 'From Chat Artifacts to Full-Stack Apps in IDE'
+        }
+      ]
     }
   ];
+
+  const MODULE_NAV_ITEMS = FIVE_SESSIONS.flatMap((s) => s.modules);
 
   const handleToggleSound = () => {
     const next = !soundEnabled;
@@ -293,6 +502,10 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   ) => {
     playTactileSound('thock');
     setActiveTab(tab);
+    if (tab && tab !== 'all') {
+      const found = MODULE_NAV_ITEMS.find((m) => m.id === tab);
+      if (found) setActiveSessionId(found.sessionId);
+    }
     setIsQuickDrawerOpen(false);
     if (scrollToTop && navPillsRef.current) {
       setTimeout(() => {
@@ -303,6 +516,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
 
   const currentModuleIdx = MODULE_NAV_ITEMS.findIndex((m) => m.id === activeTab);
   const currentModuleMeta = currentModuleIdx >= 0 ? MODULE_NAV_ITEMS[currentModuleIdx] : null;
+  const activeSessionObj = FIVE_SESSIONS.find((s) => s.id === activeSessionId) || FIVE_SESSIONS[0];
 
   const handlePrevModule = () => {
     if (currentModuleIdx <= 0) {
@@ -348,9 +562,28 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   const loadPromptToSandbox = (promptText: string) => {
     playTactileSound('switch');
     onChangeContent(promptText);
-    const sandboxEl = document.getElementById('prompt-sandbox');
-    if (sandboxEl) {
-      sandboxEl.scrollIntoView({ behavior: 'smooth' });
+    setIsSandboxOpen(true);
+    setTimeout(() => {
+      const sandboxEl = document.getElementById('prompt-sandbox');
+      if (sandboxEl) {
+        sandboxEl.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 60);
+  };
+
+  const openCompanionWindow = (url: string, targetName = 'ai_companion') => {
+    playTactileSound('switch');
+    if (typeof window === 'undefined') return;
+    const width = Math.min(540, Math.round(window.screen.availWidth * 0.42));
+    const height = Math.round(window.screen.availHeight * 0.92);
+    const left = Math.max(0, window.screen.availWidth - width - 20);
+    const top = 30;
+    const features = `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=no,toolbar=no,menubar=no,location=no`;
+    const popup = window.open(url, targetName, features);
+    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      popup.focus();
     }
   };
 
@@ -786,71 +1019,157 @@ Tasks:
     }
   ];
 
-  const renderKeycapGrid = (scrollToTopOnSelect: boolean) => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 text-xs">
-      {MODULE_NAV_ITEMS.map((item) => {
-        const isSelected = activeTab === item.id;
-        return (
-          <button
-            key={item.id}
-            type="button"
-            onMouseEnter={() => playTactileSound('hover')}
-            onClick={(e) => handleTabClick(item.id, e, scrollToTopOnSelect)}
-            data-active={isSelected}
-            data-keycap="true"
-            className={`group relative p-3 rounded-2xl border border-b-4 text-right transition-all duration-150 cursor-pointer flex items-start gap-2.5 select-none ${
-              isSelected
-                ? `${item.activeBg} ${item.activeBorder} text-white shadow-md -translate-y-0.5 active:translate-y-0.5 active:border-b-2`
-                : 'bg-gradient-to-b from-white to-[#f3f5f4] dark:from-[#1a232b] dark:to-[#12181e] text-[#1c2830] dark:text-[#e8ebe9] border-black/[0.1] dark:border-white/[0.1] border-b-[#cbd0cd] dark:border-b-[#090d10] shadow-2xs hover:-translate-y-0.5 hover:shadow-md hover:border-[#00738c]/50 active:translate-y-[2px] active:border-b'
-            }`}
-          >
-            {/* Keycap Number Badge */}
-            <div className="flex flex-col items-center gap-1 shrink-0">
+  const renderCurriculumNav = () => (
+    <div className="space-y-3">
+      {/* Level 1: 5 Unnumbered Topics with Admin Completion Green Toggle */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+        {FIVE_SESSIONS.map((sess) => {
+          const isSessActive = activeSessionId === sess.id;
+          const isCompleted = !!completedSessions[sess.id];
+          return (
+            <div
+              key={sess.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => {
+                playTactileSound('thock');
+                setActiveSessionId(sess.id);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  playTactileSound('thock');
+                  setActiveSessionId(sess.id);
+                }
+              }}
+              className={`p-3 rounded-xl border text-right transition-all duration-150 cursor-pointer flex flex-col justify-between gap-1.5 select-none active:scale-[0.98] ${
+                isCompleted
+                  ? isSessActive
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent shadow-md ring-2 ring-emerald-400'
+                    : 'bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-100 border-emerald-500/50 hover:border-emerald-500 shadow-2xs'
+                  : isSessActive
+                  ? 'bg-gradient-to-r from-[#e0533c] to-[#c026d3] text-white border-transparent shadow-md'
+                  : 'bg-[#fdf8f5] dark:bg-[#201729] text-[#261a1d] dark:text-[#faedf3] border-[#ecdcd8] dark:border-[#382645] hover:border-[#e0533c]/50'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-1.5 w-full">
+                {/* Status Badge or Admin Completion Toggle */}
+                {isAdmin ? (
+                  <button
+                    type="button"
+                    onClick={(e) => toggleSessionCompletion(sess.id, e)}
+                    title={isCompleted ? 'لغو وضعیت تکمیل (ویژه ادمین)' : 'ثبت به عنوان تکمیل‌شده / سبز کردن (ویژه ادمین)'}
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-black flex items-center gap-1 transition-all cursor-pointer ${
+                      isCompleted
+                        ? isSessActive
+                          ? 'bg-white text-emerald-700 shadow-2xs'
+                          : 'bg-emerald-600 text-white shadow-2xs'
+                        : isSessActive
+                        ? 'bg-white/20 text-white hover:bg-white/30'
+                        : 'bg-black/[0.06] dark:bg-white/[0.08] text-[#755e66] dark:text-[#ad99ab] hover:bg-emerald-500/20 hover:text-emerald-700'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-3 h-3 shrink-0" />
+                    <span>{isCompleted ? 'تکمیل شد ✓' : 'سبز کردن'}</span>
+                  </button>
+                ) : isCompleted ? (
+                  <span
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-black flex items-center gap-1 ${
+                      isSessActive
+                        ? 'bg-white text-emerald-700'
+                        : 'bg-emerald-600 text-white'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-3 h-3 shrink-0" />
+                    <span>تکمیل‌شده</span>
+                  </span>
+                ) : (
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      isSessActive ? 'bg-white' : 'bg-[#e0533c]/50'
+                    }`}
+                  />
+                )}
+
+                <span
+                  className={`text-[10px] font-mono ${
+                    isCompleted
+                      ? isSessActive
+                        ? 'text-white/90'
+                        : 'text-emerald-800 dark:text-emerald-300 font-bold'
+                      : isSessActive
+                      ? 'text-white/85'
+                      : 'text-[#755e66] dark:text-[#ad99ab]'
+                  }`}
+                >
+                  {sess.hoursFa} · {sess.modules.length} ماژول
+                </span>
+              </div>
+              <div className="font-extrabold text-xs leading-snug mt-0.5">
+                {lang === 'fa' ? sess.titleFa : sess.titleEn}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Track-Adaptive Metaphor Strip for Active Session */}
+      <div className="px-3.5 py-2.5 rounded-xl bg-[#fdeee9]/70 dark:bg-[#341528]/50 border border-[#e0533c]/25 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-[#e0533c] text-white shrink-0">
+            استعاره مسیر {activeTrackMetaphor.trackLabelFa}
+          </span>
+          <span className="font-semibold text-[#261a1d] dark:text-[#faedf3] leading-relaxed">
+            {activeSessionObj.metaphorFa}
+          </span>
+        </div>
+        <span className="text-[10px] font-mono text-[#755e66] dark:text-[#ad99ab] shrink-0" dir="ltr">
+          Drive → GitHub → LLMs → Skills &amp; MCP → Vibe Coding
+        </span>
+      </div>
+
+      {/* Level 2: Modules Inside Active Session */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 text-xs">
+        {activeSessionObj.modules.map((item) => {
+          const isSelected = activeTab === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={(e) => handleTabClick(item.id, e, false)}
+              data-active={isSelected}
+              className={`group relative p-2.5 rounded-xl border text-right transition-all duration-200 cursor-pointer flex items-center gap-2 select-none active:scale-[0.98] ${
+                isSelected
+                  ? 'bg-[#261a1d] dark:bg-white text-white dark:text-[#16101c] border-transparent shadow-md ring-2 ring-[#e0533c]'
+                  : 'bg-white dark:bg-[#201729] text-[#261a1d] dark:text-[#faedf3] border-[#ecdcd8] dark:border-[#382645] hover:border-[#e0533c]/50 hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 shadow-2xs'
+              }`}
+            >
               <span
-                className={`font-mono text-[11px] font-black px-2 py-1 rounded-lg border shadow-2xs transition-transform group-hover:scale-105 ${
+                className={`px-1.5 py-1 rounded-lg font-mono text-[10px] font-black flex items-center justify-center shrink-0 ${
                   isSelected
-                    ? 'bg-white/20 text-white border-white/30'
-                    : `bg-white dark:bg-[#0e1419] border-black/10 dark:border-white/10 ${item.badgeColor}`
+                    ? 'bg-[#e0533c] text-white'
+                    : 'bg-black/[0.05] dark:bg-white/[0.08] text-[#e0533c] dark:text-[#fb7185]'
                 }`}
               >
                 {item.num}
               </span>
-              <span
-                dir="ltr"
-                className={`text-[9px] font-mono tracking-tighter ${
-                  isSelected ? 'text-white/75' : 'text-[#7c8b94] dark:text-[#6c7a82]'
-                }`}
-              >
-                {item.keyHint}
-              </span>
-            </div>
 
-            {/* Keycap Label & Subtitle */}
-            <div className="min-w-0 flex-1 space-y-0.5">
-              <div className="flex items-center justify-between gap-1">
-                <span className="font-extrabold text-xs leading-snug">
+              <div className="min-w-0 flex-1">
+                <span className="font-extrabold text-[11px] leading-tight block truncate">
                   {lang === 'fa' ? item.titleFa : item.titleEn}
                 </span>
-                {/* LED Indicator Dot */}
                 <span
-                  className={`w-2 h-2 rounded-full shrink-0 transition-all ${
-                    isSelected
-                      ? 'bg-[#4ade80] shadow-[0_0_8px_#4ade80]'
-                      : 'bg-black/10 dark:bg-white/10 group-hover:bg-[#00738c]/50'
+                  className={`text-[9px] leading-tight block truncate ${
+                    isSelected ? 'text-white/80 dark:text-[#16101c]/75' : 'text-[#755e66] dark:text-[#ad99ab]'
                   }`}
-                />
+                >
+                  {lang === 'fa' ? item.subFa : item.subEn}
+                </span>
               </div>
-              <div
-                className={`text-[10px] leading-tight ${
-                  isSelected ? 'text-white/85' : 'text-[#5d6b73] dark:text-[#9aa8b0]'
-                }`}
-              >
-                {lang === 'fa' ? item.subFa : item.subEn}
-              </div>
-            </div>
-          </button>
-        );
-      })}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 
@@ -866,7 +1185,7 @@ Tasks:
       }}
     >
       {/* Top Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1f5163] via-[#0f4c5c] to-[#0a3540] text-white p-6 sm:p-8 shadow-md border border-[#1f5163]/40">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#e0533c] via-[#9333ea] to-[#4a044e] text-white p-6 sm:p-8 shadow-md border border-[#e0533c]/40">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-3 max-w-3xl">
             <div className="flex flex-wrap items-center gap-3">
@@ -889,18 +1208,18 @@ Tasks:
               </a>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs text-[#99e2b4] text-xs font-semibold tracking-wide border border-white/15">
                 <Sparkles className="w-3.5 h-3.5 text-[#fbbf24]" />
-                <span>{lang === 'fa' ? 'ماژول صفر پیش‌نیاز · گروه مشاوران مدیریت اوج (OWJ)' : 'Prerequisite Module 0 · OWJ Business Council'}</span>
+                <span>{lang === 'fa' ? 'نقشه راه ۲۰ ساعته (۵ جلسه ۴ ساعته) · گروه مشاوران مدیریت اوج (OWJ)' : '20-Hour Curriculum (5 x 4h Sessions) · OWJ Business Council'}</span>
               </div>
             </div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-white leading-snug">
               {lang === 'fa'
-                ? 'راهنمای کاربردی و الفبای کار با مدل‌های زبانی بزرگ (LLMs)'
-                : 'Applied Handbook: Mastering Large Language Models for Practitioners'}
+                ? 'مهندسی هوش مصنوعی: از زیرساخت Drive و GitHub تا Skills، MCP و Vibe Coding'
+                : 'Applied AI Engineering: Drive & GitHub to Skills, MCP & Vibe Coding'}
             </h1>
             <p className="text-xs sm:text-sm text-[#d0e5ec] leading-relaxed">
               {lang === 'fa'
-                ? 'پیش از ورود به مراحل رسمی استاندارد CPMAI، در این کارگاه عملی با سه غول دنیای هوش مصنوعی (ChatGPT، Claude، Gemini)، متدولوژی نگارش پرامپت‌های اثربخش (R-C-T-O)، ابزارهای پیشرفته‌ای مانند Artifacts و Projects، و مجموعه‌ای از پرامپت‌های آماده و قابل کپی آشنا شوید.'
-                : 'Before embarking on CPMAI Phase I, equip yourself with practical AI skills: top LLM platforms (ChatGPT, Claude, Gemini), the RCTO prompt engineering framework, advanced workflows (Artifacts & Projects), and one-click copyable prompts.'}
+                ? 'چیدمان استاندارد ۵ جلسه‌ای پیش از ورود به Vibe Coding و فاز اول CPMAI: ۱) زیرساخت درایو و گیت‌هاب · ۲) LLMها، Gems، Projects و Artifacts · ۳) NotebookLM، قراردادها و معماری Skills · ۴) پایپ‌لاین MCP، امنیت و مغز دوم Obsidian · ۵) ارکستراسیون نهایی.'
+                : '5-Session structured engineering curriculum: 1) Drive, Markdown & GitHub DCC · 2) LLMs, RCTO, Gems, Projects & Artifacts · 3) NotebookLM, Contracts & SKILL.md · 4) MCP Piping, Security & Obsidian · 5) Full Orchestration & Vibe Coding Bridge.'}
             </p>
           </div>
 
@@ -912,19 +1231,25 @@ Tasks:
               <span>{lang === 'fa' ? 'ورود به صفحه ۱ (فاز اول CPMAI)' : 'Proceed to Page 1 (Phase I)'}</span>
               {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
             </button>
-            <a
-              href="#prompt-sandbox"
-              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-medium border border-white/20 transition-colors"
+            <button
+              type="button"
+              onClick={() => {
+                setIsSandboxOpen(true);
+                setTimeout(() => {
+                  document.getElementById('prompt-sandbox')?.scrollIntoView({ behavior: 'smooth' });
+                }, 60);
+              }}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-medium border border-white/20 transition-colors cursor-pointer"
             >
               <Terminal className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'پرش به کارگاه تمرین پرامپت' : 'Jump to Prompt Sandbox'}</span>
-            </a>
+              <span>{lang === 'fa' ? 'باز کردن سندباکس تمرین پرامپت' : 'Open Prompt Sandbox'}</span>
+            </button>
           </div>
         </div>
       </div>
 
       {/* Interactive Placement Quiz Banner for New Entrants */}
-      <div className="p-1 rounded-2xl bg-gradient-to-r from-[#2f7d5b]/25 via-[#00738c]/25 to-[#b87333]/25 border border-[#2f7d5b]/30 shadow-2xs">
+      <div className="p-1 rounded-2xl bg-gradient-to-r from-[#2f7d5b]/25 via-[#c026d3]/25 to-[#b87333]/25 border border-[#2f7d5b]/30 shadow-2xs">
         <div className="rounded-[calc(1rem-0.25rem)] bg-white dark:bg-[#161e24] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-start sm:items-center gap-3.5">
             <div className="p-3 rounded-2xl bg-[#2f7d5b]/15 text-[#2f7d5b] dark:text-[#52b788] shrink-0 mt-0.5 sm:mt-0">
@@ -962,88 +1287,704 @@ Tasks:
         </div>
       </div>
 
-      {/* TOP TACTILE 3D MECHANICAL KEYCAP NAVIGATOR */}
+      {/* 5-SESSION TWO-LEVEL EXECUTIVE NAVIGATOR */}
       <div
         ref={navPillsRef}
-        className="p-4 sm:p-5 rounded-3xl bg-gradient-to-b from-[#eceeed] to-[#dfe3e1] dark:from-[#161f26] dark:to-[#0f161b] border-2 border-black/[0.08] dark:border-white/[0.1] shadow-inner space-y-3.5"
+        className="p-4 sm:p-5 rounded-2xl bg-white/90 dark:bg-[#1a1222]/90 backdrop-blur-md border border-[#ecdcd8] dark:border-[#382645] shadow-xs space-y-3.5"
       >
-        {/* Top Deck Bar: Title + Sound Toggle + All Sections & Quiz Quick Keys */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-black/[0.08] dark:border-white/[0.1]">
-          <div className="flex items-center gap-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#4ade80] shadow-[0_0_8px_#4ade80]" />
-            <span className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9]">
+        {/* Top Control Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pb-2.5 border-b border-[#ecdcd8]/80 dark:border-[#382645]/80">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#e0533c] animate-pulse" />
+            <h3 className="text-xs sm:text-sm font-extrabold text-[#261a1d] dark:text-[#faedf3]">
               {lang === 'fa'
-                ? 'کیبورد ناوبری ۱۲ کارگاه آموزشی (با افکت لمسی و صدای کلید مکانیکی):'
-                : '12-Module Mechanical Keycap Deck (Click Any Key):'}
-            </span>
+                ? 'نقشه راه ۵ جلسه‌ای (۲۰ ساعت) — جلسه و ماژول مدنظر را انتخاب کنید:'
+                : '5-Session Engineering Curriculum (20 Hours) — Select Session & Module:'}
+            </h3>
+            {activeTab && activeTab !== 'all' && currentModuleMeta && (
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-[#e0533c]/10 text-[#e0533c] dark:text-[#fb7185] border border-[#e0533c]/20">
+                {currentModuleMeta.num} · {lang === 'fa' ? currentModuleMeta.titleFa : currentModuleMeta.titleEn}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Mechanical Sound Toggle Keycap */}
             <button
               type="button"
-              data-keycap="true"
-              onClick={handleToggleSound}
-              className={`px-3 py-1.5 rounded-xl border border-b-3 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-all active:translate-y-[2px] active:border-b ${
-                soundEnabled
-                  ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/40 border-b-amber-600/50'
-                  : 'bg-black/[0.05] dark:bg-white/[0.05] text-[#5d6b73] border-black/10 dark:border-white/10'
-              }`}
-              title="روشن/خاموش کردن صدای کیبورد مکانیکی هنگام کلیک"
+              onClick={() => {
+                setIsSandboxOpen((prev) => !prev);
+                setTimeout(() => {
+                  document.getElementById('prompt-sandbox')?.scrollIntoView({ behavior: 'smooth' });
+                }, 60);
+              }}
+              className="px-3 py-1.5 rounded-xl border border-[#c026d3]/30 text-xs bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185] hover:bg-[#c026d3]/20 font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
             >
-              {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-              <span>
-                {lang === 'fa'
-                  ? soundEnabled
-                    ? 'صدای کلید: روشن'
-                    : 'صدای کلید: خاموش'
-                  : soundEnabled
-                  ? 'Key Sound: ON'
-                  : 'Key Sound: OFF'}
-              </span>
+              <Terminal className="w-3.5 h-3.5" />
+              <span>{lang === 'fa' ? 'سندباکس تمرین پرامپت' : 'Prompt Sandbox'}</span>
             </button>
 
             <button
               type="button"
               onClick={onOpenQuiz}
-              className="px-3 py-1.5 rounded-xl border border-b-3 border-[#2f7d5b]/40 border-b-[#1e523b] text-xs bg-[#2f7d5b]/15 text-[#2f7d5b] dark:text-[#52b788] hover:bg-[#2f7d5b]/25 font-bold flex items-center gap-1.5 cursor-pointer transition-all active:translate-y-[2px] active:border-b"
+              className="px-3 py-1.5 rounded-xl border border-emerald-500/30 text-xs bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
             >
               <Target className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? '🎯 آزمون تعیین سطح' : '🎯 Readiness Quiz'}</span>
+              <span>{lang === 'fa' ? 'آزمون تعیین سطح' : 'Readiness Quiz'}</span>
             </button>
 
             <button
               type="button"
-              data-keycap="true"
-              onClick={(e) => handleTabClick('all', e, false)}
-              data-active={activeTab === 'all'}
-              className={`px-3.5 py-1.5 rounded-xl border border-b-3 text-xs font-bold transition-all cursor-pointer active:translate-y-[2px] active:border-b ${
+              onClick={(e) => handleTabClick(activeTab === 'all' ? 's1_demo' : 'all', e, false)}
+              className={`px-3.5 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer active:scale-95 ${
                 activeTab === 'all'
-                  ? 'bg-[#1f5163] border-[#0e2a34] text-white shadow-xs'
-                  : 'bg-white dark:bg-[#1a232b] border-black/10 dark:border-white/10 border-b-black/25 text-[#1c2830] dark:text-[#e8ebe9] hover:bg-black/[0.04]'
+                  ? 'bg-gradient-to-r from-[#e0533c] to-[#c026d3] text-white border-transparent shadow-xs'
+                  : 'bg-black/[0.03] dark:bg-white/[0.05] border-black/10 dark:border-white/10 text-[#261a1d] dark:text-[#faedf3] hover:bg-black/[0.06]'
               }`}
             >
-              {lang === 'fa' ? 'نمایش یکجای همه ۱۲ بخش' : 'Show All 12 Sections'}
+              {activeTab === 'all'
+                ? lang === 'fa' ? '✓ حالت نمایش یکجا' : '✓ Showing All'
+                : lang === 'fa' ? 'نمایش یکجای تمام جلسه‌ها' : 'Show All Sessions'}
             </button>
           </div>
         </div>
 
-        {/* Render 12 Mechanical Keycaps */}
-        {renderKeycapGrid(false)}
+        {/* 5-Session + Module Stepper Grid */}
+        {renderCurriculumNav()}
       </div>
+
+      {/* Empty State / Prompt to Pick a Module */}
+      {activeTab === null && (
+        <div className="p-8 sm:p-10 rounded-3xl border-2 border-dashed border-[#e0533c]/30 dark:border-[#fb7185]/30 bg-gradient-to-b from-[#fdeee9]/50 via-transparent to-[#c026d3]/5 dark:from-[#341528]/30 dark:via-transparent dark:to-purple-950/10 text-center space-y-4 shadow-2xs">
+          <div className="w-14 h-14 rounded-2xl bg-[#e0533c]/10 text-[#e0533c] dark:text-[#fb7185] flex items-center justify-center mx-auto shadow-2xs">
+            <Layers className="w-7 h-7" />
+          </div>
+          <div className="space-y-1.5 max-w-lg mx-auto">
+            <h3 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9]">
+              {lang === 'fa' ? activeSessionObj.titleFa : activeSessionObj.titleEn}
+            </h3>
+            <p className="text-xs sm:text-sm text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+              {lang === 'fa'
+                ? 'برای جلوگیری از شلوغی صفحه، ابتدا یکی از ماژول‌های این بخش را از نوار بالا انتخاب کنید تا محتوای همان بخش باز شود.'
+                : 'Select one of the modules from the bar above to open its focused content.'}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+            <button
+              type="button"
+              onClick={(e) => handleTabClick(activeSessionObj.modules[0].id, e, true)}
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#e0533c] to-[#c026d3] text-white text-xs font-bold shadow-sm hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+            >
+              {lang === 'fa'
+                ? `شروع (${activeSessionObj.modules[0].titleFa})`
+                : `Start ${activeSessionObj.modules[0].titleEn}`}
+            </button>
+            <button
+              type="button"
+              onClick={(e) => handleTabClick('all', e, true)}
+              className="px-4 py-2.5 rounded-xl bg-white dark:bg-[#1a232b] border border-black/10 dark:border-white/10 text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] hover:bg-black/[0.04] transition-all cursor-pointer active:scale-95"
+            >
+              {lang === 'fa' ? 'نمایش یکجای تمام جلسه‌ها' : 'Show All Sessions'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* SESSION 1 MODULES: DATA INFRASTRUCTURE (DRIVE, MARKDOWN, GITHUB DCC)  */}
+      {/* ===================================================================== */}
+      {(activeTab === 'all' || activeTab === 's1_demo') && (
+        <section className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] shadow-xs space-y-5">
+          {/* Header + Projector Trigger */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#ecdcd8]/60 dark:border-[#382645]/60">
+            <div className="flex items-center gap-2.5">
+              <span className="px-2.5 py-1 rounded-lg bg-[#e0533c] text-white text-xs font-black shrink-0">۱-۱</span>
+              <div>
+                <h2 className="text-sm sm:text-base font-black text-[#261a1d] dark:text-[#faedf3]">
+                  دموی ۱۵ دقیقه‌ای خروجی نهایی: چرا باید قبل از هوش مصنوعی از Drive و GitHub شروع کنیم؟
+                </h2>
+                <p className="text-xs text-[#755e66] dark:text-[#ad99ab]">
+                  نمایش خط تولید تمام‌اتوماتیک جلسه ۵ برای درک جایگاه هر ابزار پیش از شروع دوره
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => openS1Projector('s1_demo', 0)}
+              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
+            >
+              <Monitor className="w-4 h-4" />
+              <span>حالت اسلاید پروژکتور (۶ اسلاید)</span>
+            </button>
+          </div>
+
+          {/* Layer 1: Zero-Assumption Intro Box (Always Visible) */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-l from-[#fdeee9]/80 via-white to-[#f3e8ff]/50 dark:from-[#341528]/60 dark:via-[#1a1222] dark:to-purple-950/30 border border-[#e0533c]/30 space-y-3 text-xs">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <span className="px-2.5 py-0.5 rounded-md bg-[#e0533c] text-white font-black text-[11px]">
+                مقدمه از صفر مطلق · داستان این دوره ۲۰ ساعته چیست؟
+              </span>
+              <span className="font-mono text-[11px] text-[#755e66] dark:text-[#ad99ab]">
+                مسیر انتخابی شما: {activeTrackMetaphor.trackLabelFa}
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-[#261a1d] dark:text-[#faedf3] leading-relaxed font-medium">
+              اکثر افراد از هوش مصنوعی فقط مثل یک «چت‌بات معمولی» استفاده می‌کنند: هر روز یک جدول یا متن را از فایل‌های به‌هم‌ریخته کپی می‌کنند، داخل چت پیست می‌کنند و جواب می‌گیرند؛ و فردا که چت جدیدی باز می‌کنند، هوش مصنوعی همه‌چیز را فراموش کرده است! در سال ۲۰۲۶ با ظهور <b>مهارت‌های ماژولار (Skills)</b> و <b>پروتکل اتصال مستقیم (MCP)</b>، هوش مصنوعی دیگر یک چت‌بات نیست؛ بلکه به یک همکار دیجیتال تبدیل شده که به پوشه‌های گوگل درایو و آرشیو گیت‌هاب شما وصل می‌شود.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+              <div className="p-3.5 rounded-xl bg-white/90 dark:bg-[#16101c] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+                <b className="text-[#e0533c] dark:text-[#fb7185] block">۱. مشکل روش سنتی (بدون زیرساخت)</b>
+                <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                  فایل‌های پراکنده با نام‌های <code>Final_Rev3_Edited.xlsx</code>، کپی-پیست دستی و فراموشی دائمی استانداردهای شرکت توسط مدل.
+                </p>
+              </div>
+              <div className="p-3.5 rounded-xl bg-white/90 dark:bg-[#16101c] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+                <b className="text-[#c026d3] dark:text-[#e879f9] block">۲. دو ستون ذخیره‌سازی در جلسه ۱</b>
+                <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                  • <b>{activeTrackMetaphor.driveFa}</b><br />
+                  • <b>{activeTrackMetaphor.githubFa}</b>
+                </p>
+              </div>
+              <div className="p-3.5 rounded-xl bg-white/90 dark:bg-[#16101c] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+                <b className="text-emerald-600 dark:text-emerald-400 block">۳. خروجی نهایی که در جلسه ۵ می‌سازیم</b>
+                <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                  خوانش خودکار جدول از Drive/هارد با MCP ← ممیزی با Skill ← تولید داشبورد در Artifact ← ثبت ریویژن در GitHub!
+                </p>
+              </div>
+            </div>
+
+            {/* Visual Diagram: Pipeline Architecture */}
+            <DiagramWrapper
+              titleFa="اینفوگرافیک تصویری: زنجیره خط تولید خودکار مهندسی (پایپ‌لاین ۵ مرحله‌ای دوره)"
+              titleEn="Visual Infographic: Automated 5-Stage Engineering AI Pipeline"
+              badgeFa="معماری پیوسته"
+              lang={lang}
+            >
+              <PipelineArchitectureDiagram lang={lang} />
+            </DiagramWrapper>
+          </div>
+
+          {/* Layer 2: Optional Deep-Dive Accordion */}
+          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-[#fdf8f5] dark:bg-[#16101c] overflow-hidden transition-all">
+            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 transition-colors">
+              <div className="flex items-center gap-2 text-[#261a1d] dark:text-[#faedf3]">
+                <Sparkles className="w-4 h-4 text-[#e0533c] shrink-0" />
+                <span>بسط اختیاری موضوع: جدول کامل نقشه راه ۵ جلسه و چرایی تقدم گیت‌هاب بر پرامپت‌نویسی</span>
+              </div>
+              <span className="text-[11px] font-normal text-[#755e66] dark:text-[#ad99ab] flex items-center gap-1 group-open:text-[#e0533c] shrink-0">
+                <span>مشاهده جزئیات کامل</span>
+                <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
+              </span>
+            </summary>
+
+            <div className="p-4 pt-3 border-t border-[#ecdcd8]/60 dark:border-[#382645]/60 space-y-4 text-xs">
+              <div className="overflow-x-auto rounded-xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729]">
+                <table className="w-full text-right text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-black/[0.03] dark:bg-white/[0.04] border-b border-[#ecdcd8] dark:border-[#382645] font-black">
+                      <th className="p-3">جلسه</th>
+                      <th className="p-3">محور اصلی</th>
+                      <th className="p-3">نقش گیت‌هاب و درایو در آن جلسه</th>
+                      <th className="p-3">خروجی عملی پایان جلسه</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#ecdcd8]/50 dark:divide-[#382645]/50">
+                    <tr>
+                      <td className="p-3 font-bold text-[#e0533c]">جلسه ۱ (۴ ساعت)</td>
+                      <td className="p-3 font-bold">زیرساخت داده (Drive + Markdown + GitHub)</td>
+                      <td className="p-3">ایجاد اولین شیت استاندارد در Drive و ساخت اولین مخزن (Repo) در GitHub</td>
+                      <td className="p-3">ثبت اولین فایل دستورالعمل <code>README.md</code> در گیت‌هاب</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-bold text-[#c026d3]">جلسه ۲ (۴ ساعت)</td>
+                      <td className="p-3 font-bold">LLMها، پرامپت‌نویسی RCTO، Gems/Projects و Artifacts</td>
+                      <td className="p-3">تغذیه فایل‌های استاندارد جلسه ۱ به Projects و ذخیره کد داشبورد Artifact در GitHub</td>
+                      <td className="p-3">ساخت مشاور مقیم و داشبورد تعاملی React/HTML</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-bold text-purple-600">جلسه ۳ (۴ ساعت)</td>
+                      <td className="p-3 font-bold">NotebookLM، ممیزی قراردادها و معماری Skills</td>
+                      <td className="p-3">اتصال Gem به <code>@Google Drive</code> و ذخیره پوشه <code>SKILL.md</code> در GitHub تیمی</td>
+                      <td className="p-3">ساخت و تست مهارت دائمی با سناریوی تله اعداد</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-bold text-teal-600">جلسه ۴ (۴ ساعت)</td>
+                      <td className="p-3 font-bold">انقلاب MCP، خطوط قرمز امنیتی و مغز دوم Obsidian</td>
+                      <td className="p-3">اتصال مستقیم کلاود به هارد شخصی (Filesystem MCP) و اکانت گیت‌هاب (GitHub MCP)</td>
+                      <td className="p-3">خواندن و ویرایش خودکار فایل‌ها بدون کپی-پیست</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-bold text-emerald-600">جلسه ۵ (۴ ساعت)</td>
+                      <td className="p-3 font-bold">ارکستراسیون کامل، مسترکلاس و پل Vibe Coding</td>
+                      <td className="p-3">اجرای خط تولید کامل از Drive تا انتشار زنده داشبورد روی GitHub Pages</td>
+                      <td className="p-3">آمادگی ۱۰۰٪ برای ورود به محیط‌های Cursor و Claude Code</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </details>
+        </section>
+      )}
+
+      {(activeTab === 'all' || activeTab === 's1_drive') && (
+        <section className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] shadow-xs space-y-5">
+          {/* Header + Projector Trigger */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#ecdcd8]/60 dark:border-[#382645]/60">
+            <div className="flex items-center gap-2.5">
+              <span className="px-2.5 py-1 rounded-lg bg-[#e0533c] text-white text-xs font-black shrink-0">۱-۲</span>
+              <div>
+                <h2 className="text-sm sm:text-base font-black text-[#261a1d] dark:text-[#faedf3]">
+                  بخش اول جلسه ۱: گوگل درایو (Google Drive) و استانداردسازی جداول کارگاهی (۱.۵ ساعت)
+                </h2>
+                <p className="text-xs text-[#755e66] dark:text-[#ad99ab]">
+                  {activeTrackMetaphor.driveFa} — از تعریف پایه تا تبدیل اکسل‌های نامنظم به جداول ماشین‌خوان
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => openS1Projector('s1_drive', 0)}
+              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
+            >
+              <Monitor className="w-4 h-4" />
+              <span>حالت اسلاید پروژکتور (۸ اسلاید)</span>
+            </button>
+          </div>
+
+          {/* Layer 1: Zero-to-One Definition of Google Drive & Sheets */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#fdf8f5] dark:bg-[#16101c] border border-[#ecdcd8] dark:border-[#382645] space-y-3 text-xs">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <span className="px-2.5 py-0.5 rounded-md bg-blue-600 text-white font-black text-[11px]">
+                تعریف پایه از صفر · Google Drive و Google Sheets چیستند؟
+              </span>
+              <a
+                href="https://drive.google.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+              >
+                <span>ورود به drive.google.com</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+            <p className="text-xs sm:text-sm text-[#261a1d] dark:text-[#faedf3] leading-relaxed">
+              <b>گوگل درایو (Google Drive)</b> یک هارد دیسک ابری رایگان (۱۵ گیگابایت) متصل به جیمیل شماست. برخلاف پوشه‌های معمولی ویندوز یا فلش‌مموری که با هر بار ایمیل کردن یک فایل، نسخه‌های تکراری و گیج‌کننده ایجاد می‌شود، در <b>Google Docs</b> (معادل Word) و <b>Google Sheets</b> (معادل Excel) تمام اعضای تیم روی <b>یک نسخه واحد و زنده</b> کار می‌کنند. مهم‌تر از آن، هوش مصنوعی Gemini و Claude می‌توانند مستقیماً به پوشه‌های گوگل درایو شما وصل شوند و از روی جداول زنده گزارش بگیرند؛ به شرطی که جدول شما «ماشین‌خوان» باشد!
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+              <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-2">
+                <h4 className="font-black text-xs sm:text-sm text-[#261a1d] dark:text-[#faedf3]">
+                  ۵ قانون طلایی جدول ماشین‌خوان (Machine-Readable)
+                </h4>
+                <ul className="space-y-1.5 text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                  <li>۱. <b>ممنوعیت مطلق سلول‌های Merge شده:</b> ادغام سلول‌ها باعث خطای Null در هوش مصنوعی می‌شود.</li>
+                  <li>۲. <b>سطر اول = فقط نام ستون‌ها:</b> بدون ردیف‌های عنوان تزیینی یا تاریخ در بالای جدول.</li>
+                  <li>۳. <b>خلوص نوع داده:</b> در ستون درصد یا مبلغ، فقط عدد بنویسید (عبارت «حدود ۴۰٪» ممنوع!).</li>
+                  <li>۴. <b>حذف ردیف «جمع کل» از وسط جدول خام:</b> باعث دوبار شمارش شدن اعداد در تحلیل AI می‌شود.</li>
+                  <li>۵. <b>معماری دو شیتی:</b> تب <code>01_Raw_Data</code> برای هوش مصنوعی و تب <code>02_Dashboard</code> برای پرینت.</li>
+                </ul>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-2 flex flex-col justify-between">
+                <div className="space-y-2">
+                  <h4 className="font-black text-xs sm:text-sm text-[#261a1d] dark:text-[#faedf3] flex items-center gap-1.5">
+                    <FolderTree className="w-4 h-4 text-[#e0533c]" />
+                    <span>ساختار پوشه‌بندی استاندارد در Google Drive</span>
+                  </h4>
+                  <div className="p-3 rounded-lg bg-[#1e1e1e] text-[#d4d4d4] font-mono text-[11px] space-y-1" dir="ltr">
+                    <div>📁 AI_Project_Workspace/</div>
+                    <div> ├── 📁 01_Master_Specs/ (Contracts, MDR, WBS)</div>
+                    <div> ├── 📁 02_Live_Sheets/ (Clean Tabular Sheets)</div>
+                    <div> └── 📁 03_AI_Outputs/ (Audits &amp; Reports)</div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#ecdcd8]/60 dark:border-[#382645]/60">
+                  <span className="text-[11px] text-[#755e66] dark:text-[#ad99ab]">نمونه فایل CSV استاندارد آماده تست:</span>
+                  <button
+                    type="button"
+                    onClick={() => downloadTextFile('clean_engineering_log.csv', SAMPLE_CLEAN_CSV_CONTENT, 'text/csv;charset=utf-8;')}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>دانلود نمونه CSV استاندارد</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Visual Diagram: Table Comparison (Always Visible in Layer 1) */}
+            <DiagramWrapper
+              titleFa="مقایسه بصری ساختار شیت‌ها: جدول پر از نویز اکسل ❌ در برابر شیت ماشین‌خوان هوش مصنوعی ✅"
+              titleEn="Visual Comparison: Legacy Excel Table vs. AI Machine-Readable Sheet"
+              badgeFa="الگوی ساختاری"
+              lang={lang}
+            >
+              <VisualTableComparisonDiagram lang={lang} />
+            </DiagramWrapper>
+          </div>
+
+          {/* Layer 2: Optional Deep-Dive Accordions */}
+          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-[#fdf8f5] dark:bg-[#16101c] overflow-hidden transition-all">
+            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 transition-colors">
+              <div className="flex items-center gap-2 text-[#261a1d] dark:text-[#faedf3]">
+                <Table className="w-4 h-4 text-[#e0533c] shrink-0" />
+                <span>بسط اختیاری ۱: مقایسه چشمی «جدول خراب انسانی ❌» در برابر «جدول استاندارد ماشین‌خوان ✅»</span>
+              </div>
+              <span className="text-[11px] font-normal text-[#755e66] dark:text-[#ad99ab] flex items-center gap-1 group-open:text-[#e0533c] shrink-0">
+                <span>مشاهده مقایسه جدول‌ها</span>
+                <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
+              </span>
+            </summary>
+
+            <div className="p-4 pt-3 border-t border-[#ecdcd8]/60 dark:border-[#382645]/60 grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
+              <div className="p-3.5 rounded-xl bg-red-500/[0.05] border border-red-500/30 space-y-2">
+                <b className="text-red-700 dark:text-red-400 block">❌ جدول رایج ولی خراب برای هوش مصنوعی:</b>
+                <ul className="space-y-1 text-[#5d6b73] dark:text-[#9aa8b0]">
+                  <li>• ردیف ۱ تا ۳: «به نام خدا - گزارش پیشرفت ماهانه پروژه - تاریخ: آبانماه» (سلول ادغام‌شده سراسری)</li>
+                  <li>• ستون نام واحد: برای ۵ فعالیت زیر هم، سلول «ایستگاه مرکزی» Merge شده است (ردیف‌های ۲ تا ۵ برای AI خالی دیده می‌شوند!).</li>
+                  <li>• ستون پیشرفت: نوشته شده «حدود ۷۵ درصد (منتظر تایید ناظر)» (ترکیب متن و عدد در یک سلول).</li>
+                </ul>
+              </div>
+              <div className="p-3.5 rounded-xl bg-emerald-500/[0.05] border border-emerald-500/30 space-y-2">
+                <b className="text-emerald-700 dark:text-emerald-400 block">✅ جدول تمیز و استاندارد (Machine-Readable):</b>
+                <pre dir="ltr" className="p-2.5 rounded-lg bg-[#1e1e1e] text-[#d4d4d4] font-mono text-[10px] overflow-x-auto">
+                  {SAMPLE_CLEAN_CSV_CONTENT}
+                </pre>
+              </div>
+            </div>
+          </details>
+
+          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-[#fdf8f5] dark:bg-[#16101c] overflow-hidden transition-all">
+            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 transition-colors">
+              <div className="flex items-center gap-2 text-[#261a1d] dark:text-[#faedf3]">
+                <ListChecks className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>بسط اختیاری ۲: تمرین عملی ۱۵ دقیقه‌ای کلاسی + پرامپت تمیزکننده خودکار جداول</span>
+              </div>
+              <span className="text-[11px] font-normal text-[#755e66] dark:text-[#ad99ab] flex items-center gap-1 group-open:text-[#e0533c] shrink-0">
+                <span>مشاهده تمرین و پرامپت</span>
+                <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
+              </span>
+            </summary>
+
+            <div className="p-4 pt-3 border-t border-[#ecdcd8]/60 dark:border-[#382645]/60 space-y-3 text-xs">
+              <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                اگر از قبل جدول‌های نامنظم زیادی دارید، نیازی نیست دستی آن‌ها را اصلاح کنید! جدول نامنظم را کپی کنید و با پرامپت زیر به Claude یا Gemini بدهید تا نسخه استاندارد CSV را تحویلتان دهد:
+              </p>
+              <div className="p-3 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <code className="text-[11px] text-[#261a1d] dark:text-[#faedf3]">
+                  «این جدول کپی‌شده را به یک جدول کاملاً استاندارد و ماشین‌خوان CSV تبدیل کن: سلول‌های ادغام‌شده را در تمام ردیف‌ها پر کن، اعداد را از توضیحات متنی جدا کن، ردیف‌های جمع کل میانی را حذف کن و یک ستون مجزا برای Notes بساز.»
+                </code>
+                <button
+                  type="button"
+                  onClick={() =>
+                    copyToClipboard(
+                      'این جدول کپی‌شده را به یک جدول کاملاً استاندارد و ماشین‌خوان CSV تبدیل کن: سلول‌های ادغام‌شده را در تمام ردیف‌ها پر کن، اعداد را از توضیحات متنی جدا کن، ردیف‌های جمع کل میانی را حذف کن و یک ستون مجزا برای Notes بساز.',
+                      'clean_table_prompt'
+                    )
+                  }
+                  className="px-3 py-1.5 rounded-lg bg-[#e0533c] text-white font-bold text-[11px] shrink-0 cursor-pointer"
+                >
+                  {copiedId === 'clean_table_prompt' ? 'کپی شد!' : 'کپی پرامپت'}
+                </button>
+              </div>
+            </div>
+          </details>
+        </section>
+      )}
+
+      {(activeTab === 'all' || activeTab === 's1_markdown') && (
+        <section className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] shadow-xs space-y-5">
+          {/* Header + Projector Trigger */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#ecdcd8]/60 dark:border-[#382645]/60">
+            <div className="flex items-center gap-2.5">
+              <span className="px-2.5 py-1 rounded-lg bg-[#e0533c] text-white text-xs font-black shrink-0">۱-۳</span>
+              <div>
+                <h2 className="text-sm sm:text-base font-black text-[#261a1d] dark:text-[#faedf3]">
+                  بخش دوم جلسه ۱: زبان Markdown (`.md`)؛ زبان مادری هوش مصنوعی و گیت‌هاب (۱ ساعت)
+                </h2>
+                <p className="text-xs text-[#755e66] dark:text-[#ad99ab]">
+                  از تعریف پایه Markdown تا تسلط بر ۶ علامت کلیدی و قالب آماده دستورالعمل مهندسی
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => openS1Projector('s1_markdown', 0)}
+              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
+            >
+              <Monitor className="w-4 h-4" />
+              <span>حالت اسلاید پروژکتور (۷ اسلاید)</span>
+            </button>
+          </div>
+
+          {/* Layer 1: Zero-to-One Definition of Markdown */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#fdf8f5] dark:bg-[#16101c] border border-[#ecdcd8] dark:border-[#382645] space-y-3 text-xs">
+            <span className="px-2.5 py-0.5 rounded-md bg-purple-600 text-white font-black text-[11px] inline-block">
+              تعریف پایه از صفر · اصلاً Markdown چیست و چرا جایگزین Word شده است؟
+            </span>
+            <p className="text-xs sm:text-sm text-[#261a1d] dark:text-[#faedf3] leading-relaxed">
+              <b>مارک‌داون (Markdown)</b> با پسوند <code>.md</code> ساده‌ترین استاندارد جهانی برای نوشتن متن ساختاریافته با کیبورد است. در نرم‌افزار Word، وقتی متنی را تیتر یا جدول می‌کنید، هزاران خط کد مخفی استایل و فونت پشت صحنه ذخیره می‌شود که برای هوش مصنوعی حکم «نویز و زباله» را دارد. اما در Markdown، شما با گذاشتن یک علامت مربع (<code>#</code>) قبل از جمله به هوش مصنوعی می‌گویید «این تیتر اصلی است» و با گذاشتن دو ستاره (<code>**مهم**</code>) می‌گویید «روی این کلمه تمرکز کن». تمام فایل‌های <b>GitHub (`README.md`)</b>، تمام <b>مهارت‌های کلود (`SKILL.md`)</b> و تمام یادداشت‌های <b>Obsidian</b> با همین فرمت نوشته می‌شوند!
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+              <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-2">
+                <h4 className="font-black text-xs sm:text-sm text-[#261a1d] dark:text-[#faedf3]">
+                  تقلب‌نامه ۶ علامت طلایی Markdown (کل چیزی که نیاز دارید!)
+                </h4>
+                <div className="p-3 rounded-lg bg-[#1e1e1e] text-[#d4d4d4] font-mono text-[11px] space-y-1.5" dir="ltr">
+                  <div><span className="text-emerald-400"># Title</span>         → تیتر اصلی سطح ۱ (H1)</div>
+                  <div><span className="text-emerald-400">## Section</span>      → تیتر بخش سطح ۲ (H2)</div>
+                  <div><span className="text-amber-300">**Bold Rule**</span>   → بولد و تاکید شدید روی قانون</div>
+                  <div><span className="text-sky-400">- Item</span>          → بولت‌پوینت و لیست شروط</div>
+                  <div><span className="text-pink-400">| A | B |</span>       → ساخت جدول ساختاریافته</div>
+                  <div><span className="text-purple-300">---</span>             → خط افقی جداکننده بخش‌ها</div>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-2 flex flex-col justify-between">
+                <div className="space-y-1.5">
+                  <h4 className="font-black text-xs sm:text-sm text-[#261a1d] dark:text-[#faedf3]">
+                    قالب آماده `README.md` برای اولین مخزن گیت‌هاب شما
+                  </h4>
+                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                    این فایل استاندارد را دانلود یا کپی کنید تا در ماژول بعدی (`۱-۴ گیت‌هاب`) مستقیماً در اولین Repository خود قرار دهید:
+                  </p>
+                  <pre dir="rtl" className="p-2.5 rounded-lg bg-[#fdf8f5] dark:bg-[#16101c] border border-[#ecdcd8] dark:border-[#382645] font-mono text-[10px] max-h-28 overflow-y-auto whitespace-pre-wrap text-right">
+                    {SAMPLE_ENGINEERING_README_MD}
+                  </pre>
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => downloadTextFile('README.md', SAMPLE_ENGINEERING_README_MD, 'text/markdown;charset=utf-8;')}
+                    className="flex-1 py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>دانلود فایل README.md</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(SAMPLE_ENGINEERING_README_MD, 'sample_readme_md')}
+                    className="flex-1 py-1.5 px-3 rounded-lg bg-[#e0533c] hover:bg-[#c2410c] text-white font-bold text-[11px] flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    {copiedId === 'sample_readme_md' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedId === 'sample_readme_md' ? 'کپی شد!' : 'کپی متن Markdown'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Layer 2: Optional Deep-Dive Accordion */}
+          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-[#fdf8f5] dark:bg-[#16101c] overflow-hidden transition-all">
+            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 transition-colors">
+              <div className="flex items-center gap-2 text-[#261a1d] dark:text-[#faedf3]">
+                <FileText className="w-4 h-4 text-purple-600 shrink-0" />
+                <span>بسط اختیاری: چطور فایل‌های Word و PDF قدیمی را ۱۰۰٪ خودکار به Markdown تبدیل کنیم؟ + مفهوم YAML</span>
+              </div>
+              <span className="text-[11px] font-normal text-[#755e66] dark:text-[#ad99ab] flex items-center gap-1 group-open:text-[#e0533c] shrink-0">
+                <span>مشاهده روش‌های تبدیل</span>
+                <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
+              </span>
+            </summary>
+
+            <div className="p-4 pt-3 border-t border-[#ecdcd8]/60 dark:border-[#382645]/60 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-1.5">
+                <b className="text-[#261a1d] dark:text-[#faedf3] block">۱. تبدیل مستقیم در Google Docs (بدون هیچ ابزاری)</b>
+                <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                  فایل Word خود را در Google Docs باز کنید و از منوی بالا روی <code>File &gt; Download &gt; Markdown (.md)</code> کلیک کنید! گوگل داکس تمام تیترها و جداول شما را به یک فایل <code>.md</code> تمیز تبدیل می‌کند.
+                </p>
+              </div>
+              <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-1.5">
+                <b className="text-[#261a1d] dark:text-[#faedf3] block">۲. شناسنامه بالای فایل (YAML Frontmatter) چیست؟</b>
+                <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                  در ابتدای فایل‌های حرفه‌ای Markdown (مثل <code>SKILL.md</code> در جلسه ۳)، چند خط بین دو علامت <code>---</code> نوشته می‌شود که شامل نام و شرط فعال‌سازی فایل برای هوش مصنوعی است.
+                </p>
+              </div>
+            </div>
+          </details>
+        </section>
+      )}
+
+      {(activeTab === 'all' || activeTab === 's1_github') && (
+        <section className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] shadow-xs space-y-5">
+          {/* Header + Projector Trigger */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#ecdcd8]/60 dark:border-[#382645]/60">
+            <div className="flex items-center gap-2.5">
+              <span className="px-2.5 py-1 rounded-lg bg-[#e0533c] text-white text-xs font-black shrink-0">۱-۴</span>
+              <div>
+                <h2 className="text-sm sm:text-base font-black text-[#261a1d] dark:text-[#faedf3]">
+                  بخش سوم جلسه ۱: گیت‌هاب (GitHub) از صفر مطلق به زبان دفتر فنی و کنترل مدارک (DCC) (۱.۵ ساعت)
+                </h2>
+                <p className="text-xs text-[#755e66] dark:text-[#ad99ab]">
+                  {activeTrackMetaphor.githubFa} — بدون یک خط کدنویسی و ۱۰۰٪ با دکمه‌های گرافیکی وب
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => openS1Projector('s1_github', 0)}
+              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
+            >
+              <Monitor className="w-4 h-4" />
+              <span>حالت اسلاید پروژکتور (۹ اسلاید)</span>
+            </button>
+          </div>
+
+          {/* Layer 1: Zero-to-One Definition of Git & GitHub */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#fdf8f5] dark:bg-[#16101c] border border-[#ecdcd8] dark:border-[#382645] space-y-4 text-xs">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <span className="px-2.5 py-0.5 rounded-md bg-[#261a1d] dark:bg-white text-white dark:text-[#16101c] font-black text-[11px]">
+                تعریف پایه از صفر · اصلاً Git و GitHub چیستند و چرا ما در این دوره ۴ بار با آن کار می‌کنیم؟
+              </span>
+              <a
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[11px] font-bold text-[#e0533c] dark:text-[#fb7185] hover:underline flex items-center gap-1"
+              >
+                <span>ورود به سایت github.com</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+
+            <p className="text-xs sm:text-sm text-[#261a1d] dark:text-[#faedf3] leading-relaxed">
+              تصور کنید در دفتر فنی پروژه، ۵ مهندس روی یک دستورالعمل یا جدول کار می‌کنند و فایل‌ها را با نام‌های <code>Spec_Rev1.docx</code>، <code>Spec_Final_Ali.docx</code> و <code>Spec_New2.docx</code> برای هم می‌فرستند. بعد از یک هفته، هیچ‌کس نمی‌داند آخرین نسخه معتبر کدام است و چه کسی کدام بند را تغییر داده است! <b>GitHub</b> دقیقاً یک <b>سیستم کنترل مدارک ابری (DCC)</b> و «ماشین زمان فایل‌ها» است: هر پروژه یک زونکن رسمی دارد و هر تغییری با نام شخص، ساعت دقیق و رنگ‌بندی خطوط اضافه‌شده (سبز) و حذف‌شده (قرمز) ثبت می‌شود. در عصر هوش مصنوعی، <b>تمام مهارت‌های کلود (`SKILL.md`)، تمام سرورهای MCP و تمام داشبوردهای Artifacts روی GitHub نگهداری می‌شوند.</b>
+            </p>
+
+            {/* 6 Core Concepts Translated to Engineering DCC */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+                <span className="font-mono font-black text-[#e0533c] dark:text-[#fb7185] block">1. Repository (Repo)</span>
+                <b className="block text-[#261a1d] dark:text-[#faedf3]">معادل: زونکن و پرونده اصلی پروژه در DCC</b>
+                <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                  پوشه اصلی پروژه شما در گیت‌هاب که تمام فایل‌های Markdown، اسکیل‌ها، قالب‌ها و داشبوردها با تاریخچه کامل در آن قرار می‌گیرند.
+                </p>
+              </div>
+              <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+                <span className="font-mono font-black text-[#c026d3] dark:text-[#e879f9] block">2. Commit (ثبت ریویژن)</span>
+                <b className="block text-[#261a1d] dark:text-[#faedf3]">معادل: صدور ریویژن جدید (Rev.01 → Rev.02)</b>
+                <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                  ذخیره رسمی تغییر به همراه یک جمله توضیح (Commit Message) که مشخص می‌کند دقیقاً چه چیزی و به چه دلیلی اصلاح شد.
+                </p>
+              </div>
+              <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+                <span className="font-mono font-black text-emerald-600 dark:text-emerald-400 block">3. Diff (مقایسه تغییرات)</span>
+                <b className="block text-[#261a1d] dark:text-[#faedf3]">معادل: Redline و ابروگذاری تغییرات</b>
+                <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                  نمایش خودکار تفاوت دو ریویژن کنار هم؛ جملات حذف‌شده با رنگ قرمز و جملات جدید با رنگ سبز مشخص می‌شوند.
+                </p>
+              </div>
+              <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+                <span className="font-mono font-black text-blue-600 dark:text-blue-400 block">4. Branch (شاخه موازی)</span>
+                <b className="block text-[#261a1d] dark:text-[#faedf3]">معادل: نسخه چکنویس و آزمایشی (Draft)</b>
+                <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                  ایجاد یک کپی موازی از سند برای اعمال تغییرات آزمایشی، بدون اینکه نسخه اصلی مصوب (`main`) دستکاری یا خراب شود.
+                </p>
+              </div>
+              <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+                <span className="font-mono font-black text-amber-600 dark:text-amber-400 block">5. Pull Request (PR)</span>
+                <b className="block text-[#261a1d] dark:text-[#faedf3]">معادل: فرم درخواست تایید سرپرست (IFC)</b>
+                <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                  درخواست رسمی برای بررسی تغییرات شاخه چکنویس توسط مدیر فنی و ادغام (Merge) آن در نسخه اصلی پروژه.
+                </p>
+              </div>
+              <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+                <span className="font-mono font-black text-purple-600 dark:text-purple-400 block">6. GitHub Pages</span>
+                <b className="block text-[#261a1d] dark:text-[#faedf3]">معادل: تابلوی اعلانات و داشبورد آنلاین پروژه</b>
+                <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                  قابلیت رایگان تبدیل داشبوردهای ساخته‌شده با Claude Artifacts در مخزن شما به یک لینک وب زنده برای کارفرما.
+                </p>
+              </div>
+            </div>
+
+            {/* Visual Diagram: GitHub DCC Lifecycle */}
+            <DiagramWrapper
+              titleFa="دیاگرام چرخه مهندسی مدارک در گیت‌هاب: از شاخه چکنویس تا ریویژن و ابلاغ (IFC)"
+              titleEn="Visual Flow: DCC Document Control Lifecycle via Git & GitHub"
+              badgeFa="گردش کار تیمی"
+              lang={lang}
+            >
+              <GitHubDccWorkflowDiagram lang={lang} />
+            </DiagramWrapper>
+
+            {/* Visual Diagram: Annotated Web UI Mockup for Beginners */}
+            <DiagramWrapper
+              titleFa="راهنمای تصویری صفحه گیت‌هاب: ۳ کلید حیاتی که هر مهندس در اولین ورود باید بداند"
+              titleEn="Annotated GitHub Web UI: The 3 Essential Buttons Every Beginner Needs"
+              badgeFa="راهنمای گام‌به‌گام"
+              lang={lang}
+            >
+              <GitHubAnnotatedUiMockup lang={lang} />
+            </DiagramWrapper>
+          </div>
+
+          {/* Layer 2: Optional Step-by-Step Hands-On Guide Accordion */}
+          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-[#fdf8f5] dark:bg-[#16101c] overflow-hidden transition-all">
+            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 transition-colors">
+              <div className="flex items-center gap-2 text-[#261a1d] dark:text-[#faedf3]">
+                <GitBranch className="w-4 h-4 text-[#e0533c] shrink-0" />
+                <span>بسط اختیاری: راهنمای گام‌به‌گام کارگاه عملی جلسه ۱ (ساخت اکانت، اولین Repo و ثبت اولین Commit در ۲۰ دقیقه)</span>
+              </div>
+              <span className="text-[11px] font-normal text-[#755e66] dark:text-[#ad99ab] flex items-center gap-1 group-open:text-[#e0533c] shrink-0">
+                <span>مشاهده ۴ گام عملی</span>
+                <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
+              </span>
+            </summary>
+
+            <div className="p-4 pt-3 border-t border-[#ecdcd8]/60 dark:border-[#382645]/60 space-y-3 text-xs">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+                  <b className="text-[#e0533c] block">گام ۱: ساخت اکانت و کلیک روی New Repository</b>
+                  <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                    وارد <code>github.com</code> شوید، ثبت‌نام کنید و از گوشه بالا سمت راست روی علامت <code>+</code> و گزینه <b>New repository</b> کلیک کنید.
+                  </p>
+                </div>
+                <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+                  <b className="text-[#c026d3] block">گام ۲: نام‌گذاری مخزن و تیک Add a README file</b>
+                  <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                    در کادر Repository name عبارت <code>ai-engineering-hub</code> را بنویسید، حالت را روی <b>Private</b> (یا Public) بگذارید، حتماً تیک <b>Add a README file</b> را بزنید و دکمه سبز <b>Create repository</b> را بفشارید.
+                  </p>
+                </div>
+                <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+                  <b className="text-purple-600 block">گام ۳: ویرایش گرافیکی با آیکون مداد (✏️)</b>
+                  <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                    در صفحه مخزن جدیدتان، روی آیکون مداد (Edit file) در گوشه بالای فایل <code>README.md</code> کلیک کنید و متن قالب Markdown ماژول ۱-۳ را داخل آن Paste نمایید.
+                  </p>
+                </div>
+                <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+                  <b className="text-emerald-600 block">گام ۴: ثبت اولین ریویژن رسمی (Commit Changes)</b>
+                  <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                    روی دکمه سبز <b>Commit changes...</b> کلیک کنید، در کادر توضیح بنویسید <code>docs: init engineering AI constitution rev.01</code> و تایید کنید. اولین ریویژن شما ثبت شد!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </details>
+        </section>
+      )}
 
       {/* SECTION 1: THE BIG 3 LLMs */}
       {(activeTab === 'all' || activeTab === 'tools') && (
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6]">
+              <div className="p-2 rounded-lg bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]">
                 <Bot className="w-5 h-5" />
               </div>
-              <div>
-                <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa' ? 'بخش ۱: سه ابزار اصلی هوش مصنوعی و لینک‌های دسترسی' : 'Section 1: The Top 3 LLM Platforms & Direct Access'}
-                </h2>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#c026d3] text-white text-xs font-black">۲-۱</span>
+                  <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
+                    {lang === 'fa' ? 'سه ابزار اصلی هوش مصنوعی و لینک‌های دسترسی' : 'The Top 3 LLM Platforms & Direct Access'}
+                  </h2>
+                </div>
                 <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
                   {lang === 'fa'
                     ? 'کدام مدل برای کار شما مناسب‌تر است؟ با یک کلیک ثبت‌نام و استفاده را شروع کنید.'
@@ -1105,15 +2046,14 @@ Tasks:
                 </div>
 
                 <div className="pt-3 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60">
-                  <a
-                    href="https://chatgpt.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#10a37f] hover:bg-[#0e8e6e] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150"
+                  <button
+                    type="button"
+                    onClick={() => openCompanionWindow('https://chatgpt.com', 'chatgpt_companion')}
+                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#10a37f] hover:bg-[#0e8e6e] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150 cursor-pointer"
                   >
-                    <span>{lang === 'fa' ? 'ورود به ChatGPT (chatgpt.com)' : 'Open ChatGPT'}</span>
+                    <span>{lang === 'fa' ? 'ورود به ChatGPT در پنجره کناری' : 'Open ChatGPT in Side Window'}</span>
                     <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1175,15 +2115,14 @@ Tasks:
                 </div>
 
                 <div className="pt-3 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60">
-                  <a
-                    href="https://claude.ai"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#b45309] hover:bg-[#92400e] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150"
+                  <button
+                    type="button"
+                    onClick={() => openCompanionWindow('https://claude.ai', 'claude_companion')}
+                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#b45309] hover:bg-[#92400e] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150 cursor-pointer"
                   >
-                    <span>{lang === 'fa' ? 'ورود به Claude (claude.ai)' : 'Open Claude'}</span>
+                    <span>{lang === 'fa' ? 'ورود به Claude در پنجره کناری' : 'Open Claude in Side Window'}</span>
                     <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1239,15 +2178,14 @@ Tasks:
                 </div>
 
                 <div className="pt-3 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60">
-                  <a
-                    href="https://gemini.google.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#1a73e8] hover:bg-[#1557b0] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150"
+                  <button
+                    type="button"
+                    onClick={() => openCompanionWindow('https://gemini.google.com', 'gemini_companion')}
+                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#1a73e8] hover:bg-[#1557b0] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150 cursor-pointer"
                   >
-                    <span>{lang === 'fa' ? 'ورود به Gemini (gemini.google.com)' : 'Open Gemini'}</span>
+                    <span>{lang === 'fa' ? 'ورود به Gemini در پنجره کناری' : 'Open Gemini in Side Window'}</span>
                     <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1260,13 +2198,16 @@ Tasks:
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-[#0f4c5c]/10 text-[#0f4c5c] dark:text-[#6ee7b7]">
+              <div className="p-2 rounded-lg bg-[#9333ea]/10 text-[#9333ea] dark:text-[#6ee7b7]">
                 <Zap className="w-5 h-5" />
               </div>
-              <div>
-                <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa' ? 'بخش ۲: فرمول طلایی پرامپت‌نویسی حرفه‌ای (چهارضلعی R-C-T-O)' : 'Section 2: The Gold Standard RCTO Prompting Formula'}
-                </h2>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#9333ea] text-white text-xs font-black">۲-۲</span>
+                  <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
+                    {lang === 'fa' ? 'فرمول طلایی پرامپت‌نویسی حرفه‌ای (چهارضلعی R-C-T-O)' : 'The Gold Standard RCTO Prompting Formula'}
+                  </h2>
+                </div>
                 <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
                   {lang === 'fa'
                     ? 'دیگر پرامپت‌های مبهم و کلی ننویسید. با رعایت این ۴ رکن، هوش مصنوعی دقیقاً همان خروجی مدنظر شما را تولید می‌کند.'
@@ -1276,12 +2217,22 @@ Tasks:
             </div>
           </div>
 
+          {/* Visual Diagram: RCTO Framework */}
+          <DiagramWrapper
+            titleFa="اینفوگرافیک تصویری: ساختار چهارضلعی فرمول طلایی RCTO"
+            titleEn="Visual Infographic: The 4 Pillars of RCTO Prompting"
+            badgeFa="چارچوب استاندارد"
+            lang={lang}
+          >
+            <RctoFrameworkDiagram lang={lang} />
+          </DiagramWrapper>
+
           {/* 4 Pillars Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* R - Role */}
             <div className="p-4 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs">
               <div className="flex items-center gap-2 mb-2">
-                <span className="w-7 h-7 rounded-lg bg-[#1f5163] text-white font-extrabold text-sm flex items-center justify-center">
+                <span className="w-7 h-7 rounded-lg bg-[#e0533c] text-white font-extrabold text-sm flex items-center justify-center">
                   R
                 </span>
                 <div>
@@ -1298,7 +2249,7 @@ Tasks:
                   ? 'تعیین شخصیت و سطح تخصص هوش مصنوعی. به آن بگویید در جایگاه چه کسی فکر کند.'
                   : 'Assign persona and domain expertise. Tell the AI which expert shoes to step into.'}
               </p>
-              <div className="mt-3 p-2 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] text-[11px] font-mono text-[#1f5163] dark:text-[#6fb3c6]">
+              <div className="mt-3 p-2 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] text-[11px] font-mono text-[#e0533c] dark:text-[#fb7185]">
                 {lang === 'fa'
                   ? '«تو مدیر ارشد محصول با ۱۰ سال سابقه در حوزه فین‌تک هستی...»'
                   : '"You are a Lead Product Manager with 10 years in FinTech..."'}
@@ -1308,7 +2259,7 @@ Tasks:
             {/* C - Context */}
             <div className="p-4 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs">
               <div className="flex items-center gap-2 mb-2">
-                <span className="w-7 h-7 rounded-lg bg-[#00738c] text-white font-extrabold text-sm flex items-center justify-center">
+                <span className="w-7 h-7 rounded-lg bg-[#c026d3] text-white font-extrabold text-sm flex items-center justify-center">
                   C
                 </span>
                 <div>
@@ -1325,7 +2276,7 @@ Tasks:
                   ? 'توصیف شرکت، بازار هدف، محدودیت‌های زمانی و داده‌های ورودی. هوش مصنوعی ذهن‌خوانی بلد نیست.'
                   : 'Describe organizational background, audience, and constraints. Never assume the AI knows.'}
               </p>
-              <div className="mt-3 p-2 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] text-[11px] font-mono text-[#00738c] dark:text-[#6ee7b7]">
+              <div className="mt-3 p-2 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] text-[11px] font-mono text-[#c026d3] dark:text-[#6ee7b7]">
                 {lang === 'fa'
                   ? '«شرکت ما ۴۰ نفر پرسنل دارد و نرخ ریزش مشتریان ماه قبل به ۱۲٪ رسیده است...»'
                   : '"We are a 40-person startup facing a 12% monthly customer churn..."'}
@@ -1395,7 +2346,7 @@ Tasks:
                 {lang === "fa" ? "مقایسه عینی: پرامپت ضعیف در برابر پرامپت مهندسی‌شده" : "Side-by-Side: Weak vs. High-Performance Prompt"}
               </span>
 
-              <span className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] self-start sm:self-auto border border-[#1f5163]/20">
+              <span className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg bg-[#e0533c]/10 text-[#e0533c] dark:text-[#fb7185] self-start sm:self-auto border border-[#e0533c]/20">
                 {lang === "fa" ? `دیسیپلین شما: ${discMeta.titleFa}` : `Discipline: ${discMeta.titleEn}`}
               </span>
             </div>
@@ -1452,11 +2403,11 @@ Tasks:
                 </div>
                 <div className="p-3 rounded-lg bg-white dark:bg-[#132b20] font-sans text-xs text-[#065f46] dark:text-[#a7f3d0] leading-relaxed space-y-1">
                   <div>
-                    <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6] font-mono">[Role] </span>
+                    <span className="font-bold text-[#e0533c] dark:text-[#fb7185] font-mono">[Role] </span>
                     <span>{lang === "fa" ? disciplinePromptPair.engineeredBreakdownFa.role : disciplinePromptPair.engineeredBreakdownEn.role}</span>
                   </div>
                   <div>
-                    <span className="font-bold text-[#00738c] dark:text-[#6ee7b7] font-mono">[Context] </span>
+                    <span className="font-bold text-[#c026d3] dark:text-[#6ee7b7] font-mono">[Context] </span>
                     <span>{lang === "fa" ? disciplinePromptPair.engineeredBreakdownFa.context : disciplinePromptPair.engineeredBreakdownEn.context}</span>
                   </div>
                   <div>
@@ -1487,10 +2438,13 @@ Tasks:
               <div className="p-2 rounded-lg bg-[#b87333]/10 text-[#b87333] dark:text-[#e0a96d]">
                 <FileText className="w-5 h-5" />
               </div>
-              <div>
-                <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa' ? 'بخش ۳: کتابخانه پرامپت‌های آماده و کاربردی (کپی با یک کلیک)' : 'Section 3: Battle-Tested Prompt Templates (One-Click Copy)'}
-                </h2>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#b87333] text-white text-xs font-black">۲-۳</span>
+                  <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
+                    {lang === 'fa' ? 'کتابخانه پرامپت‌های آماده و کاربردی (کپی با یک کلیک)' : 'Battle-Tested Prompt Templates (One-Click Copy)'}
+                  </h2>
+                </div>
                 <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
                   {lang === 'fa'
                     ? 'این پرامپت‌ها را با یک کلیک کپی کنید یا در کارگاه تمرین بارگذاری نمایید و در ChatGPT یا Claude امتحان کنید.'
@@ -1508,12 +2462,12 @@ Tasks:
               return (
                 <div
                   key={item.id}
-                  className="rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] p-5 shadow-xs flex flex-col justify-between hover:border-[#1f5163] dark:hover:border-[#6fb3c6] transition-all space-y-4"
+                  className="rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] p-5 shadow-xs flex flex-col justify-between hover:border-[#e0533c] dark:hover:border-[#fb7185] transition-all space-y-4"
                 >
                   <div className="space-y-2.5">
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#e3eef1] dark:bg-[#1e2a30] text-[#1f5163] dark:text-[#6fb3c6]">
+                        <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#fdeee9] dark:bg-[#1e2a30] text-[#e0533c] dark:text-[#fb7185]">
                           {lang === 'fa' ? item.categoryFa : item.categoryEn}
                         </span>
 
@@ -1548,7 +2502,7 @@ Tasks:
                   <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60">
                     <button
                       onClick={() => loadPromptToSandbox(activePromptText)}
-                      className="flex items-center gap-1 text-xs font-semibold text-[#1f5163] dark:text-[#6fb3c6] hover:underline"
+                      className="flex items-center gap-1 text-xs font-semibold text-[#e0533c] dark:text-[#fb7185] hover:underline"
                     >
                       <Play className="w-3.5 h-3.5" />
                       <span>{lang === 'fa' ? 'بارگذاری در کارگاه تست' : 'Load to Sandbox'}</span>
@@ -1559,7 +2513,7 @@ Tasks:
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all ${
                         isCopied
                           ? 'bg-[#2f7d5b] text-white'
-                          : 'bg-[#1f5163] hover:bg-[#163f4e] text-white'
+                          : 'bg-[#e0533c] hover:bg-[#163f4e] text-white'
                       }`}
                     >
                       {isCopied ? (
@@ -1591,12 +2545,15 @@ Tasks:
               <div className="p-2 rounded-lg bg-[#1b3a4b]/10 text-[#1b3a4b] dark:text-[#99e2b4]">
                 <Building2 className="w-5 h-5" />
               </div>
-              <div>
-                <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa'
-                    ? 'بخش ۴: سیستم‌های خبره سازمانی و مشاوران مدیریتی با Gems، Projects و Artifacts'
-                    : 'Section 4: Enterprise Expert Systems with Gems, Projects & Artifacts'}
-                </h2>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#1b3a4b] text-white text-xs font-black">۲-۴</span>
+                  <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
+                    {lang === 'fa'
+                      ? 'سیستم‌های خبره سازمانی و مشاوران مدیریتی با Gems، Projects و Artifacts'
+                      : 'Enterprise Expert Systems with Gems, Projects & Artifacts'}
+                  </h2>
+                </div>
                 <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
                   {lang === 'fa'
                     ? 'تبدیل مدل‌های زبانی عمومی به مشاوران دقیق حقوقی، مهندسی و مدیریت پروژه در صنایع سنگین و پیمانکاری'
@@ -1607,14 +2564,14 @@ Tasks:
           </div>
 
           {/* Hero Callout Banner */}
-          <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-r from-[#1f5163]/10 via-[#0f4c5c]/10 to-[#1b3a4b]/10 border border-[#1f5163]/30 text-xs sm:text-sm leading-relaxed text-[#1c2830] dark:text-[#e8ebe9]">
+          <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-r from-[#e0533c]/10 via-[#9333ea]/10 to-[#1b3a4b]/10 border border-[#e0533c]/30 text-xs sm:text-sm leading-relaxed text-[#1c2830] dark:text-[#e8ebe9]">
             <p className="font-medium">
               {lang === 'fa' ? (
                 <>
                   ترکیب ابزارهای سفارشی‌سازی مانند <strong className="text-[#1a73e8] font-bold">Gems در جمینای</strong> و{' '}
                   <strong className="text-[#d97706] font-bold">Projects در کلود (Claude)</strong> همراه با قابلیت‌های{' '}
                   <strong className="text-[#10a37f] font-bold">Artifacts</strong> و{' '}
-                  <strong className="text-[#1f5163] dark:text-[#6fb3c6] font-bold">System Instructions</strong>، مدل‌های زبانی عمومی را به سیستم‌های خبره سازمانی و مشاوران دقیق مدیریتی تبدیل می‌کند.
+                  <strong className="text-[#e0533c] dark:text-[#fb7185] font-bold">System Instructions</strong>، مدل‌های زبانی عمومی را به سیستم‌های خبره سازمانی و مشاوران دقیق مدیریتی تبدیل می‌کند.
                 </>
               ) : (
                 <>
@@ -1627,14 +2584,14 @@ Tasks:
           {/* Part 1: Core Architecture */}
           <div className="space-y-3">
             <h3 className="text-xs sm:text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-              <Layers className="w-4 h-4 text-[#1f5163] dark:text-[#6fb3c6]" />
+              <Layers className="w-4 h-4 text-[#e0533c] dark:text-[#fb7185]" />
               <span>{lang === 'fa' ? '۱. معماری هسته: تفکیک ابزارها و قابلیت‌ها' : '1. Core Architecture: Decoupling Tools & Capabilities'}</span>
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Instructions / Persona */}
               <div className="p-4 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs space-y-2">
-                <div className="flex items-center gap-2 text-[#1f5163] dark:text-[#6fb3c6]">
+                <div className="flex items-center gap-2 text-[#e0533c] dark:text-[#fb7185]">
                   <Terminal className="w-4 h-4" />
                   <h4 className="font-bold text-xs sm:text-sm">
                     {lang === 'fa' ? 'دستورالعمل‌های سیستمی (Instructions)' : 'System Instructions'}
@@ -1649,7 +2606,7 @@ Tasks:
 
               {/* Gems / Projects */}
               <div className="p-4 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs space-y-2">
-                <div className="flex items-center gap-2 text-[#00738c] dark:text-[#6ee7b7]">
+                <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#6ee7b7]">
                   <FolderKanban className="w-4 h-4" />
                   <h4 className="font-bold text-xs sm:text-sm">
                     {lang === 'fa' ? 'جم‌ها و پروژه‌ها (Gems / Projects)' : 'Gems & Projects (Knowledge Base)'}
@@ -1679,303 +2636,328 @@ Tasks:
             </div>
           </div>
 
-          {/* Part 2: Complex Contract & Claims Methodology */}
-          <div className="p-5 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs space-y-4">
-            <div className="flex items-center gap-2 text-[#8c3b2d] dark:text-[#f87171]">
-              <Scale className="w-5 h-5" />
-              <h3 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+          {/* Part 2: Complex Contract & Claims Methodology (Collapsible Accordion) */}
+          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all">
+            <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
+              <div className="flex items-center gap-2 text-[#8c3b2d] dark:text-[#f87171]">
+                <Scale className="w-5 h-5 shrink-0" />
+                <h3 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+                  {lang === 'fa'
+                    ? '۲. متدولوژی تحلیل قراردادهای پیچیده با Gems و Projects'
+                    : '2. Complex Contract & Claim Analysis Methodology with Gems/Projects'}
+                </h3>
+              </div>
+              <span className="text-[11px] font-normal text-[#755e66] dark:text-[#ad99ab] flex items-center gap-1 group-open:text-[#e0533c]">
+                <span>{lang === 'fa' ? 'مشاهده فرمول دانشی و فرایند ۳ مرحله‌ای' : 'View Formula & 3-Step Process'}</span>
+                <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180 shrink-0" />
+              </span>
+            </summary>
+
+            <div className="p-4 sm:p-5 pt-0 border-t border-[#ecdcd8]/50 dark:border-[#382645]/50 space-y-4">
+              <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed pt-3">
                 {lang === 'fa'
-                  ? '۲. متدولوژی تحلیل قراردادهای پیچیده با Gems و Projects'
-                  : '2. Complex Contract & Claim Analysis Methodology with Gems/Projects'}
-              </h3>
-            </div>
-            <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-              {lang === 'fa'
-                ? 'برای بررسی و ارزیابی ادعاها (Claims)، ریسک‌ها و تاخیرات قراردادی، چت معمولی پاسخگو نیست؛ باید یک Gem یا Project تخصصی تحلیل حقوقی و ادعا با پیکربندی زیر تعریف شود:'
-                : 'For evaluating claims, risks, and project delay penalties, basic chat is insufficient. Deploy a dedicated Contract & Claim Analysis Gem:'}
-            </p>
+                  ? 'برای بررسی و ارزیابی ادعاها (Claims)، ریسک‌ها و تاخیرات قراردادی، چت معمولی پاسخگو نیست؛ باید یک Gem یا Project تخصصی تحلیل حقوقی و ادعا با پیکربندی زیر تعریف شود:'
+                  : 'For evaluating claims, risks, and project delay penalties, basic chat is insufficient. Deploy a dedicated Contract & Claim Analysis Gem:'}
+              </p>
 
-            {/* Knowledge Configuration Box */}
-            <div className="p-3.5 rounded-lg bg-[#f8f9fa] dark:bg-[#12171b] border border-[#d9dad5]/70 dark:border-[#2d3942]/70 font-mono text-xs text-[#1c2830] dark:text-[#e8ebe9] space-y-1">
-              <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6] block mb-1">
-                {lang === 'fa' ? '[پیکربندی دانشی Gem / Project]:' : '[Gem / Project Knowledge Configuration]:'}
-              </span>
-              <div>• {lang === 'fa' ? 'بارگذاری شرایط عمومی و خصوصی پیمان (مانند نشریه ۴۳۱۱ یا فیدیک FIDIC نقره‌ای/زرد/قرمز)' : 'General & Particular Conditions of Contract (e.g., FIDIC Silver/Yellow/Red Books)'}</div>
-              <div>• {lang === 'fa' ? 'بخشنامه‌های جبرانی (تعدیل آحاد بها، نوسان نرخ ارز، تمدید مدت پیمان)' : 'Statutory Compensation Circulars (Price Adjustments, FX Variations, EoT Guidelines)'}</div>
-              <div>• {lang === 'fa' ? 'مکاتبات کارگاهی، صورت‌جلسات تحویل زمین و گزارش‌های روزانه پیشرفت پروژه' : 'Site correspondence, site possession protocols, and daily contractor logs'}</div>
-            </div>
+              {/* Knowledge Configuration Box */}
+              <div className="p-3.5 rounded-lg bg-[#f8f9fa] dark:bg-[#12171b] border border-[#d9dad5]/70 dark:border-[#2d3942]/70 font-mono text-xs text-[#1c2830] dark:text-[#e8ebe9] space-y-1">
+                <span className="font-bold text-[#e0533c] dark:text-[#fb7185] block mb-1">
+                  {lang === 'fa' ? '[پیکربندی دانشی Gem / Project]:' : '[Gem / Project Knowledge Configuration]:'}
+                </span>
+                <div>• {lang === 'fa' ? 'بارگذاری شرایط عمومی و خصوصی پیمان (مانند نشریه ۴۳۱۱ یا فیدیک FIDIC نقره‌ای/زرد/قرمز)' : 'General & Particular Conditions of Contract (e.g., FIDIC Silver/Yellow/Red Books)'}</div>
+                <div>• {lang === 'fa' ? 'بخشنامه‌های جبرانی (تعدیل آحاد بها، نوسان نرخ ارز، تمدید مدت پیمان)' : 'Statutory Compensation Circulars (Price Adjustments, FX Variations, EoT Guidelines)'}</div>
+                <div>• {lang === 'fa' ? 'مکاتبات کارگاهی، صورت‌جلسات تحویل زمین و گزارش‌های روزانه پیشرفت پروژه' : 'Site correspondence, site possession protocols, and daily contractor logs'}</div>
+              </div>
 
-            {/* 3 Step Extraction Process */}
-            <div className="space-y-2 pt-1">
-              <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] block">
-                {lang === 'fa' ? 'فرایند استخراج خروجی تحلیلی در ۳ گام:' : '3-Step Analytical Extraction Process:'}
-              </span>
+              {/* 3 Step Extraction Process */}
+              <div className="space-y-2 pt-1">
+                <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] block">
+                  {lang === 'fa' ? 'فرایند استخراج خروجی تحلیلی در ۳ گام:' : '3-Step Analytical Extraction Process:'}
+                </span>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5]/50 dark:border-[#2d3942]/50 space-y-1">
-                  <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6] flex items-center gap-1">
-                    <span>۱.</span>
-                    <span>{lang === 'fa' ? 'ماتریس تخصیص ریسک' : 'Risk Allocation Matrix'}</span>
-                  </span>
-                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    {lang === 'fa'
-                      ? 'استخراج تعهدات نامتقارن کارفرما/پیمانکار، بندهای مبهم در آزادسازی زمین، تحویل جبهه‌های کاری، یا فورس‌ماژور.'
-                      : 'Uncovers asymmetrical clauses, land handover ambiguities, and force majeure liabilities.'}
-                  </p>
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5]/50 dark:border-[#2d3942]/50 space-y-1">
+                    <span className="font-bold text-[#e0533c] dark:text-[#fb7185] flex items-center gap-1">
+                      <span>۱.</span>
+                      <span>{lang === 'fa' ? 'ماتریس تخصیص ریسک' : 'Risk Allocation Matrix'}</span>
+                    </span>
+                    <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                      {lang === 'fa'
+                        ? 'استخراج تعهدات نامتقارن کارفرما/پیمانکار، بندهای مبهم در آزادسازی زمین، تحویل جبهه‌های کاری، یا فورس‌ماژور.'
+                        : 'Uncovers asymmetrical clauses, land handover ambiguities, and force majeure liabilities.'}
+                    </p>
+                  </div>
 
-                <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5]/50 dark:border-[#2d3942]/50 space-y-1">
-                  <span className="font-bold text-[#00738c] dark:text-[#6ee7b7] flex items-center gap-1">
-                    <span>۲.</span>
-                    <span>{lang === 'fa' ? 'ارزیابی دعاوی تاخیرات و مالی' : 'Delay & Financial Claims'}</span>
-                  </span>
-                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    {lang === 'fa'
-                      ? 'انطباق مستندات روزانه با مواعد مندرج در ماده ۳۰ شرایط عمومی پیمان، بررسی ضرورت اخطار کتبی و تحلیل مسیر بحرانی (Critical Path).'
-                      : 'Maps daily logs against Clause 30 deadlines, notice prerequisites, and critical path variance.'}
-                  </p>
-                </div>
+                  <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5]/50 dark:border-[#2d3942]/50 space-y-1">
+                    <span className="font-bold text-[#c026d3] dark:text-[#6ee7b7] flex items-center gap-1">
+                      <span>۲.</span>
+                      <span>{lang === 'fa' ? 'ارزیابی دعاوی تاخیرات و مالی' : 'Delay & Financial Claims'}</span>
+                    </span>
+                    <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                      {lang === 'fa'
+                        ? 'انطباق مستندات روزانه با مواعد مندرج در ماده ۳۰ شرایط عمومی پیمان، بررسی ضرورت اخطار کتبی و تحلیل مسیر بحرانی (Critical Path).'
+                        : 'Maps daily logs against Clause 30 deadlines, notice prerequisites, and critical path variance.'}
+                    </p>
+                  </div>
 
-                <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5]/50 dark:border-[#2d3942]/50 space-y-1">
-                  <span className="font-bold text-[#2f7d5b] dark:text-[#63c496] flex items-center gap-1">
-                    <span>۳.</span>
-                    <span>{lang === 'fa' ? 'تدوین لایحه دفاعیه در آرتیفکت' : 'Formal Defense in Artifact'}</span>
-                  </span>
-                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    {lang === 'fa'
-                      ? 'مدل متن رسمی دفاعیه را با استناد دقیق به شماره بندهای قرارداد و مستندات تاریخی داخل یک Artifact با فرمت نامه اداری رسمی تنظیم می‌کند.'
-                      : 'Drafts hard-hitting official submission briefs citing exact contract clauses in a standalone Artifact.'}
-                  </p>
+                  <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5]/50 dark:border-[#2d3942]/50 space-y-1">
+                    <span className="font-bold text-[#2f7d5b] dark:text-[#63c496] flex items-center gap-1">
+                      <span>۳.</span>
+                      <span>{lang === 'fa' ? 'تدوین لایحه دفاعیه در آرتیفکت' : 'Formal Defense in Artifact'}</span>
+                    </span>
+                    <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                      {lang === 'fa'
+                        ? 'مدل متن رسمی دفاعیه را با استناد دقیق به شماره بندهای قرارداد و مستندات تاریخی داخل یک Artifact با فرمت نامه اداری رسمی تنظیم می‌کند.'
+                        : 'Drafts hard-hitting official submission briefs citing exact contract clauses in a standalone Artifact.'}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </details>
 
-          {/* Part 3: Industrial & Engineering Expert Assistants Table */}
-          <div className="p-5 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs space-y-3">
-            <div className="flex items-center gap-2 text-[#00738c] dark:text-[#6fb3c6]">
-              <Factory className="w-5 h-5" />
-              <h3 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+          {/* Part 3: Industrial & Engineering Expert Assistants Table (Collapsible Accordion) */}
+          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all">
+            <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
+              <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185]">
+                <Factory className="w-5 h-5 shrink-0" />
+                <h3 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+                  {lang === 'fa'
+                    ? '۳. الگوی ساخت دستیارهای تخصصی صنعتی و فنی (مترو، پتروشیمی، حقوقی)'
+                    : '3. Industrial & Technical Expert Assistant Patterns (Metro, Petrochemical, Legal)'}
+                </h3>
+              </div>
+              <span className="text-[11px] font-normal text-[#755e66] dark:text-[#ad99ab] flex items-center gap-1 group-open:text-[#e0533c]">
+                <span>{lang === 'fa' ? 'مشاهده ماتریس نقش‌ها و پرامپت‌ها' : 'View Roles Matrix'}</span>
+                <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180 shrink-0" />
+              </span>
+            </summary>
+
+            <div className="p-4 sm:p-5 pt-0 border-t border-[#ecdcd8]/50 dark:border-[#382645]/50 space-y-3">
+              <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] pt-3">
                 {lang === 'fa'
-                  ? '۳. الگوی ساخت دستیارهای تخصصی صنعتی و فنی (مترو، پتروشیمی، حقوقی)'
-                  : '3. Industrial & Technical Expert Assistant Patterns (Metro, Petrochemical, Legal)'}
-              </h3>
+                  ? 'پیکربندی مخزن دانشی و نوع خروجی‌های آرتیفکت بر حسب رده تخصصی پروژه:'
+                  : 'Knowledge base taxonomy and Artifact deliverables categorized by engineering discipline:'}
+              </p>
+
+              <div className="overflow-x-auto rounded-lg border border-[#d9dad5] dark:border-[#2d3942]">
+                <table className="w-full text-xs text-right border-collapse">
+                  <thead>
+                    <tr className="bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] border-b border-[#d9dad5] dark:border-[#2d3942]">
+                      <th className="p-3 font-bold w-1/4">
+                        {lang === 'fa' ? 'رده تخصصی و نقش' : 'Discipline & Role'}
+                      </th>
+                      <th className="p-3 font-bold w-3/8">
+                        {lang === 'fa' ? 'ساختار دانشی Gem / Project' : 'Gem / Project Knowledge Base'}
+                      </th>
+                      <th className="p-3 font-bold w-3/8">
+                        {lang === 'fa' ? 'خروجی‌های کاربردی و نحوه استفاده در Artifact' : 'Applied Artifact Deliverables'}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#d9dad5]/60 dark:divide-[#2d3942]/60">
+                    {/* Row 1: Metro */}
+                    <tr className="hover:bg-[#f8f9fa] dark:hover:bg-[#162026] transition-colors">
+                      <td className="p-3 align-top font-bold text-[#e0533c] dark:text-[#fb7185]">
+                        <div className="flex items-center gap-2">
+                          <Train className="w-4 h-4 text-[#c026d3] shrink-0" />
+                          <span>{lang === 'fa' ? 'مدیر پروژه و مدیر فنی مترو' : 'Metro Project & Technical Director'}</span>
+                        </div>
+                      </td>
+                      <td className="p-3 align-top text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                        {lang === 'fa'
+                          ? 'مشخصات فنی عمومی و خصوصی تونل‌سازی، لاینینگ سگمنتی، رژیم حفاری TBM (مانند EPB)، سیستم پایدارسازی گود و ایستگاه‌ها، سازه نگهبان، و WBS پروژه.'
+                          : 'Tunneling technical specs, segmental precast lining, EPB TBM excavation logs, deep excavation support, shoring systems, and project WBS.'}
+                      </td>
+                      <td className="p-3 align-top text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed space-y-1">
+                        <div>• {lang === 'fa' ? 'تحلیل انحرافات زمانی و ریالی با رویکرد ارزش کسب‌شده (EVM)' : 'EVM schedule and cost variance analysis'}</div>
+                        <div>• {lang === 'fa' ? 'پیش‌نویس چک‌لیست‌های تحویل موقت قطعات لاینینگ و تزریق فوم' : 'Precast segment QA checklists & foam injection audits'}</div>
+                        <div>• {lang === 'fa' ? 'سناریونویسی مدیریت ریسک برخورد با معارضات تاسیساتی شهری' : 'Urban utility clashes risk scenarios & shoring logs'}</div>
+                      </td>
+                    </tr>
+
+                    {/* Row 2: Petrochemical */}
+                    <tr className="hover:bg-[#f8f9fa] dark:hover:bg-[#162026] transition-colors">
+                      <td className="p-3 align-top font-bold text-[#9333ea] dark:text-[#6ee7b7]">
+                        <div className="flex items-center gap-2">
+                          <Factory className="w-4 h-4 text-[#9333ea] shrink-0" />
+                          <span>{lang === 'fa' ? 'مدیر پتروشیمی و پالایشگاه' : 'Petrochemical & Refinery Lead'}</span>
+                        </div>
+                      </td>
+                      <td className="p-3 align-top text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                        {lang === 'fa'
+                          ? 'استانداردهای فرآیندی (ASME, API, IPS)، نقشه‌های P&ID، لاگ‌های تعمیرات و نگهداری، رویه‌های ایمنی HAZOP و استانداردهای متریال.'
+                          : 'Process safety codes (ASME Sec VIII, API 1104, IPS), P&IDs, plant maintenance logs, HAZOP studies, metallurgy specs.'}
+                      </td>
+                      <td className="p-3 align-top text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed space-y-1">
+                        <div>• {lang === 'fa' ? 'بررسی عدم‌انطباق‌های متالورژیکی و پایپینگ با کد استاندارد' : 'Metallurgical & piping non-conformance audits against code'}</div>
+                        <div>• {lang === 'fa' ? 'آماده‌سازی ماتریس بازرسی فنی و برنامه‌ریزی تست‌های هیدروستاتیک' : 'Technical inspection matrix & hydrotest scheduling'}</div>
+                        <div>• {lang === 'fa' ? 'ساخت ماتریس علل ریشه‌ای (RCA) در توقفات عملیاتی واحدها' : 'Root Cause Analysis (RCA) matrices for operational trips'}</div>
+                      </td>
+                    </tr>
+
+                    {/* Row 3: Legal & Contracts */}
+                    <tr className="hover:bg-[#f8f9fa] dark:hover:bg-[#162026] transition-colors">
+                      <td className="p-3 align-top font-bold text-[#b87333] dark:text-[#e0a96d]">
+                        <div className="flex items-center gap-2">
+                          <Scale className="w-4 h-4 text-[#b87333] shrink-0" />
+                          <span>{lang === 'fa' ? 'مشاور حقوقی و قراردادها' : 'Legal Counsel & Contract Advisor'}</span>
+                        </div>
+                      </td>
+                      <td className="p-3 align-top text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                        {lang === 'fa'
+                          ? 'قوانین بالادستی، آیین‌نامه معاملات، شرایط عمومی پیمان، رویه‌های قضایی و داوری بین‌المللی/داخلی.'
+                          : 'Governing procurement laws, General Conditions of Contract, arbitration precedents, and statutory regulations.'}
+                      </td>
+                      <td className="p-3 align-top text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed space-y-1">
+                        <div>• {lang === 'fa' ? 'چک‌لیست انطباق‌سنجی قرارداد با قوانین حاکم پیش از امضا' : 'Pre-award contractual compliance and loophole audits'}</div>
+                        <div>• {lang === 'fa' ? 'استخراج مهلت‌های انقضای ضمانت‌نامه‌ها، جرایم تاخیر و سقف تعدیل' : 'Bank guarantee expiry schedules, liquidated damages & cap tracking'}</div>
+                        <div>• {lang === 'fa' ? 'ساخت جداول تعهدات متقابل در Artifact برای ارجاع سریع تیم اجرایی' : 'Reciprocal obligations matrices in Artifacts for site execution'}</div>
+                      </td>
+                    </tr>
+
+                    {/* Row 4: HR, Admin & Welfare */}
+                    <tr className="hover:bg-[#f8f9fa] dark:hover:bg-[#162026] transition-colors">
+                      <td className="p-3 align-top font-bold text-[#2f7d5b] dark:text-[#63c496]">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-[#2f7d5b] shrink-0" />
+                          <span>{lang === 'fa' ? 'مدیر منابع انسانی، اداری و رفاهی' : 'HR, Admin & Welfare Manager'}</span>
+                        </div>
+                      </td>
+                      <td className="p-3 align-top text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                        {lang === 'fa'
+                          ? 'مواد منابع انسانی و رفاهی شرایط خصوصی پیمان (پروژه مترو خط ایکس)، جدول متراژ فضاهای کمپ کارگاهی (صفحه ۵۴)، بخشنامه داخلی کنترل اضافه‌کاری و لاگ‌های ساعت‌زنی.'
+                          : 'Particular Conditions HR & welfare clauses (Metro Line X), Page 54 mandatory camp space table, internal overtime directives, and attendance logs.'}
+                      </td>
+                      <td className="p-3 align-top text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed space-y-1">
+                        <div>• {lang === 'fa' ? 'ساخت داشبورد React کنترل اضافه‌کاری و ریسک خستگی در Claude Artifacts / Gemini Canvas' : 'Interactive React overtime & fatigue risk dashboard in Artifacts/Canvas'}</div>
+                        <div>• {lang === 'fa' ? 'ماشین‌حساب مهلت اطلاع‌رسانی بند ۴۲-۱ (۷ روز شب‌کاری / ۲۴ ساعت روزکاری) و صدور نامه رسمی' : 'Sub-Clause 42-1 notice deadline calculator & official letter generator'}</div>
+                        <div>• {lang === 'fa' ? 'اپلیکیشن ممیزی متراژ کمپ کارگاهی (ماده ۲۰-ح) و مبدل CSV کارت‌زن به گزارش ماهانه ماده ۱۸' : 'Article 20-H camp space audit app & Article 18 monthly CSV manpower chart converter'}</div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-              {lang === 'fa'
-                ? 'پیکربندی مخزن دانشی و نوع خروجی‌های آرتیفکت بر حسب رده تخصصی پروژه:'
-                : 'Knowledge base taxonomy and Artifact deliverables categorized by engineering discipline:'}
-            </p>
+          </details>
 
-            <div className="overflow-x-auto rounded-lg border border-[#d9dad5] dark:border-[#2d3942]">
-              <table className="w-full text-xs text-right border-collapse">
-                <thead>
-                  <tr className="bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] border-b border-[#d9dad5] dark:border-[#2d3942]">
-                    <th className="p-3 font-bold w-1/4">
-                      {lang === 'fa' ? 'رده تخصصی و نقش' : 'Discipline & Role'}
-                    </th>
-                    <th className="p-3 font-bold w-3/8">
-                      {lang === 'fa' ? 'ساختار دانشی Gem / Project' : 'Gem / Project Knowledge Base'}
-                    </th>
-                    <th className="p-3 font-bold w-3/8">
-                      {lang === 'fa' ? 'خروجی‌های کاربردی و نحوه استفاده در Artifact' : 'Applied Artifact Deliverables'}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#d9dad5]/60 dark:divide-[#2d3942]/60">
-                  {/* Row 1: Metro */}
-                  <tr className="hover:bg-[#f8f9fa] dark:hover:bg-[#162026] transition-colors">
-                    <td className="p-3 align-top font-bold text-[#1f5163] dark:text-[#6fb3c6]">
-                      <div className="flex items-center gap-2">
-                        <Train className="w-4 h-4 text-[#00738c] shrink-0" />
-                        <span>{lang === 'fa' ? 'مدیر پروژه و مدیر فنی مترو' : 'Metro Project & Technical Director'}</span>
-                      </div>
-                    </td>
-                    <td className="p-3 align-top text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                      {lang === 'fa'
-                        ? 'مشخصات فنی عمومی و خصوصی تونل‌سازی، لاینینگ سگمنتی، رژیم حفاری TBM (مانند EPB)، سیستم پایدارسازی گود و ایستگاه‌ها، سازه نگهبان، و WBS پروژه.'
-                        : 'Tunneling technical specs, segmental precast lining, EPB TBM excavation logs, deep excavation support, shoring systems, and project WBS.'}
-                    </td>
-                    <td className="p-3 align-top text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed space-y-1">
-                      <div>• {lang === 'fa' ? 'تحلیل انحرافات زمانی و ریالی با رویکرد ارزش کسب‌شده (EVM)' : 'EVM schedule and cost variance analysis'}</div>
-                      <div>• {lang === 'fa' ? 'پیش‌نویس چک‌لیست‌های تحویل موقت قطعات لاینینگ و تزریق فوم' : 'Precast segment QA checklists & foam injection audits'}</div>
-                      <div>• {lang === 'fa' ? 'سناریونویسی مدیریت ریسک برخورد با معارضات تاسیساتی شهری' : 'Urban utility clashes risk scenarios & shoring logs'}</div>
-                    </td>
-                  </tr>
-
-                  {/* Row 2: Petrochemical */}
-                  <tr className="hover:bg-[#f8f9fa] dark:hover:bg-[#162026] transition-colors">
-                    <td className="p-3 align-top font-bold text-[#0f4c5c] dark:text-[#6ee7b7]">
-                      <div className="flex items-center gap-2">
-                        <Factory className="w-4 h-4 text-[#0f4c5c] shrink-0" />
-                        <span>{lang === 'fa' ? 'مدیر پتروشیمی و پالایشگاه' : 'Petrochemical & Refinery Lead'}</span>
-                      </div>
-                    </td>
-                    <td className="p-3 align-top text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                      {lang === 'fa'
-                        ? 'استانداردهای فرآیندی (ASME, API, IPS)، نقشه‌های P&ID، لاگ‌های تعمیرات و نگهداری، رویه‌های ایمنی HAZOP و استانداردهای متریال.'
-                        : 'Process safety codes (ASME Sec VIII, API 1104, IPS), P&IDs, plant maintenance logs, HAZOP studies, metallurgy specs.'}
-                    </td>
-                    <td className="p-3 align-top text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed space-y-1">
-                      <div>• {lang === 'fa' ? 'بررسی عدم‌انطباق‌های متالورژیکی و پایپینگ با کد استاندارد' : 'Metallurgical & piping non-conformance audits against code'}</div>
-                      <div>• {lang === 'fa' ? 'آماده‌سازی ماتریس بازرسی فنی و برنامه‌ریزی تست‌های هیدروستاتیک' : 'Technical inspection matrix & hydrotest scheduling'}</div>
-                      <div>• {lang === 'fa' ? 'ساخت ماتریس علل ریشه‌ای (RCA) در توقفات عملیاتی واحدها' : 'Root Cause Analysis (RCA) matrices for operational trips'}</div>
-                    </td>
-                  </tr>
-
-                  {/* Row 3: Legal & Contracts */}
-                  <tr className="hover:bg-[#f8f9fa] dark:hover:bg-[#162026] transition-colors">
-                    <td className="p-3 align-top font-bold text-[#b87333] dark:text-[#e0a96d]">
-                      <div className="flex items-center gap-2">
-                        <Scale className="w-4 h-4 text-[#b87333] shrink-0" />
-                        <span>{lang === 'fa' ? 'مشاور حقوقی و قراردادها' : 'Legal Counsel & Contract Advisor'}</span>
-                      </div>
-                    </td>
-                    <td className="p-3 align-top text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                      {lang === 'fa'
-                        ? 'قوانین بالادستی، آیین‌نامه معاملات، شرایط عمومی پیمان، رویه‌های قضایی و داوری بین‌المللی/داخلی.'
-                        : 'Governing procurement laws, General Conditions of Contract, arbitration precedents, and statutory regulations.'}
-                    </td>
-                    <td className="p-3 align-top text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed space-y-1">
-                      <div>• {lang === 'fa' ? 'چک‌لیست انطباق‌سنجی قرارداد با قوانین حاکم پیش از امضا' : 'Pre-award contractual compliance and loophole audits'}</div>
-                      <div>• {lang === 'fa' ? 'استخراج مهلت‌های انقضای ضمانت‌نامه‌ها، جرایم تاخیر و سقف تعدیل' : 'Bank guarantee expiry schedules, liquidated damages & cap tracking'}</div>
-                      <div>• {lang === 'fa' ? 'ساخت جداول تعهدات متقابل در Artifact برای ارجاع سریع تیم اجرایی' : 'Reciprocal obligations matrices in Artifacts for site execution'}</div>
-                    </td>
-                  </tr>
-
-                  {/* Row 4: HR, Admin & Welfare */}
-                  <tr className="hover:bg-[#f8f9fa] dark:hover:bg-[#162026] transition-colors">
-                    <td className="p-3 align-top font-bold text-[#2f7d5b] dark:text-[#63c496]">
-                      <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-[#2f7d5b] shrink-0" />
-                        <span>{lang === 'fa' ? 'مدیر منابع انسانی، اداری و رفاهی' : 'HR, Admin & Welfare Manager'}</span>
-                      </div>
-                    </td>
-                    <td className="p-3 align-top text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                      {lang === 'fa'
-                        ? 'مواد منابع انسانی و رفاهی شرایط خصوصی پیمان (پروژه مترو خط ایکس)، جدول متراژ فضاهای کمپ کارگاهی (صفحه ۵۴)، بخشنامه داخلی کنترل اضافه‌کاری و لاگ‌های ساعت‌زنی.'
-                        : 'Particular Conditions HR & welfare clauses (Metro Line X), Page 54 mandatory camp space table, internal overtime directives, and attendance logs.'}
-                    </td>
-                    <td className="p-3 align-top text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed space-y-1">
-                      <div>• {lang === 'fa' ? 'ساخت داشبورد React کنترل اضافه‌کاری و ریسک خستگی در Claude Artifacts / Gemini Canvas' : 'Interactive React overtime & fatigue risk dashboard in Artifacts/Canvas'}</div>
-                      <div>• {lang === 'fa' ? 'ماشین‌حساب مهلت اطلاع‌رسانی بند ۴۲-۱ (۷ روز شب‌کاری / ۲۴ ساعت روزکاری) و صدور نامه رسمی' : 'Sub-Clause 42-1 notice deadline calculator & official letter generator'}</div>
-                      <div>• {lang === 'fa' ? 'اپلیکیشن ممیزی متراژ کمپ کارگاهی (ماده ۲۰-ح) و مبدل CSV کارت‌زن به گزارش ماهانه ماده ۱۸' : 'Article 20-H camp space audit app & Article 18 monthly CSV manpower chart converter'}</div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Part 4 & 5: Operational Steps & Pre-deployment Checklist */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Operational Implementation Steps */}
-            <div className="p-5 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs space-y-3">
-              <div className="flex items-center gap-2 text-[#1f5163] dark:text-[#6fb3c6]">
-                <ListChecks className="w-5 h-5" />
+          {/* Part 4 & 5: Operational Steps & Pre-deployment Checklist (Collapsible Accordion) */}
+          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all">
+            <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
+              <div className="flex items-center gap-2 text-[#2f7d5b] dark:text-[#52b788]">
+                <ListChecks className="w-5 h-5 shrink-0" />
                 <h4 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa' ? '۴. مراحل عملیاتی راه‌اندازی دستیار اختصاصی' : '4. Operational Deployment Steps'}
+                  {lang === 'fa' ? '۴. مراحل عملیاتی راه‌اندازی دستیار و چک‌لیست اعتبارسنجی پیش از استقرار' : '4. Operational Setup & Pre-Deployment Checklist'}
                 </h4>
               </div>
+              <span className="text-[11px] font-normal text-[#755e66] dark:text-[#ad99ab] flex items-center gap-1 group-open:text-[#e0533c]">
+                <span>{lang === 'fa' ? 'مشاهده چک‌لیست و ۳ گام عملیاتی' : 'View Checklist & Steps'}</span>
+                <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180 shrink-0" />
+              </span>
+            </summary>
 
-              <div className="space-y-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5]/40 dark:border-[#2d3942]/40 space-y-1">
-                  <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6] block">
-                    {lang === 'fa' ? 'گام ۱: پایه‌گذاری System Instruction' : 'Step 1: Anchor System Instruction'}
-                  </span>
-                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    {lang === 'fa'
-                      ? 'نقش را دقیق، بدون تعارف و با لحن مهندسی/حقوقی بنویسید (مثلاً: «تو سرپرست امور قراردادها و دعاوی فنی هستی؛ هیچ ادعایی را بدون ارجاع به ماده و تبصره صریح قرارداد و بخشنامه‌های سازمان برنامه نمی‌پذیری»).'
-                      : 'Define the persona rigorously: "You are the Senior Claims Officer; reject any claim lacking explicit reference to contractual sub-clauses and verified logs."'}
-                  </p>
+            <div className="p-4 sm:p-5 pt-0 border-t border-[#ecdcd8]/50 dark:border-[#382645]/50 grid grid-cols-1 md:grid-cols-2 gap-5 pt-4">
+              {/* Operational Implementation Steps */}
+              <div className="p-4 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#fdf8f5] dark:bg-[#16101c] shadow-xs space-y-3">
+                <div className="flex items-center gap-2 text-[#e0533c] dark:text-[#fb7185]">
+                  <ListChecks className="w-4 h-4" />
+                  <h5 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+                    {lang === 'fa' ? 'مراحل عملیاتی راه‌اندازی دستیار اختصاصی' : 'Operational Deployment Steps'}
+                  </h5>
                 </div>
 
-                <div className="p-2.5 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5]/40 dark:border-[#2d3942]/40 space-y-1">
-                  <span className="font-bold text-[#00738c] dark:text-[#6ee7b7] block">
-                    {lang === 'fa' ? 'گام ۲: تغذیه اسناد مرجع' : 'Step 2: Upload Ground-Truth Docs'}
-                  </span>
-                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    {lang === 'fa'
-                      ? 'نسخه‌های متنی تمیز و PDFهای دارای لایه متنی اسناد را مستقیماً به مخزن دانشی Gem یا Project بارگذاری کنید تا استنادها قطعی و بدون افت کیفیت باشد.'
-                      : 'Upload clean, OCR-layered PDFs and structured markdown files directly into the Gem/Project Knowledge Base.'}
-                  </p>
-                </div>
+                <div className="space-y-2.5 text-xs">
+                  <div className="p-2.5 rounded-lg bg-white dark:bg-[#201729] border border-[#d9dad5]/40 dark:border-[#2d3942]/40 space-y-1">
+                    <span className="font-bold text-[#e0533c] dark:text-[#fb7185] block">
+                      {lang === 'fa' ? 'گام ۱: پایه‌گذاری System Instruction' : 'Step 1: Anchor System Instruction'}
+                    </span>
+                    <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                      {lang === 'fa'
+                        ? 'نقش را دقیق، بدون تعارف و با لحن مهندسی/حقوقی بنویسید (مثلاً: «تو سرپرست امور قراردادها و دعاوی فنی هستی؛ هیچ ادعایی را بدون ارجاع به ماده و تبصره صریح قرارداد و بخشنامه‌های سازمان برنامه نمی‌پذیری»).'
+                        : 'Define the persona rigorously: "You are the Senior Claims Officer; reject any claim lacking explicit reference to contractual sub-clauses and verified logs."'}
+                    </p>
+                  </div>
 
-                <div className="p-2.5 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5]/40 dark:border-[#2d3942]/40 space-y-1">
-                  <span className="font-bold text-[#b87333] dark:text-[#e0a96d] block">
-                    {lang === 'fa' ? 'گام ۳: تعریف ساختار خروجی با Artifacts' : 'Step 3: Direct Artifact Formatting'}
-                  </span>
-                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    {lang === 'fa'
-                      ? 'به دستیار دستور دهید خلاصه‌ها را در قالب جداول چندمتغیره، پیش‌نویس مکاتبات را به صورت ساختار نامه‌ای رسمی، و داده‌های پیشرفت کار را به شکل کدهای داشبورد بصری تولید کند.'
-                      : 'Direct the assistant to output briefs as formal letters and metrics as interactive tables in dedicated Artifacts.'}
-                  </p>
+                  <div className="p-2.5 rounded-lg bg-white dark:bg-[#201729] border border-[#d9dad5]/40 dark:border-[#2d3942]/40 space-y-1">
+                    <span className="font-bold text-[#c026d3] dark:text-[#6ee7b7] block">
+                      {lang === 'fa' ? 'گام ۲: تغذیه اسناد مرجع' : 'Step 2: Upload Ground-Truth Docs'}
+                    </span>
+                    <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                      {lang === 'fa'
+                        ? 'نسخه‌های متنی تمیز و PDFهای دارای لایه متنی اسناد را مستقیماً به مخزن دانشی Gem یا Project بارگذاری کنید تا استنادها قطعی و بدون افت کیفیت باشد.'
+                        : 'Upload clean, OCR-layered PDFs and structured markdown files directly into the Gem/Project Knowledge Base.'}
+                    </p>
+                  </div>
+
+                  <div className="p-2.5 rounded-lg bg-white dark:bg-[#201729] border border-[#d9dad5]/40 dark:border-[#2d3942]/40 space-y-1">
+                    <span className="font-bold text-[#b87333] dark:text-[#e0a96d] block">
+                      {lang === 'fa' ? 'گام ۳: تعریف ساختار خروجی با Artifacts' : 'Step 3: Direct Artifact Formatting'}
+                    </span>
+                    <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                      {lang === 'fa'
+                        ? 'به دستیار دستور دهید خلاصه‌ها را در قالب جداول چندمتغیره، پیش‌نویس مکاتبات را به صورت ساختار نامه‌ای رسمی، و داده‌های پیشرفت کار را به شکل کدهای داشبورد بصری تولید کند.'
+                        : 'Direct the assistant to output briefs as formal letters and metrics as interactive tables in dedicated Artifacts.'}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Validation Checklist */}
-            <div className="p-5 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs space-y-3">
-              <div className="flex items-center gap-2 text-[#2f7d5b] dark:text-[#63c496]">
-                <BookCheck className="w-5 h-5" />
-                <h4 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa' ? 'چک‌لیست اعتبارسنجی پیش از استقرار Gem' : 'Pre-Deployment Validation Checklist'}
-                </h4>
+              {/* Validation Checklist */}
+              <div className="p-4 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#fdf8f5] dark:bg-[#16101c] shadow-xs space-y-3">
+                <div className="flex items-center gap-2 text-[#2f7d5b] dark:text-[#63c496]">
+                  <BookCheck className="w-4 h-4" />
+                  <h5 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+                    {lang === 'fa' ? 'چک‌لیست اعتبارسنجی پیش از استقرار Gem' : 'Pre-Deployment Validation Checklist'}
+                  </h5>
+                </div>
+
+                <ul className="space-y-3 text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
+                  <li className="flex items-start gap-2 p-2.5 rounded-lg bg-white dark:bg-[#201729] border border-[#d9dad5]/40 dark:border-[#2d3942]/40">
+                    <CheckCircle2 className="w-4 h-4 text-[#2f7d5b] dark:text-[#63c496] shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-[#1c2830] dark:text-[#e8ebe9] block mb-0.5">
+                        {lang === 'fa' ? 'قید شرط عدم فرضیه‌سازی (Hallucination Guardrail):' : 'Strict Zero-Hallucination Guardrail:'}
+                      </strong>
+                      <span>
+                        {lang === 'fa'
+                          ? 'اطمینان از قرار دادن شروط عدم فرضیه‌سازی در بخش دستورالعمل تا مدل در صورت نبود داده در اسناد بارگذاری‌شده، اعلام بی‌اطلاعی کند.'
+                          : 'Ensure instructions mandate stating "Information not found in reference documents" rather than guessing.'}
+                      </span>
+                    </div>
+                  </li>
+
+                  <li className="flex items-start gap-2 p-2.5 rounded-lg bg-white dark:bg-[#201729] border border-[#d9dad5]/40 dark:border-[#2d3942]/40">
+                    <CheckCircle2 className="w-4 h-4 text-[#2f7d5b] dark:text-[#63c496] shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-[#1c2830] dark:text-[#e8ebe9] block mb-0.5">
+                        {lang === 'fa' ? 'طبقه‌بندی بر اساس اولویت حاکمیت اسناد:' : 'Contractual Order of Precedence:'}
+                      </strong>
+                      <span>
+                        {lang === 'fa'
+                          ? 'طبقه‌بندی اسناد بر اساس اولویت حاکمیت اسناد (مثلاً تقدم موافقت‌نامه بر شرایط عمومی و شرایط عمومی بر مشخصات فنی).'
+                          : 'Explicitly enforce document hierarchy (Agreement > Particular Conditions > General Conditions > Technical Specs).'}
+                      </span>
+                    </div>
+                  </li>
+
+                  <li className="flex items-start gap-2 p-2.5 rounded-lg bg-white dark:bg-[#201729] border border-[#d9dad5]/40 dark:border-[#2d3942]/40">
+                    <CheckCircle2 className="w-4 h-4 text-[#2f7d5b] dark:text-[#63c496] shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-[#1c2830] dark:text-[#e8ebe9] block mb-0.5">
+                        {lang === 'fa' ? 'یکپارچه‌سازی شیوه‌نامه مکاتبات رسمی:' : 'Corporate Letter & Tone Style Guide:'}
+                      </strong>
+                      <span>
+                        {lang === 'fa'
+                          ? 'یکپارچه‌سازی شیوه‌نامه نگارش مکاتبات رسمی سازمان در حافظه پایدار دستیار جهت انطباق ۱۰۰٪ با نامه‌های صادره سازمانی.'
+                          : 'Embed the organization’s standard official letterhead format and diplomatic tone in persistent memory.'}
+                      </span>
+                    </div>
+                  </li>
+                </ul>
               </div>
-
-              <ul className="space-y-3 text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-                <li className="flex items-start gap-2 p-2.5 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5]/40 dark:border-[#2d3942]/40">
-                  <CheckCircle2 className="w-4 h-4 text-[#2f7d5b] dark:text-[#63c496] shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="text-[#1c2830] dark:text-[#e8ebe9] block mb-0.5">
-                      {lang === 'fa' ? 'قید شرط عدم فرضیه‌سازی (Hallucination Guardrail):' : 'Strict Zero-Hallucination Guardrail:'}
-                    </strong>
-                    <span>
-                      {lang === 'fa'
-                        ? 'اطمینان از قرار دادن شروط عدم فرضیه‌سازی در بخش دستورالعمل تا مدل در صورت نبود داده در اسناد بارگذاری‌شده، اعلام بی‌اطلاعی کند.'
-                        : 'Ensure instructions mandate stating "Information not found in reference documents" rather than guessing.'}
-                    </span>
-                  </div>
-                </li>
-
-                <li className="flex items-start gap-2 p-2.5 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5]/40 dark:border-[#2d3942]/40">
-                  <CheckCircle2 className="w-4 h-4 text-[#2f7d5b] dark:text-[#63c496] shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="text-[#1c2830] dark:text-[#e8ebe9] block mb-0.5">
-                      {lang === 'fa' ? 'طبقه‌بندی بر اساس اولویت حاکمیت اسناد:' : 'Contractual Order of Precedence:'}
-                    </strong>
-                    <span>
-                      {lang === 'fa'
-                        ? 'طبقه‌بندی اسناد بر اساس اولویت حاکمیت اسناد (مثلاً تقدم موافقت‌نامه بر شرایط عمومی و شرایط عمومی بر مشخصات فنی).'
-                        : 'Explicitly enforce document hierarchy (Agreement > Particular Conditions > General Conditions > Technical Specs).'}
-                    </span>
-                  </div>
-                </li>
-
-                <li className="flex items-start gap-2 p-2.5 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5]/40 dark:border-[#2d3942]/40">
-                  <CheckCircle2 className="w-4 h-4 text-[#2f7d5b] dark:text-[#63c496] shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="text-[#1c2830] dark:text-[#e8ebe9] block mb-0.5">
-                      {lang === 'fa' ? 'یکپارچه‌سازی شیوه‌نامه مکاتبات رسمی:' : 'Corporate Letter & Tone Style Guide:'}
-                    </strong>
-                    <span>
-                      {lang === 'fa'
-                        ? 'یکپارچه‌سازی شیوه‌نامه نگارش مکاتبات رسمی سازمان در حافظه پایدار دستیار جهت انطباق ۱۰۰٪ با نامه‌های صادره سازمانی.'
-                        : 'Embed the organization’s standard official letterhead format and diplomatic tone in persistent memory.'}
-                    </span>
-                  </div>
-                </li>
-              </ul>
             </div>
-          </div>
-
-          {/* Part 6: 5 Interactive HR & Admin Exercises for Claude Artifacts & Gemini Canvas */}
-          <HrArtifactsCanvasWorkshop
-            lang={lang}
-            onLoadToSandbox={loadPromptToSandbox}
-            copyToClipboard={copyToClipboard}
-            copiedId={copiedId}
-          />
+          </details>
         </section>
       )}
 
@@ -1992,15 +2974,18 @@ Tasks:
             {/* Section Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6]">
+                <div className="p-2 rounded-lg bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]">
                   <FileSpreadsheet className="w-5 h-5" />
                 </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
-                    {lang === 'fa'
-                      ? 'بخش ۵: کارگاه عملی تحلیل داده و ساخت داشبورد مهندسی با Claude و Gemini (مترو و نفت‌وگاز)'
-                      : 'Section 5: Engineering Data & Dashboard Workshop with Claude & Gemini'}
-                  </h2>
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#0284c7] text-white text-xs font-black">۲-۵</span>
+                    <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
+                      {lang === 'fa'
+                        ? 'کارگاه عملی تحلیل داده و ساخت داشبورد مهندسی با Claude و Gemini (مترو و نفت‌وگاز)'
+                        : 'Engineering Data & Dashboard Workshop with Claude & Gemini'}
+                    </h2>
+                  </div>
                   <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
                     {lang === 'fa'
                       ? 'دانلود فایل‌های CSV واقعی، پیش‌نمایش جداول داده، و پرامپت‌های آماده جهت تولید فوری داشبورد React در Claude Artifacts و تحلیل‌های پیش‌بینانه پایتون در Gemini.'
@@ -2020,20 +3005,20 @@ Tasks:
                     onClick={() => setSelectedDatasetId(ds.id)}
                     className={`p-3.5 rounded-xl border text-right transition-all flex flex-col justify-between gap-2 ${
                       isSelected
-                        ? 'border-[#00738c] bg-[#e3eef1]/60 dark:bg-[#1b2c32] shadow-xs'
-                        : 'border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] hover:border-[#00738c]/50'
+                        ? 'border-[#c026d3] bg-[#fdeee9]/60 dark:bg-[#341528] shadow-xs'
+                        : 'border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] hover:border-[#c026d3]/50'
                     }`}
                   >
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-2">
-                        {ds.id === 'metro_station_tbm' && <Train className={`w-4 h-4 ${isSelected ? 'text-[#00738c]' : 'text-[#5d6b73]'}`} />}
-                        {ds.id === 'oil_gas_pipeline_epc' && <Factory className={`w-4 h-4 ${isSelected ? 'text-[#00738c]' : 'text-[#5d6b73]'}`} />}
-                        {ds.id === 'refinery_equipment_qa' && <Building2 className={`w-4 h-4 ${isSelected ? 'text-[#00738c]' : 'text-[#5d6b73]'}`} />}
+                        {ds.id === 'metro_station_tbm' && <Train className={`w-4 h-4 ${isSelected ? 'text-[#c026d3]' : 'text-[#5d6b73]'}`} />}
+                        {ds.id === 'oil_gas_pipeline_epc' && <Factory className={`w-4 h-4 ${isSelected ? 'text-[#c026d3]' : 'text-[#5d6b73]'}`} />}
+                        {ds.id === 'refinery_equipment_qa' && <Building2 className={`w-4 h-4 ${isSelected ? 'text-[#c026d3]' : 'text-[#5d6b73]'}`} />}
                         <span className="font-bold text-xs text-[#1c2830] dark:text-[#e8ebe9]">
                           {lang === 'fa' ? ds.titleFa : ds.titleEn}
                         </span>
                       </div>
-                      {isSelected && <span className="w-2 h-2 rounded-full bg-[#00738c] shrink-0" />}
+                      {isSelected && <span className="w-2 h-2 rounded-full bg-[#c026d3] shrink-0" />}
                     </div>
                     <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
                       {lang === 'fa' ? ds.domainFa : ds.domainEn}
@@ -2048,7 +3033,7 @@ Tasks:
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#d9dad5]/60 dark:border-[#2d3942]/60">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6]">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]">
                       {lang === 'fa' ? currentDataset.domainFa : currentDataset.domainEn}
                     </span>
                     <span className="text-xs font-mono text-[#5d6b73] dark:text-[#9aa8b0]">
@@ -2080,7 +3065,7 @@ Tasks:
                       setCsvCopied(true);
                       setTimeout(() => setCsvCopied(false), 2500);
                     }}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f8f9fa] dark:bg-[#12171b] hover:border-[#00738c] text-xs font-semibold text-[#1c2830] dark:text-[#e8ebe9] transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f8f9fa] dark:bg-[#12171b] hover:border-[#c026d3] text-xs font-semibold text-[#1c2830] dark:text-[#e8ebe9] transition-colors"
                   >
                     {csvCopied ? (
                       <>
@@ -2100,7 +3085,7 @@ Tasks:
               {/* Data Table Preview */}
               <div className="space-y-2">
                 <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-                  <Eye className="w-3.5 h-3.5 text-[#00738c]" />
+                  <Eye className="w-3.5 h-3.5 text-[#c026d3]" />
                   <span>{lang === 'fa' ? 'پیش‌نمایش داده‌های نمونه (نمونه ۵ ردیف اول):' : 'Data Matrix Preview (First 5 Rows):'}</span>
                 </span>
 
@@ -2189,15 +3174,15 @@ Tasks:
                         <span>{lang === 'fa' ? 'انتقال به کارگاه' : 'Sandbox'}</span>
                       </button>
 
-                      <a
-                        href="https://claude.ai"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-2.5 py-1.5 text-[11px] font-semibold rounded bg-[#b45309]/10 hover:bg-[#b45309]/20 text-[#b45309] dark:text-[#fbbf24] flex items-center gap-1 transition-colors"
+                      <button
+                        type="button"
+                        onClick={() => openCompanionWindow('https://claude.ai', 'claude_companion')}
+                        className="px-2.5 py-1.5 text-[11px] font-semibold rounded bg-[#b45309]/10 hover:bg-[#b45309]/20 text-[#b45309] dark:text-[#fbbf24] flex items-center gap-1 transition-colors cursor-pointer"
+                        title={lang === 'fa' ? 'باز کردن Claude در پنجره کناری' : 'Open Claude in side window'}
                       >
                         <span>Claude</span>
                         <ExternalLink className="w-3 h-3" />
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -2259,15 +3244,15 @@ Tasks:
                         <span>{lang === 'fa' ? 'انتقال به کارگاه' : 'Sandbox'}</span>
                       </button>
 
-                      <a
-                        href="https://gemini.google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-2.5 py-1.5 text-[11px] font-semibold rounded bg-[#1a73e8]/10 hover:bg-[#1a73e8]/20 text-[#1a73e8] dark:text-[#60a5fa] flex items-center gap-1 transition-colors"
+                      <button
+                        type="button"
+                        onClick={() => openCompanionWindow('https://gemini.google.com', 'gemini_companion')}
+                        className="px-2.5 py-1.5 text-[11px] font-semibold rounded bg-[#1a73e8]/10 hover:bg-[#1a73e8]/20 text-[#1a73e8] dark:text-[#60a5fa] flex items-center gap-1 transition-colors cursor-pointer"
+                        title={lang === 'fa' ? 'باز کردن Gemini در پنجره کناری' : 'Open Gemini in side window'}
                       >
                         <span>Gemini</span>
                         <ExternalLink className="w-3 h-3" />
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -2297,12 +3282,49 @@ Tasks:
                   </li>
                 </ol>
               </div>
+
+              {/* Collapsible Supplementary HR & Admin Interactive Workshop */}
+              <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] p-4 sm:p-5 shadow-xs overflow-hidden transition-all">
+                <summary className="cursor-pointer list-none flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
+                  <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185]">
+                    <Users className="w-5 h-5 shrink-0" />
+                    <span>
+                      {lang === 'fa'
+                        ? 'کارگاه تکمیلی: ۵ ابزار تعاملی منابع انسانی و اداری در Gemini Canvas و Claude Artifacts'
+                        : 'Supplementary Lab: 5 Interactive HR & Admin Tools in Canvas/Artifacts'}
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-normal text-[#755e66] dark:text-[#ad99ab] flex items-center gap-1 group-open:text-[#e0533c]">
+                    <span>{lang === 'fa' ? 'مشاهده تمرین‌های ۵گانه HR' : 'View 5 HR Exercises'}</span>
+                    <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180 shrink-0" />
+                  </span>
+                </summary>
+
+                <div className="pt-4 border-t border-[#ecdcd8]/50 dark:border-[#382645]/50 mt-3">
+                  <HrArtifactsCanvasWorkshop
+                    lang={lang}
+                    onLoadToSandbox={loadPromptToSandbox}
+                    copyToClipboard={copyToClipboard}
+                    copiedId={copiedId}
+                  />
+                </div>
+              </details>
             </div>
           </section>
         );
       })()}
 
-      {/* SECTION 6: CONTRACTS & ASSISTANTS WORKSHOP (GEMS & PROJECTS) */}
+      {/* SESSION 3 - MODULE 3-1: GOOGLE NOTEBOOKLM MEGA-WORKSHOP */}
+      {(activeTab === 'all' || activeTab === 'notebooklm') && (
+        <NotebookLmWorkshop
+          lang={lang}
+          onLoadToSandbox={loadPromptToSandbox}
+          copyToClipboard={copyToClipboard}
+          copiedId={copiedId}
+        />
+      )}
+
+      {/* SESSION 3 - MODULE 3-2: CONTRACTS & ASSISTANTS WORKSHOP (GEMS & PROJECTS) */}
       {(activeTab === 'all' || activeTab === 'contracts_and_gems') && (() => {
         const currentContract = ENGINEERING_CONTRACTS.find(c => c.id === selectedContractId) || ENGINEERING_CONTRACTS[0];
         const geminiInst = lang === 'fa' ? currentContract.geminiSystemInstructionFa : currentContract.geminiSystemInstructionEn;
@@ -2316,12 +3338,15 @@ Tasks:
                 <div className="p-2 rounded-lg bg-[#b87333]/10 text-[#b87333] dark:text-[#e0a96d]">
                   <ScrollText className="w-5 h-5" />
                 </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
-                    {lang === 'fa'
-                      ? 'بخش ۶: کارگاه تحلیل قراردادهای EPC (مترو و نفت‌وگاز) و ساخت دستیار در Gems و Projects'
-                      : 'Section 6: Specimen Engineering Contracts & Custom Assistant Setup in Gems & Projects'}
-                  </h2>
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#b87333] text-white text-xs font-black">۳-۲</span>
+                    <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
+                      {lang === 'fa'
+                        ? 'کارگاه تحلیل قراردادهای EPC (مترو و نفت‌وگاز) و ساخت دستیار در Gems و Projects'
+                        : 'Specimen Engineering Contracts & Custom Assistant Setup in Gems & Projects'}
+                    </h2>
+                  </div>
                   <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
                     {lang === 'fa'
                       ? 'دانلود متن کامل قراردادها با فرمت Markdown، دریافت System Instruction اختصاصی برای ساخت Gem و Project، و پرسش‌های نمونه برای آزمون ادعاها و تاخیرات.'
@@ -2330,6 +3355,16 @@ Tasks:
                 </div>
               </div>
             </div>
+
+            {/* Visual Diagram: Contract Audit Architecture */}
+            <DiagramWrapper
+              titleFa="اینفوگرافیک تصویری: معماری ۳ ستونه ممیزی قرارداد، تاخیرات و ادعاها (Claims) با هوش مصنوعی"
+              titleEn="Visual Infographic: 3-Pillar AI Contract & Delay Claims Audit Architecture"
+              badgeFa="معماری حقوقی و ادعا"
+              lang={lang}
+            >
+              <ContractAuditArchitectureDiagram lang={lang} />
+            </DiagramWrapper>
 
             {/* Contract Selector Tabs */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2481,15 +3516,15 @@ Tasks:
                       )}
                     </button>
 
-                    <a
-                      href="https://gemini.google.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-2.5 py-1.5 text-[11px] font-semibold rounded bg-[#1a73e8]/10 hover:bg-[#1a73e8]/20 text-[#1a73e8] dark:text-[#60a5fa] flex items-center gap-1 transition-colors"
+                    <button
+                      type="button"
+                      onClick={() => openCompanionWindow('https://gemini.google.com', 'gemini_companion')}
+                      className="px-2.5 py-1.5 text-[11px] font-semibold rounded bg-[#1a73e8]/10 hover:bg-[#1a73e8]/20 text-[#1a73e8] dark:text-[#60a5fa] flex items-center gap-1 transition-colors cursor-pointer"
+                      title={lang === 'fa' ? 'باز کردن Gemini در پنجره کناری' : 'Open Gemini in side window'}
                     >
                       <span>Gemini Gems</span>
                       <ExternalLink className="w-3 h-3" />
-                    </a>
+                    </button>
                   </div>
                 </div>
 
@@ -2541,15 +3576,15 @@ Tasks:
                       )}
                     </button>
 
-                    <a
-                      href="https://claude.ai"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-2.5 py-1.5 text-[11px] font-semibold rounded bg-[#b45309]/10 hover:bg-[#b45309]/20 text-[#b45309] dark:text-[#fbbf24] flex items-center gap-1 transition-colors"
+                    <button
+                      type="button"
+                      onClick={() => openCompanionWindow('https://claude.ai', 'claude_companion')}
+                      className="px-2.5 py-1.5 text-[11px] font-semibold rounded bg-[#b45309]/10 hover:bg-[#b45309]/20 text-[#b45309] dark:text-[#fbbf24] flex items-center gap-1 transition-colors cursor-pointer"
+                      title={lang === 'fa' ? 'باز کردن Claude در پنجره کناری' : 'Open Claude in side window'}
                     >
                       <span>Claude Projects</span>
                       <ExternalLink className="w-3 h-3" />
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -2584,7 +3619,7 @@ Tasks:
                         <div className="flex items-center justify-between gap-1 pt-1">
                           <button
                             onClick={() => loadPromptToSandbox(activeQueryText)}
-                            className="text-[10px] font-semibold text-[#1f5163] dark:text-[#6fb3c6] hover:underline flex items-center gap-1"
+                            className="text-[10px] font-semibold text-[#e0533c] dark:text-[#fb7185] hover:underline flex items-center gap-1"
                           >
                             <Play className="w-3 h-3" />
                             <span>{lang === 'fa' ? 'کارگاه' : 'Sandbox'}</span>
@@ -2595,7 +3630,7 @@ Tasks:
                             className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold transition-colors ${
                               isCopied
                                 ? 'bg-[#2f7d5b] text-white'
-                                : 'bg-[#1f5163] hover:bg-[#163f4e] text-white'
+                                : 'bg-[#e0533c] hover:bg-[#163f4e] text-white'
                             }`}
                           >
                             {isCopied ? (
@@ -2651,7 +3686,46 @@ Tasks:
         );
       })()}
 
-      {/* SECTION 7: CLAUDE ENTERPRISE & GOOGLE CONNECTORS (GMAIL, DRIVE, CALENDAR, SLACK & NOTION MCP) */}
+      {/* SESSION 3 - MODULE 3-3: AI SKILLS MASTERCLASS (SKILL.MD) */}
+      {(activeTab === 'all' || activeTab === 'skills_lab') && (
+        <ObsidianBrainSkillsWorkshop
+          lang={lang}
+          copyToClipboard={copyToClipboard}
+          copiedId={copiedId}
+          onLoadToSandbox={loadPromptToSandbox}
+          mode="agent_skills"
+        />
+      )}
+
+      {/* SESSION 4 - MODULE 4-1: MCP PROTOCOL & SERVERS LAB */}
+      {(activeTab === 'all' || activeTab === 'mcp_lab') && (
+        <div className="space-y-4">
+          {/* Pre-Session Prerequisite Checklist Callout */}
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="space-y-1">
+              <b className="text-amber-800 dark:text-amber-300 block">
+                ⚡ چک‌لیست پیش‌نیاز قبل از جلسه ۴ (برای جلوگیری از اتلاف وقت نصب در کلاس):
+              </b>
+              <p className="text-[#261a1d] dark:text-[#faedf3]">
+                ۱) نصب <code>Node.js LTS</code> (شامل دستور <code>npx</code>) · ۲) نصب <code>Claude Desktop</code> · ۳) ایجاد یک پوشه مشخص کاری روی درایو (مثلاً <code>D:/EPC_Project</code>) و ساخت توکن محدود گیت‌هاب.
+              </p>
+            </div>
+            <span className="px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-black text-[10px] shrink-0 self-start sm:self-center">
+              پیش‌نیاز فنی جلسه ۴
+            </span>
+          </div>
+
+          <ObsidianBrainSkillsWorkshop
+            lang={lang}
+            copyToClipboard={copyToClipboard}
+            copiedId={copiedId}
+            onLoadToSandbox={loadPromptToSandbox}
+            mode="mcp_protocol"
+          />
+        </div>
+      )}
+
+      {/* SESSION 4 - MODULE 4-2: CLAUDE ENTERPRISE & GOOGLE CONNECTORS */}
       {(activeTab === 'all' || activeTab === 'connectors') && (
         <ClaudeEnterpriseConnectors
           lang={lang}
@@ -2660,27 +3734,200 @@ Tasks:
         />
       )}
 
-      {/* SECTION 8: OBSIDIAN SECOND BRAIN & AGENT SKILLS WORKSHOP */}
+      {/* SESSION 4 - MODULE 4-3: SAFETY GUARDRAILS, PAT SECURITY & HALLUCINATION DEFENSE */}
+      {(activeTab === 'all' || activeTab === 'safety') && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-[#8c3b2d]/10 text-[#8c3b2d] dark:text-[#f87171]">
+                <ShieldAlert className="w-5 h-5" />
+              </div>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#8c3b2d] text-white text-xs font-black">۴-۳</span>
+                  <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
+                    {lang === 'fa' ? 'خطوط قرمز امنیتی، حفاظت از توکن‌های گیت‌هاب (PAT) و مهار توهم' : 'Security Guardrails, PAT Safety & Hallucination Mitigation'}
+                  </h2>
+                </div>
+                <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
+                  {lang === 'fa'
+                    ? 'اصول حیاتی امنیت هنگام اتصال MCP به پوشه‌های سیستم و مخازن گیت‌هاب سازمانی'
+                    : 'Critical security rules when connecting MCP servers to local folders and GitHub repositories.'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Rule 1: PAT & MCP Security */}
+            <div className="p-5 rounded-xl border border-red-500/30 bg-red-500/[0.04] shadow-xs space-y-3">
+              <div className="flex items-center gap-2 text-[#b91c1c] dark:text-[#f87171]">
+                <Shield className="w-5 h-5" />
+                <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+                  امنیت توکن گیت‌هاب (PAT) و MCP
+                </h3>
+              </div>
+              <ul className="space-y-2 text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                <li>• <b>هرگز توکن را در چت نفرستید:</b> توکن‌های <code>ghp_...</code> حکم کلید گاوصندوق را دارند؛ در صورت افشا در چت فوراً از Settings گیت‌هاب آن را <b>Revoke</b> کنید.</li>
+                <li>• <b>حداقل دسترسی (Fine-Grained PAT):</b> توکن MCP را فقط به یک ریپازیتوری مشخص محدود کنید، نه کل اکانت.</li>
+                <li>• <b>محدودسازی پوشه Filesystem:</b> فقط مسیر یک پوشه کاری (مثلاً <code>D:/Project</code>) را به MCP بدهید، نه کل درایو C یا Desktop.</li>
+              </ul>
+            </div>
+
+            {/* Rule 2: Data Privacy & PII */}
+            <div className="p-5 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs space-y-3">
+              <div className="flex items-center gap-2 text-[#b91c1c] dark:text-[#f87171]">
+                <ShieldAlert className="w-5 h-5" />
+                <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+                  {lang === 'fa' ? 'سه قانون حریم خصوصی و محرمانگی' : '3 Non-Negotiable Privacy Rules'}
+                </h3>
+              </div>
+              <ul className="space-y-2 text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                <li>
+                  <strong className="text-[#1c2830] dark:text-[#e8ebe9]">۱. عدم درج اطلاعات حساس (PII):</strong> شماره ملی، رمزهای عبور و اسناد طبقه‌بندی‌شده را در چت عمومی وارد نکنید.
+                </li>
+                <li>
+                  <strong className="text-[#1c2830] dark:text-[#e8ebe9]">۲. خاموش کردن Training:</strong> در تنظیمات حساب‌های عمومی گزینه آموزش مدل روی داده‌های چت را خاموش کنید.
+                </li>
+                <li>
+                  <strong className="text-[#1c2830] dark:text-[#e8ebe9]">۳. تایید انسانی (Human-in-the-Loop):</strong> پیش از هر Commit یا حذف فایل توسط MCP، مجوز را شخصاً بررسی و تایید کنید.
+                </li>
+              </ul>
+            </div>
+
+            {/* Rule 3: Hallucination Mitigation */}
+            <div className="p-5 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs space-y-3">
+              <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185]">
+                <Info className="w-5 h-5" />
+                <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+                  {lang === 'fa' ? 'مهار خطای توهم در اعداد و استانداردها' : 'Tactics to Squash Hallucinations'}
+                </h3>
+              </div>
+              <ul className="space-y-2 text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                <li>
+                  <strong className="text-[#1c2830] dark:text-[#e8ebe9]">۱. شرط «نمی‌دانم»:</strong> الزام مدل به اعلام صریح در صورت نبود داده در اسناد مرجع.
+                </li>
+                <li>
+                  <strong className="text-[#1c2830] dark:text-[#e8ebe9]">۲. الزام به Citation:</strong> درخواست ذکر شماره ماده، بند یا ردیف جدول برای هر عدد گزارش‌شده.
+                </li>
+                <li>
+                  <strong className="text-[#1c2830] dark:text-[#e8ebe9]">۳. تله اعداد تاییدنشده:</strong> جداسازی برآوردهای شفاهی از ارقام قطعی صورت‌جلسات.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* SESSION 4 - MODULE 4-4: OBSIDIAN SECOND BRAIN + CLAUDE & HERMES */}
       {(activeTab === 'all' || activeTab === 'obsidian_brain') && (
         <ObsidianBrainSkillsWorkshop
           lang={lang}
           copyToClipboard={copyToClipboard}
           copiedId={copiedId}
           onLoadToSandbox={loadPromptToSandbox}
+          mode="obsidian_vault"
         />
       )}
 
-      {/* SECTION 8: GOOGLE NOTEBOOKLM MEGA-WORKSHOP */}
-      {(activeTab === 'all' || activeTab === 'notebooklm') && (
-        <NotebookLmWorkshop
-          lang={lang}
-          onLoadToSandbox={loadPromptToSandbox}
-          copyToClipboard={copyToClipboard}
-          copiedId={copiedId}
-        />
+      {/* ===================================================================== */}
+      {/* SESSION 5 MODULES: FULL ORCHESTRATION, MASTERCLASS & VIBE CODING      */}
+      {/* ===================================================================== */}
+      {(activeTab === 'all' || activeTab === 's5_orchestration') && (
+        <section className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] shadow-xs space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#ecdcd8]/60 dark:border-[#382645]/60">
+            <div className="flex items-center gap-2.5">
+              <span className="px-2.5 py-1 rounded-lg bg-[#e0533c] text-white text-xs font-black shrink-0">۵-۱</span>
+              <div>
+                <h2 className="text-sm sm:text-base font-black text-[#261a1d] dark:text-[#faedf3]">
+                  پروژه جامع پایان دوره (End-to-End Engineering Workflow) — ۲.۵ ساعت
+                </h2>
+                <p className="text-xs text-[#755e66] dark:text-[#ad99ab]">
+                  اتصال زنجیره‌ای تمام قطعات پازل: Drive + Filesystem MCP + Skill + Artifact + GitHub MCP
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => openS1Projector('s5_capstone', 0)}
+              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
+            >
+              <Monitor className="w-4 h-4" />
+              <span>حالت اسلاید پروژکتور جلسه ۵</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+            <div className="p-3.5 rounded-xl bg-[#fdf8f5] dark:bg-[#16101c] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+              <span className="font-mono font-black text-[#e0533c]">گام ۱ · ورودی خام</span>
+              <b className="block text-[#261a1d] dark:text-[#faedf3]">Google Drive / پوشه هارد</b>
+              <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                فایل وضعیت کارگاه ({activeTrackMetaphor.trackLabelFa}) در پوشه محلی یا Drive قرار دارد.
+              </p>
+            </div>
+            <div className="p-3.5 rounded-xl bg-[#fdf8f5] dark:bg-[#16101c] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+              <span className="font-mono font-black text-[#c026d3]">گام ۲ · پایپ‌لاین داده</span>
+              <b className="block text-[#261a1d] dark:text-[#faedf3]">خوانش خودکار با MCP</b>
+              <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                کلاود بدون کپی-پیست، فایل‌ها را از طریق Filesystem / Drive MCP می‌خواند.
+              </p>
+            </div>
+            <div className="p-3.5 rounded-xl bg-[#fdf8f5] dark:bg-[#16101c] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+              <span className="font-mono font-black text-purple-600">گام ۳ · مغز پردازش</span>
+              <b className="block text-[#261a1d] dark:text-[#faedf3]">ممیزی با SKILL.md</b>
+              <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                بر اساس اسکیل کنترل پروژه شما، تاخیرات، گلوگاه‌ها و اعداد مشکوک را استخراج می‌کند.
+              </p>
+            </div>
+            <div className="p-3.5 rounded-xl bg-[#fdf8f5] dark:bg-[#16101c] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+              <span className="font-mono font-black text-amber-600">گام ۴ · مصورسازی</span>
+              <b className="block text-[#261a1d] dark:text-[#faedf3]">تولید داشبورد Artifact</b>
+              <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                خروجی را به صورت داشبورد تعاملی HTML/React همراه با جدول هشدارها می‌سازد.
+              </p>
+            </div>
+            <div className="p-3.5 rounded-xl bg-[#fdf8f5] dark:bg-[#16101c] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
+              <span className="font-mono font-black text-emerald-600">گام ۵ · انتشار در DCC</span>
+              <b className="block text-[#261a1d] dark:text-[#faedf3]">Commit با GitHub MCP</b>
+              <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                کد داشبورد و گزارش Markdown را مستقیماً در ریپازیتوری GitHub پروژه ثبت و منتشر می‌کند!
+              </p>
+            </div>
+          </div>
+
+          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-[#fdf8f5] dark:bg-[#16101c] overflow-hidden transition-all">
+            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 transition-colors">
+              <div className="flex items-center gap-2 text-[#261a1d] dark:text-[#faedf3]">
+                <Zap className="w-4 h-4 text-[#e0533c] shrink-0" />
+                <span>بسط اختیاری: پرامپت جامع ارکستراسیون (اجرای کل زنجیره ۵ مرحله‌ای بالا با یک دستور واحد)</span>
+              </div>
+              <span className="text-[11px] font-normal text-[#755e66] dark:text-[#ad99ab] flex items-center gap-1 group-open:text-[#e0533c] shrink-0">
+                <span>مشاهده و کپی پرامپت</span>
+                <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
+              </span>
+            </summary>
+
+            <div className="p-4 pt-3 border-t border-[#ecdcd8]/60 dark:border-[#382645]/60 space-y-3 text-xs">
+              <pre dir="rtl" className="p-3.5 rounded-xl bg-[#1e1e1e] text-[#d4d4d4] font-mono text-[11px] leading-relaxed whitespace-pre-wrap text-right">
+                {S5_CAPSTONE_SLIDES[1].codeSnippet}
+              </pre>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(S5_CAPSTONE_SLIDES[1].codeSnippet || '', 's5_orchestration_prompt')}
+                  className="px-4 py-2 rounded-xl bg-[#e0533c] hover:bg-[#c2410c] text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  {copiedId === 's5_orchestration_prompt' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedId === 's5_orchestration_prompt' ? 'پرامپت ارکستراسیون کپی شد!' : 'کپی پرامپت جامع ارکستراسیون'}</span>
+                </button>
+              </div>
+            </div>
+          </details>
+        </section>
       )}
 
-      {/* SECTION 8: ADVANCED ENGINEERING MASTERCLASS */}
+      {/* SESSION 5 - MODULE 5-2: ADVANCED ENGINEERING MASTERCLASS */}
       {(activeTab === 'all' || activeTab === 'masterclass') && (
         <Page0EngineeringMasterclass
           lang={lang}
@@ -2690,432 +3937,248 @@ Tasks:
         />
       )}
 
-      {/* SECTION 9: SAFETY GUARDRAILS & HALLUCINATION DEFENSE */}
-      {(activeTab === 'all' || activeTab === 'safety') && (
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-[#8c3b2d]/10 text-[#8c3b2d] dark:text-[#f87171]">
-                <ShieldAlert className="w-5 h-5" />
-              </div>
+      {/* SESSION 5 - MODULE 5-3: BRIDGE TO VIBE CODING */}
+      {(activeTab === 'all' || activeTab === 's5_vibecoding') && (
+        <section className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#261a1d] via-[#341528] to-[#16101c] text-white border border-[#e0533c]/40 shadow-md space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/15">
+            <div className="flex items-center gap-2.5">
+              <span className="px-2.5 py-1 rounded-lg bg-[#e0533c] text-white text-xs font-black shrink-0">۵-۳</span>
               <div>
-                <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa' ? 'بخش ۹: خطوط قرمز امنیتی، حریم داده و مهار خطای توهم (Hallucination)' : 'Section 9: Security Guardrails & Hallucination Mitigation'}
+                <h2 className="text-sm sm:text-base font-black text-white">
+                  پل ورود به Vibe Coding؛ فردا قرار است چه کار کنیم؟ (۱.۵ ساعت)
                 </h2>
-                <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-                  {lang === 'fa'
-                    ? 'هوش مصنوعی ابزاری احتمالی (Probabilistic) است، نه قطعی. این اصول را برای حفاظت از اسرار سازمان رعایت کنید.'
-                    : 'Cognitive models are probabilistic, not deterministic. Protect proprietary data and control accuracy.'}
+                <p className="text-xs text-white/75">
+                  گذر از تک‌فایل‌های محیط چت به ساخت نرم‌افزارهای کامل چندصفحه‌ای در محیط‌های توسعه هوشمند (Cursor, Windsurf, Claude Code)
                 </p>
               </div>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Rule 1: Data Privacy & PII */}
-            <div className="p-5 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs space-y-3">
-              <div className="flex items-center gap-2 text-[#b91c1c] dark:text-[#f87171]">
-                <ShieldAlert className="w-5 h-5" />
-                <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa' ? 'سه قانون سفت و سخت حریم خصوصی و امنیت' : '3 Non-Negotiable Privacy Rules'}
-                </h3>
-              </div>
-              <ul className="space-y-2 text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#b91c1c] dark:text-[#f87171] font-bold">۱.</span>
-                  <span>
-                    <strong className="text-[#1c2830] dark:text-[#e8ebe9]">
-                      {lang === 'fa' ? 'عدم درج اطلاعات هویتی و مالی (PII):' : 'Never paste PII:'}
-                    </strong>{' '}
-                    {lang === 'fa'
-                      ? 'شماره ملی، رمزهای عبور، شماره کارت، و مشخصات محرمانه مشتریان را هرگز در چت عمومی وارد نکنید.'
-                      : 'Never enter national IDs, passwords, bank numbers, or confidential customer identifiers into public LLM chats.'}
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#b91c1c] dark:text-[#f87171] font-bold">۲.</span>
-                  <span>
-                    <strong className="text-[#1c2830] dark:text-[#e8ebe9]">
-                      {lang === 'fa' ? 'خاموش کردن آموزش روی داده‌ها:' : 'Disable Model Training on Your Chats:'}
-                    </strong>{' '}
-                    {lang === 'fa'
-                      ? 'در تنظیمات ChatGPT گزینه Data Controls -> Improve the model for everyone را در حساب‌های شخصی خاموش کنید.'
-                      : 'In ChatGPT settings, turn off "Improve the model for everyone" to prevent chats being used in training sets.'}
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#b91c1c] dark:text-[#f87171] font-bold">۳.</span>
-                  <span>
-                    <strong className="text-[#1c2830] dark:text-[#e8ebe9]">
-                      {lang === 'fa' ? 'ماسک‌گذاری نام‌ها:' : 'Pseudonymize & Mask Names:'}
-                    </strong>{' '}
-                    {lang === 'fa'
-                      ? 'به جای نام مشتری یا شرکت رقیب واقعی، از نام‌های فرضی مانند «مشتری X» یا «شرکت آلفا» استفاده کنید.'
-                      : 'Replace actual client or competitor names with placeholders like "Company Alpha" or "Client X".'}
-                  </span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Rule 2: Hallucination Mitigation */}
-            <div className="p-5 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs space-y-3">
-              <div className="flex items-center gap-2 text-[#00738c] dark:text-[#6fb3c6]">
-                <Info className="w-5 h-5" />
-                <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa' ? 'تکنیک‌های جلوگیری از خطای توهم (Hallucination)' : 'Tactics to Squash Hallucinations'}
-                </h3>
-              </div>
-              <ul className="space-y-2 text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#00738c] dark:text-[#6fb3c6] font-bold">۱.</span>
-                  <span>
-                    <strong className="text-[#1c2830] dark:text-[#e8ebe9]">
-                      {lang === 'fa' ? 'جمله جادویی «نمی‌دانم»:' : 'Permit Admitting Ignorance:'}
-                    </strong>{' '}
-                    {lang === 'fa'
-                      ? 'همیشه به پرامپت اضافه کنید: «اگر پاسخ دقیق را بر اساس داده‌های ارائه شده نمی‌دانی، حدس نزن و صریحاً بگو نمی‌دانم».'
-                      : 'Explicitly state: "If the exact answer is not in the text, do not guess; state that you do not know."'}
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#00738c] dark:text-[#6fb3c6] font-bold">۲.</span>
-                  <span>
-                    <strong className="text-[#1c2830] dark:text-[#e8ebe9]">
-                      {lang === 'fa' ? 'الزام به ارجاع (Citation):' : 'Demand Source Citations:'}
-                    </strong>{' '}
-                    {lang === 'fa'
-                      ? 'از مدل بخواهید برای هر ادعا یا آمار، شماره صفحه یا بند دقیق سند مرجع را ذکر کند.'
-                      : 'Instruct the model to cite the exact section or paragraph for every factual claim.'}
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#00738c] dark:text-[#6fb3c6] font-bold">۳.</span>
-                  <span>
-                    <strong className="text-[#1c2830] dark:text-[#e8ebe9]">
-                      {lang === 'fa' ? 'استراتژی گام‌به‌گام (Iterative):' : 'Iterative Step-by-Step Refinement:'}
-                    </strong>{' '}
-                    {lang === 'fa'
-                      ? 'انتظار نداشته باشید کل پروژه با ۱ پرامپت حل شود؛ ابتدا سرفصل بگیرید، سپس بند به بند گسترش دهید.'
-                      : 'Never expect a final deliverable in a single turn. Request an outline first, critique it, then expand.'}
-                  </span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* SECTION 10: INTERACTIVE PRACTICE SANDBOX */}
-      {(activeTab === 'all' || activeTab === 'sandbox') && (
-        <section id="prompt-sandbox" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-[#2f7d5b]/10 text-[#2f7d5b] dark:text-[#63c496]">
-                <Terminal className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa' ? 'بخش ۱۰: کارگاه شخصی‌سازی و تست پرامپت (Sandbox)' : 'Section 10: Interactive Prompt Customization Sandbox'}
-                </h2>
-                <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-                  {lang === 'fa'
-                    ? 'پرامپت خود را در این جعبه ویرایش و شخصی‌سازی کنید، سپس با یک کلیک کپی کرده و در یکی از مدل‌ها اجرا نمایید.'
-                    : 'Draft, tweak, and personalize your prompt here. Click to copy and launch in ChatGPT, Claude, or Gemini.'}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] p-5 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <span className="text-xs font-semibold text-[#1c2830] dark:text-[#e8ebe9]">
-                {lang === 'fa' ? 'پیش‌نویس پرامپت اختصاصی شما:' : 'Your Custom Prompt Draft:'}
-              </span>
-
-              <div className="flex items-center gap-2 text-xs">
-                <button
-                  type="button"
-                  onClick={() =>
-                    onChangeContent(
-                      lang === 'fa'
-                        ? disciplinePromptPair.engineeredPromptFa
-                        : disciplinePromptPair.engineeredPromptEn
-                    )
-                  }
-                  className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#1f5163]/10 hover:bg-[#1f5163]/20 text-[#1f5163] dark:text-[#6fb3c6] transition-colors flex items-center gap-1 cursor-pointer"
-                >
-                  <Sparkles className="w-3 h-3 text-amber-500" />
-                  <span>
-                    {lang === 'fa'
-                      ? `بارگذاری الگوی دیسیپلین ${discMeta.shortTitleFa}`
-                      : `Load ${discMeta.shortTitleEn} Template`}
-                  </span>
-                </button>
-                <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
-                  {lang === 'fa'
-                    ? `${content.trim().length ? content.trim().split(/\s+/).length : 0} واژه · ${content.length} کاراکتر`
-                    : `${content.trim().length ? content.trim().split(/\s+/).length : 0} words · ${content.length} chars`}
-                </span>
-                {content && (
-                  <button
-                    onClick={() => onChangeContent('')}
-                    className="flex items-center gap-1 text-[11px] text-[#b91c1c] dark:text-[#f87171] hover:underline"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                    <span>{lang === 'fa' ? 'پاک کردن' : 'Clear'}</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <textarea
-              rows={8}
-              value={content}
-              onChange={(e) => onChangeContent(e.target.value)}
-              placeholder={
-                lang === 'fa'
-                  ? 'پرامپت خود را اینجا بنویسید، یا از بخش کتابخانه پرامپت‌های بالا یکی را انتخاب کنید تا اینجا بارگذاری شود...\nفرمول RCTO را فراموش نکنید:\n[Role] تو مشاور ارشد...\n[Context] شرکت ما...\n[Task] این ۵ کار را انجام بده...\n[Output] در قالب جدول...'
-                  : 'Type your prompt here, or pick one from the library above...\nRemember the RCTO formula:\n[Role] You are a lead...\n[Context] Our organization...\n[Task] Perform these 5 steps...\n[Output] In a structured table...'
-              }
-              className="w-full p-4 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#fdfdfd] dark:bg-[#12171b] text-xs sm:text-sm font-mono text-[#1c2830] dark:text-[#e8ebe9] focus:outline-hidden focus:ring-2 focus:ring-[#1f5163] dark:focus:ring-[#6fb3c6] transition-all resize-y"
-            />
-
-            {/* Quick Action & Launch Buttons */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
-              <button
-                onClick={copySandboxToClipboard}
-                disabled={!content.trim()}
-                className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-semibold shadow-xs transition-all ${
-                  sandboxCopied
-                    ? 'bg-[#2f7d5b] text-white'
-                    : content.trim()
-                    ? 'bg-[#1f5163] hover:bg-[#163f4e] text-white'
-                    : 'bg-[#d9dad5] dark:bg-[#2d3942] text-[#5d6b73] dark:text-[#9aa8b0] cursor-not-allowed'
-                }`}
-              >
-                {sandboxCopied ? (
-                  <>
-                    <Check className="w-4 h-4 text-white" />
-                    <span>{lang === 'fa' ? 'پرامپت با موفقیت کپی شد!' : 'Copied to Clipboard!'}</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    <span>{lang === 'fa' ? 'کپی پرامپت آماده' : 'Copy Prompt'}</span>
-                  </>
-                )}
-              </button>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] font-medium hidden md:inline">
-                  {lang === 'fa' ? 'تست فوری در:' : 'Test in:'}
-                </span>
-
-                <a
-                  href="https://chatgpt.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-[#10a37f]/10 hover:bg-[#10a37f]/20 text-[#10a37f] border border-[#10a37f]/30 text-xs font-semibold transition-colors"
-                >
-                  <span>ChatGPT</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-
-                <a
-                  href="https://claude.ai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-[#d97706]/10 hover:bg-[#d97706]/20 text-[#d97706] border border-[#d97706]/30 text-xs font-semibold transition-colors"
-                >
-                  <span>Claude</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-
-                <a
-                  href="https://gemini.google.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-[#1a73e8]/10 hover:bg-[#1a73e8]/20 text-[#1a73e8] border border-[#1a73e8]/30 text-xs font-semibold transition-colors"
-                >
-                  <span>Gemini</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ===================================================================== */}
-      {/* BOTTOM 12-MODULE MECHANICAL KEYCAP DECK & PREV/NEXT SWITCHER          */}
-      {/* ===================================================================== */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-white to-[#f4f6f5] dark:from-[#161d22] dark:to-[#11171b] border-2 border-[#1f5163]/25 dark:border-[#6fb3c6]/25 shadow-md space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.07] dark:border-white/[0.08]">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <h3 className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9]">
-              {lang === 'fa'
-                ? 'پنل پایین صفحه: پرش فوری بین ۱۲ کارگاه آموزشی (بدون نیاز به اسکرول به بالا):'
-                : 'Bottom Navigation Deck: Instant Jump Across All 12 Workshops:'}
-            </h3>
-            {currentModuleMeta && (
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6] border border-[#00738c]/20">
-                {lang === 'fa'
-                  ? `کارگاه فعلی: ${currentModuleMeta.num}. ${currentModuleMeta.titleFa}`
-                  : `Current: ${currentModuleMeta.num}. ${currentModuleMeta.titleEn}`}
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            {activeTab !== 'all' && (
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={handlePrevModule}
-                  className="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-white dark:bg-[#1a232a] text-[#1c2830] dark:text-[#e8ebe9] border border-black/15 dark:border-white/15 border-b-4 border-b-black/25 dark:border-b-black/60 hover:-translate-y-0.5 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
-                >
-                  {lang === 'fa' ? '→ کارگاه قبلی' : '← Prev Workshop'}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleNextModule}
-                  className="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-[#00738c] text-white border border-black/15 border-b-4 border-b-[#083b47] hover:-translate-y-0.5 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
-                >
-                  {lang === 'fa' ? 'کارگاه بعدی ←' : 'Next Workshop →'}
-                </button>
-              </div>
-            )}
-
             <button
               type="button"
-              onClick={() => {
-                playTactileSound('switch');
-                navPillsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }}
-              className="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] border border-[#1f5163]/25 border-b-4 border-b-[#1f5163]/40 hover:-translate-y-0.5 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
+              onClick={() => openS1Projector('s5_capstone', 2)}
+              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
             >
-              {lang === 'fa' ? '↑ بازگشت به بالای صفحه' : '↑ Scroll to Top'}
+              <Monitor className="w-4 h-4" />
+              <span>اسلاید پروژکتور Vibe Coding</span>
             </button>
           </div>
-        </div>
 
-        {/* Full 12-Module Mechanical Keycap Grid at Bottom (auto-scrolls smoothly to module top on click) */}
-        {renderKeycapGrid(true)}
-      </div>
+          <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
+            «تا امروز در محیط چت (Claude و Gemini) تک‌فایل‌ها و مینی‌اپلیکیشن‌ها را ساختید، با Skills به آن‌ها روش کار دادید و با MCP به فایل‌ها و گیت‌هاب وصل شدید. در دوره <b>Vibe Coding</b>، ما همین مغز هوش مصنوعی، همین MCPها، همین Skills و همین GitHub را به داخل یک محیط توسعه حرفه‌ای (IDE) می‌بریم تا به جای یک صفحه داشبورد، یک نرم‌افزار کامل تحت وب یا دسکتاپ چندصفحه‌ای با دیتابیس واقعی بسازیم؛ بدون اینکه خودتان درگیر سینتکس کدنویسی شوید.»
+          </p>
 
-      {/* ===================================================================== */}
-      {/* FLOATING STICKY BOTTOM QUICK-SWITCH DOCK                              */}
-      {/* ===================================================================== */}
-      <div className="sticky bottom-3 z-40 pointer-events-none flex justify-center">
-        <div className="pointer-events-auto w-full max-w-4xl mx-auto px-3 py-2 rounded-2xl bg-[#141c22]/95 dark:bg-[#0d1317]/95 text-white backdrop-blur-md border border-white/15 shadow-[0_12px_32px_rgba(0,0,0,0.35)] space-y-2">
-          {/* Expandable Popup Drawer inside Floating Dock */}
-          {isQuickDrawerOpen && (
-            <div className="p-3 rounded-xl bg-[#f4f6f5] dark:bg-[#161d22] text-[#1c2830] dark:text-[#e8ebe9] border border-black/10 dark:border-white/10 max-h-[60vh] overflow-y-auto space-y-2">
-              <div className="flex items-center justify-between pb-1.5 border-b border-black/10 dark:border-white/10">
-                <span className="text-xs font-black">
-                  {lang === 'fa' ? 'انتخاب سریع کارگاه آموزشی (با صدای کلید مکانیکی):' : 'Quick Workshop Switcher:'}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    playTactileSound('switch');
-                    setIsQuickDrawerOpen(false);
-                  }}
-                  className="text-xs font-bold px-2 py-0.5 rounded bg-black/10 dark:bg-white/10 hover:bg-black/20 cursor-pointer"
-                >
-                  {lang === 'fa' ? 'بستن ✕' : 'Close ✕'}
-                </button>
-              </div>
-              {renderKeycapGrid(true)}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs pt-1">
+            <div className="p-3.5 rounded-xl bg-white/10 border border-white/15 space-y-1">
+              <b className="text-[#fb7185] block">۱. میراث جلسه ۱ و ۴ (GitHub + MCP)</b>
+              <p className="text-white/80 leading-relaxed">
+                ریپازیتوری گیت‌هاب شما تبدیل به مخزن اصلی کد نرم‌افزار می‌شود و ایجنت مستقیماً در آن Commit و Branch می‌زند.
+              </p>
             </div>
-          )}
+            <div className="p-3.5 rounded-xl bg-white/10 border border-white/15 space-y-1">
+              <b className="text-amber-300 block">۲. میراث جلسه ۲ (Artifacts → Components)</b>
+              <p className="text-white/80 leading-relaxed">
+                تک‌صفحه‌های React که در Artifacts ساختید، به کامپوننت‌های ماژولار یک سیستم کامل سازمانی تبدیل می‌شوند.
+              </p>
+            </div>
+            <div className="p-3.5 rounded-xl bg-white/10 border border-white/15 space-y-1">
+              <b className="text-emerald-300 block">۳. میراث جلسه ۳ (SKILL.md → CLAUDE.md)</b>
+              <p className="text-white/80 leading-relaxed">
+                مهارت‌های استانداردی که نوشتید، در پوشه <code>.claude/skills/</code> پروژه قرار می‌گیرند تا ایجنت کدنویس دقیقاً طبق استاندارد شما کد بزند.
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
 
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            {/* Active Workshop Indicator & Quick Drawer Trigger */}
-            <div className="flex items-center gap-2 min-w-0">
+      {/* ===================================================================== */}
+      {/* PERSISTENT PROMPT SANDBOX TOOL (ALWAYS AVAILABLE ACROSS ALL SESSIONS) */}
+      {/* ===================================================================== */}
+      <details
+        id="prompt-sandbox"
+        open={isSandboxOpen}
+        onToggle={(e) => setIsSandboxOpen((e.currentTarget as HTMLDetailsElement).open)}
+        className="group rounded-2xl border-2 border-[#e0533c]/35 dark:border-[#fb7185]/35 bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all"
+      >
+        <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between gap-3 select-none hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 transition-colors">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-[#e0533c]/10 text-[#e0533c] dark:text-[#fb7185]">
+              <Terminal className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-sm sm:text-base font-black text-[#1c2830] dark:text-[#e8ebe9]">
+                {lang === 'fa' ? 'ابزار سراسری: سندباکس شخصی‌سازی و تست پرامپت (همیشه در دسترس)' : 'Global Tool: Interactive Prompt Customization Sandbox'}
+              </h2>
+              <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
+                {lang === 'fa'
+                  ? 'پرامپت‌های هر جلسه را اینجا ویرایش و شخصی‌سازی کنید و با یک کلیک در ChatGPT، Claude یا Gemini اجرا نمایید.'
+                  : 'Edit and customize prompts from any session here, then copy and launch in ChatGPT, Claude, or Gemini.'}
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-bold text-[#e0533c] dark:text-[#fb7185] flex items-center gap-1 shrink-0">
+            <span>{isSandboxOpen ? (lang === 'fa' ? 'بستن سندباکس' : 'Close') : (lang === 'fa' ? 'باز کردن سندباکس' : 'Open Sandbox')}</span>
+            <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
+          </span>
+        </summary>
+
+        <div className="p-5 pt-3 border-t border-[#ecdcd8]/60 dark:border-[#382645]/60 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span className="text-xs font-semibold text-[#1c2830] dark:text-[#e8ebe9]">
+              {lang === 'fa' ? 'پیش‌نویس پرامپت اختصاصی شما:' : 'Your Custom Prompt Draft:'}
+            </span>
+
+            <div className="flex items-center gap-2 text-xs flex-wrap">
               <button
                 type="button"
-                onClick={() => {
-                  playTactileSound('thock');
-                  setIsQuickDrawerOpen((prev) => !prev);
-                }}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-b from-[#00738c] to-[#0a5263] text-white text-xs font-black border border-white/20 border-b-[3px] border-b-[#052c36] hover:brightness-110 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
+                onClick={() =>
+                  onChangeContent(
+                    lang === 'fa'
+                      ? disciplinePromptPair.engineeredPromptFa
+                      : disciplinePromptPair.engineeredPromptEn
+                  )
+                }
+                className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#e0533c]/10 hover:bg-[#e0533c]/20 text-[#e0533c] dark:text-[#fb7185] transition-colors flex items-center gap-1 cursor-pointer"
               >
-                <Layers className="w-3.5 h-3.5 shrink-0" />
+                <Sparkles className="w-3 h-3 text-amber-500" />
                 <span>
                   {lang === 'fa'
-                    ? isQuickDrawerOpen
-                      ? 'بستن فهرست ۱۲ کارگاه ▾'
-                      : 'فهرست ۱۲ کارگاه آموزشی ▴'
-                    : isQuickDrawerOpen
-                    ? 'Hide 12 Workshops ▾'
-                    : 'All 12 Workshops ▴'}
+                    ? `بارگذاری الگوی دیسیپلین ${discMeta.shortTitleFa}`
+                    : `Load ${discMeta.shortTitleEn} Template`}
                 </span>
               </button>
-
-              {currentModuleMeta && (
-                <span className="text-[11px] font-bold text-white/90 truncate hidden sm:inline">
-                  {lang === 'fa'
-                    ? `${currentModuleMeta.num}. ${currentModuleMeta.titleFa}`
-                    : `${currentModuleMeta.num}. ${currentModuleMeta.titleEn}`}
-                </span>
+              <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                {lang === 'fa'
+                  ? `${content.trim().length ? content.trim().split(/\s+/).length : 0} واژه · ${content.length} کاراکتر`
+                  : `${content.trim().length ? content.trim().split(/\s+/).length : 0} words · ${content.length} chars`}
+              </span>
+              {content && (
+                <button
+                  onClick={() => onChangeContent('')}
+                  className="flex items-center gap-1 text-[11px] text-[#b91c1c] dark:text-[#f87171] hover:underline"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>{lang === 'fa' ? 'پاک کردن' : 'Clear'}</span>
+                </button>
               )}
             </div>
+          </div>
 
-            {/* Prev / Next / Sound / Top Controls */}
-            <div className="flex items-center gap-1.5">
+          <textarea
+            rows={7}
+            value={content}
+            onChange={(e) => onChangeContent(e.target.value)}
+            placeholder={
+              lang === 'fa'
+                ? 'پرامپت خود را اینجا بنویسید، یا از بخش کتابخانه پرامپت‌های بالا یکی را انتخاب کنید تا اینجا بارگذاری شود...\nفرمول RCTO را فراموش نکنید:\n[Role] تو مشاور ارشد...\n[Context] شرکت ما...\n[Task] این ۵ کار را انجام بده...\n[Output] در قالب جدول...'
+                : 'Type your prompt here, or pick one from the library above...\nRemember the RCTO formula:\n[Role] You are a lead...\n[Context] Our organization...\n[Task] Perform these 5 steps...\n[Output] In a structured table...'
+            }
+            className="w-full p-4 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#fdfdfd] dark:bg-[#12171b] text-xs sm:text-sm font-mono text-[#1c2830] dark:text-[#e8ebe9] focus:outline-hidden focus:ring-2 focus:ring-[#e0533c] dark:focus:ring-[#fb7185] transition-all resize-y"
+          />
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
+            <button
+              onClick={copySandboxToClipboard}
+              disabled={!content.trim()}
+              className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-semibold shadow-xs transition-all ${
+                sandboxCopied
+                  ? 'bg-[#2f7d5b] text-white'
+                  : content.trim()
+                  ? 'bg-[#e0533c] hover:bg-[#c2410c] text-white'
+                  : 'bg-[#d9dad5] dark:bg-[#2d3942] text-[#5d6b73] dark:text-[#9aa8b0] cursor-not-allowed'
+              }`}
+            >
+              {sandboxCopied ? (
+                <>
+                  <Check className="w-4 h-4 text-white" />
+                  <span>{lang === 'fa' ? 'پرامپت با موفقیت کپی شد!' : 'Copied to Clipboard!'}</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  <span>{lang === 'fa' ? 'کپی پرامپت آماده' : 'Copy Prompt'}</span>
+                </>
+              )}
+            </button>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] font-medium hidden md:inline">
+                {lang === 'fa' ? 'تست فوری در:' : 'Test in:'}
+              </span>
+
               <button
                 type="button"
-                onClick={handlePrevModule}
-                className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold border border-white/15 border-b-[3px] border-b-black/50 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
-                title={lang === 'fa' ? 'کارگاه قبلی' : 'Previous Workshop'}
+                onClick={() => openCompanionWindow('https://chatgpt.com', 'chatgpt_companion')}
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-[#10a37f]/10 hover:bg-[#10a37f]/20 text-[#10a37f] border border-[#10a37f]/30 text-xs font-semibold transition-colors cursor-pointer"
+                title={lang === 'fa' ? 'تست در پنجره کناری پلتفرم' : 'Test in side window'}
               >
-                {lang === 'fa' ? '→ قبلی' : '← Prev'}
+                <span>ChatGPT</span>
+                <ExternalLink className="w-3 h-3" />
               </button>
 
               <button
                 type="button"
-                onClick={handleNextModule}
-                className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold border border-white/15 border-b-[3px] border-b-black/50 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
-                title={lang === 'fa' ? 'کارگاه بعدی' : 'Next Workshop'}
+                onClick={() => openCompanionWindow('https://claude.ai', 'claude_companion')}
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-[#d97706]/10 hover:bg-[#d97706]/20 text-[#d97706] border border-[#d97706]/30 text-xs font-semibold transition-colors cursor-pointer"
+                title={lang === 'fa' ? 'تست در پنجره کناری پلتفرم' : 'Test in side window'}
               >
-                {lang === 'fa' ? 'بعدی ←' : 'Next →'}
+                <span>Claude</span>
+                <ExternalLink className="w-3 h-3" />
               </button>
 
               <button
                 type="button"
-                onClick={handleToggleSound}
-                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold border border-b-[3px] active:translate-y-[2px] active:border-b transition-all cursor-pointer ${
-                  soundEnabled
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 border-b-emerald-900'
-                    : 'bg-white/10 text-white/60 border-white/15 border-b-black/50'
-                }`}
-                title={lang === 'fa' ? 'صدای کلیک مکانیکی کیبورد' : 'Mechanical Key Click Sound'}
+                onClick={() => openCompanionWindow('https://gemini.google.com', 'gemini_companion')}
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-[#1a73e8]/10 hover:bg-[#1a73e8]/20 text-[#1a73e8] border border-[#1a73e8]/30 text-xs font-semibold transition-colors cursor-pointer"
+                title={lang === 'fa' ? 'تست در پنجره کناری پلتفرم' : 'Test in side window'}
               >
-                {soundEnabled ? '🔊' : '🔇'}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  playTactileSound('switch');
-                  navPillsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }}
-                className="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[11px] font-black border border-amber-500/40 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
-                title={lang === 'fa' ? 'پرش به بالای صفحه' : 'Scroll to Top'}
-              >
-                ↑
+                <span>Gemini</span>
+                <ExternalLink className="w-3 h-3" />
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </details>
+
+      {/* ===================================================================== */}
+      {/* WORKSHOP LINEAR PAGER CONTROLS (CLEAN, NO REDUNDANT KEYCAPS)          */}
+      {/* ===================================================================== */}
+      {activeTab && activeTab !== 'all' && (
+        <div className="p-4 rounded-2xl bg-white/90 dark:bg-[#1a1222]/90 backdrop-blur-md border border-[#ecdcd8] dark:border-[#382645] flex items-center justify-between gap-3 shadow-xs">
+          <button
+            type="button"
+            onClick={handlePrevModule}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-[#ecdcd8] dark:border-[#382645] bg-black/[0.02] dark:bg-white/[0.04] hover:bg-[#e0533c]/10 text-[#261a1d] dark:text-[#faedf3] transition-all cursor-pointer active:scale-95"
+          >
+            <span>{lang === 'fa' ? '← ماژول قبلی' : '← Previous'}</span>
+          </button>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono font-bold text-[#755e66] dark:text-[#ad99ab]">
+              {currentModuleIdx >= 0 ? `${currentModuleIdx + 1} / ${MODULE_NAV_ITEMS.length}` : ''}
+            </span>
+            <button
+              type="button"
+              onClick={() => navPillsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              className="p-1.5 rounded-lg text-xs font-bold text-[#e0533c] dark:text-[#fb7185] hover:bg-[#e0533c]/10 transition-colors cursor-pointer"
+              title={lang === 'fa' ? 'بازگشت به بالای سرفصل‌ها' : 'Scroll to top'}
+            >
+              ↑
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleNextModule}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#e0533c] to-[#c026d3] text-white hover:brightness-110 shadow-xs transition-all cursor-pointer active:scale-95"
+          >
+            <span>{lang === 'fa' ? 'ماژول بعدی →' : 'Next Module →'}</span>
+          </button>
+        </div>
+      )}
 
       {/* Prominent Footer Call to Action: Proceed to Page 1 */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-[#e3eef1] via-[#d7e8ec] to-[#cbe2e8] dark:from-[#1b2c32] dark:via-[#16252b] dark:to-[#121e23] border border-[#1f5163]/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+      <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-[#fdeee9] via-[#fbdcd5] to-[#f9cac1] dark:from-[#341528] dark:via-[#2a1220] dark:to-[#1d0c16] border border-[#e0533c]/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
         <div className="space-y-1 text-center sm:text-right">
-          <span className="text-xs font-bold text-[#1f5163] dark:text-[#6fb3c6] block">
+          <span className="text-xs font-bold text-[#e0533c] dark:text-[#fb7185] block">
             {lang === 'fa' ? 'پایان پیش‌نیاز · ورود به متدولوژی استاندارد پروژه' : 'Prerequisite Complete · Enter Official CPMAI Standard'}
           </span>
           <h4 className="text-sm sm:text-base font-extrabold text-[#1c2830] dark:text-[#e8ebe9]">
@@ -3133,12 +4196,88 @@ Tasks:
         <button
           type="button"
           onClick={onGoToPage1}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 text-xs sm:text-sm font-bold rounded-xl bg-[#0a7b97] hover:bg-[#08677e] text-white transition-all shadow-sm hover:scale-[1.02] shrink-0"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 text-xs sm:text-sm font-bold rounded-xl bg-[#e0533c] hover:bg-[#c2410c] active:scale-[0.98] text-white transition-all shadow-sm hover:scale-[1.02] shrink-0"
         >
           <span>{lang === 'fa' ? 'شروع فاز اول CPMAI (صفحه ۱)' : 'Start CPMAI Phase I (Page 1)'}</span>
           {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
         </button>
       </div>
+
+      {/* FULL-SCREEN PROJECTOR SLIDE MODALS FOR SESSION 1 & SESSION 5 */}
+      {s1ProjectorDeck === 's1_demo' && (
+        <ProjectorSlideModal
+          isOpen={true}
+          onClose={() => setS1ProjectorDeck(null)}
+          deckTitleFa="دموی ۱۵ دقیقه‌ای خروجی نهایی و معماری دوره ۲۰ ساعته"
+          deckSubtitleFa="جلسه ۱ · ماژول ۱-۱ (۶ اسلاید)"
+          accentColor="purple"
+          slides={S1_DEMO_SLIDES}
+          activeIndex={s1SlideIndex}
+          onChangeIndex={setS1SlideIndex}
+          copyToClipboard={copyToClipboard}
+          copiedId={copiedId}
+        />
+      )}
+
+      {s1ProjectorDeck === 's1_drive' && (
+        <ProjectorSlideModal
+          isOpen={true}
+          onClose={() => setS1ProjectorDeck(null)}
+          deckTitleFa="آموزش کامل Google Drive و استانداردسازی جداول ماشین‌خوان"
+          deckSubtitleFa="جلسه ۱ · ماژول ۱-۲ (۸ اسلاید)"
+          accentColor="blue"
+          slides={S1_DRIVE_SLIDES}
+          activeIndex={s1SlideIndex}
+          onChangeIndex={setS1SlideIndex}
+          copyToClipboard={copyToClipboard}
+          copiedId={copiedId}
+        />
+      )}
+
+      {s1ProjectorDeck === 's1_markdown' && (
+        <ProjectorSlideModal
+          isOpen={true}
+          onClose={() => setS1ProjectorDeck(null)}
+          deckTitleFa="زبان Markdown (.md)؛ زبان مشترک مهندس، گیت‌هاب و هوش مصنوعی"
+          deckSubtitleFa="جلسه ۱ · ماژول ۱-۳ (۷ اسلاید)"
+          accentColor="purple"
+          slides={S1_MARKDOWN_SLIDES}
+          activeIndex={s1SlideIndex}
+          onChangeIndex={setS1SlideIndex}
+          copyToClipboard={copyToClipboard}
+          copiedId={copiedId}
+        />
+      )}
+
+      {s1ProjectorDeck === 's1_github' && (
+        <ProjectorSlideModal
+          isOpen={true}
+          onClose={() => setS1ProjectorDeck(null)}
+          deckTitleFa="گیت‌هاب (GitHub) از صفر مطلق به زبان دفتر فنی و کنترل مدارک (DCC)"
+          deckSubtitleFa="جلسه ۱ · ماژول ۱-۴ (۹ اسلاید)"
+          accentColor="teal"
+          slides={S1_GITHUB_SLIDES}
+          activeIndex={s1SlideIndex}
+          onChangeIndex={setS1SlideIndex}
+          copyToClipboard={copyToClipboard}
+          copiedId={copiedId}
+        />
+      )}
+
+      {s1ProjectorDeck === 's5_capstone' && (
+        <ProjectorSlideModal
+          isOpen={true}
+          onClose={() => setS1ProjectorDeck(null)}
+          deckTitleFa="ارکستراسیون کامل پایان دوره و پل ورود به Vibe Coding"
+          deckSubtitleFa="جلسه ۵ · ماژول‌های ۵-۱ و ۵-۳"
+          accentColor="purple"
+          slides={S5_CAPSTONE_SLIDES}
+          activeIndex={s1SlideIndex}
+          onChangeIndex={setS1SlideIndex}
+          copyToClipboard={copyToClipboard}
+          copiedId={copiedId}
+        />
+      )}
     </div>
   );
 };

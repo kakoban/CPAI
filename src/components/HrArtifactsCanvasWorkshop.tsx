@@ -74,7 +74,7 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
                 <Code className="w-3.5 h-3.5" />
                 <span>Claude Artifacts & Gemini Canvas</span>
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#00738c]/10 text-[#00738c] dark:text-[#6fb3c6] border border-[#00738c]/20 flex items-center gap-1">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185] border border-[#c026d3]/20 flex items-center gap-1">
                 <Users className="w-3 h-3" />
                 <span>
                   {lang === 'fa'
@@ -115,10 +115,10 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
         </div>
 
         {/* 2-Step Chained Workshop Playbook (NotebookLM -> Claude Artifacts / Gemini Canvas) */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#00738c]/[0.06] via-[#2f7d5b]/[0.06] to-[#d97706]/[0.06] border border-[#00738c]/20 space-y-3.5">
+        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#c026d3]/[0.06] via-[#2f7d5b]/[0.06] to-[#d97706]/[0.06] border border-[#c026d3]/20 space-y-3.5">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <span className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[#00738c] dark:text-[#6fb3c6]" />
+              <Layers className="w-4 h-4 text-[#c026d3] dark:text-[#fb7185]" />
               <span>
                 {lang === 'fa'
                   ? HR_ARTIFACTS_WORKSHOP_HEADER.twoStepChainGuide.titleFa
@@ -146,7 +146,7 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
                   <span
                     className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 ${
                       st.stepNumber === 1
-                        ? 'bg-[#00738c] text-white'
+                        ? 'bg-[#c026d3] text-white'
                         : 'bg-[#b45309] text-white'
                     }`}
                   >
@@ -182,8 +182,8 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
                   onClick={() => setSelectedExId(ex.id)}
                   className={`p-3.5 rounded-2xl border text-right transition-all active:scale-[0.97] flex flex-col justify-between gap-2 cursor-pointer ${
                     isSelected
-                      ? 'bg-[#1f5163] text-white border-[#1f5163] shadow-sm'
-                      : 'bg-[#f8f9fa] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] border-black/[0.06] dark:border-white/[0.08] hover:border-[#00738c]/40'
+                      ? 'bg-[#e0533c] text-white border-[#e0533c] shadow-sm'
+                      : 'bg-[#f8f9fa] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] border-black/[0.06] dark:border-white/[0.08] hover:border-[#c026d3]/40'
                   }`}
                 >
                   <div className="flex items-center justify-between w-full gap-1">
@@ -241,7 +241,7 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
 
           {/* Objective Banner */}
           <div className="p-3.5 rounded-xl bg-white dark:bg-[#161e24] border border-black/[0.05] dark:border-white/[0.07] text-xs leading-relaxed">
-            <strong className="text-[#00738c] dark:text-[#6fb3c6] font-extrabold">
+            <strong className="text-[#c026d3] dark:text-[#fb7185] font-extrabold">
               {lang === 'fa' ? '🎯 هدف تمرین: ' : '🎯 Exercise Objective: '}
             </strong>
             <span className="text-[#1c2830] dark:text-[#e8ebe9]">
@@ -365,7 +365,7 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
                       const nextIdx = (HR_ARTIFACT_EXERCISES.findIndex((e) => e.id === selectedExId) + 1) % HR_ARTIFACT_EXERCISES.length;
                       setSelectedExId(HR_ARTIFACT_EXERCISES[nextIdx].id);
                     }}
-                    className="px-2.5 py-1 rounded-lg bg-[#00738c]/10 hover:bg-[#00738c]/20 text-[#00738c] dark:text-[#6fb3c6] font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                    className="px-2.5 py-1 rounded-lg bg-[#c026d3]/10 hover:bg-[#c026d3]/20 text-[#c026d3] dark:text-[#fb7185] font-bold flex items-center gap-1 cursor-pointer transition-colors"
                   >
                     <span>{lang === 'fa' ? 'تمرین بعدی' : 'Next Exercise'}</span>
                     {lang === 'fa' ? <ArrowLeft className="w-3 h-3" /> : <ArrowRight className="w-3 h-3" />}
