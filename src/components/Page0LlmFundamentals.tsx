@@ -110,6 +110,50 @@ interface PromptItem {
   targetTools: string[];
 }
 
+interface RctoPillarExample {
+  roleFa: string;
+  roleEn: string;
+  contextFa: string;
+  contextEn: string;
+  taskFa: string;
+  taskEn: string;
+  outputFa: string;
+  outputEn: string;
+}
+
+const TRACK_RCTO_PILLARS: Record<IndustryTrackId, RctoPillarExample> = {
+  CIVIL_INFRA: {
+    roleFa: '«تو مهندس ارشد ژئوتکنیک و ناظر مقیم احداث خط مترو بر مبنای نشریه ۴۳۱۱ هستی...»',
+    roleEn: '"You are a Lead Geotechnical Engineer and resident metro inspector adhering to Circular 4311..."',
+    contextFa: '«دستگاه TBM در حال نزدیک شدن به تقاطع با لوله گاز پرفشار شهری در عمق ۱۸ متری است و داده‌های انکلینومتر نشست ۳ میلی‌متری را نشان می‌دهند...»',
+    contextEn: '"The TBM drive is approaching a high-pressure municipal gas main at 18m depth with inclinometers recording 3mm settlement..."',
+    taskFa: '«ریسک فرونشست را ارزیابی، پارامترهای بهینه فشار سینه کار را تعیین و دستور کار فوری برای شیفت بعد صادر کن...»',
+    taskEn: '"Assess subsidence risk, calculate optimal face-support pressure, and prescribe immediate excavation instructions..."',
+    outputFa: '«پاسخ را در یک جدول فنی ۴ ستونه شامل: [پارامتر TBM | مقدار فعلی | حد مجاز استاندارد | اقدام اصلاحی کارگاه] بدون مقدمه بنویس.»',
+    outputEn: '"Output a 4-column engineering table: [TBM Parameter | Current Telemetry | Allowable Limit | Site Action Plan] without preamble."'
+  },
+  ENERGY_PETRO: {
+    roleFa: '«تو مهندس ارشد فرآیند و هماهنگ‌کننده جلسات HAZOP در پالایشگاه میعانات گازی هستی...»',
+    roleEn: '"You are a Lead Process Engineer and HAZOP coordinator at a gas condensate refinery..."',
+    contextFa: '«افت فشار در مبدل‌های حرارتی پیش‌گرمایش به ۳.۲ بار رسیده و دمای ورودی به کوره ۵ درجه کاهش یافته که ریسک کک‌گرفتگی و شات‌دان ایجاد کرده است...»',
+    contextEn: '"Preheat train heat exchanger differential pressure hit 3.2 bar with a 5°C furnace inlet drop, risking emergency coking trips..."',
+    taskFa: '«علت هیدرولیکی رسوب را تحلیل، زمان بحرانی شستشو با حلال را پیش‌بینی و پروتکل پیشگیری از مشعل‌سوزی را تدوین کن...»',
+    taskEn: '"Analyze hydraulic fouling kinetics, forecast descaling timeline, and formulate flaring mitigation protocols..."',
+    outputFa: '«پاسخ را در یک ماتریس ایمنی فرآیندی شامل: [تجهیز بحرانی | انحراف فشار/دما | پیامد HAZOP | دستور اقدام اتاق کنترل] ارائه بده.»',
+    outputEn: '"Output as a process safety matrix: [Critical Equipment | Deviation | HAZOP Consequence | CCR Action Directive]."'
+  },
+  GENERAL_EVERYDAY: {
+    roleFa: '«تو مشاور و مربی هوشمند اقتصاد خانوار و برنامه‌ریزی زندگی خانوادگی هستی...»',
+    roleEn: '"You are a Smart Family Lifestyle & Household Economics Coach..."',
+    contextFa: '«خانواده ما ۴ نفره است و ماهانه نزدیک به ۲۵٪ از خریدهای سوپرمارکت و میوه به دلیل فراموشی در یخچال دور ریخته می‌شود...»',
+    contextEn: '"Our 4-person family currently discards nearly 25% of fresh supermarket groceries due to pantry disorganization..."',
+    taskFa: '«با تحلیل اقلام پرمصرف، ۵ ترفند سریع برای صفر کردن دورریز، برنامه غذایی با باقیمانده‌ها و روش پس‌انداز بودجه برای سفر تابستانی پیشنهاد بده...»',
+    taskEn: '"Identify high-spoilage items, propose 5 quick zero-waste hacks, a leftover meal plan, and a vacation micro-savings rule..."',
+    outputFa: '«پاسخ را در قالب یک جدول کاربردی و دوستانه شامل: [قلم مصرفی / دغدغه | راهکار هوشمند روزمره | صرفه‌جویی ریالی ماهانه | اقدام عملی همین امروز] بنویس.»',
+    outputEn: '"Output as a friendly, actionable household table: [Item / Concern | Smart Everyday Hack | Monthly Savings | Immediate Today Action]."'
+  }
+};
+
 export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   lang,
   content,
@@ -122,7 +166,11 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
 }) => {
   const effectiveDiscipline: DisciplineId =
     disciplineId ||
-    (industryTrack === 'ENERGY_PETRO' ? 'petro_process_safety' : 'civil_tbm_tunnel');
+    (industryTrack === 'ENERGY_PETRO'
+      ? 'petro_process_safety'
+      : industryTrack === 'GENERAL_EVERYDAY'
+      ? 'general_household_finance'
+      : 'civil_tbm_tunnel');
 
   const discMeta = getDisciplineMetadata(effectiveDiscipline);
   const disciplinePromptPair = getDisciplinePromptShowcase(effectiveDiscipline);
@@ -239,6 +287,9 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
 
   const activeTrackMetaphor =
     TRACK_METAPHORS[industryTrack || 'CIVIL_INFRA'] || TRACK_METAPHORS.CIVIL_INFRA;
+
+  const activeRctoPillars =
+    TRACK_RCTO_PILLARS[industryTrack || 'CIVIL_INFRA'] || TRACK_RCTO_PILLARS.CIVIL_INFRA;
 
   type ModuleTabId = Exclude<typeof activeTab, null | 'all'>;
   interface SessionModuleMeta {
@@ -2250,9 +2301,7 @@ Tasks:
                   : 'Assign persona and domain expertise. Tell the AI which expert shoes to step into.'}
               </p>
               <div className="mt-3 p-2 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] text-[11px] font-mono text-[#e0533c] dark:text-[#fb7185]">
-                {lang === 'fa'
-                  ? '«تو مدیر ارشد محصول با ۱۰ سال سابقه در حوزه فین‌تک هستی...»'
-                  : '"You are a Lead Product Manager with 10 years in FinTech..."'}
+                {lang === 'fa' ? activeRctoPillars.roleFa : activeRctoPillars.roleEn}
               </div>
             </div>
 
@@ -2277,9 +2326,7 @@ Tasks:
                   : 'Describe organizational background, audience, and constraints. Never assume the AI knows.'}
               </p>
               <div className="mt-3 p-2 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] text-[11px] font-mono text-[#c026d3] dark:text-[#6ee7b7]">
-                {lang === 'fa'
-                  ? '«شرکت ما ۴۰ نفر پرسنل دارد و نرخ ریزش مشتریان ماه قبل به ۱۲٪ رسیده است...»'
-                  : '"We are a 40-person startup facing a 12% monthly customer churn..."'}
+                {lang === 'fa' ? activeRctoPillars.contextFa : activeRctoPillars.contextEn}
               </div>
             </div>
 
@@ -2304,9 +2351,7 @@ Tasks:
                   : 'Unambiguous directive with sharp action verbs: "Categorize", "Synthesize", "Prioritize".'}
               </p>
               <div className="mt-3 p-2 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] text-[11px] font-mono text-[#b87333] dark:text-[#e0a96d]">
-                {lang === 'fa'
-                  ? '«۵ علت اصلی این ریزش را شناسایی و برای هر یک اقدام کم‌هزینه پیشنهاد بده...»'
-                  : '"Identify top 5 churn root causes and draft low-cost mitigation steps..."'}
+                {lang === 'fa' ? activeRctoPillars.taskFa : activeRctoPillars.taskEn}
               </div>
             </div>
 
@@ -2331,9 +2376,7 @@ Tasks:
                   : 'Format specification: Markdown table, bullet points, corporate tone, length limits.'}
               </p>
               <div className="mt-3 p-2 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] text-[11px] font-mono text-[#2f7d5b] dark:text-[#63c496]">
-                {lang === 'fa'
-                  ? '«پاسخ را در یک جدول مقایسه‌ای ۴ ستونه به فارسی سازمانی و بدون مقدمه بنویس.»'
-                  : '"Output as a 4-column Markdown table, professional Persian, no preamble."'}
+                {lang === 'fa' ? activeRctoPillars.outputFa : activeRctoPillars.outputEn}
               </div>
             </div>
           </div>

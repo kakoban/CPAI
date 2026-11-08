@@ -25,16 +25,17 @@ export const Page2ProblemIteration: React.FC<Page2Props> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const isPetro = industryTrack === 'ENERGY_PETRO';
+  const isEveryday = industryTrack === 'GENERAL_EVERYDAY';
   const discMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
   const discContent = disciplineId ? getDisciplineExampleContent(disciplineId) : null;
 
   const t = {
     en: {
-      badge: `CPMAI Phase I · Page 2 of 5 (${discMeta ? discMeta.titleEn : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
+      badge: `CPMAI Phase I · Page 2 of 5 (${discMeta ? discMeta.titleEn : isEveryday ? 'Everyday & Lifestyle Track' : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       slideTitle: 'What problem are you solving with AI in this iteration?',
       promptHint: 'Write your complete problem definition for this iteration. Address the business friction, why traditional software fails, current vs future state, and scope boundaries.',
       templateBtn: 'Insert CPMAI Template',
-      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} Case Study` : isPetro ? 'Fill Refinery Fouling Case Study' : 'Fill Urban Metro TBM Case Study',
+      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} Case Study` : isEveryday ? 'Fill Smart Household & Travel Case Study' : isPetro ? 'Fill Refinery Fouling Case Study' : 'Fill Urban Metro TBM Case Study',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
       copiedToast: 'Copied to clipboard!',
@@ -48,11 +49,11 @@ export const Page2ProblemIteration: React.FC<Page2Props> = ({
       tip4: 'Explicitly define what is IN-SCOPE versus deferred to future iterations.'
     },
     fa: {
-      badge: `فاز اول CPMAI · صفحه ۲ از ۵ (${discMeta ? discMeta.titleFa : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
+      badge: `فاز اول CPMAI · صفحه ۲ از ۵ (${discMeta ? discMeta.titleFa : isEveryday ? 'حوزه تخصصی سبک زندگی و خانواده' : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
       slideTitle: 'What problem are you solving with AI in this iteration?',
       promptHint: 'تعریف دقیق مسئله در این تکرار (اسپرینت) را بنویسید: چه اصطکاکی در کسب‌وکار رخ می‌دهد؟ چرا نرم‌افزار سنتی پاسخگو نیست؟ وضعیت فعلی در برابر مطلوب چیست و مرزهای این تکرار کجاست؟',
       templateBtn: 'درج قالب استاندارد CPMAI',
-      exampleBtn: discMeta ? `پر کردن با نمونه ${discMeta.shortTitleFa}` : isPetro ? 'پر کردن با نمونه پالایشگاهی (رسوب مبدل‌ها)' : 'پر کردن با نمونه مگاپروژه احداث خط مترو (TBM)',
+      exampleBtn: discMeta ? `پر کردن با نمونه ${discMeta.shortTitleFa}` : isEveryday ? 'پر کردن با نمونه اقتصاد خانوار و سبد خرید' : isPetro ? 'پر کردن با نمونه پالایشگاهی (رسوب مبدل‌ها)' : 'پر کردن با نمونه مگاپروژه احداث خط مترو (TBM)',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
       copiedToast: 'متن بوم در کلیپ‌بورد کپی شد!',
@@ -172,8 +173,40 @@ Crude blending variances (API gravity, sulfur, salt, and heavy metals) interact 
 - درون محدوده (In-Scope): قطار مبدل‌های پیش‌گرمایش واحد تقطیر اتمسفری (E-101 تا E-108) با تلمتری ۵ ثانیه‌ای سیستم DCS و نتایج آزمایشگاه نفت خام.
 - خارج از محدوده (Out-of-Scope): ستون‌های تقطیر در خلاء، کمپرسورهای بازیافت گاز فلر و کنترل خودکار شیرهای برقی (موکول به اسپرینت‌های ۲ و ۳).`;
 
-    let selectedEn = isPetro ? exampleEnPetro : exampleEnCivil;
-    let selectedFa = isPetro ? exampleFaPetro : exampleFaCivil;
+    const exampleEnEveryday = `Iteration Problem Definition: Smart Household Budget, Grocery Waste Reduction & Family Vacation Savings
+
+1. Business Problem Statement:
+Households suffer from recurring 20-25% waste of perishable grocery staples (dairy, vegetables, meat) due to disorganization and forgotten pantry items. Deceptive promotions spark impulse spending, straining household finances and destroying vacation savings goals.
+
+2. Why AI (Cognitive vs. Traditional Programming):
+Family consumption rates fluctuate seasonally with erratic shopping schedules. Hardcoded calendar alerts or static spreadsheet templates cannot predict perishable depletion velocity. A cognitive approach combining predictive pantry exhaustion models with recipe recommendation engines generates dynamic, waste-free shopping lists before expiration occurs.
+
+3. Current State vs. Desired Future State:
+- Current State: Incomplete manual lists, redundant grocery shopping, throwing away spoiled food at month-end, and persistent financial stress.
+- Future State in this Sprint: Proactive smart shopping forecasts, cutting household grocery waste to under 5%, and capturing 25% monthly grocery spend ($200+) redirected automatically into the family annual vacation fund.
+
+4. Iteration Scoping (Sprint 1):
+- IN-SCOPE: High-turnover perishable fridge categories (milk, yogurt, fruits, vegetables) based on OCR receipt inputs and standard 4-person family consumption velocity.
+- OUT-OF-SCOPE: Annual clothing purchases, furniture/appliances, and overseas vacation booking optimization (deferred to Sprints 2 & 3).`;
+
+    const exampleFaEveryday = `تعریف مسئله این تکرار: مدیریت هوشمند اقتصاد خانوار، پیش‌گیری از دورریز مواد غذایی و پس‌انداز بودجه سفر خانوادگی
+
+۱. صورت مسئله کسب‌وکار:
+خانواده‌ها ماهانه بخش چشمگیری (۲۰ الی ۲۵ درصد) از خریدهای سوپرمارکت و میوه را به دلیل خرید بیش از حد نیاز یا فراموشی تاریخ انقضا در یخچال دور می‌ریزند. خریدهای هیجانی در جشنواره‌های تخفیف و عدم پایش موجودی، بار مالی سنگینی ایجاد کرده و مانع پس‌انداز برای سفر سالیانه خانواده می‌شود.
+
+۲. چرا هوش مصنوعی؟
+الگوهای مصرف اعضای خانواده متغیر و فصلی است و عادات خرید با قواعد شرطی ساده یا یادداشت‌های دستی اکسل قابل پیش‌بینی نیستند. یک راهکار شناختی با ترکیب الگوی پیش‌بینی اتمام اقلام یخچال و سیستم پیشنهاددهنده دستور غذا، فهرست خرید هوشمند را پیش از فاسد شدن مواد قبلی تنظیم می‌کند.
+
+۳. وضعیت فعلی در برابر وضعیت مطلوب در این تکرار:
+- وضعیت فعلی: ثبت دستی پراکنده، خرید تکراری اقلام موجود در یخچال، دورریز هفتگی مواد فاسدشدنی و احساس دائمی کمبود بودجه در پایان ماه.
+- وضعیت مطلوب در این اسپرینت: پیش‌بینی دقیق مایحتاج مصرفی، کاهش دورریز به زیر ۵ درصد و پس‌انداز ماهیانه ۲۵ درصدی هزینه‌های خرید (معادل ۸ الی ۱۲ میلیون تومان) در صندوق سفر خانوادگی.
+
+۴. مرزبندی محدوده این تکرار (اسپرینت ۱):
+- درون محدوده (In-Scope): اقلام پرمصرف و فاسدشدنی یخچال (لبنیات، سبزیجات، میوه و پروتئین) بر مبنای رسیدهای سوپرمارکت و الگوی مصرف خانواده ۴ نفره.
+- خارج از محدوده (Out-of-Scope): خریدهای پوشاک، لوازم خانگی و بهینه‌سازی بلیت سفرهای خارجی (موکول به اسپرینت‌های ۲ و ۳).`;
+
+    let selectedEn = isEveryday ? exampleEnEveryday : isPetro ? exampleEnPetro : exampleEnCivil;
+    let selectedFa = isEveryday ? exampleFaEveryday : isPetro ? exampleFaPetro : exampleFaCivil;
 
     if (discContent) {
       selectedEn = `Iteration Problem Definition: ${discContent.titleEn}

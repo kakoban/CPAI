@@ -968,32 +968,122 @@ export function getDisciplinePromptShowcase(disciplineId: DisciplineId): Discipl
   const meta = getDisciplineMetadata(disciplineId);
   const content = getDisciplineExampleContent(disciplineId);
 
+  // 1. GENERAL & EVERYDAY LIFESTYLE TRACK
+  if (meta.trackId === 'GENERAL_EVERYDAY') {
+    const generalRoleFaMap: Record<string, string> = {
+      general_family_parenting: `مشاور و مربی هوشمند آموزش کودک و تعامل والدین بر مبنای ${meta.governingStandardsFa[0]}`,
+      general_household_finance: `مشاور ارشد اقتصاد خانوار و مدیریت خرید هوشمند بر مبنای ${meta.governingStandardsFa[0]}`,
+      general_travel_lifestyle: `برنامه‌ریز حرفه‌ای سفر و اوقات فراغت خانوادگی بر مبنای ${meta.governingStandardsFa[0]}`,
+      general_viral_content: `سناریونویس خلاق و ایده‌پرداز محتوای وایرال شبکه‌های اجتماعی بر مبنای ${meta.governingStandardsFa[0]}`,
+      general_ecommerce_retail: `کارشناس هوشمند خرید آنلاین و شکار تخفیف‌های واقعی بر مبنای ${meta.governingStandardsFa[0]}`,
+      general_health_nutrition: `مربی سلامت، تغذیه و تناسب اندام خانوادگی بر مبنای ${meta.governingStandardsFa[0]}`,
+      general_personal_productivity: `مربی بهره‌وری فردی، مدیریت زمان و غلبه بر تنبلی بر مبنای ${meta.governingStandardsFa[0]}`,
+      general_customer_care: `مشاور آداب معاشرت، حل تعارض و ارتباط محترمانه بر مبنای ${meta.governingStandardsFa[0]}`
+    };
+
+    const generalRoleEnMap: Record<string, string> = {
+      general_family_parenting: `Smart Parenting & Child Engagement Coach adhering to ${meta.governingStandardsEn[0]}`,
+      general_household_finance: `Household Economics & Grocery Optimization Advisor adhering to ${meta.governingStandardsEn[0]}`,
+      general_travel_lifestyle: `Family Vacation Planner & Travel Curator adhering to ${meta.governingStandardsEn[0]}`,
+      general_viral_content: `Creative Viral Social Media Scriptwriter adhering to ${meta.governingStandardsEn[0]}`,
+      general_ecommerce_retail: `Smart Online Shopping & Deals Specialist adhering to ${meta.governingStandardsEn[0]}`,
+      general_health_nutrition: `Family Health, Nutrition & Vitality Coach adhering to ${meta.governingStandardsEn[0]}`,
+      general_personal_productivity: `Personal Productivity & Time-Boxing Mentor adhering to ${meta.governingStandardsEn[0]}`,
+      general_customer_care: `Social Etiquette & Diplomatic Conflict Negotiator adhering to ${meta.governingStandardsEn[0]}`
+    };
+
+    const roleFa = generalRoleFaMap[disciplineId] || `مشاور و راهنمای هوشمند در زمینه ${meta.titleFa}`;
+    const roleEn = generalRoleEnMap[disciplineId] || `Smart Lifestyle Advisor in ${meta.titleEn}`;
+
+    return {
+      weakPromptFa: `«یک متن درباره ${meta.titleFa} برای من بنویس و چند توصیه کلی بده.»`,
+      weakPromptEn: `"Write some text and generic tips about ${meta.titleEn}."`,
+      weakCritiqueFa: `ایراد پرامپت: فاقد نقش مشخص، فاقد شرایط عینی زندگی، بدون اشاره به شاخص‌های ملموس (${meta.performanceMetricsFa[0]}) و با خروجی مبهم و توصیه‌ای تکراری.`,
+      weakCritiqueEn: `Flaw: Lacks persona, family/real-life context, specific metrics (${meta.performanceMetricsEn[0]}), and actionable constraints. Yields superficial advice.`,
+      engineeredPromptFa: `تو ${roleFa} هستی [Role].
+دغدغه و وضعیت فعلی در زندگی روزمره: ${content.businessProblemFa} [Context].
+اطلاعات و شاخص‌های در دسترس خانواده بر اساس [${meta.performanceMetricsFa.join(' | ')}] است.
+وظیفه تو این است که با زبانی صمیمی، ملموس و خودمانی، راهکارهای عملی و بی‌درنگ برای حل این دغدغه تدوین کنی [Task].
+خروجی باید در قالب یک جدول کاربردی ۴ ستونه با عناوین [دغدغه اصلی | راهکار هوشمند روزمره | صرفه‌جویی زمان / هزینه | اقدام عملی مشخص برای امروز] بدون مقدمه‌چینی اضافی ارائه شود [Output].`,
+      engineeredPromptEn: `You are a ${roleEn} [Role].
+Real-world household context: ${content.businessProblemEn} [Context].
+Available lifestyle indicators include: [${meta.performanceMetricsEn.join(' | ')}].
+Your task is to craft practical, empathetic, and actionable everyday solutions [Task].
+Output format must be a structured 4-column Markdown table: [Core Concern | Smart Lifestyle Solution | Time / Cost Saved | Immediate Today Action] with zero preamble [Output].`,
+      engineeredBreakdownFa: {
+        role: roleFa,
+        context: content.businessProblemFa.slice(0, 100) + '...',
+        task: `ارائه راهکارهای ملموس حل دغدغه بر پایه ${meta.performanceMetricsFa[0]}`,
+        output: `جدول ۴ ستونه: [دغدغه اصلی | راهکار هوشمند | صرفه‌جویی | اقدام عملی]`
+      },
+      engineeredBreakdownEn: {
+        role: roleEn,
+        context: content.businessProblemEn.slice(0, 100) + '...',
+        task: `Formulate actionable solutions addressing ${meta.performanceMetricsEn[0]}`,
+        output: `4-column table: [Core Concern | Smart Solution | Savings | Action]`
+      }
+    };
+  }
+
+  // 2. OIL, GAS & PETROCHEMICAL EPCC TRACK
+  if (meta.trackId === 'ENERGY_PETRO') {
+    return {
+      weakPromptFa: `«وضعیت واحد ${meta.titleFa} را تحلیل کن و یک گزارش کلی بده.»`,
+      weakPromptEn: `"Analyze unit status in ${meta.titleEn} and give a generic summary."`,
+      weakCritiqueFa: `ایراد پرامپت: فاقد نقش تخصصی پالایشگاهی، بدون تلمتری DCS و بدون استانداردهای مرجع فرآیندی (${meta.governingStandardsFa[0]}). خروجی فاقد ارزش برای اتاق کنترل است.`,
+      weakCritiqueEn: `Flaw: Lacks plant engineering persona, DCS historian telemetry, reference codes (${meta.governingStandardsEn[0]}), and safety boundaries. Useless for CCR operators.`,
+      engineeredPromptFa: `تو مهندس ارشد فرآیند و هماهنگ‌کننده تخصصی در واحد ${meta.titleFa} بر مبنای استاندارد ${meta.governingStandardsFa[0]} هستی [Role].
+در حال حاضر با چالش عملیاتی و ریسک ایمنی فرآیندی در پلنت روبرو هستیم: ${content.businessProblemFa} [Context].
+داده‌های بلادرنگ تلمتری سیستم DCS و سنسورهای صنعتی بر اساس شاخص‌های [${meta.performanceMetricsFa.join(' | ')}] در اختیار توست.
+وظیفه تو این است که ریشه افت راندمان یا ریسک شات‌دان را تحلیل کرده، انطباق با حدود ایمنی را ارزیابی و سناریوی بهینه را پیشنهاد دهی [Task].
+خروجی باید در یک ماتریس ایمنی فرآیندی ۴ ستونه با عناوین [تجهیز / تگ فرآیندی | حد مجاز عملیاتی (SOP/MAWP) | انحراف سنسوری DCS | دستور کار فوری اتاق کنترل و بهره‌برداری] بدون زیاده‌گویی استخراج شود [Output].`,
+      engineeredPromptEn: `You are a Lead Process Engineer and Unit Coordinator in ${meta.titleEn} adhering to ${meta.governingStandardsEn[0]} [Role].
+Plant Operational Challenge: ${content.businessProblemEn} [Context].
+Input DCS telemetry encompasses continuous metrics: [${meta.performanceMetricsEn.join(' | ')}].
+Your task is to analyze hydraulic/thermal root anomalies, evaluate safety limits, and formulate operational mitigation protocols [Task].
+Output format must be a structured 4-column Process Safety Matrix: [Critical Tag / Equipment | Operating Limit (SOP/MAWP) | Observed DCS Deviation | CCR Action Directive] with zero preamble [Output].`,
+      engineeredBreakdownFa: {
+        role: `مهندس ارشد فرآیند ${meta.shortTitleFa} (${meta.governingStandardsFa[0]})`,
+        context: content.businessProblemFa.slice(0, 100) + '...',
+        task: `تحلیل ریشه انحرافات DCS در ${meta.performanceMetricsFa[0]} و تدوین سناریوی اصلاحی`,
+        output: `ماتریس ۴ ستونه: [تگ فرآیندی | حد مجاز عملیاتی | انحراف DCS | اقدام اتاق کنترل]`
+      },
+      engineeredBreakdownEn: {
+        role: `Lead Process Engineer in ${meta.shortTitleEn} (${meta.governingStandardsEn[0]})`,
+        context: content.businessProblemEn.slice(0, 100) + '...',
+        task: `Analyze root DCS deviations in ${meta.performanceMetricsEn[0]} and prescribe CCR actions`,
+        output: `4-column matrix: [Process Tag | Operating Limit | DCS Deviation | CCR Directive]`
+      }
+    };
+  }
+
+  // 3. CIVIL & INFRASTRUCTURE TRACK (Default)
   return {
-    weakPromptFa: `«یک گزارش و تحلیل درباره وضعیت ${meta.titleFa} برای من بنویس.»`,
+    weakPromptFa: `«یک گزارش درباره وضعیت ${meta.titleFa} برای من بنویس.»`,
     weakPromptEn: `"Write a report and analysis about ${meta.titleEn}."`,
-    weakCritiqueFa: `ایراد پرامپت: فاقد نقش، فاقد داده‌های سنسوری و استانداردهای مرجع (${meta.governingStandardsFa[0]}) و بدون خروجی ساختاریافته. نتیجه متنی کلی و توهم‌آمیز خواهد بود.`,
-    weakCritiqueEn: `Flaw: Lacks role persona, operational metrics (${meta.performanceMetricsEn[0]}), reference standards, and output constraints. Yields generic textbook fluff.`,
+    weakCritiqueFa: `ایراد پرامپت: فاقد نقش کارگاهی، فاقد داده‌های سنسوری و استانداردهای مرجع (${meta.governingStandardsFa[0]}) و بدون خروجی ساختاریافته. نتیجه متنی کلی و توهم‌آمیز خواهد بود.`,
+    weakCritiqueEn: `Flaw: Lacks site engineer persona, geotechnical metrics (${meta.performanceMetricsEn[0]}), reference standards, and contractual constraints. Yields generic textbook fluff.`,
     engineeredPromptFa: `تو مهندس ارشد و هماهنگ‌کننده تخصصی در واحد ${meta.titleFa} بر مبنای استاندارد ${meta.governingStandardsFa[0]} هستی [Role].
-در حال حاضر با چالش عملیاتی روبرو هستیم: ${content.businessProblemFa} [Context].
-داده‌های ورودی و پارامترهای تلمتری بر اساس شاخص‌های [${meta.performanceMetricsFa.join(' | ')}] در اختیار توست.
-وظیفه تو این است که ریشه بروز خطا را واکاوی کرده و راهکار پیشگیرانه کاهش ریسک را پیشنهاد دهی [Task].
-خروجی باید در یک جدول ۴ ستونه با عناوین [عامل بحرانی | حد مجاز استاندارد | انحراف فعلی | اقدام اصلاحی شیفت] بدون زیاده‌گویی استخراج شود [Output].`,
+در حال حاضر با چالش کارگاهی و قراردادی در مگاپروژه روبرو هستیم: ${content.businessProblemFa} [Context].
+داده‌های میدانی، قرائت‌های ابزاردقیق و پارامترهای اجرایی بر اساس شاخص‌های [${meta.performanceMetricsFa.join(' | ')}] در اختیار توست.
+وظیفه تو این است که ریشه انحرافات ژئوتکنیکی/اجرایی را تحلیل کرده، ریسک‌های قراردادی و مالی را پیشگیری کنی و دستور کار مشخصی ارائه دهی [Task].
+خروجی باید در یک جدول ۴ ستونه با عناوین [عامل بحرانی کارگاه | حد مجاز استاندارد | انحراف اندازه‌گیری‌شده | اقدام اصلاحی کارگاه / دفتر فنی] بدون مقدمه و حاشیه استخراج شود [Output].`,
     engineeredPromptEn: `You are a Lead Specialist in ${meta.titleEn} adhering to ${meta.governingStandardsEn[0]} [Role].
-Operational Context: ${content.businessProblemEn} [Context].
-Input telemetry encompasses key metrics: [${meta.performanceMetricsEn.join(' | ')}].
-Your task is to analyze root causes and formulate risk mitigation protocols [Task].
-Output format must be a structured 4-column Markdown table: [Critical Anomaly | Engineering Limit | Current Deviation | Shift Action Plan] with zero preamble [Output].`,
+Site Operational Context: ${content.businessProblemEn} [Context].
+Input site telemetry encompasses key metrics: [${meta.performanceMetricsEn.join(' | ')}].
+Your task is to analyze geotechnical/structural root causes and formulate risk mitigation protocols [Task].
+Output format must be a structured 4-column Markdown table: [Critical Anomaly | Engineering Limit | Current Deviation | Site Action Plan] with zero preamble [Output].`,
     engineeredBreakdownFa: {
       role: `مهندس ارشد ${meta.shortTitleFa} منطبق بر ${meta.governingStandardsFa[0]}`,
       context: content.businessProblemFa.slice(0, 100) + '...',
-      task: `واکاوی ریشه انحرافات ${meta.performanceMetricsFa[0]} و تدوین برنامه اقدام`,
-      output: `جدول ۴ ستونه: [عامل بحرانی | حد استاندارد | انحراف | اقدام اصلاحی]`
+      task: `واکاوی ریشه انحرافات ${meta.performanceMetricsFa[0]} و تدوین برنامه اقدام کارگاه`,
+      output: `جدول ۴ ستونه: [عامل بحرانی کارگاه | حد استاندارد | انحراف | اقدام اصلاحی]`
     },
     engineeredBreakdownEn: {
       role: `Lead Specialist in ${meta.shortTitleEn} (${meta.governingStandardsEn[0]})`,
       context: content.businessProblemEn.slice(0, 100) + '...',
-      task: `Analyze root anomalies in ${meta.performanceMetricsEn[0]} and prescribe shift actions`,
-      output: `4-column Markdown table: [Anomaly | Standard Limit | Deviation | Action Plan]`
+      task: `Analyze root anomalies in ${meta.performanceMetricsEn[0]} and prescribe site actions`,
+      output: `4-column Markdown table: [Site Anomaly | Standard Limit | Deviation | Site Action Plan]`
     }
   };
 }

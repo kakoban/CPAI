@@ -56,7 +56,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
 
   const t = {
     en: {
-      badge: `CPMAI Phase I · Page 1 of 5 (${discMeta ? discMeta.titleEn : isPetro ? 'Oil, Gas & Petrochemical Track' : 'Civil Megaproject Track'})`,
+      badge: `CPMAI Phase I · Page 1 of 5 (${discMeta ? discMeta.titleEn : isEveryday ? 'Everyday, Family & Lifestyle AI Track' : isPetro ? 'Oil, Gas & Petrochemical Track' : 'Civil Megaproject Track'})`,
       h1: 'CPMAI Phase I: Business Understanding',
       p1: 'The first phase of a CPMAI process is gaining a thorough understanding of the business and organizational objectives and other factors that will determine whether the project is worth undertaking, and the conditions under which it will be a success. The Business Understanding phase focuses on understanding the project objectives and requirements from a business perspective, then converting this knowledge into an AI and cognitive project problem definition and a preliminary plan designed to achieve the objectives.',
       p2: 'As mentioned earlier, since we are doing CPMAI in the context of agile, the business understanding for the particular CPMAI project is relevant to the specific sprint or iteration you are currently in, and should tie very closely to the user story that is relevant for that iteration. In a CPMAI project, it is possible for a single sprint iteration to encompass all of the CPMAI phases, but it is also possible for a CPMAI project to span multiple sprints or iterations, which means that the business understanding will be relevant to that particular iteration’s user story.',
@@ -93,7 +93,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       rm: 'Remove',
       exBtnShow: 'Show Example',
       exBtnHide: 'Hide Example',
-      exTitle: discMeta ? `${discMeta.shortTitleEn} Objective Example:` : isPetro ? 'Oil & Gas Primary Objective Example:' : 'Civil Megaproject Primary Objective Example:',
+      exTitle: discMeta ? `${discMeta.shortTitleEn} Objective Example:` : isEveryday ? 'Everyday & Family Objective Example:' : isPetro ? 'Oil & Gas Primary Objective Example:' : 'Civil Megaproject Primary Objective Example:',
       exText: domainEx.artifacts.primaryObjectiveEn,
       quizTitle: 'Check Your Understanding',
       quizDesc: 'Select an option to see instant feedback and explanation.',
@@ -104,10 +104,18 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       q2: 'In an agile CPMAI project, business understanding should tie most closely to what?',
       q2Options: ['The final product vision only', 'The vendor’s contract', 'The user story for the current sprint or iteration'],
       q2Why: 'Business understanding is relevant to the specific sprint or iteration, and ties to its user story.',
-      q3: isPetro
+      q3: isEveryday
+        ? 'Which one is a related household/consumption question rather than the primary objective?'
+        : isPetro
         ? 'Which one is a related business/operational question rather than the primary objective?'
         : 'Which one is a related contractual/operational question rather than the primary objective?',
-      q3Options: isPetro
+      q3Options: isEveryday
+        ? [
+            'Which supermarket grocery categories suffer the highest monthly expiration spoilage?',
+            'Cut 25% perishable grocery waste and fully fund the annual family vacation savings',
+            'Select CNN convolutional kernel size or neural hidden layer width'
+          ]
+        : isPetro
         ? [
             'How does feed sulfur variance impact descaling intervals?',
             'Forecast heat exchanger fouling to prevent unscheduled shutdowns',
@@ -118,12 +126,14 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
             'Forecast surface ground settlement above mechanized tunnel drives',
             'Select the Adam optimizer learning rate'
           ],
-      q3Why: isPetro
+      q3Why: isEveryday
+        ? 'Identifying high-spoilage grocery categories is a related consumption exploration question; cutting 25% waste is the primary business goal, and tuning neural hyperparameters is an engineering task.'
+        : isPetro
         ? 'Feed sulfur variance is a business exploration factor around fouling mitigation. Neural hyperparameters are purely engineering tasks.'
         : 'Circular 4311 claim mitigation is a related contractual risk question. Optimizer tuning is a model training task.'
     },
     fa: {
-      badge: `فاز اول CPMAI · صفحه ۱ از ۵ (${discMeta ? discMeta.titleFa : isPetro ? 'حوزه تخصصی نفت، گاز و پتروشیمی' : 'حوزه تخصصی مگاپروژه‌های عمرانی و راه'})`,
+      badge: `فاز اول CPMAI · صفحه ۱ از ۵ (${discMeta ? discMeta.titleFa : isEveryday ? 'حوزه تخصصی سبک زندگی، خانواده و کاربردهای روزمره' : isPetro ? 'حوزه تخصصی نفت، گاز و پتروشیمی' : 'حوزه تخصصی مگاپروژه‌های عمرانی و راه'})`,
       h1: 'CPMAI Phase I: Business Understanding',
       p1: 'نخستین فاز فرایند CPMAI، دستیابی به درکی کامل از اهداف کسب‌وکار و سازمان و عوامل دیگری است که تعیین می‌کنند آیا پروژه ارزش اجرا دارد و در چه شرایطی موفق خواهد بود. تمرکز فاز درک کسب‌وکار بر شناخت اهداف و الزامات پروژه از دیدگاه کسب‌وکار است و سپس تبدیل این دانش به تعریف مسئله برای پروژه هوش مصنوعی و یک برنامه اولیه برای رسیدن به اهداف.',
       p2: 'چون CPMAI را در بستر چابک (Agile) اجرا می‌کنیم، درک کسب‌وکار به اسپرینت یا تکرار مشخصی که در آن هستید مربوط است و باید ارتباط نزدیکی با داستان کاربر (User Story) همان تکرار داشته باشد. ممکن است یک اسپرینت همه فازهای CPMAI را پوشش دهد، یا یک پروژه چند اسپرینت را در بر بگیرد که در این حالت درک کسب‌وکار به داستان کاربر همان تکرار گره می‌خورد.',
@@ -160,7 +170,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       rm: 'حذف',
       exBtnShow: 'نمایش مثال',
       exBtnHide: 'پنهان‌سازی مثال',
-      exTitle: discMeta ? `نمونه هدف اصلی (${discMeta.shortTitleFa}):` : isPetro ? 'نمونه هدف اصلی (نفت و گاز):' : 'نمونه هدف اصلی (مگاپروژه عمرانی):',
+      exTitle: discMeta ? `نمونه هدف اصلی (${discMeta.shortTitleFa}):` : isEveryday ? 'نمونه هدف اصلی (روزمره و خانواده):' : isPetro ? 'نمونه هدف اصلی (نفت و گاز):' : 'نمونه هدف اصلی (مگاپروژه عمرانی):',
       exText: domainEx.artifacts.primaryObjectiveFa,
       quizTitle: 'بررسی فهم مطالب (Quiz)',
       quizDesc: 'یک گزینه را انتخاب کنید تا بلافاصله بازخورد و استدلال را ببینید.',
@@ -171,10 +181,18 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       q2: 'در یک پروژه CPMAI چابک، درک کسب‌وکار باید بیش از همه به چه چیزی مرتبط باشد؟',
       q2Options: ['فقط چشم‌انداز نهایی محصول', 'قرارداد فروشنده', 'داستان کاربر اسپرینت یا تکرار جاری'],
       q2Why: 'درک کسب‌وکار به اسپرینت یا تکرار مشخصی مربوط است و باید با داستان کاربر آن پیوند بخورد.',
-      q3: isPetro
+      q3: isEveryday
+        ? 'کدام مورد یک پرسش فرعی و مرتبط خانوار است، نه هدف اصلی؟'
+        : isPetro
         ? 'کدام مورد یک پرسش فرآیندی مرتبط است، نه هدف اصلی؟'
         : 'کدام مورد یک پرسش قراردادی مرتبط است، نه هدف اصلی؟',
-      q3Options: isPetro
+      q3Options: isEveryday
+        ? [
+            'کدام دسته‌های خرید سوپرمارکت بالاترین سهم را در دورریز ماهانه خانوار دارند؟',
+            'کاهش ۲۵ درصدی دورریز مواد غذایی یخچال و تامین بودجه سفر سالیانه خانواده',
+            'تنظیم پارامتر تعداد لایه‌ها در مدل یادگیری عمیق'
+          ]
+        : isPetro
         ? [
             'آیا نوسان درصد گوگرد و گرانروی API خوراک بر فواصل تمیزکاری مبدل‌ها موثر است؟',
             'پیش‌بینی نرخ رسوب‌گرفتگی مبدل‌ها جهت کاهش مشعل‌سوزی پالایشگاه',
@@ -185,7 +203,9 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
             'پیش‌بینی فرونشست سطحی معابر شهری بالای تاج تونل مکانیزه',
             'انتخاب نرخ یادگیری در الگوریتم بهینه‌ساز Adam'
           ],
-      q3Why: isPetro
+      q3Why: isEveryday
+        ? 'بررسی سهم دسته‌های کالایی در دورریز یک پرسش فرعی تحلیل مصرف است؛ کاهش ۲۵ درصدی دورریز و پس‌انداز سفر هدف اصلی است و انتخاب پارامترهای شبکه عصبی یک وظیفه کدنویسی است.'
+        : isPetro
         ? 'بررسی اثر کیفیت خوراک یک پرسش عملیاتی کلیدی است؛ هدف اصلی پیش‌بینی رسوب است و انتخاب لایه‌های عصبی یک وظیفه کدنویسی است.'
         : 'مسئله ماده ۳۰ نشریه ۴۳۱۱ یک پرسش ریسک قراردادی است؛ هدف اصلی پیش‌بینی نشست است و پارامتر بهینه‌ساز یک وظیفه فنی یادگیری ماشین است.'
     }

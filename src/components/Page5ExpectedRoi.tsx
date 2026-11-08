@@ -26,23 +26,24 @@ export const Page5ExpectedRoi: React.FC<Page5Props> = ({
   const [copied, setCopied] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
   const isPetro = industryTrack === 'ENERGY_PETRO';
+  const isEveryday = industryTrack === 'GENERAL_EVERYDAY';
   const discMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
   const discContent = disciplineId ? getDisciplineExampleContent(disciplineId) : null;
 
   // Sensitivity analysis inputs
-  const [investmentCost, setInvestmentCost] = useState(isPetro ? '160000' : '135000');
-  const [annualBenefit, setAnnualBenefit] = useState(isPetro ? '3650000' : '1700000');
-  const [annualOpsCost, setAnnualOpsCost] = useState(isPetro ? '35000' : '25000');
+  const [investmentCost, setInvestmentCost] = useState(isEveryday ? '2000' : isPetro ? '160000' : '135000');
+  const [annualBenefit, setAnnualBenefit] = useState(isEveryday ? '3720' : isPetro ? '3650000' : '1700000');
+  const [annualOpsCost, setAnnualOpsCost] = useState(isEveryday ? '300' : isPetro ? '35000' : '25000');
   const [adoptionRate, setAdoptionRate] = useState('90'); // %
 
   const t = {
     en: {
-      badge: `CPMAI Phase I · Page 5 of 5 (${discMeta ? discMeta.titleEn : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
+      badge: `CPMAI Phase I · Page 5 of 5 (${discMeta ? discMeta.titleEn : isEveryday ? 'Everyday & Lifestyle Track' : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       slideBanner: 'What is the expected ROI for this project?',
       promptHint:
         'Calculate and articulate the expected Return on Investment (ROI) for this cognitive iteration. Include quantified financial ROI, payback period, strategic/non-monetary dividends, and risk/adoption sensitivity assumptions.',
       templateBtn: 'Insert CPMAI ROI Template',
-      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} ROI Example` : isPetro ? 'Fill Refinery Fouling ROI Example' : 'Fill Metro TBM Subsidence ROI Example',
+      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} ROI Example` : isEveryday ? 'Fill Household Budget & Travel ROI Example' : isPetro ? 'Fill Refinery Fouling ROI Example' : 'Fill Metro TBM Subsidence ROI Example',
       calcToggleBtn: 'Interactive ROI & Sensitivity Tool',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
@@ -74,12 +75,12 @@ export const Page5ExpectedRoi: React.FC<Page5Props> = ({
       months: 'months'
     },
     fa: {
-      badge: `فاز اول CPMAI · صفحه ۵ از ۵ (${discMeta ? discMeta.titleFa : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
+      badge: `فاز اول CPMAI · صفحه ۵ از ۵ (${discMeta ? discMeta.titleFa : isEveryday ? 'حوزه تخصصی سبک زندگی و خانواده' : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
       slideBanner: 'What is the expected ROI for this project?',
       promptHint:
         'نرخ بازگشت سرمایه (ROI) مورد انتظار برای این تکرار هوش مصنوعی را محاسبه و تبیین کنید. شامل درصد بازگشت مالی، دوره بازگشت سرمایه (Payback Period)، مزایای استراتژیک غیرمالی و تحلیل حساسیت نرخ پذیرش سازمانی.',
       templateBtn: 'درج قالب استاندارد برآورد ROI',
-      exampleBtn: discMeta ? `پر کردن با نمونه ROI ${discMeta.shortTitleFa}` : isPetro ? 'پر کردن با نمونه پالایشگاهی (بازگشت سرمایه ROI)' : 'پر کردن با نمونه مگاپروژه احداث مترو (بازگشت سرمایه ROI)',
+      exampleBtn: discMeta ? `پر کردن با نمونه ROI ${discMeta.shortTitleFa}` : isEveryday ? 'پر کردن با نمونه بازگشت سرمایه اقتصاد خانوار' : isPetro ? 'پر کردن با نمونه پالایشگاهی (بازگشت سرمایه ROI)' : 'پر کردن با نمونه مگاپروژه احداث مترو (بازگشت سرمایه ROI)',
       calcToggleBtn: 'ابزار تعاملی محاسبه ROI و تحلیل حساسیت',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
@@ -177,7 +178,23 @@ export const Page5ExpectedRoi: React.FC<Page5Props> = ({
   };
 
   const handleInsertExample = () => {
-    const selectedEn = isPetro ? `Detailed ROI Justification: Crude Preheat Train Fouling & Flaring Mitigation (Iteration 1)
+    const selectedEn = isEveryday ? `Detailed ROI Justification: Smart Household Budget & Family Vacation Savings (Iteration 1)
+
+1. Executive Financial ROI Summary:
+- Initial Sprint Investment: $2,000 (OCR receipt scanner integration, family onboarding, serverless bot setup)
+- Annualized Gross Value Preserved: $3,720 (Grocery waste reduction, impulse buying cap, vacation booking sweet spot)
+- Risk-Adjusted Value (at 90% family daily compliance): $3,348
+- Ongoing Annual Maintenance & API Inference: $300
+- First-Year Net ROI: 52% Net ROI ($1,048 Net Payoff after recovering full initial setup)
+- Capital Payback Horizon: 7.2 Months
+
+2. ROI Mechanics & Breakdown:
+- Perishable Food Waste Reduction: $1,920 annual savings by slashing monthly spoilage from $200 down to $40.
+- Supermarket Impulse Spending Prevention: $600 annual savings through strict dynamic shopping lists.
+- Flight & Accommodation Deal Sweet Spot: $1,200 saved per vacation by timing seasonal flight bookings at price troughs.
+
+3. Downside Sensitivity Cushion:
+Even if family compliance drops to 65% and food waste is reduced by only 10%, the project yields over $1,600 annually, paying for itself within 14 months while completely eliminating family dinnertime meal-planning stress.` : isPetro ? `Detailed ROI Justification: Crude Preheat Train Fouling & Flaring Mitigation (Iteration 1)
 
 1. Executive Financial ROI Summary:
 - Initial Sprint Investment: $160,000 (Process AI engineers, Level-3 OT edge compute, DCS historian data pipeline)
@@ -210,7 +227,23 @@ Even under conservative assumptions with a 25% drop in heavy crude premium and 7
 
 3. Downside Sensitivity Cushion:
 Even if model prediction accuracy degrades by 40% and site adoption falls to 60%, the net annual benefit exceeds $580,000, achieving financial breakeven within 2.8 months. The investment profile demonstrates exceptional resilience under CPMAI standards.`;
-    const selectedFa = isPetro ? `توجیه تفصیلی نرخ بازگشت سرمایه (ROI): سامانه پیش‌بینی رسوب مبدل‌ها و کاهش مشعل‌سوزی پالایشگاه (تکرار اول)
+    const selectedFa = isEveryday ? `توجیه تفصیلی نرخ بازگشت سرمایه (ROI): سامانه مدیریت اقتصاد خانوار و تامین صندوق سفر (تکرار اول)
+
+۱. خلاصه مدیریتی شاخص‌های بازگشت سرمایه:
+- سرمایه‌گذاری اولیه در این تکرار: ۳۰,۰۰۰,۰۰۰ تومان (طراحی پایپ‌لاین خوانش رسید، بات پیام‌رسان و استقرار اولیه)
+- ارزش ناخالص سالانه صرفه‌جویی‌شده: ۵۵,۰۰۰,۰۰۰ تومان (کاهش دورریز غذا، جلوگیری از خریدهای هیجانی و شکار ارزان‌ترین بلیت سفر)
+- ارزش تعدیل‌شده بر اساس نرخ پایبندی خانواده (۸۵٪): ۴۶,۷۵۰,۰۰۰ تومان
+- هزینه سالیانه اینترنت، نگهداری سرورلس و اشتراک مدل: ۵,۰۰۰,۰۰۰ تومان
+- نرخ بازگشت سرمایه خالص سال اول (Net Year 1 ROI): ۱۳۲ درصد
+- زمان بازگشت سرمایه: ۷.۵ ماه پس از استقرار در پیام‌رسان خانوادگی
+
+۲. تفکیک سرفصل‌های بازدهی مالی:
+- کاهش دورریز مواد غذایی یخچال: ۲۵,۰۰۰,۰۰۰ تومان صرفه‌جویی سالانه از طریق صفر کردن اسراف اقلام میوه و لبنیات.
+- مهار خریدهای وسوسه‌انگیز و هیجانی: ۱۰,۰۰۰,۰۰۰ تومان صرفه‌جویی با پایبندی به فهرست هوشمند خرید.
+- شکار کف قیمت بلیت سفر و هتل: ۲۰,۰۰۰,۰۰۰ تومان کاهش هزینه در دو سفر سالیانه خانواده.
+
+۳. تحلیل حساسیت و حاشیه امنیت:
+حتی با فرض بدبینانه پایبندی ۶۰ درصدی اعضای خانه، صرفه‌جویی سالانه بالای ۳۰ میلیون تومان بوده و کل سرمایه‌گذاری ظرف کمتر از ۱ سال بازمی‌گردد؛ در حالی که آرامش فکری و تغذیه سالم خانواده حاصل شده است.` : isPetro ? `توجیه تفصیلی نرخ بازگشت سرمایه (ROI): سامانه پیش‌بینی رسوب مبدل‌ها و کاهش مشعل‌سوزی پالایشگاه (تکرار اول)
 
 ۱. خلاصه مدیریتی شاخص‌های بازگشت سرمایه:
 - سرمایه‌گذاری اولیه در این تکرار: ۱۶۰,۰۰۰ دلار (تیم هوش مصنوعی فرآیند، سرور امن شبکه OT، پایپ‌لاین تاریخچه DCS)

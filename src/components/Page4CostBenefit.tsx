@@ -26,24 +26,25 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
   const [copied, setCopied] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
   const isPetro = industryTrack === 'ENERGY_PETRO';
+  const isEveryday = industryTrack === 'GENERAL_EVERYDAY';
   const discMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
   const discContent = disciplineId ? getDisciplineExampleContent(disciplineId) : null;
 
   // Structured breakdown states for the interactive calculator
-  const [costPersonnel, setCostPersonnel] = useState(isPetro ? '95000' : '85000');
-  const [costCompute, setCostCompute] = useState(isPetro ? '25000' : '20000');
-  const [costData, setCostData] = useState(isPetro ? '20000' : '15000');
-  const [costOps, setCostOps] = useState(isPetro ? '20000' : '15000');
+  const [costPersonnel, setCostPersonnel] = useState(isEveryday ? '1200' : isPetro ? '95000' : '85000');
+  const [costCompute, setCostCompute] = useState(isEveryday ? '300' : isPetro ? '25000' : '20000');
+  const [costData, setCostData] = useState(isEveryday ? '200' : isPetro ? '20000' : '15000');
+  const [costOps, setCostOps] = useState(isEveryday ? '300' : isPetro ? '20000' : '15000');
 
-  const [benefitSavings, setBenefitSavings] = useState(isPetro ? '1400000' : '650000');
-  const [benefitRevenue, setBenefitRevenue] = useState(isPetro ? '1800000' : '750000');
-  const [benefitRisk, setBenefitRisk] = useState(isPetro ? '450000' : '300000');
+  const [benefitSavings, setBenefitSavings] = useState(isEveryday ? '2400' : isPetro ? '1400000' : '650000');
+  const [benefitRevenue, setBenefitRevenue] = useState(isEveryday ? '1200' : isPetro ? '1800000' : '750000');
+  const [benefitRisk, setBenefitRisk] = useState(isEveryday ? '800' : isPetro ? '450000' : '300000');
 
-  const [timeWeeks, setTimeWeeks] = useState(isPetro ? '16' : '14');
+  const [timeWeeks, setTimeWeeks] = useState(isEveryday ? '6' : isPetro ? '16' : '14');
 
   const t = {
     en: {
-      badge: `CPMAI Phase I · Page 4 of 5 (${discMeta ? discMeta.titleEn : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
+      badge: `CPMAI Phase I · Page 4 of 5 (${discMeta ? discMeta.titleEn : isEveryday ? 'Everyday & Lifestyle Track' : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       subtaskH: 'Subtask: Cost-Benefit Analysis',
       costsAndBenefitsLabel: 'Costs and benefits:',
       costsAndBenefitsText:
@@ -52,7 +53,7 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
       promptHint:
         'Specify the financial budget, resource costs (talent, cloud/GPU, data, maintenance), project schedule/time budget, and quantifiable financial return (cost reduction, revenue uplift, risk avoidance).',
       templateBtn: 'Insert Cost-Benefit Template',
-      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} Cost-Benefit Example` : isPetro ? 'Fill Refinery Preheat Cost-Benefit Example' : 'Fill Metro TBM Cost-Benefit Example',
+      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} Cost-Benefit Example` : isEveryday ? 'Fill Household Budget Cost-Benefit Example' : isPetro ? 'Fill Refinery Preheat Cost-Benefit Example' : 'Fill Metro TBM Cost-Benefit Example',
       calcToggleBtn: 'Interactive Financial ROI Estimator',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
@@ -83,7 +84,7 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
       weeks: 'weeks'
     },
     fa: {
-      badge: `فاز اول CPMAI · صفحه ۴ از ۵ (${isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
+      badge: `فاز اول CPMAI · صفحه ۴ از ۵ (${discMeta ? discMeta.titleFa : isEveryday ? 'حوزه تخصصی سبک زندگی و خانواده' : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
       subtaskH: 'زیروظیفه: تحلیل هزینه-فایده (Subtask: Cost-Benefit Analysis)',
       costsAndBenefitsLabel: 'هزینه‌ها و منافع (Costs and benefits):',
       costsAndBenefitsText:
@@ -92,7 +93,7 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
       promptHint:
         'بودجه مالی، هزینه‌های منابع (متخصصان، زیرساخت ابری و پردازش GPU، تأمین داده، نگهداری)، بودجه زمانی و زمان‌بندی پروژه و بازدهی مالی سنجش‌پذیر (کاهش هزینه، درآمد افزایشی، جلوگیری از زیان) را ثبت نمایید.',
       templateBtn: 'درج قالب تحلیل هزینه-فایده و بودجه',
-      exampleBtn: discMeta ? `پر کردن با تحلیل هزینه-فایده ${discMeta.shortTitleFa}` : isPetro ? 'پر کردن با نمونه پالایشگاهی (هزینه-فایده)' : 'پر کردن با نمونه مگاپروژه احداث مترو (هزینه-فایده)',
+      exampleBtn: discMeta ? `پر کردن با تحلیل هزینه-فایده ${discMeta.shortTitleFa}` : isEveryday ? 'پر کردن با نمونه اقتصاد خانوار (هزینه-فایده)' : isPetro ? 'پر کردن با نمونه پالایشگاهی (هزینه-فایده)' : 'پر کردن با نمونه مگاپروژه احداث مترو (هزینه-فایده)',
       calcToggleBtn: 'ماشین‌حساب تعاملی برآورد ROI و بودجه',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
@@ -292,8 +293,58 @@ With an upfront investment of $160,000 delivering $3,650,000 in annual thermal a
 ۴. جمع‌بندی مقایسه هزینه-فایده:
 پروژه با هزینه ۱۶۰,۰۰۰ دلار و منفعت سالانه ۳,۶۵۰,۰۰۰ دلار، نرخ بازگشت سرمایه ۲,۱۸۱٪ و دوره بازگشت کمتر از ۱ ماه دارد و از منظر متدولوژی CPMAI یک سرمایه‌گذاری استراتژیک فوق‌العاده است.`;
 
-    let selectedEn = isPetro ? exampleEnPetro : exampleEnCivil;
-    let selectedFa = isPetro ? exampleFaPetro : exampleFaCivil;
+    const exampleEnEveryday = `Project Cost-Benefit Analysis & Budget: Smart Household Economy & Vacation Fund (Sprint 1)
+
+1. Total Financial Cost Budget ($2,000 Total Setup & 1-Year Operation):
+- Software & API Cloud Costs: $300 (OCR receipt parsing & lightweight LLM inference APIs)
+- Messaging Integration & Bot Hosting: $200 (Serverless webhooks and database storage)
+- Implementation & Guided Setup: $1,200 (Personalized onboarding and family profile configuration)
+- Annual Ongoing Maintenance: $300
+- Total Initial Project Investment: $2,000
+
+2. Project Schedule & Time Budget: 6 Weeks
+- Phase II (Data Understanding): Weeks 1-2 [Receipt photo testing & pantry item cataloging]
+- Phase III (Data Preparation): Weeks 3-4 [Pantry taxonomy normalization & expiration thresholds]
+- Phase IV (Model Development): Weeks 4-5 [Pantry depletion predictor & dynamic recipe recommender]
+- Phase V (Evaluation): Week 5 [Family taste trial and zero-waste compliance test]
+- Phase VI (Deployment): Week 6 [Family Telegram/Bale messaging bot rollout]
+
+3. Potential Tangible Business & Household Benefits (Annual):
+- Direct Grocery Waste Savings: Cutting 20% waste from $800/month grocery spend = $1,920/year cash savings.
+- Impulse Spending Avoidance: Dynamic list enforcement saves $50/month = $600/year.
+- Vacation Deal Window Savings: Booking flights/hotels at predicted price troughs = $1,200 saved per vacation.
+- Total Annual Household Financial Benefit: $3,720
+
+4. Cost-Benefit Summary:
+With a $2,000 investment budget and $3,720 in verified first-year household savings, the project delivers an 86% net first-year ROI, paying for itself in under 6.5 months and creating a self-sustaining annual family vacation fund.`;
+
+    const exampleFaEveryday = `تحلیل هزینه-فایده و بودجه پروژه: مدیریت هوشمند اقتصاد خانوار و صندوق سفر (اسپرینت ۱)
+
+۱. برآورد بودجه و هزینه‌های اجرایی (کل سرمایه‌گذاری: حدود ۳۰ میلیون تومان):
+- هزینه‌های اشتراک مدل و پردازش ابری: ۴ میلیون تومان (API خوانش رسیدها و مدل زبانی)
+- راه‌اندازی بات پیام‌رسان و سرورلس: ۳ میلیون تومان
+- پیکربندی اولیه، راهبری و آموزش اعضای خانواده: ۱۸ میلیون تومان
+- هزینه سالیانه پشتیبانی و نگهداری داده‌ها: ۵ میلیون تومان
+- کل سرمایه‌گذاری تکرار اول: ۳۰ میلیون تومان
+
+۲. زمان‌بندی پروژه در متدولوژی CPMAI چابک: ۶ هفته
+- فاز ۲ (درک داده‌ها): هفته ۱ و ۲ [تست کیفیت عکس فاکتورها و استخراج اقلام]
+- فاز ۳ (آماده‌سازی داده‌ها): هفته ۳ [یکپارچه‌سازی اسامی مواد غذایی و تاریخ انقضا]
+- فاز ۴ (توسعه مدل): هفته ۴ [الگوریتم پیش‌بینی اتمام موجودی و پیشنهاد دستور غذا با یخچال]
+- فاز ۵ (ارزیابی کیفی): هفته ۵ [تست رضایت اعضای خانواده از وعده‌های غذایی پیشنهادی]
+- فاز ۶ (استقرار عملیاتی): هفته ۶ [راه‌اندازی بات در پیام‌رسان خانوادگی و ویجت سفر]
+
+۳. منافع مالی و ملموس سالانه برای خانواده:
+- صرفه‌جویی در دورریز سوپرمارکت: کاهش ۲۵ درصدی از سبد خرید ماهانه = ۲۴ الی ۳۰ میلیون تومان در سال.
+- جلوگیری از خریدهای هیجانی و تکراری: ۱۰ میلیون تومان در سال.
+- شکار کف قیمت بلیت و اقامتگاه سفر نوروز و تابستان: ۲۰ میلیون تومان صرفه‌جویی مستقیم در هر سفر.
+- کل منافع مالی سالانه خانواده: ۵۴ الی ۶۰ میلیون تومان
+
+۴. جمع‌بندی تحلیل هزینه-فایده:
+پروژه با هزینه ۳۰ میلیون تومان و سودآوری ۵۵ میلیون تومان در سال اول، نرخ بازگشت سرمایه ۱۸۳٪ و دوره بازگشت کمتر از ۷ ماه دارد و هزینه سفر سالیانه خانواده را به طور کامل از محل مدیریت دورریز تامین می‌نماید.`;
+
+    let selectedEn = isEveryday ? exampleEnEveryday : isPetro ? exampleEnPetro : exampleEnCivil;
+    let selectedFa = isEveryday ? exampleFaEveryday : isPetro ? exampleFaPetro : exampleFaCivil;
 
     if (discContent) {
       selectedEn = `Project Cost-Benefit Analysis: ${discContent.titleEn}

@@ -25,19 +25,24 @@ export const Page3SuccessCriteria: React.FC<Page3Props> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const isPetro = industryTrack === 'ENERGY_PETRO';
+  const isEveryday = industryTrack === 'GENERAL_EVERYDAY';
   const discMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
   const discContent = disciplineId ? getDisciplineExampleContent(disciplineId) : null;
 
   const t = {
     en: {
-      badge: `CPMAI Phase I · Page 3 of 5 (${discMeta ? discMeta.titleEn : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
+      badge: `CPMAI Phase I · Page 3 of 5 (${discMeta ? discMeta.titleEn : isEveryday ? 'Everyday & Lifestyle Track' : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       subtaskH: 'Subtask: Determine Business Success Criteria',
       criteriaLabel: 'Business success criteria:',
-      criteriaText: 'Describe the criteria for a successful or useful outcome of the project from the business point of view. This might be quite specific and able to be measured objectively, for example, reduction of customer attrition to a certain level, or it might be general and subjective, such as “give useful insights into the relationships.” In the latter case, it should be indicated who makes the subjective judgment.',
+      criteriaText: isEveryday
+        ? 'Describe successful household outcomes: reducing grocery waste to under 5%, capturing monthly budget savings, and family satisfaction with meal and vacation planning.'
+        : isPetro
+        ? 'Describe success criteria from the refinery and operations perspective, such as reducing flaring, preventing shutdowns, and increasing thermal efficiency.'
+        : 'Describe criteria for a successful outcome from the megaproject client perspective: e.g. settlement under 2mm, eliminating TBM stops, and mitigating Circular 4311 claims.',
       slideTitle: 'What are the objective measures of success for this project iteration?',
       promptHint: 'Identify specific, measurable business success metrics for this iteration, distinguishing between objective quantitative KPIs and subjective qualitative judgments.',
       templateBtn: 'Insert Criteria Template',
-      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} Success Criteria` : isPetro ? 'Fill Refinery Fouling Success Criteria' : 'Fill Urban Metro TBM Success Criteria',
+      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} Success Criteria` : isEveryday ? 'Fill Household Success Criteria' : isPetro ? 'Fill Refinery Fouling Success Criteria' : 'Fill Urban Metro TBM Success Criteria',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
       copiedToast: 'Copied to clipboard!',
@@ -52,16 +57,18 @@ export const Page3SuccessCriteria: React.FC<Page3Props> = ({
       tip4: 'Keep the success criteria calibrated strictly to THIS iteration scope, avoiding premature promises for future sprints.'
     },
     fa: {
-      badge: `فاز اول CPMAI · صفحه ۳ از ۵ (${discMeta ? discMeta.titleFa : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
+      badge: `فاز اول CPMAI · صفحه ۳ از ۵ (${discMeta ? discMeta.titleFa : isEveryday ? 'حوزه تخصصی سبک زندگی و خانواده' : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
       subtaskH: 'زیروظیفه: تعیین معیارهای موفقیت کسب‌وکار (Subtask: Determine Business Success Criteria)',
       criteriaLabel: 'معیارهای موفقیت کسب‌وکار (Business success criteria):',
-      criteriaText: isPetro
+      criteriaText: isEveryday
+        ? 'معیارهای یک نتیجه موفق از دیدگاه اقتصاد خانوار و سبک زندگی را توصیف کنید؛ مانند کاهش دورریز مواد غذایی به زیر ۵٪، ذخیره ماهانه در صندوق سفر و رضایت اعضای خانواده.'
+        : isPetro
         ? 'معیارهای یک نتیجه موفق یا سودمند از دیدگاه پالایشگاه و بهره‌برداری را توصیف کنید؛ مانند کاهش مشعل‌سوزی، جلوگیری از شات‌دان و افزایش راندمان حرارتی.'
         : 'معیارهای یک نتیجه موفق از دیدگاه مگاپروژه عمرانی و کارفرما را توصیف کنید؛ مانند کنترل نشست زیر ۲ میلی‌متر، حذف توقف TBM و کاهش ادعاهای تاخیرات نشریه ۴۳۱۱.',
       slideTitle: 'What are the objective measures of success for this project iteration?',
       promptHint: 'معیارهای عینی و سنجش‌پذیر موفقیت تجاری را برای این تکرار پروژه مشخص کنید و بین شاخص‌های کمّی و ارزیابی‌های کیفی تفکیک قائل شوید.',
       templateBtn: 'درج قالب استاندارد معیارها',
-      exampleBtn: discMeta ? `پر کردن با معیارهای ${discMeta.shortTitleFa}` : isPetro ? 'پر کردن با نمونه پالایشگاهی (معیارهای موفقیت)' : 'پر کردن با نمونه مگاپروژه احداث مترو (معیارهای موفقیت)',
+      exampleBtn: discMeta ? `پر کردن با معیارهای ${discMeta.shortTitleFa}` : isEveryday ? 'پر کردن با معیارهای موفقیت اقتصاد خانوار' : isPetro ? 'پر کردن با نمونه پالایشگاهی (معیارهای موفقیت)' : 'پر کردن با نمونه مگاپروژه احداث مترو (معیارهای موفقیت)',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
       copiedToast: 'متن بوم در کلیپ‌بورد کپی شد!',
@@ -168,8 +175,38 @@ export const Page3SuccessCriteria: React.FC<Page3Props> = ({
 ۳. آستانه پذیرش حداقلی برای پیشروی:
 - در صورتی که خطای پیش‌بینی ضریب حرارتی بالای ۷٪ باشد، پیشنهادهای مدل در وضعیت غیرفعال (Shadow Mode) قرار گرفته و تیم به فاز ۳ برای اصلاح موازنه جرم و انرژی بازمی‌گردد.`;
 
-    let selectedEn = isPetro ? exampleEnPetro : exampleEnCivil;
-    let selectedFa = isPetro ? exampleFaPetro : exampleFaCivil;
+    const exampleEnEveryday = `Business Success Criteria: Smart Household Budget & Grocery Economy Iteration (Sprint 1)
+
+1. Objective (Quantitative) Success Measures for this Iteration:
+- Food Waste Elimination: Cut perishable grocery spoilage from baseline 22% to under 5% of monthly volume within 60 days.
+- Monthly Household Cash Savings: Capture at least $200 (15-25%) in recurring monthly grocery savings redirected automatically to the vacation fund.
+- Stockout Prevention Accuracy: 98%+ on-time replenishment alerts before essential pantry staples (milk, eggs, cooking oil) run out.
+- Assistant Uptime: 99.5% availability across family mobile messaging apps.
+
+2. Subjective (Qualitative) Success Measures:
+- Family Meal Satisfaction: All household members (including picky children) enjoy recommended leftover-based recipes without dinner friction.
+- Evaluator: Household heads (Parents) based on a weekly quick 3-star rating prompt in the family messaging group.
+
+3. Minimum Acceptable Gate Threshold:
+- If food waste reduction falls below 15% after 4 weeks, recalibrate family portion size parameters in Phase III before enabling automated shopping orders.`;
+
+    const exampleFaEveryday = `معیارهای موفقیت کسب‌وکار: مدیریت هوشمند اقتصاد خانوار و سبد خرید (اسپرینت ۱)
+
+۱. معیارهای عینی و کمّی موفقیت برای این تکرار (Objective Measures):
+- کاهش دورریز مواد غذایی: رساندن نرخ دورریز میوه و لبنیات از ۲۲٪ به زیر ۵٪ ظرف ۶۰ روز از شروع استفاده.
+- صرفه‌جویی پولی ماهانه: ذخیره قطعی حداقل ۲۰٪ از هزینه‌های سبد خرید سوپرمارکت (معادل ۲ الی ۳ میلیون تومان در ماه) در صندوق پس‌انداز سفر خانوادگی.
+- دقت پیش‌بینی اتمام اقلام: پیش‌بینی بالای ۹۵ درصدی مایحتاج ضروری (شیر، تخم‌مرغ، نان) حداقل ۲۴ ساعت پیش از اتمام کامل.
+- پایداری و سهولت کاربری: ثبت رسید خرید با عکس در کمتر از ۱۵ ثانیه در پیام‌رسان خانوادگی (بله/تلگرام).
+
+۲. معیارهای کیفی و ذهنی موفقیت (Subjective Criteria):
+- رضایت ذائقه خانواده: فرزندان و همسر از طعم غذاهای سریع پخته‌شده با باقیمانده‌های یخچال رضایت کامل داشته باشند (بدون حس تحمیل یا صرفه‌جویی خسیسانه).
+- مرجع قضاوت کیفی: نظر سنجی هفتگی اعضای خانواده با امتیاز ستاره‌ای در گروه پیام‌رسان خانه.
+
+۳. آستانه پذیرش حداقلی برای پیشروی:
+- در صورت کاهش کمتر از ۱۰ درصدی دورریز در ماه اول، الگوریتم پیشنهاد سبد خرید بر اساس تعداد وعده‌های صرف‌شده در خانه بازتنظیم شود.`;
+
+    let selectedEn = isEveryday ? exampleEnEveryday : isPetro ? exampleEnPetro : exampleEnCivil;
+    let selectedFa = isEveryday ? exampleFaEveryday : isPetro ? exampleFaPetro : exampleFaCivil;
 
     if (discContent) {
       selectedEn = `Business Success Criteria: ${discContent.titleEn}

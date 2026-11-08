@@ -78,7 +78,28 @@ export type DisciplineId =
   - **sampleDatasetTitleFa / sampleDatasetTitleEn**: نمونه داده‌های ورودی
   - **sampleContractClauseFa / sampleContractClauseEn**: قوانین / ضوابط توافق مصرف‌کننده و بودجه
 
+### Entity: DisciplinePromptPair
+- **weakPromptFa / weakPromptEn**: نمونه پرامپت ضعیف و کلیشه‌ای
+- **weakCritiqueFa / weakCritiqueEn**: نقد ساختاری نقاط ضعف پرامپت
+- **engineeredPromptFa / engineeredPromptEn**: پرامپت کامل ارتقایافته مبتنی بر متدولوژی RCTO با واژگان و ادبیات تخصصی متناسب با دیسیپلین و مسیر انتخابی
+- **engineeredBreakdownFa / engineeredBreakdownEn**:
+  - **role**: نقش متناسب با دیسیپلین (مهندس ناظر در ابنیه، مهندس فرآیند در نفت و گاز، مربی/مشاور در روزمره)
+  - **context**: زمینه چالش واقعی با اعداد، استانداردها و تلمتری
+  - **task**: وظیفه دقیق و عملیاتی بدون ابهام
+  - **output**: ساختار خروجی مقید به جدول یا چک‌لیست کاربردی
+
+### Entity: TrackRctoPillars
+- **trackId**: `IndustryTrackId`
+- **roleExampleFa / roleExampleEn**: نمونه نقش متناسب با ترک
+- **contextExampleFa / contextExampleEn**: نمونه زمینه متناسب با ترک
+- **taskExampleFa / taskExampleEn**: نمونه وظیفه متناسب با ترک
+- **outputExampleFa / outputExampleEn**: نمونه ساختار خروجی متناسب با ترک
+
 ## 3. Storage & State Management
-- **Local Storage Key**: `cpmai_industry_track` -> ذخیره `'CIVIL_INFRA' | 'ENERGY_PETRO' | 'GENERAL_EVERYDAY'`
-- **Local Storage Key**: `cpmai_selected_discipline` -> ذخیره شناسه دیسیپلین انتخابی
-- **Fallback Rule**: اگر دیسیپلین با ترک تطابق نداشت، دیسیپلین پیش‌فرض `'general_household_finance'` برای مسیر عمومی ست می‌شود.
+- **Local Storage Key**: `cpmai_selected_industry_track` -> ذخیره `'CIVIL_INFRA' | 'ENERGY_PETRO' | 'GENERAL_EVERYDAY'`
+- **Local Storage Key**: `cpmai_selected_discipline_id` -> ذخیره شناسه دیسیپلین انتخابی
+- **Fallback Rule**: اگر دیسیپلین ذخیره‌شده با ترک انتخاب‌شده ناهمخوان باشد، تابع `getSavedDiscipline(trackId)` فراخوانی شده و مقدار پیش‌فرض معتبر تنظیم می‌شود:
+  - `CIVIL_INFRA` -> `'civil_tbm_tunnel'`
+  - `ENERGY_PETRO` -> `'petro_process_safety'`
+  - `GENERAL_EVERYDAY` -> `'general_household_finance'`
+
