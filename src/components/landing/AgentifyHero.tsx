@@ -60,7 +60,7 @@ export const AgentifyHero: React.FC<AgentifyHeroProps> = ({
         <div className="flex flex-wrap items-center gap-4 pt-1">
           {/* Primary CTA */}
           <button
-            onClick={() => handleProtectedClick(onExploreSolutions)}
+            onClick={onExploreSolutions}
             className="flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-gradient-to-r from-[#e0533c] to-[#c026d3] hover:from-[#c2410c] hover:to-[#9333ea] text-white text-[15px] font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group active:scale-95"
           >
             <span>Start CPMAI Workbook</span>

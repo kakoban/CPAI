@@ -46,7 +46,11 @@ import {
   LayoutGrid,
   Monitor,
   GitBranch,
-  FolderTree
+  FolderTree,
+  Rocket,
+  Globe,
+  BookOpen,
+  AlertTriangle
 } from 'lucide-react';
 import { ENGINEERING_DATASETS } from '../data/engineering_sample_datasets';
 import { ENGINEERING_CONTRACTS } from '../data/engineering_sample_contracts';
@@ -197,7 +201,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     | 's5_orchestration'
     | 'masterclass'
     | 's5_vibecoding'
-  >(null);
+  >('s1_demo');
   const [isSandboxOpen, setIsSandboxOpen] = useState<boolean>(false);
   const [completedSessions, setCompletedSessions] = useState<Record<string, boolean>>(() => {
     try {
@@ -1276,10 +1280,18 @@ Tasks:
 
           <div className="flex flex-col sm:flex-row md:flex-col items-stretch gap-2.5 shrink-0">
             <button
-              onClick={onGoToPage1}
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#2f7d5b] hover:bg-[#25664a] text-white font-semibold text-xs sm:text-sm shadow-sm transition-all hover:scale-[1.02]"
+              onClick={() => handleTabClick('s1_demo', undefined, true)}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs sm:text-sm shadow-md transition-all hover:scale-[1.02] cursor-pointer"
             >
-              <span>{lang === 'fa' ? 'ورود به صفحه ۱ (فاز اول CPMAI)' : 'Proceed to Page 1 (Phase I)'}</span>
+              <Play className="w-4 h-4 fill-white" />
+              <span>{lang === 'fa' ? 'شروع جلسه ۱ کارگاه مهندسی (ماژول ۱-۱)' : 'Start Workshop Session 1 (Module 1-1)'}</span>
+            </button>
+            <button
+              onClick={onGoToPage1}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#2f7d5b] hover:bg-[#25664a] text-white font-semibold text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>{lang === 'fa' ? 'ورود به جلسه ۱ کتاب‌کار CPMAI (اهداف تجاری)' : 'Go to CPMAI Page 1 (Business Goals)'}</span>
               {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
             </button>
             <button
@@ -1296,6 +1308,54 @@ Tasks:
               <span>{lang === 'fa' ? 'باز کردن سندباکس تمرین پرامپت' : 'Open Prompt Sandbox'}</span>
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Quick Start Guidance Banner: شروع جلسه اول */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-blue-500/15 border-2 border-emerald-500/30 dark:border-emerald-500/20 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3.5">
+          <div className="p-3 rounded-2xl bg-emerald-500 text-white shadow-xs shrink-0 mt-0.5 sm:mt-0 flex items-center justify-center">
+            <Rocket className="w-5 h-5" />
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
+                {lang === 'fa' ? 'راهنمای شروع دوره' : 'Getting Started Guide'}
+              </span>
+              <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] font-mono">
+                {lang === 'fa' ? 'گام اول شما: انتخاب مسیر شروع' : 'Step 1: Choose your path'}
+              </span>
+            </div>
+            <h3 className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9]">
+              {lang === 'fa'
+                ? 'خوش آمدید! برای شروع یادگیری یکی از دو مسیر زیر را انتخاب کنید:'
+                : 'Welcome! Choose one of the paths below to begin:'}
+            </h3>
+            <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] max-w-2xl leading-relaxed">
+              {lang === 'fa'
+                ? '۱) مسیر کارگاه مهندسی هوش مصنوعی: از «جلسه ۱: زیرساخت داده، درایو و گیت‌هاب» شروع کنید. ۲) مسیر متدولوژی رسمی CPMAI: مستقیماً وارد «جلسه ۱ کتاب‌کار (درک کسب‌وکار)» شوید.'
+                : '1) Engineering Workshop: Start from Session 1 (Drive, Markdown & GitHub DCC). 2) Official CPMAI Workbook: Proceed to Session 1 (Business Understanding).'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0 w-full md:w-auto">
+          <button
+            type="button"
+            onClick={(e) => handleTabClick('s1_demo', e, true)}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-black shadow-xs transition-all active:scale-95 cursor-pointer"
+          >
+            <Play className="w-3.5 h-3.5 fill-white" />
+            <span>{lang === 'fa' ? 'شروع جلسه ۱ کارگاه مهندسی (ماژول ۱-۱)' : 'Start Workshop Session 1'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={onGoToPage1}
+            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#161e24] hover:bg-gray-50 dark:hover:bg-[#1f2933] border border-emerald-500/40 text-emerald-800 dark:text-emerald-300 text-xs font-bold shadow-2xs transition-all active:scale-95 cursor-pointer"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>{lang === 'fa' ? 'جلسه ۱ کتاب‌کار CPMAI' : 'CPMAI Workbook Session 1'}</span>
+          </button>
         </div>
       </div>
 
@@ -2018,6 +2078,159 @@ Tasks:
               </div>
             </div>
           </details>
+
+          {/* Layer 3: GitHub Pages Static Deployment Guide & 404 Troubleshooting */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#f8fafc] via-white to-blue-50/40 dark:from-[#161b22] dark:via-[#1c2128] dark:to-blue-950/20 border-2 border-blue-500/30 dark:border-blue-500/20 shadow-xs space-y-4 text-xs">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-blue-500/20">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 font-black">
+                  <Globe className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9]">
+                    کاربرد گیت‌هاب برای دیپلوی پروژه‌های استاتیک و دریافت لینک مستقیم (GitHub Pages)
+                  </h3>
+                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                    انتشار رایگان وبسایت و داشبورد مهندسی روی دامنه اینترنتی رایگان بدون نیاز به هاست و سرور
+                  </p>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0 self-start sm:self-center">
+                سرویس رایگان GitHub Pages
+              </span>
+            </div>
+
+            <p className="text-xs text-[#261a1d] dark:text-[#faedf3] leading-relaxed">
+              برای دیپلوی کردن پروژه روی گیت‌هاب و دریافت لینک مستقیم (URL)، باید از سرویس رایگان <b>GitHub Pages</b> استفاده کنید. نحوه انجام این کار بسته به اینکه پروژه شما شامل فایل‌های استاتیک ساده است یا با ابزارهایی مثل Vite / React ساخته شده، متفاوت است.
+            </p>
+
+            {/* Step-by-step for Simple Static Projects */}
+            <div className="p-4 rounded-xl bg-white dark:bg-[#12161c] border border-blue-500/20 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-md bg-blue-600 text-white font-extrabold text-[11px]">بخش ۱</span>
+                <h4 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+                  پروژه‌های استاتیک ساده (HTML, CSS, JavaScript)
+                </h4>
+              </div>
+              <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                اگر پروژه شما نیاز به Build گرفتن ندارد و فایل <code className="text-blue-600 font-mono font-bold">index.html</code> مستقیماً در پوشه اصلی قرار دارد:
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1">
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#1a212d] border border-black/5 dark:border-white/5 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-blue-600 dark:text-blue-400">
+                    <span className="w-5 h-5 rounded-full bg-blue-600/10 flex items-center justify-center text-[11px]">۱</span>
+                    <span>آپلود کدها در گیت‌هاب</span>
+                  </div>
+                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                    یک ریپازیتوری با وضعیت <b>Public</b> در گیت‌هاب بسازید و فایل‌های پروژه را در آن Push کنید (مطمئن شوید فایل <code>index.html</code> دقیقاً در ریشه یا Root پروژه باشد، نه داخل یک پوشه فرعی).
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#1a212d] border border-black/5 dark:border-white/5 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-blue-600 dark:text-blue-400">
+                    <span className="w-5 h-5 rounded-full bg-blue-600/10 flex items-center justify-center text-[11px]">۲</span>
+                    <span>ورود به تنظیمات</span>
+                  </div>
+                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                    در صفحه ریپازیتوری خود در گیت‌هاب، از نوار بالا روی تب <b>Settings</b> کلیک کنید.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#1a212d] border border-black/5 dark:border-white/5 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-blue-600 dark:text-blue-400">
+                    <span className="w-5 h-5 rounded-full bg-blue-600/10 flex items-center justify-center text-[11px]">۳</span>
+                    <span>بخش Pages</span>
+                  </div>
+                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                    از منوی سمت چپ (در بخش Code and automation)، گزینه <b>Pages</b> را انتخاب کنید.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#1a212d] border border-black/5 dark:border-white/5 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-blue-600 dark:text-blue-400">
+                    <span className="w-5 h-5 rounded-full bg-blue-600/10 flex items-center justify-center text-[11px]">۴</span>
+                    <span>تنظیم برنچ</span>
+                  </div>
+                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                    • در قسمت Build and deployment، گزینه Source را روی <b>Deploy from a branch</b> بگذارید.<br />
+                    • در بخش Branch، برنچ اصلی خود (معمولاً <code>main</code> یا <code>master</code>) و پوشه را روی <b>/(root)</b> قرار داده و دکمه <b>Save</b> را بزنید.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#1a212d] border border-black/5 dark:border-white/5 space-y-1 sm:col-span-2 lg:col-span-2">
+                  <div className="flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400">
+                    <span className="w-5 h-5 rounded-full bg-emerald-600/10 flex items-center justify-center text-[11px]">۵</span>
+                    <span>دریافت URL زنده وبسایت</span>
+                  </div>
+                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                    حدود ۱ تا ۲ دقیقه صبر کنید و صفحه را رفرش کنید. در بالای همان صفحه Pages، لینک سایت شما با ساختار زیر نمایش داده می‌شود:
+                  </p>
+                  <div className="mt-1 p-2 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-mono font-bold text-xs dir-ltr text-left">
+                    https://&lt;username&gt;.github.io/&lt;repository-name&gt;/
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Critical Warning: index.html exact naming */}
+            <div className="p-4 rounded-xl bg-amber-500/10 border-2 border-amber-500/30 text-amber-900 dark:text-amber-200 space-y-2">
+              <div className="flex items-center gap-2 font-bold text-xs sm:text-sm text-amber-800 dark:text-amber-300">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600" />
+                <span>نکته بسیار حیاتی: نام دقیق فایل ورودی باید index.html باشد</span>
+              </div>
+              <p className="text-[11px] sm:text-xs leading-relaxed">
+                گیت‌هاب برای بارگذاری خودکار صفحه در آدرس اصلی ریپازیتوری، منحصراً به فایلی با نام دقیق <code className="bg-amber-500/20 px-1.5 py-0.5 rounded font-mono font-bold">index.html</code> (با تمام حروف کوچک انگلیسی) نیاز دارد. در صورتی که فایل شما با نام‌های دیگر یا فارسی (مثلاً <code className="bg-amber-500/20 px-1.5 py-0.5 rounded font-mono">کارگاه شماره سه-عباس عسگری.html</code>) ذخیره شده باشد، گیت‌هاب قادر به شناسایی آن به عنوان فایل ریشه نیست.
+              </p>
+            </div>
+
+            {/* 404 Troubleshooting Guide */}
+            <div className="p-4 rounded-xl bg-rose-500/10 border-2 border-rose-500/30 text-rose-950 dark:text-rose-200 space-y-3">
+              <div className="flex items-center gap-2 font-bold text-xs sm:text-sm text-rose-700 dark:text-rose-300">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                <span>راهنمای رفع خطای رایج «404 File not found» در GitHub Pages</span>
+              </div>
+              <p className="text-[11px] sm:text-xs leading-relaxed text-[#4a5568] dark:text-[#cbd5e1]">
+                خطای <b>404 File not found</b> در GitHub Pages به این معناست که سرور گیت‌هاب نمی‌تواند فایل ورودی <code className="font-mono font-bold">index.html</code> را در مسیر و شاخه‌ای (Branch) که در تنظیمات مشخص کرده‌اید، پیدا کند. برای برطرف کردن این مشکل، موارد زیر را به‌ترتیب بررسی و اعمال کنید:
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                <div className="p-3.5 rounded-lg bg-white dark:bg-[#1a1215] border border-rose-500/20 space-y-1.5">
+                  <b className="text-rose-600 dark:text-rose-400 text-xs block">
+                    ۱. بررسی شاخه (Branch) و مسیر انتخابی در تنظیمات
+                  </b>
+                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                    شایع‌ترین دلیل این خطا، ست نبودن شاخه دیپلوی با شاخه حاوی فایل‌های اجرایی است:
+                  </p>
+                  <ol className="list-decimal list-inside space-y-1 text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                    <li>وارد ریپازیتوری خود در سایت GitHub شوید.</li>
+                    <li>از تب‌های بالا به <b>Settings</b> و سپس از منوی کناری به بخش <b>Pages</b> بروید.</li>
+                    <li>در بخش Build and deployment:
+                      <ul className="list-disc list-inside ms-3 mt-1 space-y-0.5">
+                        <li>اگر از دستور <code className="font-mono">npm run deploy</code> (پکیج gh-pages) استفاده کرده‌اید، منوی کشویی Branch را از <code className="font-mono">main</code> به <code className="font-mono font-bold">gh-pages</code> تغییر دهید و پوشه را روی <code className="font-mono">/(root)</code> بگذارید.</li>
+                        <li>اگر پروژه‌تان صرفاً فایل‌های خام HTML/CSS است، برنچ را روی <code className="font-mono font-bold">main</code> و مسیر را روی <code className="font-mono">/(root)</code> قرار دهید.</li>
+                      </ul>
+                    </li>
+                    <li>روی دکمه <b>Save</b> کلیک کنید.</li>
+                  </ol>
+                </div>
+
+                <div className="p-3.5 rounded-lg bg-white dark:bg-[#1a1215] border border-rose-500/20 space-y-1.5">
+                  <b className="text-rose-600 dark:text-rose-400 text-xs block">
+                    ۲. بررسی محل و نام فایل index.html
+                  </b>
+                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                    سرور لینوکسی گیت‌هاب به حروف بزرگ و کوچک و موقعیت فایل‌ها بسیار حساس است:
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                    <li>نام فایل باید <b>دقیقاً با تمام حروف کوچک</b> <code className="font-mono font-bold">index.html</code> باشد (نه <code className="font-mono line-through">Index.html</code> یا <code className="font-mono line-through">main.html</code>).</li>
+                    <li>فایل <code className="font-mono font-bold">index.html</code> باید <b>مستقیماً در ریشه (Root)</b> همان شاخه‌ای باشد که در تنظیمات Pages مشخص کرده‌اید. اگر فایل‌ها داخل یک ساب‌فولدر قرار دارند، گیت‌هاب در آدرس اصلی ریپازیتوری چیزی پیدا نمی‌کند.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
       )}
 

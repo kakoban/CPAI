@@ -40,11 +40,7 @@ export const AgentifyLanding: React.FC<AgentifyLandingProps> = ({
   );
 
   const handleProtectedEnter = () => {
-    if (!currentUser) {
-      onOpenAuth();
-    } else {
-      onEnterApp();
-    }
+    onEnterApp();
   };
 
   const handleApplyMediaConfig = (newConfig: LandingMediaConfig) => {

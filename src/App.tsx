@@ -56,7 +56,7 @@ import { UserProfile } from './types/auth';
 import { SessionLockEntity } from './types/lms';
 import { Footer } from './components/Footer';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from './data/logo';
-import { Clock, Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud, Calculator, Bot, Server, Sparkles, Trophy, Lock, Unlock, GraduationCap, Menu, PanelLeftClose } from 'lucide-react';
+import { Clock, Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud, Calculator, Bot, Server, Sparkles, Trophy, Lock, Unlock, GraduationCap, Menu, PanelLeftClose, Home } from 'lucide-react';
 
 export type AppPage = 'landing' | 'quiz' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21;
 
@@ -86,25 +86,22 @@ const LEGACY_KEY = 'cpmai-wb-p1-v1';
 export default function App() {
   const [page, setPage] = useState<AppPage>(() => {
     try {
-      const savedPage = localStorage.getItem('cpmai_active_page_v1');
-      if (savedPage) {
-        if (savedPage === 'landing' || savedPage === 'quiz') return savedPage;
-        const num = parseInt(savedPage, 10);
-        if (!isNaN(num) && num >= 0 && num <= 21) return num as AppPage;
+      if (typeof window !== 'undefined') {
+        const searchParams = new URLSearchParams(window.location.search);
+        const urlPage = searchParams.get('page');
+        if (urlPage === 'landing' || urlPage === 'quiz') return urlPage;
+        if (urlPage !== null) {
+          const num = parseInt(urlPage, 10);
+          if (!isNaN(num) && num >= 0 && num <= 21) return num as AppPage;
+        }
       }
     } catch {}
-    return 0; // Default to Page 0 LLM Toolkit
+    return 'landing'; // Default to Initial Landing Page when typing URL
   });
   const [lang, setLang] = useState<Language>('fa');
   const [theme, setTheme] = useState<Theme>('light');
-  // AJA Cinematic Brand Intro (Unseen Studio Inspired Experience)
-  const [showBrandIntro, setShowBrandIntro] = useState<boolean>(() => {
-    try {
-      return !localStorage.getItem('aja_brand_intro_seen_v2');
-    } catch {
-      return false;
-    }
-  });
+  // AJA Cinematic Brand Intro (Shown on replay or explicit user request)
+  const [showBrandIntro, setShowBrandIntro] = useState<boolean>(false);
 
   // Google OAuth / GIS Authentication State
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
@@ -129,14 +126,8 @@ export default function App() {
   const [activeDiscipline, setActiveDiscipline] = useState<DisciplineId>(() => getSavedDiscipline(getSavedIndustryTrack()));
   const [activeRole, setActiveRole] = useState<EngineeringRoleId>(() => getSavedRole());
   const [isDisciplineModalOpen, setIsDisciplineModalOpen] = useState<boolean>(false);
-  // Foldable & Collapsible sidebar state (persisted across sessions)
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() => {
-    try {
-      const saved = localStorage.getItem('cpmai_sidebar_open');
-      if (saved !== null) return saved === 'true';
-    } catch {}
-    return typeof window !== 'undefined' ? window.innerWidth >= 1440 : false;
-  });
+  // Foldable & Collapsible sidebar state (default closed per user requirement)
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => {
@@ -231,6 +222,15 @@ export default function App() {
   useEffect(() => {
     try {
       localStorage.setItem('cpmai_active_page_v1', page.toString());
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        if (page === 'landing') {
+          url.searchParams.delete('page');
+        } else {
+          url.searchParams.set('page', page.toString());
+        }
+        window.history.replaceState({}, '', url.toString());
+      }
     } catch {}
   }, [page]);
 
@@ -395,7 +395,8 @@ export default function App() {
 
       if (stored) {
         const d = JSON.parse(stored);
-        if (d.page !== undefined) setPage(d.page);
+        const hasUrlPage = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('page');
+        if (hasUrlPage && d.page !== undefined) setPage(d.page);
         if (d.lang) setLang(d.lang);
         if (d.theme) setTheme(d.theme);
         if (d.page0Content) setPage0Content(d.page0Content);
@@ -837,22 +838,14 @@ export default function App() {
           onSelectTrack={handleSelectIndustryTrack}
           onOpenTrackModal={() => setIsIndustryModalOpen(true)}
           onEnterApp={() => {
-            if (!currentUser) {
-              setIsAuthModalOpen(true);
-            } else {
-              setPage(0);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+            setPage(0);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onOpenAuth={() => setIsAuthModalOpen(true)}
           currentUser={currentUser}
           onGoToQuiz={() => {
-            if (!currentUser) {
-              setIsAuthModalOpen(true);
-            } else {
-              setPage('quiz');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+            setPage('quiz');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />
 
@@ -965,12 +958,15 @@ export default function App() {
               </span>
             </button>
 
-            {/* Brand & Organization */}
-            <a
-              href="https://owjbc.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 group shrink-0 select-none cursor-pointer"
+            {/* Brand & Organization -> Click to return to Landing Page */}
+            <button
+              type="button"
+              onClick={() => {
+                setPage('landing');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="flex items-center gap-2 group shrink-0 select-none cursor-pointer text-right bg-transparent border-none p-0"
+              title={lang === 'fa' ? 'بازگشت به لندینگ پیج اولیه' : 'Back to Landing Page'}
             >
               <div className="bg-[#ffffff] p-1 rounded-xl border border-black/[0.08] dark:border-white/[0.12] shadow-xs group-hover:scale-105 transition-all shrink-0 flex items-center justify-center">
                 <img
@@ -984,14 +980,28 @@ export default function App() {
                 />
               </div>
               <div className="hidden lg:flex flex-col shrink-0">
-                <span className="font-extrabold text-xs text-[#1c2830] dark:text-[#e8ebe9] whitespace-nowrap">
+                <span className="font-extrabold text-xs text-[#1c2830] dark:text-[#e8ebe9] whitespace-nowrap group-hover:text-[#e0533c] transition-colors">
                   {lang === 'fa' ? 'کتاب کار CPMAI' : 'CPMAI Workbook'}
                 </span>
                 <span className="text-[10px] text-[#5d6b73] dark:text-[#9aa8b0] whitespace-nowrap">
                   {lang === 'fa' ? 'مشاوران مدیریت اوج' : 'OWJ Business Council'}
                 </span>
               </div>
-            </a>
+            </button>
+
+            {/* Direct Landing Page Nav Link */}
+            <button
+              type="button"
+              onClick={() => {
+                setPage('landing');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] hover:bg-[#e0533c]/10 hover:text-[#e0533c] dark:hover:text-[#fb7185] text-xs font-bold transition-all cursor-pointer shrink-0"
+              title={lang === 'fa' ? 'بازگشت به لندینگ پیج اولیه' : 'Back to Landing Page'}
+            >
+              <Home className="w-3.5 h-3.5 text-[#e0533c]" />
+              <span className="hidden xl:inline text-[11px]">{lang === 'fa' ? 'لندینگ پیج' : 'Landing'}</span>
+            </button>
           </div>
 
           {/* Section 2: Active Track & Discipline Center Pill */}

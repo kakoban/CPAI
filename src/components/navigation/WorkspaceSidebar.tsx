@@ -342,12 +342,12 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
       {/* Main Sidebar Element matching reference .side */}
       <aside
         style={{
-          width: window.innerWidth >= 1024 ? (isOpen ? `${sidebarWidth}px` : '0px') : undefined,
-          opacity: window.innerWidth >= 1024 && !isOpen ? 0 : 1,
-          pointerEvents: window.innerWidth >= 1024 && !isOpen ? 'none' : 'auto'
+          width: isOpen ? `${sidebarWidth}px` : '0px',
         }}
-        className={`fixed lg:sticky inset-y-0 start-0 lg:top-16 z-50 lg:z-30 h-full lg:h-[calc(100vh-4rem)] w-[min(340px,88vw)] lg:w-auto shrink-0 frosted-sidebar flex flex-col transition-all duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
+        className={`fixed lg:sticky inset-y-0 start-0 lg:top-16 z-50 lg:z-30 h-full lg:h-[calc(100vh-4rem)] shrink-0 frosted-sidebar flex flex-col transition-all duration-300 ease-in-out ${
+          isOpen
+            ? 'w-[min(340px,88vw)] lg:w-auto opacity-100 pointer-events-auto visible'
+            : 'w-0 opacity-0 pointer-events-none invisible overflow-hidden border-none p-0 m-0'
         } ${isDragging ? 'select-none' : ''}`}
       >
         {/* Resize Grip Handle (.grip) on Desktop (visible only when open) */}
