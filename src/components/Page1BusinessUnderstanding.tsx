@@ -52,11 +52,12 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
   const domainEx = getDomainPhaseExample(1, industryTrack);
   const isPetro = industryTrack === 'ENERGY_PETRO';
   const isEveryday = industryTrack === 'GENERAL_EVERYDAY';
+  const isPaya = industryTrack === 'PAYA_SAMAN_PARS';
   const discMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
 
   const t = {
     en: {
-      badge: `CPMAI Phase I · Page 1 of 5 (${discMeta ? discMeta.titleEn : isEveryday ? 'Everyday, Family & Lifestyle AI Track' : isPetro ? 'Oil, Gas & Petrochemical Track' : 'Civil Megaproject Track'})`,
+      badge: `CPMAI Phase I · Page 1 of 5 (${discMeta ? discMeta.titleEn : isPaya ? 'Paya Saman Pars Holding Track' : isEveryday ? 'Everyday, Family & Lifestyle AI Track' : isPetro ? 'Oil, Gas & Petrochemical Track' : 'Civil Megaproject Track'})`,
       h1: 'CPMAI Phase I: Business Understanding',
       p1: 'The first phase of a CPMAI process is gaining a thorough understanding of the business and organizational objectives and other factors that will determine whether the project is worth undertaking, and the conditions under which it will be a success. The Business Understanding phase focuses on understanding the project objectives and requirements from a business perspective, then converting this knowledge into an AI and cognitive project problem definition and a preliminary plan designed to achieve the objectives.',
       p2: 'As mentioned earlier, since we are doing CPMAI in the context of agile, the business understanding for the particular CPMAI project is relevant to the specific sprint or iteration you are currently in, and should tie very closely to the user story that is relevant for that iteration. In a CPMAI project, it is possible for a single sprint iteration to encompass all of the CPMAI phases, but it is also possible for a CPMAI project to span multiple sprints or iterations, which means that the business understanding will be relevant to that particular iteration’s user story.',
@@ -73,12 +74,16 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       wsTitle: 'Worksheet: Your Project Artifacts',
       wsDesc: 'Fill these in for your own project or case study iteration.',
       storyL: 'Sprint User Story',
-      storyHint: isEveryday
+      storyHint: isPaya
+        ? 'e.g. As Paya Saman Pars Holding PMO, I want unified dual-wing bottleneck alerts so that we catch EPC+F/BOT delays and fleet conflicts early.'
+        : isEveryday
         ? 'e.g. As a household manager, I want smart pantry expiration alerts so that I can eliminate food waste and save for our annual family vacation.'
         : isPetro
         ? 'e.g. As a refinery process lead, I want 60-day fouling forecasts so that I can schedule heat exchanger descaling without emergency shutdowns.'
         : 'e.g. As a metro project director, I want 48-hour ground settlement predictions so that I can adjust TBM foam injection and prevent utility damage.',
-      storyPh: isEveryday
+      storyPh: isPaya
+        ? 'As [Paya Holding Wing Lead], I want [Dual-Wing EPC+F/BOT Delay Alerts] so that [Sync 14 Subsidiaries & Fleet]...'
+        : isEveryday
         ? 'As a [Household Manager], I want [Pantry Depletion Alerts] so that [Save 25% on Groceries & Fund Vacation]...'
         : isPetro
         ? 'As a [Refinery Unit Lead], I want [Fouling Prediction] so that [Avoid Flaring & Emergency Trips]...'
@@ -93,7 +98,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       rm: 'Remove',
       exBtnShow: 'Show Example',
       exBtnHide: 'Hide Example',
-      exTitle: discMeta ? `${discMeta.shortTitleEn} Objective Example:` : isEveryday ? 'Everyday & Family Objective Example:' : isPetro ? 'Oil & Gas Primary Objective Example:' : 'Civil Megaproject Primary Objective Example:',
+      exTitle: discMeta ? `${discMeta.shortTitleEn} Objective Example:` : isPaya ? 'Paya Saman Pars Holding Objective Example:' : isEveryday ? 'Everyday & Family Objective Example:' : isPetro ? 'Oil & Gas Primary Objective Example:' : 'Civil Megaproject Primary Objective Example:',
       exText: domainEx.artifacts.primaryObjectiveEn,
       quizTitle: 'Check Your Understanding',
       quizDesc: 'Select an option to see instant feedback and explanation.',
@@ -104,12 +109,20 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       q2: 'In an agile CPMAI project, business understanding should tie most closely to what?',
       q2Options: ['The final product vision only', 'The vendor’s contract', 'The user story for the current sprint or iteration'],
       q2Why: 'Business understanding is relevant to the specific sprint or iteration, and ties to its user story.',
-      q3: isEveryday
+      q3: isPaya
+        ? 'Which one is a related holding portfolio question rather than the primary business objective?'
+        : isEveryday
         ? 'Which one is a related household/consumption question rather than the primary objective?'
         : isPetro
         ? 'Which one is a related business/operational question rather than the primary objective?'
         : 'Which one is a related contractual/operational question rather than the primary objective?',
-      q3Options: isEveryday
+      q3Options: isPaya
+        ? [
+            'Which of our 14 subsidiaries face overlapping heavy-fleet mobilization gaps next quarter?',
+            'Unify dual-wing 63-project EPC+F/BOT portfolio visibility across Paya Holding',
+            'Tune neural network batch size and dropout regularization'
+          ]
+        : isEveryday
         ? [
             'Which supermarket grocery categories suffer the highest monthly expiration spoilage?',
             'Cut 25% perishable grocery waste and fully fund the annual family vacation savings',
@@ -126,14 +139,16 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
             'Forecast surface ground settlement above mechanized tunnel drives',
             'Select the Adam optimizer learning rate'
           ],
-      q3Why: isEveryday
+      q3Why: isPaya
+        ? 'Heavy-fleet overlap across subsidiaries is a related operational question; unifying dual-wing portfolio visibility is the primary objective, while tuning hyperparameters is a technical ML task.'
+        : isEveryday
         ? 'Identifying high-spoilage grocery categories is a related consumption exploration question; cutting 25% waste is the primary business goal, and tuning neural hyperparameters is an engineering task.'
         : isPetro
         ? 'Feed sulfur variance is a business exploration factor around fouling mitigation. Neural hyperparameters are purely engineering tasks.'
         : 'Circular 4311 claim mitigation is a related contractual risk question. Optimizer tuning is a model training task.'
     },
     fa: {
-      badge: `فاز اول CPMAI · صفحه ۱ از ۵ (${discMeta ? discMeta.titleFa : isEveryday ? 'حوزه تخصصی سبک زندگی، خانواده و کاربردهای روزمره' : isPetro ? 'حوزه تخصصی نفت، گاز و پتروشیمی' : 'حوزه تخصصی مگاپروژه‌های عمرانی و راه'})`,
+      badge: `فاز اول CPMAI · صفحه ۱ از ۵ (${discMeta ? discMeta.titleFa : isPaya ? 'حوزه اختصاصی هلدینگ پایا سامان پارس' : isEveryday ? 'حوزه تخصصی سبک زندگی، خانواده و کاربردهای روزمره' : isPetro ? 'حوزه تخصصی نفت، گاز و پتروشیمی' : 'حوزه تخصصی مگاپروژه‌های عمرانی و راه'})`,
       h1: 'CPMAI Phase I: Business Understanding',
       p1: 'نخستین فاز فرایند CPMAI، دستیابی به درکی کامل از اهداف کسب‌وکار و سازمان و عوامل دیگری است که تعیین می‌کنند آیا پروژه ارزش اجرا دارد و در چه شرایطی موفق خواهد بود. تمرکز فاز درک کسب‌وکار بر شناخت اهداف و الزامات پروژه از دیدگاه کسب‌وکار است و سپس تبدیل این دانش به تعریف مسئله برای پروژه هوش مصنوعی و یک برنامه اولیه برای رسیدن به اهداف.',
       p2: 'چون CPMAI را در بستر چابک (Agile) اجرا می‌کنیم، درک کسب‌وکار به اسپرینت یا تکرار مشخصی که در آن هستید مربوط است و باید ارتباط نزدیکی با داستان کاربر (User Story) همان تکرار داشته باشد. ممکن است یک اسپرینت همه فازهای CPMAI را پوشش دهد، یا یک پروژه چند اسپرینت را در بر بگیرد که در این حالت درک کسب‌وکار به داستان کاربر همان تکرار گره می‌خورد.',
@@ -150,12 +165,16 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       wsTitle: 'برگه تمرین: مستندات پروژه شما',
       wsDesc: 'این بخش‌ها را برای پروژه یا مطالعه موردی خود تکمیل کنید.',
       storyL: 'داستان کاربر اسپرینت (Sprint User Story)',
-      storyHint: isEveryday
+      storyHint: isPaya
+        ? 'مثال: به عنوان معاونت برنامه‌ریزی هلدینگ پایا سامان پارس، می‌خواهم هشدار زودهنگام تاخیر در دو بال پیمانکاری و مسکن/کاوه را داشته باشم تا از ریسک کنسرسیوم‌های EPC+F و خواب ناوگان جلوگیری شود.'
+        : isEveryday
         ? 'مثال: به عنوان سرپرست خانواده، می‌خواهم پیش‌بینی انقضا و اتمام اقلام یخچال را دریافت کنم تا لیست خرید هفتگی را بدون دورریز تنظیم نمایم و بودجه سفر را ذخیره کنم.'
         : isPetro
         ? 'مثال: به عنوان سرپرست فرآیند پالایشگاه، می‌خواهم پیش‌بینی ۶۰ روزه رسوب مبدل‌ها را دریافت کنم تا برنامه شستشو را بدون توقف خط تولید تنظیم نمایم.'
         : 'مثال: به عنوان مدیر پروژه مترو، می‌خواهم پیش‌بینی ۴۸ ساعته نشست معابر را دریافت کنم تا پارامترهای حفاری TBM را تغییر دهم و از آسیب به لوله‌های گاز و ادعای تاخیرات جلوگیری شود.',
-      storyPh: isEveryday
+      storyPh: isPaya
+        ? 'به عنوان [مدیر PMO / واحد هلدینگ پایا]، می‌خواهم [پایش هوشمند ۶۳ پروژه دو بال و ناوگان] را داشته باشم تا [گلوگاه‌های EPC+F و کاوه پیشگیری شود]...'
+        : isEveryday
         ? 'به عنوان [سرپرست خانواده / مدیر خرید]، می‌خواهم [پیش‌بینی هوشمند اتمام اقلام یخچال و هشدار دورریز] را داشته باشم تا [۲۵٪ در هزینه‌ها صرفه‌جویی و بودجه سفر ذخیره شود]...'
         : isPetro
         ? 'به عنوان [رئیس بهره‌برداری پالایشگاه]، می‌خواهم [پیش‌بینی رسوب مبدل‌ها] را داشته باشم تا [از شات‌دان و فلرینگ اضطراری پیشگیری شود]...'
@@ -170,7 +189,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       rm: 'حذف',
       exBtnShow: 'نمایش مثال',
       exBtnHide: 'پنهان‌سازی مثال',
-      exTitle: discMeta ? `نمونه هدف اصلی (${discMeta.shortTitleFa}):` : isEveryday ? 'نمونه هدف اصلی (روزمره و خانواده):' : isPetro ? 'نمونه هدف اصلی (نفت و گاز):' : 'نمونه هدف اصلی (مگاپروژه عمرانی):',
+      exTitle: discMeta ? `نمونه هدف اصلی (${discMeta.shortTitleFa}):` : isPaya ? 'نمونه هدف اصلی (هلدینگ پایا سامان پارس):' : isEveryday ? 'نمونه هدف اصلی (روزمره و خانواده):' : isPetro ? 'نمونه هدف اصلی (نفت و گاز):' : 'نمونه هدف اصلی (مگاپروژه عمرانی):',
       exText: domainEx.artifacts.primaryObjectiveFa,
       quizTitle: 'بررسی فهم مطالب (Quiz)',
       quizDesc: 'یک گزینه را انتخاب کنید تا بلافاصله بازخورد و استدلال را ببینید.',
@@ -181,12 +200,20 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
       q2: 'در یک پروژه CPMAI چابک، درک کسب‌وکار باید بیش از همه به چه چیزی مرتبط باشد؟',
       q2Options: ['فقط چشم‌انداز نهایی محصول', 'قرارداد فروشنده', 'داستان کاربر اسپرینت یا تکرار جاری'],
       q2Why: 'درک کسب‌وکار به اسپرینت یا تکرار مشخصی مربوط است و باید با داستان کاربر آن پیوند بخورد.',
-      q3: isEveryday
+      q3: isPaya
+        ? 'کدام مورد یک پرسش فرعی مرتبط در سطح هلدینگ پایا سامان پارس است، نه هدف اصلی؟'
+        : isEveryday
         ? 'کدام مورد یک پرسش فرعی و مرتبط خانوار است، نه هدف اصلی؟'
         : isPetro
         ? 'کدام مورد یک پرسش فرآیندی مرتبط است، نه هدف اصلی؟'
         : 'کدام مورد یک پرسش قراردادی مرتبط است، نه هدف اصلی؟',
-      q3Options: isEveryday
+      q3Options: isPaya
+        ? [
+            'کدام یک از ۱۴ شرکت تابعه در فصل پیش رو با هم‌پوشانی ناوگان ماشین‌آلات سنگین مواجه می‌شوند؟',
+            'یکپارچه‌سازی پایش ریسک و پیشرفت ۶۳ پروژه در دو بال پیمانکاری و مسکن/کاوه',
+            'تنظیم نرخ یادگیری و تعداد لایه‌های شبکه عصبی'
+          ]
+        : isEveryday
         ? [
             'کدام دسته‌های خرید سوپرمارکت بالاترین سهم را در دورریز ماهانه خانوار دارند؟',
             'کاهش ۲۵ درصدی دورریز مواد غذایی یخچال و تامین بودجه سفر سالیانه خانواده',
@@ -203,7 +230,9 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
             'پیش‌بینی فرونشست سطحی معابر شهری بالای تاج تونل مکانیزه',
             'انتخاب نرخ یادگیری در الگوریتم بهینه‌ساز Adam'
           ],
-      q3Why: isEveryday
+      q3Why: isPaya
+        ? 'شناسایی هم‌پوشانی ناوگان بین شرکت‌های تابعه یک پرسش فرعی تحلیلی است؛ هدف اصلی پایش یکپارچه دو بال و ۶۳ پروژه است و تنظیم هایپرپارامترها یک کار فنی یادگیری ماشین محسوب می‌شود.'
+        : isEveryday
         ? 'بررسی سهم دسته‌های کالایی در دورریز یک پرسش فرعی تحلیل مصرف است؛ کاهش ۲۵ درصدی دورریز و پس‌انداز سفر هدف اصلی است و انتخاب پارامترهای شبکه عصبی یک وظیفه کدنویسی است.'
         : isPetro
         ? 'بررسی اثر کیفیت خوراک یک پرسش عملیاتی کلیدی است؛ هدف اصلی پیش‌بینی رسوب است و انتخاب لایه‌های عصبی یک وظیفه کدنویسی است.'

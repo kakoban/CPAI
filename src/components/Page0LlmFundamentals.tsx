@@ -50,12 +50,14 @@ import {
   Rocket,
   Globe,
   BookOpen,
-  AlertTriangle
+  AlertTriangle,
+  Landmark
 } from 'lucide-react';
-import { ENGINEERING_DATASETS } from '../data/engineering_sample_datasets';
-import { ENGINEERING_CONTRACTS } from '../data/engineering_sample_contracts';
+import { getDatasetsForTrack } from '../data/engineering_sample_datasets';
+import { getContractsForTrack } from '../data/engineering_sample_contracts';
 import { Page0EngineeringMasterclass } from './Page0EngineeringMasterclass';
 import { NotebookLmWorkshop } from './NotebookLmWorkshop';
+import { PayaHoldingArtifactSimulator } from './PayaHoldingArtifactSimulator';
 import { HrArtifactsCanvasWorkshop } from './HrArtifactsCanvasWorkshop';
 import { ClaudeEnterpriseConnectors } from './connectors/ClaudeEnterpriseConnectors';
 import { ObsidianBrainSkillsWorkshop } from './obsidian/ObsidianBrainSkillsWorkshop';
@@ -69,15 +71,7 @@ import {
   ContractAuditArchitectureDiagram,
   RctoFrameworkDiagram
 } from './visuals/EngineeringVisualDiagrams';
-import {
-  S1_DEMO_SLIDES,
-  S1_DRIVE_SLIDES,
-  S1_MARKDOWN_SLIDES,
-  S1_GITHUB_SLIDES,
-  S5_CAPSTONE_SLIDES,
-  SAMPLE_ENGINEERING_README_MD,
-  SAMPLE_CLEAN_CSV_CONTENT
-} from '../data/session1_and_5_curriculum';
+import { getSessionCurriculumForTrack } from '../data/session1_and_5_curriculum';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../data/logo';
 import { IndustryTrackId, DisciplineId } from '../types/industryTrack';
 import {
@@ -155,6 +149,16 @@ const TRACK_RCTO_PILLARS: Record<IndustryTrackId, RctoPillarExample> = {
     taskEn: '"Identify high-spoilage items, propose 5 quick zero-waste hacks, a leftover meal plan, and a vacation micro-savings rule..."',
     outputFa: '«پاسخ را در قالب یک جدول کاربردی و دوستانه شامل: [قلم مصرفی / دغدغه | راهکار هوشمند روزمره | صرفه‌جویی ریالی ماهانه | اقدام عملی همین امروز] بنویس.»',
     outputEn: '"Output as a friendly, actionable household table: [Item / Concern | Smart Everyday Hack | Monthly Savings | Immediate Today Action]."'
+  },
+  PAYA_SAMAN_PARS: {
+    roleFa: '«تو مدیر ارشد PMO و تحلیلگر قراردادهای EPC+F / BOT در ستاد هلدینگ پایا سامان پارس هستی...»',
+    roleEn: '"You are Senior Portfolio PMO and EPC+F / BOT Contracts Lead at Paya Saman Pars Holding..."',
+    contextFa: '«گزارش‌های ۶۳ پروژه در ۱۴ شرکت تابعه دو بال (رامان، جنرال مکانیک، دی، ملی ساختمان، تابیران، آتی‌ساز، خانه و شهر صنعتی کاوه) پراکنده است و برخی فیلدهای پورتال خالی مانده‌اند...»',
+    contextEn: '"Progress reports across 63 projects and 14 subsidiaries in both wings (civil contracting + housing & Kaveh SEZ) are fragmented with unpopulated portal detail fields..."',
+    taskFa: '«گلوگاه‌های دو بال و تداخل ناوگان سنگین را تحلیل کن و بدون حدس زدن فیلدهای مفقود، برنامه اقدام کنسرسیومی پیشنهاد بده...»',
+    taskEn: '"Diagnose dual-wing delays and heavy fleet conflicts without fabricating missing portal fields, and prescribe consortium actions..."',
+    outputFa: '«پاسخ را در جدول ۴ ستونه: [پروژه / شرکت تابعه | گلوگاه یا خلأ داده | اثر بر قرارداد EPC+F/BOT | اقدام اصلاحی با مسئول] بدون مقدمه‌چینی بنویس.»',
+    outputEn: '"Output as a 4-column executive table: [Project / Subsidiary | Bottleneck or Data Gap | EPC+F/BOT Impact | Corrective Action & Owner]."'
   }
 };
 
@@ -174,7 +178,13 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
       ? 'petro_process_safety'
       : industryTrack === 'GENERAL_EVERYDAY'
       ? 'general_household_finance'
+      : industryTrack === 'PAYA_SAMAN_PARS'
+      ? 'paya_portfolio_pmo'
       : 'civil_tbm_tunnel');
+
+  const trackDatasets = getDatasetsForTrack(industryTrack);
+  const trackContracts = getContractsForTrack(industryTrack);
+  const sessionCurriculum = getSessionCurriculumForTrack(industryTrack);
 
   const discMeta = getDisciplineMetadata(effectiveDiscipline);
   const disciplinePromptPair = getDisciplinePromptShowcase(effectiveDiscipline);
@@ -286,6 +296,13 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
       githubFa: 'GitHub: آلبوم نسخه‌دار اسناد و قالب‌های دائمی',
       skillFa: 'Skill: دستور پخت و چک‌لیست استاندارد روزانه',
       mcpFa: 'MCP: پایپ‌لاین ارتباطی هوشمند بین AI، فایل‌ها و تقویم'
+    },
+    PAYA_SAMAN_PARS: {
+      trackLabelFa: 'هلدینگ پایا سامان پارس (دو بال و ۶۳ پروژه)',
+      driveFa: 'Drive: پوشه مشترک گزارش‌های ۱۴ شرکت تابعه و شهر صنعتی کاوه',
+      githubFa: 'GitHub: مخزن DCC هلدینگ و مهارت‌های ممیزی EPC+F/BOT',
+      skillFa: 'Skill: دستورالعمل استاندارد کنترل پورتفوی دو بال و تکمیل پورتال',
+      mcpFa: 'MCP: پایپ‌لاین اتصال مستقیم گزارش‌های ۱۴ شرکت به کلود و گیت‌هاب'
     }
   } as const;
 
@@ -590,12 +607,21 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   };
 
   React.useEffect(() => {
-    if (industryTrack === 'ENERGY_PETRO') {
-      setSelectedDatasetId('oil_gas_pipeline_ndt');
-      setSelectedContractId('oil_gas_epc_contract');
+    const nextDs = getDatasetsForTrack(industryTrack);
+    const nextCt = getContractsForTrack(industryTrack);
+    if (industryTrack === 'PAYA_SAMAN_PARS') {
+      setSelectedDatasetId('paya_holding_portfolio');
+      setSelectedContractId('paya_epcf_consortium_contract');
+    } else if (industryTrack === 'ENERGY_PETRO') {
+      setSelectedDatasetId(
+        nextDs.find((d) => d.id === 'oil_gas_pipeline_epc')?.id || nextDs[0]?.id || 'metro_station_tbm'
+      );
+      setSelectedContractId(
+        nextCt.find((c) => c.id === 'oil_gas_epc_contract')?.id || nextCt[0]?.id || 'metro_tunnel_contract'
+      );
     } else {
-      setSelectedDatasetId('metro_station_tbm');
-      setSelectedContractId('metro_tunnel_contract');
+      setSelectedDatasetId(nextDs[0]?.id || 'metro_station_tbm');
+      setSelectedContractId(nextCt[0]?.id || 'metro_tunnel_contract');
     }
   }, [industryTrack]);
 
@@ -647,8 +673,22 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
       id: `discipline_custom_${discMeta.id}`,
       titleFa: `پرامپت تخصصی دیسیپلین: ${discMeta.titleFa}`,
       titleEn: `Discipline Engineering Prompt: ${discMeta.titleEn}`,
-      categoryFa: discMeta.trackId === 'CIVIL_INFRA' ? 'مگاپروژه‌های راه و ابنیه' : discMeta.trackId === 'ENERGY_PETRO' ? 'نفت، گاز و پتروشیمی' : 'سبک زندگی و خانواده',
-      categoryEn: discMeta.trackId === 'CIVIL_INFRA' ? 'Civil & Infrastructure' : discMeta.trackId === 'ENERGY_PETRO' ? 'Oil & Gas EPCC' : 'Lifestyle & Everyday AI',
+      categoryFa:
+        discMeta.trackId === 'CIVIL_INFRA'
+          ? 'مگاپروژه‌های راه و ابنیه'
+          : discMeta.trackId === 'ENERGY_PETRO'
+          ? 'نفت، گاز و پتروشیمی'
+          : discMeta.trackId === 'PAYA_SAMAN_PARS'
+          ? 'هلدینگ پایا سامان پارس'
+          : 'سبک زندگی و خانواده',
+      categoryEn:
+        discMeta.trackId === 'CIVIL_INFRA'
+          ? 'Civil & Infrastructure'
+          : discMeta.trackId === 'ENERGY_PETRO'
+          ? 'Oil & Gas EPCC'
+          : discMeta.trackId === 'PAYA_SAMAN_PARS'
+          ? 'Paya Saman Pars Holding'
+          : 'Lifestyle & Everyday AI',
       descriptionFa: `پرامپت مهندسی‌شده RCTO با استانداردهای ${discMeta.governingStandardsFa[0]} و تحلیل شاخص‌های ${discMeta.performanceMetricsFa.slice(0, 2).join(' و ')}.`,
       descriptionEn: `Engineered RCTO prompt customized for ${discMeta.governingStandardsEn[0]} and ${discMeta.performanceMetricsEn.slice(0, 2).join(', ')}.`,
       promptFa: disciplinePromptPair.engineeredPromptFa,
@@ -1716,7 +1756,7 @@ Tasks:
                   <span className="text-[11px] text-[#755e66] dark:text-[#ad99ab]">نمونه فایل CSV استاندارد آماده تست:</span>
                   <button
                     type="button"
-                    onClick={() => downloadTextFile('clean_engineering_log.csv', SAMPLE_CLEAN_CSV_CONTENT, 'text/csv;charset=utf-8;')}
+                    onClick={() => downloadTextFile('clean_engineering_log.csv', sessionCurriculum.cleanCsvContent, 'text/csv;charset=utf-8;')}
                     className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
@@ -1762,7 +1802,7 @@ Tasks:
               <div className="p-3.5 rounded-xl bg-emerald-500/[0.05] border border-emerald-500/30 space-y-2">
                 <b className="text-emerald-700 dark:text-emerald-400 block">✅ جدول تمیز و استاندارد (Machine-Readable):</b>
                 <pre dir="ltr" className="p-2.5 rounded-lg bg-[#1e1e1e] text-[#d4d4d4] font-mono text-[10px] overflow-x-auto">
-                  {SAMPLE_CLEAN_CSV_CONTENT}
+                  {sessionCurriculum.cleanCsvContent}
                 </pre>
               </div>
             </div>
@@ -1865,14 +1905,14 @@ Tasks:
                     این فایل استاندارد را دانلود یا کپی کنید تا در ماژول بعدی (`۱-۴ گیت‌هاب`) مستقیماً در اولین Repository خود قرار دهید:
                   </p>
                   <pre dir="rtl" className="p-2.5 rounded-lg bg-[#fdf8f5] dark:bg-[#16101c] border border-[#ecdcd8] dark:border-[#382645] font-mono text-[10px] max-h-28 overflow-y-auto whitespace-pre-wrap text-right">
-                    {SAMPLE_ENGINEERING_README_MD}
+                    {sessionCurriculum.readmeMd}
                   </pre>
                 </div>
 
                 <div className="flex items-center gap-2 pt-2">
                   <button
                     type="button"
-                    onClick={() => downloadTextFile('README.md', SAMPLE_ENGINEERING_README_MD, 'text/markdown;charset=utf-8;')}
+                    onClick={() => downloadTextFile('README.md', sessionCurriculum.readmeMd, 'text/markdown;charset=utf-8;')}
                     className="flex-1 py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center justify-center gap-1 cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
@@ -1880,7 +1920,7 @@ Tasks:
                   </button>
                   <button
                     type="button"
-                    onClick={() => copyToClipboard(SAMPLE_ENGINEERING_README_MD, 'sample_readme_md')}
+                    onClick={() => copyToClipboard(sessionCurriculum.readmeMd, 'sample_readme_md')}
                     className="flex-1 py-1.5 px-3 rounded-lg bg-[#e0533c] hover:bg-[#c2410c] text-white font-bold text-[11px] flex items-center justify-center gap-1 cursor-pointer"
                   >
                     {copiedId === 'sample_readme_md' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -3217,9 +3257,9 @@ Tasks:
         </section>
       )}
 
-      {/* SECTION 5: ENGINEERING DATA & DASHBOARD WORKSHOP (METRO & OIL/GAS) */}
+      {/* SECTION 5: ENGINEERING DATA & DASHBOARD WORKSHOP */}
       {(activeTab === 'all' || activeTab === 'engineering_dashboards') && (() => {
-        const currentDataset = ENGINEERING_DATASETS.find(d => d.id === selectedDatasetId) || ENGINEERING_DATASETS[0];
+        const currentDataset = trackDatasets.find(d => d.id === selectedDatasetId) || trackDatasets[0];
         const claudePromptText = lang === 'fa' ? currentDataset.claudeDashboardPromptFa : currentDataset.claudeDashboardPromptEn;
         const geminiPromptText = lang === 'fa' ? currentDataset.geminiPythonAnalyticsPromptFa : currentDataset.geminiPythonAnalyticsPromptEn;
         const fullClaudePrompt = `${claudePromptText}\n\n\`\`\`csv\n${currentDataset.rawCsv}\n\`\`\``;
@@ -3238,7 +3278,9 @@ Tasks:
                     <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#0284c7] text-white text-xs font-black">۲-۵</span>
                     <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
                       {lang === 'fa'
-                        ? 'کارگاه عملی تحلیل داده و ساخت داشبورد مهندسی با Claude و Gemini (مترو و نفت‌وگاز)'
+                        ? industryTrack === 'PAYA_SAMAN_PARS'
+                          ? 'کارگاه تحلیل پورتفو و داشبوردسازی دو بال هلدینگ پایا سامان پارس (۳ دیتاست تخصصی)'
+                          : 'کارگاه عملی تحلیل داده و ساخت داشبورد مهندسی با Claude و Gemini (مترو و نفت‌وگاز)'
                         : 'Engineering Data & Dashboard Workshop with Claude & Gemini'}
                     </h2>
                   </div>
@@ -3251,9 +3293,15 @@ Tasks:
               </div>
             </div>
 
+            {industryTrack === 'PAYA_SAMAN_PARS' && (
+              <div className="space-y-2">
+                <PayaHoldingArtifactSimulator lang={lang} />
+              </div>
+            )}
+
             {/* Dataset Selector Tabs */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {ENGINEERING_DATASETS.map((ds) => {
+              {trackDatasets.map((ds) => {
                 const isSelected = ds.id === selectedDatasetId;
                 return (
                   <button
@@ -3270,6 +3318,7 @@ Tasks:
                         {ds.id === 'metro_station_tbm' && <Train className={`w-4 h-4 ${isSelected ? 'text-[#c026d3]' : 'text-[#5d6b73]'}`} />}
                         {ds.id === 'oil_gas_pipeline_epc' && <Factory className={`w-4 h-4 ${isSelected ? 'text-[#c026d3]' : 'text-[#5d6b73]'}`} />}
                         {ds.id === 'refinery_equipment_qa' && <Building2 className={`w-4 h-4 ${isSelected ? 'text-[#c026d3]' : 'text-[#5d6b73]'}`} />}
+                        {ds.id.startsWith('paya_') && <Landmark className={`w-4 h-4 ${isSelected ? 'text-[#c026d3]' : 'text-violet-500'}`} />}
                         <span className="font-bold text-xs text-[#1c2830] dark:text-[#e8ebe9]">
                           {lang === 'fa' ? ds.titleFa : ds.titleEn}
                         </span>
@@ -3574,6 +3623,7 @@ Tasks:
       {(activeTab === 'all' || activeTab === 'notebooklm') && (
         <NotebookLmWorkshop
           lang={lang}
+          industryTrack={industryTrack}
           onLoadToSandbox={loadPromptToSandbox}
           copyToClipboard={copyToClipboard}
           copiedId={copiedId}
@@ -3582,7 +3632,7 @@ Tasks:
 
       {/* SESSION 3 - MODULE 3-2: CONTRACTS & ASSISTANTS WORKSHOP (GEMS & PROJECTS) */}
       {(activeTab === 'all' || activeTab === 'contracts_and_gems') && (() => {
-        const currentContract = ENGINEERING_CONTRACTS.find(c => c.id === selectedContractId) || ENGINEERING_CONTRACTS[0];
+        const currentContract = trackContracts.find(c => c.id === selectedContractId) || trackContracts[0];
         const geminiInst = lang === 'fa' ? currentContract.geminiSystemInstructionFa : currentContract.geminiSystemInstructionEn;
         const claudeInst = lang === 'fa' ? currentContract.claudeSystemInstructionFa : currentContract.claudeSystemInstructionEn;
 
@@ -3599,7 +3649,9 @@ Tasks:
                     <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#b87333] text-white text-xs font-black">۳-۲</span>
                     <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
                       {lang === 'fa'
-                        ? 'کارگاه تحلیل قراردادهای EPC (مترو و نفت‌وگاز) و ساخت دستیار در Gems و Projects'
+                        ? industryTrack === 'PAYA_SAMAN_PARS'
+                          ? 'کارگاه ممیزی قراردادهای EPC+F، BOT و کنسرسیوم هلدینگ پایا سامان پارس در Gems و Projects'
+                          : 'کارگاه تحلیل قراردادهای EPC (مترو و نفت‌وگاز) و ساخت دستیار در Gems و Projects'
                         : 'Specimen Engineering Contracts & Custom Assistant Setup in Gems & Projects'}
                     </h2>
                   </div>
@@ -3624,7 +3676,7 @@ Tasks:
 
             {/* Contract Selector Tabs */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {ENGINEERING_CONTRACTS.map((contract) => {
+              {trackContracts.map((contract) => {
                 const isSelected = contract.id === selectedContractId;
                 return (
                   <button
@@ -3640,6 +3692,7 @@ Tasks:
                       <div className="flex items-center gap-2">
                         {contract.id === 'metro_tunnel_contract' && <Train className={`w-4 h-4 ${isSelected ? 'text-[#b87333]' : 'text-[#5d6b73]'}`} />}
                         {contract.id === 'oil_gas_epc_contract' && <Factory className={`w-4 h-4 ${isSelected ? 'text-[#b87333]' : 'text-[#5d6b73]'}`} />}
+                        {contract.id.startsWith('paya_') && <Landmark className={`w-4 h-4 ${isSelected ? 'text-[#b87333]' : 'text-violet-500'}`} />}
                         <span className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
                           {lang === 'fa' ? contract.titleFa : contract.titleEn}
                         </span>
@@ -4166,12 +4219,12 @@ Tasks:
 
             <div className="p-4 pt-3 border-t border-[#ecdcd8]/60 dark:border-[#382645]/60 space-y-3 text-xs">
               <pre dir="rtl" className="p-3.5 rounded-xl bg-[#1e1e1e] text-[#d4d4d4] font-mono text-[11px] leading-relaxed whitespace-pre-wrap text-right">
-                {S5_CAPSTONE_SLIDES[1].codeSnippet}
+                {sessionCurriculum.s5CapstoneSlides[1].codeSnippet}
               </pre>
               <div className="flex justify-end">
                 <button
                   type="button"
-                  onClick={() => copyToClipboard(S5_CAPSTONE_SLIDES[1].codeSnippet || '', 's5_orchestration_prompt')}
+                  onClick={() => copyToClipboard(sessionCurriculum.s5CapstoneSlides[1].codeSnippet || '', 's5_orchestration_prompt')}
                   className="px-4 py-2 rounded-xl bg-[#e0533c] hover:bg-[#c2410c] text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   {copiedId === 's5_orchestration_prompt' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -4464,10 +4517,14 @@ Tasks:
         <ProjectorSlideModal
           isOpen={true}
           onClose={() => setS1ProjectorDeck(null)}
-          deckTitleFa="دموی ۱۵ دقیقه‌ای خروجی نهایی و معماری دوره ۲۰ ساعته"
-          deckSubtitleFa="جلسه ۱ · ماژول ۱-۱ (۶ اسلاید)"
+          deckTitleFa={
+            industryTrack === 'PAYA_SAMAN_PARS'
+              ? 'دموی ۱۵ دقیقه‌ای خروجی نهایی و معماری دوره پایا سامان پارس'
+              : 'دموی ۱۵ دقیقه‌ای خروجی نهایی و معماری دوره ۲۰ ساعته'
+          }
+          deckSubtitleFa={`جلسه ۱ · ماژول ۱-۱ (${sessionCurriculum.s1DemoSlides.length} اسلاید)`}
           accentColor="purple"
-          slides={S1_DEMO_SLIDES}
+          slides={sessionCurriculum.s1DemoSlides}
           activeIndex={s1SlideIndex}
           onChangeIndex={setS1SlideIndex}
           copyToClipboard={copyToClipboard}
@@ -4479,10 +4536,14 @@ Tasks:
         <ProjectorSlideModal
           isOpen={true}
           onClose={() => setS1ProjectorDeck(null)}
-          deckTitleFa="آموزش کامل Google Drive و استانداردسازی جداول ماشین‌خوان"
-          deckSubtitleFa="جلسه ۱ · ماژول ۱-۲ (۸ اسلاید)"
+          deckTitleFa={
+            industryTrack === 'PAYA_SAMAN_PARS'
+              ? 'Google Drive و استانداردسازی جداول ۱۴ شرکت تابعه پایا'
+              : 'آموزش کامل Google Drive و استانداردسازی جداول ماشین‌خوان'
+          }
+          deckSubtitleFa={`جلسه ۱ · ماژول ۱-۲ (${sessionCurriculum.s1DriveSlides.length} اسلاید)`}
           accentColor="blue"
-          slides={S1_DRIVE_SLIDES}
+          slides={sessionCurriculum.s1DriveSlides}
           activeIndex={s1SlideIndex}
           onChangeIndex={setS1SlideIndex}
           copyToClipboard={copyToClipboard}
@@ -4495,9 +4556,9 @@ Tasks:
           isOpen={true}
           onClose={() => setS1ProjectorDeck(null)}
           deckTitleFa="زبان Markdown (.md)؛ زبان مشترک مهندس، گیت‌هاب و هوش مصنوعی"
-          deckSubtitleFa="جلسه ۱ · ماژول ۱-۳ (۷ اسلاید)"
+          deckSubtitleFa={`جلسه ۱ · ماژول ۱-۳ (${sessionCurriculum.s1MarkdownSlides.length} اسلاید)`}
           accentColor="purple"
-          slides={S1_MARKDOWN_SLIDES}
+          slides={sessionCurriculum.s1MarkdownSlides}
           activeIndex={s1SlideIndex}
           onChangeIndex={setS1SlideIndex}
           copyToClipboard={copyToClipboard}
@@ -4510,9 +4571,9 @@ Tasks:
           isOpen={true}
           onClose={() => setS1ProjectorDeck(null)}
           deckTitleFa="گیت‌هاب (GitHub) از صفر مطلق به زبان دفتر فنی و کنترل مدارک (DCC)"
-          deckSubtitleFa="جلسه ۱ · ماژول ۱-۴ (۹ اسلاید)"
+          deckSubtitleFa={`جلسه ۱ · ماژول ۱-۴ (${sessionCurriculum.s1GithubSlides.length} اسلاید)`}
           accentColor="teal"
-          slides={S1_GITHUB_SLIDES}
+          slides={sessionCurriculum.s1GithubSlides}
           activeIndex={s1SlideIndex}
           onChangeIndex={setS1SlideIndex}
           copyToClipboard={copyToClipboard}
@@ -4527,7 +4588,7 @@ Tasks:
           deckTitleFa="ارکستراسیون کامل پایان دوره و پل ورود به Vibe Coding"
           deckSubtitleFa="جلسه ۵ · ماژول‌های ۵-۱ و ۵-۳"
           accentColor="purple"
-          slides={S5_CAPSTONE_SLIDES}
+          slides={sessionCurriculum.s5CapstoneSlides}
           activeIndex={s1SlideIndex}
           onChangeIndex={setS1SlideIndex}
           copyToClipboard={copyToClipboard}

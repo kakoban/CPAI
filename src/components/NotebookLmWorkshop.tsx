@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Language } from '../types/cpmai';
+import { IndustryTrackId } from '../types/industryTrack';
 import { playTactileSound } from '../utils/uiSoundEffects';
 import {
   Sparkles,
@@ -30,7 +31,9 @@ import {
   FileCode,
   Users,
   Code,
-  Monitor
+  Monitor,
+  Zap,
+  Home
 } from 'lucide-react';
 import {
   ProjectorSlideModal,
@@ -38,18 +41,13 @@ import {
   splitPointTitleAndBody
 } from './ProjectorSlideModal';
 import {
-  NOTEBOOKLM_OVERVIEW,
-  UNIT_MANAGERS_MATRIX,
-  PRESENTATION_INFOGRAPHIC_GUIDES,
-  NOTEBOOKLM_EXERCISES,
+  getNotebookLmGuideForTrack,
   DepartmentUseCase,
   PresentationInfographicBlueprint,
   NotebookLmExercise
 } from '../data/notebooklm_engineering_guide';
 import {
-  SAMPLE_DEPARTMENT_DOCS,
-  SAMPLE_BLUEPRINT_DOCS,
-  SAMPLE_EXERCISE_DOCS,
+  getNotebookLmSampleDocsForTrack,
   SampleDepartmentDocument,
   SampleSubDocument
 } from '../data/notebooklm_sample_documents';
@@ -61,6 +59,7 @@ import { HrArtifactsCanvasWorkshop } from './HrArtifactsCanvasWorkshop';
 
 interface NotebookLmWorkshopProps {
   lang: Language;
+  industryTrack?: IndustryTrackId;
   onLoadToSandbox: (promptText: string) => void;
   copyToClipboard: (text: string, id: string) => void;
   copiedId: string | null;
@@ -68,21 +67,42 @@ interface NotebookLmWorkshopProps {
 
 export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
   lang,
+  industryTrack = 'CIVIL_INFRA',
   onLoadToSandbox,
   copyToClipboard,
   copiedId
 }) => {
+  const {
+    overview: NOTEBOOKLM_OVERVIEW,
+    departments: UNIT_MANAGERS_MATRIX,
+    blueprints: PRESENTATION_INFOGRAPHIC_GUIDES,
+    exercises: NOTEBOOKLM_EXERCISES
+  } = getNotebookLmGuideForTrack(industryTrack);
+  const {
+    departmentDocs: SAMPLE_DEPARTMENT_DOCS,
+    blueprintDocs: SAMPLE_BLUEPRINT_DOCS,
+    exerciseDocs: SAMPLE_EXERCISE_DOCS
+  } = getNotebookLmSampleDocsForTrack(industryTrack);
+
   const [activeSubTab, setActiveSubTab] = useState<'mastery_guide' | 'departments' | 'blueprints' | 'exercises' | 'artifacts_canvas'>('mastery_guide');
   const [activeMasteryIdx, setActiveMasteryIdx] = useState<number>(0);
   const [activeStudioToolId, setActiveStudioToolId] = useState<string>(NOTEBOOKLM_STUDIO_TOOLS[0].id);
   const [projectorDeck, setProjectorDeck] = useState<'mastery' | 'studio' | null>(null);
-  const [selectedDeptId, setSelectedDeptId] = useState<string>('tech_office');
-  const [selectedBlueprintId, setSelectedBlueprintId] = useState<string>('presentation_deck_workflow');
-  const [selectedExerciseId, setSelectedExerciseId] = useState<string>('ex1_contract_claim_extraction');
+  const [selectedDeptId, setSelectedDeptId] = useState<string>(UNIT_MANAGERS_MATRIX[0].id);
+  const [selectedBlueprintId, setSelectedBlueprintId] = useState<string>(PRESENTATION_INFOGRAPHIC_GUIDES[0].id);
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string>(NOTEBOOKLM_EXERCISES[0].id);
   const [previewDocId, setPreviewDocId] = useState<string | null>(null);
   const [docCopiedId, setDocCopiedId] = useState<string | null>(null);
   const [activeScenarioIdx, setActiveScenarioIdx] = useState<number>(0);
   const subTabNavRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setSelectedDeptId(UNIT_MANAGERS_MATRIX[0]?.id || 'tech_office');
+    setSelectedBlueprintId(PRESENTATION_INFOGRAPHIC_GUIDES[0]?.id || 'presentation_deck_workflow');
+    setSelectedExerciseId(NOTEBOOKLM_EXERCISES[0]?.id || 'ex1_contract_claim_extraction');
+    setPreviewDocId(null);
+    setActiveScenarioIdx(0);
+  }, [industryTrack]);
 
   const SUB_TAB_ITEMS: Array<{
     id: 'mastery_guide' | 'departments' | 'blueprints' | 'exercises' | 'artifacts_canvas';
@@ -253,6 +273,38 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
               'Source 2: Contractor Internal Overtime Directive (HR-INST-1403/07) & October Attendance Logs',
               'Contract Page 54 Mandatory Camp Space Table & Articles 20-H / 25 / 42-1'
             ];
+      case 'paya_board_dual_wing_deck':
+        return isFa
+          ? [
+              'پرونده پورتفوی ۶۳ پروژه و ۱۴ شرکت تابعه دو بال هلدینگ پایا سامان پارس',
+              'گزارش پیشرفت بال پیمانکاری (تهران–شمال، امارات SKF2، سدها، ریل و فرودگاه)',
+              'گزارش بال مسکن (آتی‌ساز، خانه، عمران مسکن) و طرح‌های کاوه ۱۴۰۵'
+            ]
+          : [
+              'Paya 63-Project & 14-Subsidiary Dual-Wing Portfolio Dossier',
+              'Civil Contracting progress logs (domestic & UAE SKF2)',
+              'Housing wing & 1405 Kaveh solar/cold-plasma summaries'
+            ];
+      case 'paya_kaveh_investor_infographic':
+        return isFa
+          ? [
+              'سند منطقه ویژه اقتصادی و شهر صنعتی ۳۰۰۰ هکتاری کاوه در ساوه',
+              'پرونده نیروگاه خورشیدی ۵ مگاواتی (BOT) و تصفیه‌خانه پلاسمای سرد (BLT)'
+            ]
+          : [
+              'Kaveh 3,000ha Special Economic Zone dossier',
+              '5MW Solar PV (BOT) & Cold-Plasma Effluent (BLT) specifications'
+            ];
+      case 'paya_audio_consortium_briefing':
+        return isFa
+          ? [
+              'قرارداد کنسرسیومی EPC+F و تقسیم سهم رامان، جنرال مکانیک، دی و تابیران',
+              'ضوابط ماده ۳۰ تاخیرات و خلاصه پورتفوی دو بال'
+            ]
+          : [
+              'EPC+F Consortium agreement & subsidiary workshare terms',
+              'Clause 30 notice rules & dual-wing summary'
+            ];
       case 'audio_overview_deep_dive':
       default:
         return isFa
@@ -318,6 +370,46 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
               'Source 1: Metro Line X HR, Admin & Camp Welfare Contract Clauses (metro_line_x_hr_contract_clauses.md)',
               'Source 2: Contractor Internal Overtime Directive & October Time-Card Logs (contractor_internal_overtime_directive.md)',
               'Individual Copy buttons for Paste Text of Source 1 and Source 2 in NotebookLM'
+            ];
+      case 'paya_ex1_consortium_audit':
+        return isFa
+          ? [
+              'قرارداد نمونه کنسرسیومی EPC+F پایا (paya_epcf_consortium_contract_sim.md)',
+              'تقسیم سهم ۵۰٪ رامان، ۳۰٪ جنرال مکانیک و ۲۰٪ دی/تابیران + فرجه ۲۱ روزه ماده ۳۰'
+            ]
+          : [
+              'Paya EPC+F Consortium Specimen Contract (.md)',
+              '50/30/20 subsidiary workshare & 21-day notice rule'
+            ];
+      case 'paya_ex2_kaveh_bot_audio':
+        return isFa
+          ? [
+              'پرونده BOT/BLT شهر صنعتی کاوه (نیروگاه خورشیدی ۵MW و تصفیه‌خانه پلاسمای سرد)',
+              'حداقل ۸۸٪ کاهش COD، مهلت ۴۸ ساعته خورشیدی و دوره ۱۵/۱۰ ساله'
+            ]
+          : [
+              'Kaveh BOT/BLT Concession Brief (5MW Solar & Cold Plasma)',
+              '88% COD reduction SLA, 48h solar remediation & handover terms'
+            ];
+      case 'paya_ex3_63projects_board_deck':
+        return isFa
+          ? [
+              'پرونده ۶۳ پروژه ثبت‌شده در ۸ حوزه و دو بال هلدینگ پایا سامان پارس',
+              'تحلیل فیلدهای خالی پورتال و ۰ پروژه در دسته ابنیه ساختمانی/مدیریت شهری'
+            ]
+          : [
+              '63-Project 8-Sector Portfolio Dossier (.md)',
+              'Portal metadata gap audit & empty Urban/Housing category'
+            ];
+      case 'paya_ex4_hr_fleet_cross_audit':
+        return isFa
+          ? [
+              'منبع ۱: دستورالعمل سرمایه انسانی (۵۰۰۰+ نیرو در ۱۴ شرکت تابعه)',
+              'منبع ۲: گزارش هم‌افزایی ناوگان سنگین و ایمنی HSE کارگاه‌ها'
+            ]
+          : [
+              'Source 1: Paya 5,000+ Staff HR & Welfare Directive',
+              'Source 2: Inter-Subsidiary Heavy Fleet & HSE Brief'
             ];
       case 'ex4_hse_qaqc_infographic':
       default:
@@ -453,6 +545,10 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
         return <CheckCircle2 className={className} />;
       case 'Users':
         return <Users className={className} />;
+      case 'Zap':
+        return <Zap className={className} />;
+      case 'Home':
+        return <Home className={className} />;
       case 'Layers':
       default:
         return <Layers className={className} />;

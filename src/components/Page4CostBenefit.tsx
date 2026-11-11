@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Language } from '../types/cpmai';
 import { IndustryTrackId, DisciplineId } from '../types/industryTrack';
 import { getDisciplineMetadata, getDisciplineExampleContent } from '../data/disciplineExamplesRegistry';
@@ -27,24 +27,36 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
   const [showCalculator, setShowCalculator] = useState(false);
   const isPetro = industryTrack === 'ENERGY_PETRO';
   const isEveryday = industryTrack === 'GENERAL_EVERYDAY';
+  const isPaya = industryTrack === 'PAYA_SAMAN_PARS';
   const discMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
   const discContent = disciplineId ? getDisciplineExampleContent(disciplineId) : null;
 
   // Structured breakdown states for the interactive calculator
-  const [costPersonnel, setCostPersonnel] = useState(isEveryday ? '1200' : isPetro ? '95000' : '85000');
-  const [costCompute, setCostCompute] = useState(isEveryday ? '300' : isPetro ? '25000' : '20000');
-  const [costData, setCostData] = useState(isEveryday ? '200' : isPetro ? '20000' : '15000');
-  const [costOps, setCostOps] = useState(isEveryday ? '300' : isPetro ? '20000' : '15000');
+  const [costPersonnel, setCostPersonnel] = useState(isEveryday ? '1200' : isPetro ? '95000' : isPaya ? '110000' : '85000');
+  const [costCompute, setCostCompute] = useState(isEveryday ? '300' : isPetro ? '25000' : isPaya ? '22000' : '20000');
+  const [costData, setCostData] = useState(isEveryday ? '200' : isPetro ? '20000' : isPaya ? '28000' : '15000');
+  const [costOps, setCostOps] = useState(isEveryday ? '300' : isPetro ? '20000' : isPaya ? '20000' : '15000');
 
-  const [benefitSavings, setBenefitSavings] = useState(isEveryday ? '2400' : isPetro ? '1400000' : '650000');
-  const [benefitRevenue, setBenefitRevenue] = useState(isEveryday ? '1200' : isPetro ? '1800000' : '750000');
-  const [benefitRisk, setBenefitRisk] = useState(isEveryday ? '800' : isPetro ? '450000' : '300000');
+  const [benefitSavings, setBenefitSavings] = useState(isEveryday ? '2400' : isPetro ? '1400000' : isPaya ? '850000' : '650000');
+  const [benefitRevenue, setBenefitRevenue] = useState(isEveryday ? '1200' : isPetro ? '1800000' : isPaya ? '920000' : '750000');
+  const [benefitRisk, setBenefitRisk] = useState(isEveryday ? '800' : isPetro ? '450000' : isPaya ? '430000' : '300000');
 
-  const [timeWeeks, setTimeWeeks] = useState(isEveryday ? '6' : isPetro ? '16' : '14');
+  const [timeWeeks, setTimeWeeks] = useState(isEveryday ? '6' : isPetro ? '16' : isPaya ? '12' : '14');
+
+  useEffect(() => {
+    setCostPersonnel(isEveryday ? '1200' : isPetro ? '95000' : isPaya ? '110000' : '85000');
+    setCostCompute(isEveryday ? '300' : isPetro ? '25000' : isPaya ? '22000' : '20000');
+    setCostData(isEveryday ? '200' : isPetro ? '20000' : isPaya ? '28000' : '15000');
+    setCostOps(isEveryday ? '300' : isPetro ? '20000' : isPaya ? '20000' : '15000');
+    setBenefitSavings(isEveryday ? '2400' : isPetro ? '1400000' : isPaya ? '850000' : '650000');
+    setBenefitRevenue(isEveryday ? '1200' : isPetro ? '1800000' : isPaya ? '920000' : '750000');
+    setBenefitRisk(isEveryday ? '800' : isPetro ? '450000' : isPaya ? '430000' : '300000');
+    setTimeWeeks(isEveryday ? '6' : isPetro ? '16' : isPaya ? '12' : '14');
+  }, [industryTrack, isEveryday, isPetro, isPaya]);
 
   const t = {
     en: {
-      badge: `CPMAI Phase I · Page 4 of 5 (${discMeta ? discMeta.titleEn : isEveryday ? 'Everyday & Lifestyle Track' : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
+      badge: `CPMAI Phase I · Page 4 of 5 (${discMeta ? discMeta.titleEn : isPaya ? 'Paya Saman Pars Holding Track' : isEveryday ? 'Everyday & Lifestyle Track' : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       subtaskH: 'Subtask: Cost-Benefit Analysis',
       costsAndBenefitsLabel: 'Costs and benefits:',
       costsAndBenefitsText:
@@ -53,7 +65,7 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
       promptHint:
         'Specify the financial budget, resource costs (talent, cloud/GPU, data, maintenance), project schedule/time budget, and quantifiable financial return (cost reduction, revenue uplift, risk avoidance).',
       templateBtn: 'Insert Cost-Benefit Template',
-      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} Cost-Benefit Example` : isEveryday ? 'Fill Household Budget Cost-Benefit Example' : isPetro ? 'Fill Refinery Preheat Cost-Benefit Example' : 'Fill Metro TBM Cost-Benefit Example',
+      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} Cost-Benefit Example` : isPaya ? 'Fill Paya Holding Cost-Benefit (Simulated)' : isEveryday ? 'Fill Household Budget Cost-Benefit Example' : isPetro ? 'Fill Refinery Preheat Cost-Benefit Example' : 'Fill Metro TBM Cost-Benefit Example',
       calcToggleBtn: 'Interactive Financial ROI Estimator',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
@@ -84,7 +96,7 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
       weeks: 'weeks'
     },
     fa: {
-      badge: `فاز اول CPMAI · صفحه ۴ از ۵ (${discMeta ? discMeta.titleFa : isEveryday ? 'حوزه تخصصی سبک زندگی و خانواده' : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
+      badge: `فاز اول CPMAI · صفحه ۴ از ۵ (${discMeta ? discMeta.titleFa : isPaya ? 'حوزه اختصاصی هلدینگ پایا سامان پارس' : isEveryday ? 'حوزه تخصصی سبک زندگی و خانواده' : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
       subtaskH: 'زیروظیفه: تحلیل هزینه-فایده (Subtask: Cost-Benefit Analysis)',
       costsAndBenefitsLabel: 'هزینه‌ها و منافع (Costs and benefits):',
       costsAndBenefitsText:
@@ -93,7 +105,7 @@ export const Page4CostBenefit: React.FC<Page4Props> = ({
       promptHint:
         'بودجه مالی، هزینه‌های منابع (متخصصان، زیرساخت ابری و پردازش GPU، تأمین داده، نگهداری)، بودجه زمانی و زمان‌بندی پروژه و بازدهی مالی سنجش‌پذیر (کاهش هزینه، درآمد افزایشی، جلوگیری از زیان) را ثبت نمایید.',
       templateBtn: 'درج قالب تحلیل هزینه-فایده و بودجه',
-      exampleBtn: discMeta ? `پر کردن با تحلیل هزینه-فایده ${discMeta.shortTitleFa}` : isEveryday ? 'پر کردن با نمونه اقتصاد خانوار (هزینه-فایده)' : isPetro ? 'پر کردن با نمونه پالایشگاهی (هزینه-فایده)' : 'پر کردن با نمونه مگاپروژه احداث مترو (هزینه-فایده)',
+      exampleBtn: discMeta ? `پر کردن با تحلیل هزینه-فایده ${discMeta.shortTitleFa}` : isPaya ? 'پر کردن با نمونه هلدینگ پایا (شبیه‌سازی آموزشی)' : isEveryday ? 'پر کردن با نمونه اقتصاد خانوار (هزینه-فایده)' : isPetro ? 'پر کردن با نمونه پالایشگاهی (هزینه-فایده)' : 'پر کردن با نمونه مگاپروژه احداث مترو (هزینه-فایده)',
       calcToggleBtn: 'ماشین‌حساب تعاملی برآورد ROI و بودجه',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
@@ -343,8 +355,36 @@ With a $2,000 investment budget and $3,720 in verified first-year household savi
 ۴. جمع‌بندی تحلیل هزینه-فایده:
 پروژه با هزینه ۳۰ میلیون تومان و سودآوری ۵۵ میلیون تومان در سال اول، نرخ بازگشت سرمایه ۱۸۳٪ و دوره بازگشت کمتر از ۷ ماه دارد و هزینه سفر سالیانه خانواده را به طور کامل از محل مدیریت دورریز تامین می‌نماید.`;
 
-    let selectedEn = isEveryday ? exampleEnEveryday : isPetro ? exampleEnPetro : exampleEnCivil;
-    let selectedFa = isEveryday ? exampleFaEveryday : isPetro ? exampleFaPetro : exampleFaCivil;
+    const exampleEnPaya = `Project Cost-Benefit Analysis: Paya Saman Pars Dual-Wing Portfolio Intelligence (Simulated Training Data)
+
+1. Cost Budget ($180,000 simulated sprint estimate):
+- AI PMO & Data Engineering across 14 subsidiaries: $110,000
+- Cloud workspace, MCP connectors & secure holding repository: $22,000
+- Portal normalization & 63-project data ingestion: $28,000
+- Governance, training & change management: $20,000
+
+2. Quantified Annual Business Benefits (Simulated):
+- Heavy fleet & inter-subsidiary rental savings: $850,000/year
+- Kaveh 5MW solar/cold-plasma & EPC+F claim protection: $920,000/year
+- Avoiding schedule slippage across dual-wing workfronts: $430,000/year
+- Total Simulated Annual Benefit: $2,200,000.`;
+
+    const exampleFaPaya = `تحلیل هزینه-فایده و بودجه: سامانه فرماندهی پورتفوی دو بال پایا سامان پارس (مقادیر شبیه‌سازی‌شده آموزشی)
+
+۱. بودجه هزینه‌ای اسپرینت (تخمین آموزشی ۱۸۰,۰۰۰ دلار معادل برآوردی دوره):
+- تیم مهندسی داده، کنترل پورتفو و همگام‌سازی ۱۴ شرکت تابعه: ۱۱۰,۰۰۰ دلار
+- زیرساخت امن ابری، کانکتورهای MCP و مخازن خصوصی گیت‌هاب: ۲۲,۰۰۰ دلار
+- پاکسازی جداول ۶۳ پروژه و تکمیل شکاف فیلدهای پورتال و بخش مسکن: ۲۸,۰۰۰ دلار
+- آموزش پرسنل ۵۰۰۰ نفره و حاکمیت تغییر: ۲۰,۰۰۰ دلار
+
+۲. منافع بالقوه سالانه (شبیه‌سازی آموزشی):
+- صرفه‌جویی از محل جابه‌جایی داخلی ناوگان سنگین بین شرکت‌ها: ۸۵۰,۰۰۰ دلار
+- بهره‌وری نیروگاه خورشیدی ۵MW / پلاسمای سرد کاوه و صیانت از لوایح EPC+F: ۹۲۰,۰۰۰ دلار
+- کاهش ریسک تاخیرات در بال پیمانکاری و بال مسکن: ۴۳۰,۰۰۰ دلار
+- جمع منافع شبیه‌سازی‌شده: ۲,۲۰۰,۰۰۰ دلار.`;
+
+    let selectedEn = isPaya ? exampleEnPaya : isEveryday ? exampleEnEveryday : isPetro ? exampleEnPetro : exampleEnCivil;
+    let selectedFa = isPaya ? exampleFaPaya : isEveryday ? exampleFaEveryday : isPetro ? exampleFaPetro : exampleFaCivil;
 
     if (discContent) {
       selectedEn = `Project Cost-Benefit Analysis: ${discContent.titleEn}

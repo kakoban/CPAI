@@ -26,16 +26,17 @@ export const Page2ProblemIteration: React.FC<Page2Props> = ({
   const [copied, setCopied] = useState(false);
   const isPetro = industryTrack === 'ENERGY_PETRO';
   const isEveryday = industryTrack === 'GENERAL_EVERYDAY';
+  const isPaya = industryTrack === 'PAYA_SAMAN_PARS';
   const discMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
   const discContent = disciplineId ? getDisciplineExampleContent(disciplineId) : null;
 
   const t = {
     en: {
-      badge: `CPMAI Phase I · Page 2 of 5 (${discMeta ? discMeta.titleEn : isEveryday ? 'Everyday & Lifestyle Track' : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
+      badge: `CPMAI Phase I · Page 2 of 5 (${discMeta ? discMeta.titleEn : isPaya ? 'Paya Saman Pars Holding Track' : isEveryday ? 'Everyday & Lifestyle Track' : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       slideTitle: 'What problem are you solving with AI in this iteration?',
       promptHint: 'Write your complete problem definition for this iteration. Address the business friction, why traditional software fails, current vs future state, and scope boundaries.',
       templateBtn: 'Insert CPMAI Template',
-      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} Case Study` : isEveryday ? 'Fill Smart Household & Travel Case Study' : isPetro ? 'Fill Refinery Fouling Case Study' : 'Fill Urban Metro TBM Case Study',
+      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} Case Study` : isPaya ? 'Fill Paya Holding Dual-Wing Case Study' : isEveryday ? 'Fill Smart Household & Travel Case Study' : isPetro ? 'Fill Refinery Fouling Case Study' : 'Fill Urban Metro TBM Case Study',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
       copiedToast: 'Copied to clipboard!',
@@ -49,11 +50,11 @@ export const Page2ProblemIteration: React.FC<Page2Props> = ({
       tip4: 'Explicitly define what is IN-SCOPE versus deferred to future iterations.'
     },
     fa: {
-      badge: `فاز اول CPMAI · صفحه ۲ از ۵ (${discMeta ? discMeta.titleFa : isEveryday ? 'حوزه تخصصی سبک زندگی و خانواده' : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
+      badge: `فاز اول CPMAI · صفحه ۲ از ۵ (${discMeta ? discMeta.titleFa : isPaya ? 'حوزه اختصاصی هلدینگ پایا سامان پارس' : isEveryday ? 'حوزه تخصصی سبک زندگی و خانواده' : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
       slideTitle: 'What problem are you solving with AI in this iteration?',
       promptHint: 'تعریف دقیق مسئله در این تکرار (اسپرینت) را بنویسید: چه اصطکاکی در کسب‌وکار رخ می‌دهد؟ چرا نرم‌افزار سنتی پاسخگو نیست؟ وضعیت فعلی در برابر مطلوب چیست و مرزهای این تکرار کجاست؟',
       templateBtn: 'درج قالب استاندارد CPMAI',
-      exampleBtn: discMeta ? `پر کردن با نمونه ${discMeta.shortTitleFa}` : isEveryday ? 'پر کردن با نمونه اقتصاد خانوار و سبد خرید' : isPetro ? 'پر کردن با نمونه پالایشگاهی (رسوب مبدل‌ها)' : 'پر کردن با نمونه مگاپروژه احداث خط مترو (TBM)',
+      exampleBtn: discMeta ? `پر کردن با نمونه ${discMeta.shortTitleFa}` : isPaya ? 'پر کردن با نمونه دو بال هلدینگ پایا سامان پارس' : isEveryday ? 'پر کردن با نمونه اقتصاد خانوار و سبد خرید' : isPetro ? 'پر کردن با نمونه پالایشگاهی (رسوب مبدل‌ها)' : 'پر کردن با نمونه مگاپروژه احداث خط مترو (TBM)',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
       copiedToast: 'متن بوم در کلیپ‌بورد کپی شد!',
@@ -205,8 +206,40 @@ Family consumption rates fluctuate seasonally with erratic shopping schedules. H
 - درون محدوده (In-Scope): اقلام پرمصرف و فاسدشدنی یخچال (لبنیات، سبزیجات، میوه و پروتئین) بر مبنای رسیدهای سوپرمارکت و الگوی مصرف خانواده ۴ نفره.
 - خارج از محدوده (Out-of-Scope): خریدهای پوشاک، لوازم خانگی و بهینه‌سازی بلیت سفرهای خارجی (موکول به اسپرینت‌های ۲ و ۳).`;
 
-    let selectedEn = isEveryday ? exampleEnEveryday : isPetro ? exampleEnPetro : exampleEnCivil;
-    let selectedFa = isEveryday ? exampleFaEveryday : isPetro ? exampleFaPetro : exampleFaCivil;
+    const exampleEnPaya = `Iteration Problem Definition: Paya Saman Pars Dual-Wing 63-Project Risk & Portfolio Consolidation (Simulated)
+
+1. Business Problem:
+Across 63 site-listed projects in 8 domains (roads/UAE SKF2, dams, rail, airports, industrial civil, MEP) and 14 subsidiaries, fragmented Excel workbooks and empty portal detail fields hide cross-subsidiary heavy fleet bottlenecks and EPC+F/BOT covenant risks.
+
+2. Why AI?
+Static spreadsheets cannot reconcile heterogeneous subsidiary reports, unstructured delay correspondence, and UAE vs domestic currencies/calendars automatically.
+
+3. Current State vs Desired Future State:
+- Current: Manual monthly aggregation taking days; 0 projects cataloged in the Urban/Housing portal section.
+- Future in Sprint 1: Automated 45-day bottleneck radar & zero-hallucination board brief flagging missing fields explicitly.
+
+4. Iteration Scoping (Sprint 1):
+- IN-SCOPE: Standardizing portfolio CSVs & EPC+F/BOT contract checks across flagship civil projects + Kaveh Industrial City.
+- OUT-OF-SCOPE: Live ERP write-back (deferred to Sprint 2).`;
+
+    const exampleFaPaya = `تعریف مسئله این تکرار: یکپارچه‌سازی هوشمند پورتفوی ۶۳ پروژه‌ای و دو بال هلدینگ پایا سامان پارس (شبیه‌سازی آموزشی)
+
+۱. صورت مسئله کسب‌وکار:
+گزارش‌های ۶۳ پروژه در ۸ حوزه و ۱۴ شرکت تابعه دو بال هلدینگ به‌صورت پراکنده و ناهمگون تولید می‌شوند و خالی‌بودن فیلدهای کارفرما/مبلغ/تاریخ در پورتال، رصد ریسک قراردادهای EPC+F، BOT و BLT را کند کرده است.
+
+۲. چرا هوش مصنوعی؟
+اکسل‌های سنتی قادر به تطبیق خودکار مکاتبات کنسرسیومی، تقویم پروژه‌های داخلی و امارات و کشف گلوگاه‌های مشترک ناوگان بین ۱۴ شرکت تابعه نیستند.
+
+۳. وضعیت فعلی در برابر مطلوب:
+- وضعیت فعلی: تجمیع دستی زمان‌بر و ثبت ۰ پروژه در بخش ابنیه ساختمانی و مدیریت شهری.
+- وضعیت مطلوب در اسپرینت ۱: هشدار ۴۵ روزه تاخیرات بحرانی، هم‌افزایی ناوگان سنگین و گزارش تلفیقی بدون توهم.
+
+۴. مرزبندی محدوده (اسپرینت ۱):
+- درون محدوده: استانداردسازی داده‌های ۶۳ پروژه، قراردادهای نمونه EPC+F/BOT و بهره‌برداری کاوه.
+- خارج از محدوده: اتصال مستقیم نوشتاری به نرم‌افزارهای مالی ERP (موکول به اسپرینت ۲).`;
+
+    let selectedEn = isPaya ? exampleEnPaya : isEveryday ? exampleEnEveryday : isPetro ? exampleEnPetro : exampleEnCivil;
+    let selectedFa = isPaya ? exampleFaPaya : isEveryday ? exampleFaEveryday : isPetro ? exampleFaPetro : exampleFaCivil;
 
     if (discContent) {
       selectedEn = `Iteration Problem Definition: ${discContent.titleEn}

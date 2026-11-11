@@ -26,17 +26,21 @@ import {
 } from 'lucide-react';
 import { LLM_FOR_HUMANS_CHAPTERS, LlmChapter } from '../../data/llmForHumansData';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../../data/logo';
+import { IndustryTrackId } from '../../types/industryTrack';
 import ajaLogoImg from '../../assets/aja_logo_transparent.png';
 import { PetroClaudeArtifactSimulator } from '../PetroClaudeArtifactSimulator';
+import { PayaHoldingArtifactSimulator } from '../PayaHoldingArtifactSimulator';
 
 interface LlmForHumansBookModalProps {
   isOpen: boolean;
   onClose: () => void;
+  industryTrack?: IndustryTrackId;
 }
 
 export const LlmForHumansBookModal: React.FC<LlmForHumansBookModalProps> = ({
   isOpen,
-  onClose
+  onClose,
+  industryTrack = 'CIVIL_INFRA'
 }) => {
   const [selectedChapterId, setSelectedChapterId] = useState<string>('ch1');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -607,14 +611,22 @@ export const LlmForHumansBookModal: React.FC<LlmForHumansBookModalProps> = ({
                   </article>
                 ))}
 
-                {/* Live Claude Artifact Petrochemical Simulator for Chapter 5 */}
+                {/* Live Claude Artifact Simulator for Chapter 5 */}
                 {currentChapter.id === 'ch5' && (
                   <div className="pt-2 space-y-3">
                     <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-900 dark:text-white">
                       <Sparkles className="w-4 h-4 text-cyan-500" />
-                      <span>کارگاه عملی و شبیه‌ساز زنده: آرتیفکت‌های تعاملی Claude در صنعت نفت و گاز</span>
+                      <span>
+                        {industryTrack === 'PAYA_SAMAN_PARS'
+                          ? 'کارگاه عملی و شبیه‌ساز زنده: آرتیفکت فرماندهی دو بال هلدینگ پایا سامان پارس در Claude'
+                          : 'کارگاه عملی و شبیه‌ساز زنده: آرتیفکت‌های تعاملی Claude در صنعت نفت و گاز'}
+                      </span>
                     </div>
-                    <PetroClaudeArtifactSimulator lang="fa" />
+                    {industryTrack === 'PAYA_SAMAN_PARS' ? (
+                      <PayaHoldingArtifactSimulator lang="fa" />
+                    ) : (
+                      <PetroClaudeArtifactSimulator lang="fa" />
+                    )}
                   </div>
                 )}
               </div>

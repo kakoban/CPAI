@@ -881,6 +881,7 @@ export default function App() {
             onComplete={handleOnboardingComplete}
             onLogout={handleLogout}
             lang={lang}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -915,6 +916,7 @@ export default function App() {
         <LlmForHumansBookModal
           isOpen={isBookModalOpen}
           onClose={() => setIsBookModalOpen(false)}
+          industryTrack={industryTrack}
         />
 
         {/* Industry Track Selector Modal */}
@@ -1714,6 +1716,7 @@ export default function App() {
             onComplete={handleOnboardingComplete}
             onLogout={handleLogout}
             lang={lang}
+            industryTrack={industryTrack}
           />
         )}
 
@@ -1748,6 +1751,7 @@ export default function App() {
         <LlmForHumansBookModal
           isOpen={isBookModalOpen}
           onClose={() => setIsBookModalOpen(false)}
+          industryTrack={industryTrack}
         />
 
         {/* Industry Track Selector Modal */}

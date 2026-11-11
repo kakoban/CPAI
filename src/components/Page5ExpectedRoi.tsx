@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Language } from '../types/cpmai';
 import { IndustryTrackId, DisciplineId } from '../types/industryTrack';
 import { getDisciplineMetadata, getDisciplineExampleContent } from '../data/disciplineExamplesRegistry';
@@ -27,23 +27,31 @@ export const Page5ExpectedRoi: React.FC<Page5Props> = ({
   const [showCalculator, setShowCalculator] = useState(false);
   const isPetro = industryTrack === 'ENERGY_PETRO';
   const isEveryday = industryTrack === 'GENERAL_EVERYDAY';
+  const isPaya = industryTrack === 'PAYA_SAMAN_PARS';
   const discMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
   const discContent = disciplineId ? getDisciplineExampleContent(disciplineId) : null;
 
   // Sensitivity analysis inputs
-  const [investmentCost, setInvestmentCost] = useState(isEveryday ? '2000' : isPetro ? '160000' : '135000');
-  const [annualBenefit, setAnnualBenefit] = useState(isEveryday ? '3720' : isPetro ? '3650000' : '1700000');
-  const [annualOpsCost, setAnnualOpsCost] = useState(isEveryday ? '300' : isPetro ? '35000' : '25000');
-  const [adoptionRate, setAdoptionRate] = useState('90'); // %
+  const [investmentCost, setInvestmentCost] = useState(isEveryday ? '2000' : isPetro ? '160000' : isPaya ? '180000' : '135000');
+  const [annualBenefit, setAnnualBenefit] = useState(isEveryday ? '3720' : isPetro ? '3650000' : isPaya ? '2200000' : '1700000');
+  const [annualOpsCost, setAnnualOpsCost] = useState(isEveryday ? '300' : isPetro ? '35000' : isPaya ? '30000' : '25000');
+  const [adoptionRate, setAdoptionRate] = useState(isPaya ? '85' : '90'); // %
+
+  useEffect(() => {
+    setInvestmentCost(isEveryday ? '2000' : isPetro ? '160000' : isPaya ? '180000' : '135000');
+    setAnnualBenefit(isEveryday ? '3720' : isPetro ? '3650000' : isPaya ? '2200000' : '1700000');
+    setAnnualOpsCost(isEveryday ? '300' : isPetro ? '35000' : isPaya ? '30000' : '25000');
+    setAdoptionRate(isPaya ? '85' : '90');
+  }, [industryTrack, isEveryday, isPetro, isPaya]);
 
   const t = {
     en: {
-      badge: `CPMAI Phase I · Page 5 of 5 (${discMeta ? discMeta.titleEn : isEveryday ? 'Everyday & Lifestyle Track' : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
+      badge: `CPMAI Phase I · Page 5 of 5 (${discMeta ? discMeta.titleEn : isPaya ? 'Paya Saman Pars Holding Track' : isEveryday ? 'Everyday & Lifestyle Track' : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       slideBanner: 'What is the expected ROI for this project?',
       promptHint:
         'Calculate and articulate the expected Return on Investment (ROI) for this cognitive iteration. Include quantified financial ROI, payback period, strategic/non-monetary dividends, and risk/adoption sensitivity assumptions.',
       templateBtn: 'Insert CPMAI ROI Template',
-      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} ROI Example` : isEveryday ? 'Fill Household Budget & Travel ROI Example' : isPetro ? 'Fill Refinery Fouling ROI Example' : 'Fill Metro TBM Subsidence ROI Example',
+      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} ROI Example` : isPaya ? 'Fill Paya Holding ROI (Simulated)' : isEveryday ? 'Fill Household Budget & Travel ROI Example' : isPetro ? 'Fill Refinery Fouling ROI Example' : 'Fill Metro TBM Subsidence ROI Example',
       calcToggleBtn: 'Interactive ROI & Sensitivity Tool',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
@@ -75,12 +83,12 @@ export const Page5ExpectedRoi: React.FC<Page5Props> = ({
       months: 'months'
     },
     fa: {
-      badge: `فاز اول CPMAI · صفحه ۵ از ۵ (${discMeta ? discMeta.titleFa : isEveryday ? 'حوزه تخصصی سبک زندگی و خانواده' : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
+      badge: `فاز اول CPMAI · صفحه ۵ از ۵ (${discMeta ? discMeta.titleFa : isPaya ? 'حوزه اختصاصی هلدینگ پایا سامان پارس' : isEveryday ? 'حوزه تخصصی سبک زندگی و خانواده' : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
       slideBanner: 'What is the expected ROI for this project?',
       promptHint:
         'نرخ بازگشت سرمایه (ROI) مورد انتظار برای این تکرار هوش مصنوعی را محاسبه و تبیین کنید. شامل درصد بازگشت مالی، دوره بازگشت سرمایه (Payback Period)، مزایای استراتژیک غیرمالی و تحلیل حساسیت نرخ پذیرش سازمانی.',
       templateBtn: 'درج قالب استاندارد برآورد ROI',
-      exampleBtn: discMeta ? `پر کردن با نمونه ROI ${discMeta.shortTitleFa}` : isEveryday ? 'پر کردن با نمونه بازگشت سرمایه اقتصاد خانوار' : isPetro ? 'پر کردن با نمونه پالایشگاهی (بازگشت سرمایه ROI)' : 'پر کردن با نمونه مگاپروژه احداث مترو (بازگشت سرمایه ROI)',
+      exampleBtn: discMeta ? `پر کردن با نمونه ROI ${discMeta.shortTitleFa}` : isPaya ? 'پر کردن با نمونه ROI پایا (شبیه‌سازی آموزشی)' : isEveryday ? 'پر کردن با نمونه بازگشت سرمایه اقتصاد خانوار' : isPetro ? 'پر کردن با نمونه پالایشگاهی (بازگشت سرمایه ROI)' : 'پر کردن با نمونه مگاپروژه احداث مترو (بازگشت سرمایه ROI)',
       calcToggleBtn: 'ابزار تعاملی محاسبه ROI و تحلیل حساسیت',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
@@ -178,7 +186,14 @@ export const Page5ExpectedRoi: React.FC<Page5Props> = ({
   };
 
   const handleInsertExample = () => {
-    const selectedEn = isEveryday ? `Detailed ROI Justification: Smart Household Budget & Family Vacation Savings (Iteration 1)
+    const selectedEn = isPaya ? `Detailed ROI Justification: Paya Saman Pars Dual-Wing Portfolio Intelligence (Simulated)
+
+1. Executive ROI Summary (Educational Simulation):
+- Initial Sprint Investment: $180,000
+- Gross Annualized Value: $2,200,000 (Heavy fleet dispatch across 14 subsidiaries, EPC+F/BOT risk shield, Kaveh 5MW solar/cold-plasma optimization)
+- Risk-Adjusted Value (85% subsidiary adoption): $1,870,000
+- Annual OpEx & Retraining: $30,000
+- First-Year Net ROI: 922% | Payback: 1.2 Months` : isEveryday ? `Detailed ROI Justification: Smart Household Budget & Family Vacation Savings (Iteration 1)
 
 1. Executive Financial ROI Summary:
 - Initial Sprint Investment: $2,000 (OCR receipt scanner integration, family onboarding, serverless bot setup)
@@ -227,7 +242,14 @@ Even under conservative assumptions with a 25% drop in heavy crude premium and 7
 
 3. Downside Sensitivity Cushion:
 Even if model prediction accuracy degrades by 40% and site adoption falls to 60%, the net annual benefit exceeds $580,000, achieving financial breakeven within 2.8 months. The investment profile demonstrates exceptional resilience under CPMAI standards.`;
-    const selectedFa = isEveryday ? `توجیه تفصیلی نرخ بازگشت سرمایه (ROI): سامانه مدیریت اقتصاد خانوار و تامین صندوق سفر (تکرار اول)
+    const selectedFa = isPaya ? `توجیه تفصیلی نرخ بازگشت سرمایه (ROI): سامانه پورتفوی دو بال پایا سامان پارس (مقادیر شبیه‌سازی‌شده آموزشی)
+
+۱. خلاصه شاخص‌های بازگشت سرمایه (شبیه‌سازی کلاسی):
+- سرمایه‌گذاری اولیه تکرار ۱: ۱۸۰,۰۰۰ دلار
+- منافع ناخالص سالانه: ۲,۲۰۰,۰۰۰ دلار (هم‌افزایی ناوگان سنگین ۱۴ شرکت، صیانت از EPC+F/BOT، بهینه‌سازی خورشیدی ۵MW و پلاسمای سرد کاوه)
+- ارزش تعدیل‌شده با نرخ پذیرش ۸۵٪ مدیران دو بال: ۱,۸۷۰,۰۰۰ دلار
+- هزینه سالیانه نگهداری و پایش: ۳۰,۰۰۰ دلار
+- نرخ بازگشت سرمایه سال اول: ۹۲۲٪ | دوره بازگشت: ۱.۲ ماه (شبیه‌سازی آموزشی).` : isEveryday ? `توجیه تفصیلی نرخ بازگشت سرمایه (ROI): سامانه مدیریت اقتصاد خانوار و تامین صندوق سفر (تکرار اول)
 
 ۱. خلاصه مدیریتی شاخص‌های بازگشت سرمایه:
 - سرمایه‌گذاری اولیه در این تکرار: ۳۰,۰۰۰,۰۰۰ تومان (طراحی پایپ‌لاین خوانش رسید، بات پیام‌رسان و استقرار اولیه)

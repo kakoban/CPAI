@@ -26,15 +26,18 @@ export const Page3SuccessCriteria: React.FC<Page3Props> = ({
   const [copied, setCopied] = useState(false);
   const isPetro = industryTrack === 'ENERGY_PETRO';
   const isEveryday = industryTrack === 'GENERAL_EVERYDAY';
+  const isPaya = industryTrack === 'PAYA_SAMAN_PARS';
   const discMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
   const discContent = disciplineId ? getDisciplineExampleContent(disciplineId) : null;
 
   const t = {
     en: {
-      badge: `CPMAI Phase I · Page 3 of 5 (${discMeta ? discMeta.titleEn : isEveryday ? 'Everyday & Lifestyle Track' : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
+      badge: `CPMAI Phase I · Page 3 of 5 (${discMeta ? discMeta.titleEn : isPaya ? 'Paya Saman Pars Holding Track' : isEveryday ? 'Everyday & Lifestyle Track' : isPetro ? 'Oil & Gas Petrochemical Track' : 'Civil Megaproject Track'})`,
       subtaskH: 'Subtask: Determine Business Success Criteria',
       criteriaLabel: 'Business success criteria:',
-      criteriaText: isEveryday
+      criteriaText: isPaya
+        ? 'Describe holding-level success criteria: faster dual-wing board consolidation, zero missed EPC+F/BOT notice time-bars, higher internal fleet sharing across 14 subsidiaries, and closing portal metadata gaps.'
+        : isEveryday
         ? 'Describe successful household outcomes: reducing grocery waste to under 5%, capturing monthly budget savings, and family satisfaction with meal and vacation planning.'
         : isPetro
         ? 'Describe success criteria from the refinery and operations perspective, such as reducing flaring, preventing shutdowns, and increasing thermal efficiency.'
@@ -42,7 +45,7 @@ export const Page3SuccessCriteria: React.FC<Page3Props> = ({
       slideTitle: 'What are the objective measures of success for this project iteration?',
       promptHint: 'Identify specific, measurable business success metrics for this iteration, distinguishing between objective quantitative KPIs and subjective qualitative judgments.',
       templateBtn: 'Insert Criteria Template',
-      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} Success Criteria` : isEveryday ? 'Fill Household Success Criteria' : isPetro ? 'Fill Refinery Fouling Success Criteria' : 'Fill Urban Metro TBM Success Criteria',
+      exampleBtn: discMeta ? `Fill ${discMeta.shortTitleEn} Success Criteria` : isPaya ? 'Fill Paya Holding Success Criteria' : isEveryday ? 'Fill Household Success Criteria' : isPetro ? 'Fill Refinery Fouling Success Criteria' : 'Fill Urban Metro TBM Success Criteria',
       clearBtn: 'Clear Canvas',
       copyBtn: 'Copy Canvas',
       copiedToast: 'Copied to clipboard!',
@@ -57,10 +60,12 @@ export const Page3SuccessCriteria: React.FC<Page3Props> = ({
       tip4: 'Keep the success criteria calibrated strictly to THIS iteration scope, avoiding premature promises for future sprints.'
     },
     fa: {
-      badge: `فاز اول CPMAI · صفحه ۳ از ۵ (${discMeta ? discMeta.titleFa : isEveryday ? 'حوزه تخصصی سبک زندگی و خانواده' : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
+      badge: `فاز اول CPMAI · صفحه ۳ از ۵ (${discMeta ? discMeta.titleFa : isPaya ? 'حوزه اختصاصی هلدینگ پایا سامان پارس' : isEveryday ? 'حوزه تخصصی سبک زندگی و خانواده' : isPetro ? 'حوزه تخصصی نفت و گاز' : 'حوزه تخصصی مگاپروژه‌های عمرانی'})`,
       subtaskH: 'زیروظیفه: تعیین معیارهای موفقیت کسب‌وکار (Subtask: Determine Business Success Criteria)',
       criteriaLabel: 'معیارهای موفقیت کسب‌وکار (Business success criteria):',
-      criteriaText: isEveryday
+      criteriaText: isPaya
+        ? 'معیارهای موفقیت در سطح هلدینگ پایا سامان پارس را توصیف کنید؛ مانند کاهش ۳۵٪ زمان تجمیع گزارش‌های ۶۳ پروژه، صفرشدن اخطارهای سوخت‌شده EPC+F و تکمیل کاتالوگ دو بال (داده‌های عددی شبیه‌سازی‌شده آموزشی).'
+        : isEveryday
         ? 'معیارهای یک نتیجه موفق از دیدگاه اقتصاد خانوار و سبک زندگی را توصیف کنید؛ مانند کاهش دورریز مواد غذایی به زیر ۵٪، ذخیره ماهانه در صندوق سفر و رضایت اعضای خانواده.'
         : isPetro
         ? 'معیارهای یک نتیجه موفق یا سودمند از دیدگاه پالایشگاه و بهره‌برداری را توصیف کنید؛ مانند کاهش مشعل‌سوزی، جلوگیری از شات‌دان و افزایش راندمان حرارتی.'
@@ -68,7 +73,7 @@ export const Page3SuccessCriteria: React.FC<Page3Props> = ({
       slideTitle: 'What are the objective measures of success for this project iteration?',
       promptHint: 'معیارهای عینی و سنجش‌پذیر موفقیت تجاری را برای این تکرار پروژه مشخص کنید و بین شاخص‌های کمّی و ارزیابی‌های کیفی تفکیک قائل شوید.',
       templateBtn: 'درج قالب استاندارد معیارها',
-      exampleBtn: discMeta ? `پر کردن با معیارهای ${discMeta.shortTitleFa}` : isEveryday ? 'پر کردن با معیارهای موفقیت اقتصاد خانوار' : isPetro ? 'پر کردن با نمونه پالایشگاهی (معیارهای موفقیت)' : 'پر کردن با نمونه مگاپروژه احداث مترو (معیارهای موفقیت)',
+      exampleBtn: discMeta ? `پر کردن با معیارهای ${discMeta.shortTitleFa}` : isPaya ? 'پر کردن با معیارهای هلدینگ پایا سامان پارس' : isEveryday ? 'پر کردن با معیارهای موفقیت اقتصاد خانوار' : isPetro ? 'پر کردن با نمونه پالایشگاهی (معیارهای موفقیت)' : 'پر کردن با نمونه مگاپروژه احداث مترو (معیارهای موفقیت)',
       clearBtn: 'پاک کردن بوم',
       copyBtn: 'کپی متن بوم',
       copiedToast: 'متن بوم در کلیپ‌بورد کپی شد!',
@@ -205,8 +210,28 @@ export const Page3SuccessCriteria: React.FC<Page3Props> = ({
 ۳. آستانه پذیرش حداقلی برای پیشروی:
 - در صورت کاهش کمتر از ۱۰ درصدی دورریز در ماه اول، الگوریتم پیشنهاد سبد خرید بر اساس تعداد وعده‌های صرف‌شده در خانه بازتنظیم شود.`;
 
-    let selectedEn = isEveryday ? exampleEnEveryday : isPetro ? exampleEnPetro : exampleEnCivil;
-    let selectedFa = isEveryday ? exampleFaEveryday : isPetro ? exampleFaPetro : exampleFaCivil;
+    const exampleEnPaya = `Business Success Criteria: Paya Saman Pars Dual-Wing Portfolio Intelligence (Simulated)
+
+1. Objective (Quantitative) Measures:
+- Consolidation Speed: Cut monthly 14-subsidiary executive reporting turnaround by 35% (simulated).
+- Portal Completeness: Populate standardized project passports for all 63 cataloged works and the Housing Wing.
+- Fleet Synergy: Increase internal cross-subsidiary heavy machinery utilization by 12% (simulated).
+
+2. Subjective Criteria:
+- Executive Trust: Both wing directors confirm zero fabricated figures and accurate EPC+F/BOT clause citations.`;
+
+    const exampleFaPaya = `معیارهای موفقیت کسب‌وکار: پایش پورتفوی ۶۳ پروژه‌ای و دو بال پایا سامان پارس (شبیه‌سازی آموزشی)
+
+۱. معیارهای عینی و کمّی:
+- کاهش ۳۵ درصدی زمان تجمیع گزارش‌های ۱۴ شرکت تابعه برای ستاد هلدینگ (شبیه‌سازی‌شده).
+- تکمیل ۱۰۰ درصدی شناسنامه دیجیتال ۶۳ پروژه و دسته ابنیه/مسکن با حذف اعداد حدسی.
+- افزایش ۱۲ درصدی بهره‌وری جابه‌جایی داخلی ناوگان سنگین بین بال عمرانی و مسکن (شبیه‌سازی‌شده).
+
+۲. معیار کیفی و مرجع قضاوت:
+- تایید مدیران دو بال مبنی بر استناد دقیق دستیار به بندهای قراردادهای EPC+F و BOT و ضوابط کاوه.`;
+
+    let selectedEn = isPaya ? exampleEnPaya : isEveryday ? exampleEnEveryday : isPetro ? exampleEnPetro : exampleEnCivil;
+    let selectedFa = isPaya ? exampleFaPaya : isEveryday ? exampleFaEveryday : isPetro ? exampleFaPetro : exampleFaCivil;
 
     if (discContent) {
       selectedEn = `Business Success Criteria: ${discContent.titleEn}
