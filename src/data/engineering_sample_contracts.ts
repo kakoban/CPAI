@@ -1,5 +1,8 @@
+import { IndustryTrackId } from '../types/industryTrack';
+
 export interface ContractSpecimen {
   id: string;
+  trackIds?: IndustryTrackId[];
   titleFa: string;
   titleEn: string;
   domainFa: string;
@@ -274,5 +277,131 @@ Artifact Directives:
         queryEn: 'Negotiations regarding FX adjustment under Article 3.3 failed. Draft an executive dispute summary for referral to the 3-member DAB under Article 9 and FIDIC Silver Book.'
       }
     ]
+  },
+  {
+    id: 'paya_epcf_consortium_contract',
+    trackIds: ['PAYA_SAMAN_PARS'],
+    titleFa: 'قرارداد ۱ پایا: موافقت‌نامه کنسرسیومی EPC+F زیرساخت راه، تونل و خطوط ریلی (نمونه آموزشی)',
+    titleEn: 'Paya Contract 1: EPC+F Consortium Agreement for Highway, Tunnel & Rail Infrastructure (Simulated)',
+    domainFa: 'بال پیمانکاری زیرساختی · رامان، جنرال مکانیک، دی و ملی ساختمان',
+    domainEn: 'Civil Contracting Wing · Raman, General Mechanic, Dey & Melli Sakhteman',
+    governingStandardFa: 'مدل کنسرسیومی EPC+F · شرایط عمومی پیمان (نشریه ۴۳۱۱) + ضوابط تامین مالی (فاینانس)',
+    governingStandardEn: 'EPC+F Consortium Governance · Circular 4311 & Contractor Financing Covenants',
+    fileName: 'paya_epcf_consortium_contract_sim.md',
+    fileDownloadPath: '/sample_contracts/paya_epcf_consortium_contract_sim.md',
+    summaryFa: 'سند شبیه‌سازی‌شده آموزشی ویژه هلدینگ پایا سامان پارس: شامل تقسیم کار بین شرکت‌های تابعه عضو کنسرسیوم، تعهدات فاینانس EPC+F، فرجه ۲۱ روزه تاخیرات ماده ۳۰، تسعیر تجهیزات وارداتی و تضامین متقابل.',
+    summaryEn: 'Simulated educational contract for Paya Saman Pars covering consortium workshare across subsidiaries, EPC+F financing milestones, Clause 30 21-day notice rule, and FX equipment indexation.',
+    markdownContent: `# قرارداد نمونه کنسرسیومی EPC+F احداث قطعه آزادراهی، تونل و تقاطع غیرهمسطح (متن شبیه‌سازی‌شده آموزشی)
+**هشدار آموزشی:** *به دلیل خالی‌بودن فیلدهای مبلغ/کارفرما/تاریخ در پورتال عمومی، ارقام و طرفین این سند برای کارگاه ممیزی قرارداد هلدینگ پایا سامان پارس شبیه‌سازی شده‌اند.*
+
+---
+
+## موافقت‌نامه کنسرسیوم و پیمان اصلی
+
+این موافقت‌نامه در تاریخ **۱۴۰۴/۰۲/۱۰ (شبیه‌سازی آموزشی)** بین:
+* **کارفرما:** سازمان توسعه زیرساخت حمل‌ونقل منطقه‌ای
+* **پیمانکار (کنسرسیوم راهبر پایا):** با راهبری هلدینگ پایا سامان پارس متشکل از:
+  1. شرکت **رامان** (سهم ۵۰٪: عملیات خاکی، پل‌های بزرگ و روسازی آزادراه)
+  2. شرکت **جنرال مکانیک** (سهم ۳۰٪: حفاری و لاینینگ تونل دوخطه)
+  3. شرکت **دی** و **تابیران** (سهم ۲۰٪: سازه‌های بتنی تقاطع و تأسیسات روشنایی و تهویه تونل)
+
+منعقد می‌گردد.
+
+### ماده ۱: مدل قراردادی (EPC+F) و تعهدات تامین مالی
+۱. اجرای پروژه به صورت **مهندسی، تامین کالا، اجرا و تامین مالی (EPC+F)** می‌باشد.
+۲. سهم تامین مالی پیمانکار معادل **۶۵ درصد مبلغ برآوردی (مبلغ شبیه‌سازی: ۴,۸۰۰ میلیارد تومان)** از طریق منابع کنسرسیوم و خطوط اعتباری و ۳۵ درصد پیش‌پرداخت و اقساط دوره‌ای کارفرما تامین می‌شود.
+۳. تاخیر کارفرما بیش از **۳۰ روز** در ارائه تضمین‌نامه بازپرداخت اقساط فاینانس یا آزادسازی اراضی معارض، مجوز تعلیق متناسب و تمدید مدت پیمان خواهد بود.
+
+### ماده ۲: مسئولیت تضامنی و مرزهای فنی شرکای کنسرسیوم
+۱. هر شرکت تابعه در قبال تاخیر جبهه کاری تخصصی خود مسئول است؛ اما در برابر کارفرما، کنسرسیوم مسئولیت تضامنی دارد.
+۲. در صورت کمبود ناوگان ماشین‌آلات سنگین در جبهه تونل جنرال مکانیک یا رامان، هلدینگ مجاز به جابه‌جایی ناوگان بین کارگاهی با ثبت اجاره داخلی (Inter-Company Transfer) است.
+
+### ماده ۳: تحویل زمین، معارضین و تاخیرات ماده ۳۰ نشریه ۴۳۱۱
+۱. کارفرما مکلف است کریدور کوهستانی و معارضین خطوط فشار قوی برق و گاز را ظرف **۲۰ روز** از تاریخ تنفیذ آزادسازی نماید.
+۲. **فرجه اخطار کتبی:** راهبر کنسرسیوم موظف است حداکثر ظرف **۲۱ روز تقویمی** از کشف مانع یا تغییر زمین‌شناسی غیرمترقبه، اخطار مستند تاخیر را به دستگاه نظارت ارسال کند؛ عدم ارسال در مهلت مقرر، حق مطالبه هزینه خواب ماشین‌آلات را ساقط می‌کند.
+
+### ماده ۴: تعدیل آحاد بها و تجهیزات برون‌مرزی
+تعدیل ریالی بر اساس شاخص‌های فصلی سازمان برنامه اعمال می‌گردد و برای قطعات یدکی ماشین‌آلات تونل و اقلام وارداتی MEP تابیران، مابه‌التفاوت نرخ ارز رسمی مبنای تسویه فاینانس قرار می‌گیرد.`,
+    geminiSystemInstructionFa: `تو مشاور ارشد حقوقی، امور پیمان و کنسرسیوم در هلدینگ پایا سامان پارس هستی.
+پاسخ‌هایت را صرفاً بر پایه متن قرارداد EPC+F بارگذاری‌شده ارائه بده. اگر اطلاعاتی (مانند کارفرما یا عدد واقعی خارج از متن شبیه‌سازی‌شده) وجود نداشت، به صراحت اعلام کن در سند موجود نیست.`,
+    geminiSystemInstructionEn: `You are Senior Contracts & Consortium Legal Counsel at Paya Saman Pars Holding. Answer strictly from the uploaded simulated EPC+F consortium contract and never fabricate missing clauses.`,
+    claudeSystemInstructionFa: `تو ممیز ارشد قراردادهای EPC+F و دعاوی کنسرسیومی در ستاد هلدینگ پایا سامان پارس هستی.
+هر تحلیل را با ذکر شماره ماده، سهم شرکت‌های تابعه (رامان، جنرال مکانیک، دی، تابیران)، و مهلت ۲۱ روزه ماده ۳۰ در قالب جدول یا نامه رسمی در Artifact خروجی بده.`,
+    claudeSystemInstructionEn: `You are Paya Saman Pars Senior EPC+F & Consortium Claims Auditor. Cite exact article numbers, subsidiary shares, and notice time-bars in structured Artifacts.`,
+    sampleTestQueries: [
+      {
+        titleFa: 'بررسی تداخل مسئولیت شرکای کنسرسیوم و هزینه خواب ماشین‌آلات',
+        titleEn: 'Consortium Liability Split & Machinery Demurrage Review',
+        queryFa: 'بر اساس ماده ۱ تا ۳ این قرارداد EPC+F، اگر کارفرما کریدور تونل را با ۳۵ روز تاخیر تحویل دهد و همزمان اقساط فاینانس نیز ۴۰ روز معوق شود، راهبر کنسرسیوم و شرکت‌های رامان و جنرال مکانیک چه حقوقی دارند و اخطار باید ظرف چند روز ارسال شود؟',
+        queryEn: 'Under Articles 1–3, if the Employer delays site handover by 35 days and financing guarantees by 40 days, what remedies apply to Raman and General Mechanic and what is the notice deadline?'
+      },
+      {
+        titleFa: 'تحلیل جابه‌جایی بین‌شرکتی ناوگان سنگین در شرایط تاخیر',
+        titleEn: 'Inter-Company Heavy Fleet Dispatch Clause Check',
+        queryFa: 'مطابق ماده ۲، ضابطه جابه‌جایی ناوگان سنگین بین شرکت‌های تابعه هلدینگ در این پیمان چیست و چه ریسکی را کاهش می‌دهد؟',
+        queryEn: 'According to Article 2, how does inter-company heavy fleet transfer work between Paya subsidiaries?'
+      }
+    ]
+  },
+  {
+    id: 'paya_bot_kaveh_contract',
+    trackIds: ['PAYA_SAMAN_PARS'],
+    titleFa: 'قرارداد ۲ پایا: سرمایه‌گذاری و بهره‌برداری BOT / BLT نیروگاه خورشیدی ۵MW، پلاسمای سرد کاوه و مسکن',
+    titleEn: 'Paya Contract 2: BOT/BLT Concession for Kaveh 5MW Solar, Cold Plasma & Housing Wing (Simulated)',
+    domainFa: 'بال سرمایه‌گذاری · شهر صنعتی کاوه، تابیران، آتی‌ساز و عمران مسکن',
+    domainEn: 'Investment Wing · Kaveh Industrial City, Tabiran, Atisaz & Omran Maskan',
+    governingStandardFa: 'قرارداد ساخت، بهره‌برداری و واگذاری (BOT / BLT) · ضوابط شهر صنعتی و منطقه ویژه کاوه',
+    governingStandardEn: 'BOT / BLT Concession Framework · Kaveh Industrial City & SEZ Utility Regulations',
+    fileName: 'paya_bot_blt_kaveh_contract_sim.md',
+    fileDownloadPath: '/sample_contracts/paya_bot_blt_kaveh_contract_sim.md',
+    summaryFa: 'موافقت‌نامه شبیه‌سازی‌شده آموزشی در بال سرمایه‌گذاری هلدینگ پایا سامان پارس: پوشش دوره ساخت و بهره‌برداری ۱۵ ساله نیروگاه خورشیدی ۵ مگاواتی، تصفیه‌خانه پلاسمای سرد کاوه (شهریور ۱۴۰۵) و مشارکت ساخت مسکن پشتیبانی پرسنل.',
+    summaryEn: 'Simulated educational BOT/BLT concession for Kaveh 5MW solar PV, 1405 cold-plasma wastewater treatment, and staff housing development across Kaveh, Tabiran & Atisaz.',
+    markdownContent: `# قرارداد نمونه سرمایه‌گذاری، ساخت، بهره‌برداری و انتقال (BOT / BLT) شهر صنعتی کاوه و مسکن (شبیه‌سازی‌شده آموزشی)
+**هشدار آموزشی:** *اعداد ظرفیت، تعرفه و زمان‌بندی بهره‌برداری در این سند برای تمرین کلاسی هلدینگ پایا سامان پارس شبیه‌سازی شده‌اند.*
+
+---
+
+## مشخصات طرح (بال سرمایه‌گذاری و شرکت‌های تخصصی تابعه)
+* **سرمایه‌گذار و راهبر طرح:** کنسرسیوم شهر صنعتی و منطقه ویژه اقتصادی کاوه + شرکت تابیران + شرکت بال مسکن (آتی‌ساز / عمران مسکن)
+* **مکان:** شهر صنعتی کاوه (۳۰۰۰ هکتار، کیلومتر ۱۰۰ تهران–ساوه)
+
+### ماده ۱: موضوع قرارداد سه‌گانه BOT / BLT
+۱. **بخش انرژی تجدیدپذیر (BOT ۱۵ ساله):** احداث و بهره‌برداری نیروگاه خورشیدی ۵ مگاواتی در اراضی شهر صنعتی کاوه با فروش تضمینی برق به واحدهای صنعتی مستقر.
+۲. **بخش فناوری آب و پساب (BLT ۱۰ ساله):** احداث و بهره‌برداری تصفیه‌خانه پساب صنعتی با فناوری **پلاسمای سرد** (افتتاح و ورود به مدار شبیه‌سازی‌شده: شهریور ۱۴۰۵) با تعهد تحویل پساب استاندارد برای بازچرخانی صنعتی.
+۳. **بخش ابنیه پشتیبانی و مسکن:** احداث ۲۰۰ واحد مسکونی و خدماتی برای کارکنان و بهره‌برداران منطقه ویژه با الگوی پیش‌فروش و مشارکت.
+
+### ماده ۲: تضمین کیفیت پساب پلاسمای سرد و SLA تامین برق
+۱. تصفیه‌خانه پلاسمای سرد موظف به کاهش حداقل **۸۸ درصدی شاخص COD** پساب ورودی واحدهای صنعتی است.
+۲. در صورت افت بازده نیروگاه خورشیدی بیش از ۱۰٪ نسبت به منحنی تابش مبنا بدون علت جوی، شرکت بهره‌بردار موظف به شستشو و تنظیم اینورترها ظرف ۴۸ ساعت است.
+
+### ماده ۳: ریسک نرخ تعرفه، تغییر مقررات محیط‌زیست و انتقال مالکیت
+۱. تعدیل تعرفه خرید برق خورشیدی و خدمات تصفیه پساب سالانه متناسب با نرخ تورم بخشی و نرخ ارز تجهیزاتی اعمال می‌شود.
+۲. در پایان دوره **۱۰ سال BLT** برای تصفیه‌خانه و **۱۵ سال BOT** برای نیروگاه خورشیدی، تاسیسات با حداقل ۸۵٪ ظرفیت اسمی به شهر صنعتی کاوه تحویل می‌گردد.`,
+    geminiSystemInstructionFa: `تو مشاور مالی و حقوقی قراردادهای BOT/BLT در بال سرمایه‌گذاری هلدینگ پایا سامان پارس و شهر صنعتی کاوه هستی. پاسخ‌ها را فقط با ارجاع به مواد ۱ تا ۳ قرارداد شبیه‌سازی‌شده فوق ارائه کن.`,
+    geminiSystemInstructionEn: `You are Investment & BOT/BLT Counsel for Paya Saman Pars & Kaveh Industrial City. Cite Articles 1–3 strictly without fabricating figures.`,
+    claudeSystemInstructionFa: `تو تحلیلگر مدل‌های BOT/BLT هلدینگ پایا سامان پارس هستی. خروجی را در قالب ماتریس تعهدات بهره‌برداری، SLA پلاسمای سرد/خورشیدی و جدول جریان نقدی آموزشی در Artifact تنظیم کن.`,
+    claudeSystemInstructionEn: `You are BOT/BLT Concession Analyst at Paya Holding. Output SLA commitments and risk matrices in clean Artifacts.`,
+    sampleTestQueries: [
+      {
+        titleFa: 'استخراج تعهدات SLA تصفیه‌خانه پلاسمای سرد و نیروگاه خورشیدی ۵MW',
+        titleEn: 'Extract Cold-Plasma & 5MW Solar SLA Commitments',
+        queryFa: 'بر اساس ماده ۱ تا ۳، حداقل کاهش شاخص COD در تصفیه‌خانه پلاسمای سرد کاوه چقدر است، مهلت اقدام هنگام افت راندمان خورشیدی چند ساعت است و دوره انتقال BOT و BLT با چه کیفیتی تعیین شده است؟',
+        queryEn: 'From Articles 1–3, what is the cold-plasma COD reduction threshold, solar remediation SLA, and handover capacity condition for BOT vs BLT?'
+      },
+      {
+        titleFa: 'تحلیل ریسک‌های سه‌گانه انرژی، آب و مسکن در قرارداد یکپارچه کاوه',
+        titleEn: 'Cross-Wing Risk Audit (Energy, Water, Housing)',
+        queryFa: 'چه مکانیزمی در ماده ۳ برای محافظت از سرمایه‌گذار در برابر تورم و نوسان نرخ تجهیزاتی پیش‌بینی شده و ارتباط بخش مسکن با شهر صنعتی چگونه مدیریت می‌شود؟',
+        queryEn: 'How does Article 3 hedge tariff inflation and equipment FX volatility across Kaveh’s energy, water, and housing components?'
+      }
+    ]
   }
 ];
+
+export function getContractsForTrack(trackId: IndustryTrackId = 'CIVIL_INFRA'): ContractSpecimen[] {
+  if (trackId === 'PAYA_SAMAN_PARS') {
+    return ENGINEERING_CONTRACTS.filter((c) => c.trackIds?.includes('PAYA_SAMAN_PARS'));
+  }
+  return ENGINEERING_CONTRACTS.filter((c) => !c.trackIds || c.trackIds.includes(trackId));
+}
+

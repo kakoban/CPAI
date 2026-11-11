@@ -3,6 +3,8 @@ import * as trackTypes from '../src/types/industryTrack.ts';
 import * as disciplineReg from '../src/data/disciplineExamplesRegistry.ts';
 import * as domainExamples from '../src/data/domainTrackExamples.ts';
 import * as quizData from '../src/data/placement_quiz_data.ts';
+import * as sampleDatasets from '../src/data/engineering_sample_datasets.ts';
+import * as sampleContracts from '../src/data/engineering_sample_contracts.ts';
 
 // Task 1 Assertions
 assert.ok(
@@ -81,3 +83,42 @@ for (const qid of [13, 16, 20, 21]) {
 }
 
 console.log('Task 2 verification passed');
+
+// Task 3 Assertions
+assert.equal(typeof (sampleDatasets as any).getDatasetsForTrack, 'function', 'getDatasetsForTrack must be exported');
+assert.equal(typeof (sampleContracts as any).getContractsForTrack, 'function', 'getContractsForTrack must be exported');
+
+const payaDatasets = (sampleDatasets as any).getDatasetsForTrack('PAYA_SAMAN_PARS');
+assert.deepEqual(
+  payaDatasets.map((d: any) => d.id),
+  ['paya_infra_epc', 'paya_kaveh_housing', 'paya_holding_portfolio']
+);
+
+for (const ds of payaDatasets) {
+  assert.ok(ds.descriptionFa.includes('شبیه‌سازی'), `${ds.id} must declare simulated training values`);
+  const lines = ds.rawCsv.trim().split(/\r?\n/);
+  assert.ok(lines.length >= 6, `${ds.id} CSV needs header + rows`);
+  const colCount = lines[0].split(',').length;
+  for (const row of lines) {
+    assert.equal(row.split(',').length, colCount, `${ds.id} CSV row column mismatch: ${row}`);
+  }
+}
+
+const civilDatasets = (sampleDatasets as any).getDatasetsForTrack('CIVIL_INFRA');
+assert.equal(civilDatasets.length, 3);
+assert.ok(civilDatasets.every((d: any) => !String(d.id).startsWith('paya_')));
+
+const payaContracts = (sampleContracts as any).getContractsForTrack('PAYA_SAMAN_PARS');
+assert.deepEqual(
+  payaContracts.map((c: any) => c.id),
+  ['paya_epcf_consortium_contract', 'paya_bot_kaveh_contract']
+);
+for (const c of payaContracts) {
+  assert.ok(c.summaryFa.includes('شبیه‌سازی') || c.markdownContent.includes('شبیه‌سازی'), `${c.id} must declare simulated values`);
+}
+
+const civilContracts = (sampleContracts as any).getContractsForTrack('CIVIL_INFRA');
+assert.equal(civilContracts.length, 2);
+assert.ok(civilContracts.every((c: any) => !String(c.id).startsWith('paya_')));
+
+console.log('Task 3 verification passed');

@@ -1,5 +1,8 @@
+import { IndustryTrackId } from '../types/industryTrack';
+
 export interface EngineeringDataset {
   id: string;
+  trackIds?: IndustryTrackId[];
   titleFa: string;
   titleEn: string;
   domainFa: string;
@@ -229,5 +232,176 @@ Analyze the equipment inspection dataset and:
 1. Write Python code to plot Hydrotest Pressure vs. Design Operating Pressure across ASME codes.
 2. Evaluate pump P-105B's 4.8 mm/s vibration severity against ISO 10816-3 Zone C/D limits and API 610 vibration criteria.
 3. Generate a Cat A punch clearance timeline model prior to hydrocarbon introduction.`
+  },
+  {
+    id: 'paya_infra_epc',
+    trackIds: ['PAYA_SAMAN_PARS'],
+    titleFa: 'دیتاست ۱ پایا: بال پیمانکاری زیرساختی (راه، تونل، سد، ریل، فرودگاه و امارات)',
+    titleEn: 'Paya Dataset 1: Civil & Infrastructure Wing (Domestic & UAE Corridors)',
+    domainFa: 'بال پیمانکاری زیرساختی · ملی ساختمان، جنرال مکانیک، دی، رامان و تابیران (مقادیر شبیه‌سازی‌شده آموزشی)',
+    domainEn: 'Civil Contracting Wing · Melli Sakhteman, General Mechanic, Dey, Raman, Tabiran (Simulated)',
+    descriptionFa: 'نمونه کارگاهی پروژه‌های شاخص بال عمرانی (آزادراه تهران–شمال، تونل قلاجه، امارات SKF2 و R1000C، سدهای مخملکوه و شهری‌کور، راه‌آهن میانه–اردبیل، مترو تبریز و پایانه سلام)؛ اعداد مالی/پیشرفت برای کارگاه شبیه‌سازی‌شده‌اند.',
+    descriptionEn: 'Simulated educational dataset across flagship domestic & UAE infrastructure projects (Tehran-North, Qalajeh, SKF2, Makhmalkuh Dam, Mianeh-Ardabil Rail, Tabriz Metro, Salam Terminal).',
+    fileName: 'paya_infra_epc_portfolio_sim.csv',
+    fileDownloadPath: '/sample_datasets/paya_infra_epc_portfolio_sim.csv',
+    rowCount: 10,
+    columnCount: 11,
+    columnsFa: ['کد پروژه', 'نام پروژه شاخص', 'حوزه کاری', 'شرکت تابعه مجری', 'مدل قراردادی', 'پیشرفت برنامه‌ای ٪', 'پیشرفت واقعی ٪', 'شاخص SPI', 'شاخص CPI', 'موقعیت', 'وضعیت و گلوگاه (شبیه‌سازی)'],
+    columnsEn: ['Project_ID', 'Project_Name', 'Sector', 'Subsidiary', 'Contract_Model', 'Planned_Pct', 'Actual_Pct', 'SPI', 'CPI', 'Region', 'Bottleneck_Note'],
+    previewRows: [
+      { Project_ID: 'PSP-RD-01', Project_Name: 'Tehran-North Freeway Sec', Sector: 'Road_Tunnel', Subsidiary: 'General Mechanic', Contract_Model: 'EPC', Planned_Pct: 78.0, Actual_Pct: 71.5, SPI: 0.92, CPI: 0.95, Region: 'Domestic', Bottleneck_Note: 'Mountain rock support variance (Sim)' },
+      { Project_ID: 'PSP-UAE-02', Project_Name: 'Shis-Khorfakkan (SKF2)', Sector: 'Road_Tunnel_Export', Subsidiary: 'Raman', Contract_Model: 'EPC+F', Planned_Pct: 92.0, Actual_Pct: 90.0, SPI: 0.98, CPI: 1.01, Region: 'UAE', Bottleneck_Note: 'On track for handover (Sim)' },
+      { Project_ID: 'PSP-DM-03', Project_Name: 'Makhmalkuh Storage Dam', Sector: 'Dam_Water', Subsidiary: 'Dey', Contract_Model: 'PC', Planned_Pct: 64.0, Actual_Pct: 55.0, SPI: 0.86, CPI: 0.91, Region: 'Domestic', Bottleneck_Note: 'Spillway concrete form delay (Sim)' },
+      { Project_ID: 'PSP-RL-04', Project_Name: 'Tabriz Metro Line 1 Stations', Sector: 'Rail_Metro', Subsidiary: 'Melli Sakhteman', Contract_Model: 'EPC', Planned_Pct: 84.0, Actual_Pct: 79.0, SPI: 0.94, CPI: 0.96, Region: 'Domestic', Bottleneck_Note: 'MEP smoke duct interface (Sim)' },
+      { Project_ID: 'PSP-AP-05', Project_Name: 'IKIA Salam Terminal & Phase1', Sector: 'Airport', Subsidiary: 'Salam Terminal Co', Contract_Model: 'BOT', Planned_Pct: 96.0, Actual_Pct: 95.0, SPI: 0.99, CPI: 0.98, Region: 'Domestic', Bottleneck_Note: 'Baggage HVAC tuning (Sim)' }
+    ],
+    rawCsv: `Project_ID,Project_Name,Sector,Subsidiary,Contract_Model,Planned_Pct,Actual_Pct,SPI,CPI,Region,Simulated_Note
+PSP-RD-01,Tehran-North Freeway Heavy Civil,Road_Tunnel,General_Mechanic,EPC,78.0,71.5,0.92,0.95,Iran,Mountain rock support adjustment (Simulated)
+PSP-RD-02,Qalajeh-Ilam Road & Tunnel,Road_Tunnel,Dey,EPC,85.0,80.0,0.94,0.97,Iran,Winter portal concrete protection (Simulated)
+PSP-UAE-01,Shis-Khorfakkan Road & Tunnel SKF2,Road_Tunnel_Export,Raman,EPC+F,92.0,90.0,0.98,1.01,UAE,Export services milestone verified (Simulated)
+PSP-UAE-02,Sharjah-Khorfakkan R1000C,Road_Tunnel_Export,General_Mechanic,EPC,88.0,85.5,0.97,0.99,UAE,Final asphalt & drainage check (Simulated)
+PSP-DM-01,Makhmalkuh & Shahri-Kour Dams,Dam_Water,Dey,PC,64.0,55.0,0.86,0.91,Iran,Seasonal hydrology & spillway delay (Simulated)
+PSP-DM-02,Bandar Anzali Land Reclamation,Marine_Water,Bonab,EPC,72.0,68.0,0.94,0.95,Iran,Dredging barge weather hold (Simulated)
+PSP-RL-01,Mianeh-Ardabil Railway & Karaj-Qazvin,Rail_Metro,Melli_Sakhteman,EPC+F,79.0,73.0,0.92,0.94,Iran,Ballast & bridge abutment lag (Simulated)
+PSP-RL-02,Tabriz Line 1 & Tehran M3/N4 Metro,Rail_Metro,General_Mechanic,EPC,84.0,79.0,0.94,0.96,Iran,Station escalation claim review (Simulated)
+PSP-AP-01,IKIA Salam Terminal & Kish South Runway,Airport,Salam_Co,BOT,96.0,95.0,0.99,0.98,Iran,Apron lighting commissioning (Simulated)
+PSP-IND-01,Kaveh South Kish Steel & Hegmatan Cement,Industrial_Civil,Melli_Sakhteman,EPC,81.0,76.0,0.94,0.93,Iran,Heavy foundation anchor bolts ready (Simulated)`,
+    claudeDashboardPromptFa: `تو مدیر ارشد کنترل پورتفوی بال پیمانکاری هلدینگ پایا سامان پارس هستی.
+داده‌های CSV زیر شامل وضعیت پروژه‌های شاخص بال پیمانکاری (ملی ساختمان، جنرال مکانیک، دی، رامان، بن‌آب) در داخل کشور و امارات است (تمام اعداد برای تمرین شبیه‌سازی‌شده‌اند).
+
+یک داشبورد مدیریتی تعاملی React + Tailwind در Claude Artifact بساز شامل:
+۱. کارت‌های KPI بال عمرانی: میانگین SPI و CPI، سهم پروژه‌های برون‌مرزی امارات در برابر داخلی، و وضعیت بر اساس مدل قراردادی (EPC، EPC+F، PC، BOT).
+۲. فیلتر سریع بر اساس شرکت تابعه و حوزه تخصصی (راه و تونل، سد و دریایی، ریل و مترو، فرودگاه، ابنیه صنعتی).
+۳. بخش هشدار پروژه‌های نیازمند توجه (مانند SPI زیر ۰.۹۰ در جبهه سدسازی) و پیشنهاد هم‌افزایی ماشین‌آلات بین شرکت‌های تابعه.
+۴. تذکر شفاف در فوتر داشبورد مبنی بر شبیه‌سازی آموزشی اعداد قرارداد/پیشرفت.
+
+دیتاست CSV:
+[داده‌های CSV اینجا قرار می‌گیرد]`,
+    claudeDashboardPromptEn: `You are Portfolio Controls Lead for Paya Saman Pars Civil Contracting Wing.
+Build an interactive React + Tailwind Artifact dashboard from the simulated training CSV below:
+1. KPI summary across EPC, EPC+F, PC, and BOT models plus Domestic vs. UAE performance.
+2. Subsidiary & sector filters (Road/Tunnel, Dams/Marine, Rail/Metro, Airport, Industrial Civil).
+3. Bottleneck alerts for SPI < 0.90 suggesting cross-subsidiary heavy fleet sharing.
+4. Clear footer badge noting educational simulated data.`,
+    geminiPythonAnalyticsPromptFa: `تو تحلیلگر ارشد داده و ریسک در هلدینگ پایا سامان پارس هستی.
+با Python روی دیتاست بال پیمانکاری:
+۱. میانگین شاخص SPI و CPI را به تفکیک مدل قراردادی (EPC در برابر EPC+F و BOT) و شرکت تابعه (رامان، دی، جنرال مکانیک، ملی ساختمان) محاسبه و نمودار میله‌ای ترسیم کن.
+۲. پروژه‌های دارای انحراف منفی (Planned - Actual > 5%) را استخراج و اولویت‌بندی کن.
+۳. پیشنهادهای کاربردی برای تکمیل فیلدهای خالی کارفرما و مبلغ پیمان در سامانه هلدینگ بنویس.`,
+    geminiPythonAnalyticsPromptEn: `Analyze Paya Civil Wing's simulated CSV in Python:
+1. Group mean SPI & CPI by Contract_Model and Subsidiary with charts.
+2. Rank workfronts with >5% schedule variance.
+3. Recommend data-governance checks for missing portal fields.`
+  },
+  {
+    id: 'paya_kaveh_housing',
+    trackIds: ['PAYA_SAMAN_PARS'],
+    titleFa: 'دیتاست ۲ پایا: بال مسکن، MEP تابیران و شهر صنعتی کاوه (خورشیدی ۵MW و پلاسمای سرد)',
+    titleEn: 'Paya Dataset 2: Housing Wing, Tabiran MEP & Kaveh Industrial City (5MW Solar & Cold Plasma)',
+    domainFa: 'بال مسکن و شهرک کاوه · آتی‌ساز، خانه، عمران مسکن، تابیران و کاوه (مقادیر شبیه‌سازی‌شده آموزشی)',
+    domainEn: 'Housing Wing & Kaveh SEZ · Atisaz, Khaneh, Omran Maskan, Tabiran & Kaveh (Simulated)',
+    descriptionFa: 'پوشش‌دهنده شهر صنعتی ۳۰۰۰ هکتاری کاوه (نیروگاه خورشیدی ۵ مگاواتی و تصفیه‌خانه پلاسمای سرد ۱۴۰۵)، پروژه‌های MEP تابیران و طرح‌های انبوه‌سازی/شهرک‌سازی آتی‌ساز، خانه و عمران مسکن؛ اعداد برای تمرین کلاسی شبیه‌سازی‌شده‌اند.',
+    descriptionEn: 'Simulated educational dataset spanning Kaveh 3,000ha Industrial City (5MW solar + 1405 cold-plasma effluent), Tabiran MEP works, and Atisaz/Khaneh/Omran Maskan housing towns.',
+    fileName: 'paya_kaveh_housing_wing_sim.csv',
+    fileDownloadPath: '/sample_datasets/paya_kaveh_housing_wing_sim.csv',
+    rowCount: 8,
+    columnCount: 10,
+    columnsFa: ['کد دارایی/پروژه', 'عنوان پروژه یا طرح', 'شرکت تابعه', 'حوزه', 'مدل بهره‌برداری', 'پیشرفت/آمادگی ٪', 'شاخص بهره‌وری', 'ظرفیت/مقیاس', 'وضعیت ثبت پورتال', 'نکته فنی (شبیه‌سازی)'],
+    columnsEn: ['Asset_ID', 'Asset_Name', 'Subsidiary', 'Domain', 'Model', 'Readiness_Pct', 'Efficiency_Index', 'Scale_Note', 'Portal_Status', 'Simulated_Note'],
+    previewRows: [
+      { Asset_ID: 'KAV-SOL-01', Asset_Name: 'Kaveh 5MW Solar Power Plant', Subsidiary: 'Kaveh City / Tabiran', Domain: 'Renewable_Energy', Model: 'BOT', Readiness_Pct: 91.0, Efficiency_Index: 0.96, Scale_Note: '5 MW PV (1405 News)', Portal_Status: 'News-Verified', Simulated_Note: 'Inverter grid sync test (Sim)' },
+      { Asset_ID: 'KAV-PLS-02', Asset_Name: 'Cold-Plasma Effluent Treatment', Subsidiary: 'Kaveh Industrial City', Domain: 'Water_Tech', Model: 'BLT', Readiness_Pct: 87.5, Efficiency_Index: 0.94, Scale_Note: '3000ha Industrial Reuse', Portal_Status: 'News-Verified', Simulated_Note: 'COD reduction pilot log (Sim)' },
+      { Asset_ID: 'MEP-SHZ-03', Asset_Name: 'Shiraz & Isfahan Metro Vent', Subsidiary: 'Tabiran', Domain: 'MEP_Systems', Model: 'EPC', Readiness_Pct: 89.0, Efficiency_Index: 0.95, Scale_Note: 'Line 1 Smoke Control', Portal_Status: 'Site-Active', Simulated_Note: 'Jet fan flow balancing (Sim)' },
+      { Asset_ID: 'HSG-ATZ-04', Asset_Name: 'Darya-Kenar & Tower Complexes', Subsidiary: 'Atisaz', Domain: 'Housing_Towns', Model: 'Investment', Readiness_Pct: 95.0, Efficiency_Index: 0.97, Scale_Note: '1433+ Villas & Towers', Portal_Status: 'Needs-Portal-Update', Simulated_Note: 'Urban catalog update due (Sim)' },
+      { Asset_ID: 'HSG-ISF-05', Asset_Name: 'Shahinshahr & Baharestan', Subsidiary: 'Omran Maskan Isfahan', Domain: 'Satellite_Cities', Model: 'Investment', Readiness_Pct: 76.0, Efficiency_Index: 0.90, Scale_Note: 'Central Iran Towns', Portal_Status: 'Needs-Portal-Update', Simulated_Note: 'Material escalation audit (Sim)' }
+    ],
+    rawCsv: `Asset_ID,Asset_Name,Subsidiary,Domain,Model,Readiness_Pct,Efficiency_Index,Scale_Note,Portal_Status,Simulated_Note
+KAV-SOL-01,Kaveh 5MW Solar Power Plant,Kaveh_Industrial_City,Renewable_Energy,BOT,91.0,0.96,5_MW_PV_Saveh,News_1405,Inverter peak-shaving sync active (Simulated)
+KAV-PLS-02,Kaveh Cold-Plasma Effluent Plant,Kaveh_Industrial_City,Industrial_Water,BLT,87.5,0.94,3000ha_Industrial_Zone,News_1405,Cold-plasma COD abatement test (Simulated)
+MEP-SHZ-01,Shiraz & Isfahan Metro Smoke Vent,Tabiran,MEP_Electrical_Mech,EPC,89.0,0.95,Metro_Line_1_MEP,Portal_Listed,NFPA smoke extraction verified (Simulated)
+MEP-YAZ-02,Yazdmehr 63kV Substation & Mashhad,Tabiran,MEP_Power,EPC,93.0,0.97,63kV_Power_Supply,Portal_Listed,Relay protection tests passed (Simulated)
+HSG-ATZ-01,Atisaz Towers & Darya-Kenar Villas,Atisaz,Mass_Housing,Investment,95.0,0.97,1433_Plus_Villas,Portal_Gap_0_Urban,Heritage catalog digitization needed (Simulated)
+HSG-KHN-02,Tourist Towns & Commercial Towers,Khaneh_Co,Urban_Buildings,Investment,74.0,0.89,Mixed_Use_Complexes,Portal_Gap_0_Urban,Cost-per-m2 variance review (Simulated)
+HSG-SHM-03,Northern Villa & Housing Projects,Omran_Maskan_Shomal,Mass_Housing,PC,78.0,0.91,North_Iran_Coast,Portal_Gap_0_Urban,Pre-sale cashflow alignment (Simulated)
+HSG-ISF-04,Baharestan & Shahinshahr Satellites,Omran_Maskan_Isfahan,Satellite_Towns,Investment,76.0,0.90,Central_Iran_Hub,Portal_Gap_0_Urban,Urban renewal phasing update (Simulated)`,
+    claudeDashboardPromptFa: `تو مدیر نوآوری، انرژی و توسعه مسکن در هلدینگ پایا سامان پارس هستی.
+داده‌های CSV زیر شامل وضعیت شهر صنعتی ۳۰۰۰ هکتاری کاوه (نیروگاه خورشیدی ۵MW و تصفیه‌خانه پلاسمای سرد)، پروژه‌های MEP تابیران و شرکت‌های بال مسکن (آتی‌ساز، خانه، عمران مسکن) است (مقادیر شبیه‌سازی‌شده آموزشی).
+
+یک داشبورد تعاملی در Claude Artifact طراحی کن که:
+۱. عملکرد انرژی و آب سبز شهر صنعتی کاوه (خورشیدی ۵MW و پلاسمای سرد) را کنار شاخص‌های پروژه‌های مسکن و MEP نمایش دهد.
+۲. پروژه‌هایی را که در سایت هلدینگ وضعیت «Portal_Gap_0_Urban» دارند (بخش ابنیه ساختمانی و مدیریت شهری) هایلایت کرده و چک‌لیست تکمیل پورتفو بسازد.
+۳. امکان شبیه‌سازی اثر تکمیل پروژه‌های BOT/BLT کاوه بر جریان نقدی پایدار هلدینگ را فراهم کند.
+
+دیتاست CSV:
+[داده‌های CSV اینجا قرار می‌گیرد]`,
+    claudeDashboardPromptEn: `Build an interactive Claude Artifact dashboard tracking Kaveh 3,000ha Industrial City (5MW Solar & Cold Plasma), Tabiran MEP, and the Housing Investment Wing from this simulated training CSV, flagging Portal_Gap_0_Urban items.`,
+    geminiPythonAnalyticsPromptFa: `با Python داده‌های بال مسکن، MEP و شهر صنعتی کاوه را تحلیل کن:
+۱. مقایسه Readiness_Pct و Efficiency_Index بین پروژه‌های BOT/BLT شهر صنعتی کاوه و پروژه‌های سرمایه‌گذاری مسکن.
+۲. فهرست دارایی‌هایی که نیاز به ثبت فوری شناسنامه در دسته «ابنیه ساختمانی و مدیریت شهری» سایت هلدینگ دارند.
+۳. تحلیل ریسک بهای تمام‌شده و پیشنهاد بهینه‌سازی نقدینگی.`,
+    geminiPythonAnalyticsPromptEn: `Analyze Paya Housing, MEP, and Kaveh simulated dataset in Python comparing BOT/BLT assets vs housing developments and listing Portal_Gap_0_Urban items.`
+  },
+  {
+    id: 'paya_holding_portfolio',
+    trackIds: ['PAYA_SAMAN_PARS'],
+    titleFa: 'دیتاست ۳ پایا: داشبورد کلان ۶۳ پروژه، ۵۰۰۰ نیرو و ناوگان ۱۴ شرکت تابعه',
+    titleEn: 'Paya Dataset 3: Holding Macro Portfolio (63 Projects, 5,000 Staff & 14 Subsidiaries)',
+    domainFa: 'ستاد هلدینگ پایا سامان پارس · نمای یکپارچه ۸ حوزه کاری و ۱۴ شرکت تابعه (شبیه‌سازی آموزشی)',
+    domainEn: 'Paya Holding HQ · 8 Domains, 63 Projects & 14 Subsidiaries Matrix (Simulated Training Data)',
+    descriptionFa: 'ماتریس جامع تجمیعی ستاد هلدینگ برای پایش توزیع ۶۳ پروژه ثبت‌شده روی سایت در ۸ حوزه، تخصیص ۵۰۰۰ نیروی انسانی و ناوگان ماشین‌آلات سنگین میان دو بال؛ کلیه اعداد تکمیلی جهت تمرین کلاسی شبیه‌سازی‌شده‌اند.',
+    descriptionEn: 'Executive holding matrix reconciling all 8 business domains, 63 site-listed projects, 5,000+ personnel, and heavy machinery across both wings (simulated training figures).',
+    fileName: 'paya_holding_63projects_macro_sim.csv',
+    fileDownloadPath: '/sample_datasets/paya_holding_63projects_macro_sim.csv',
+    rowCount: 8,
+    columnCount: 10,
+    columnsFa: ['حوزه تخصصی', 'بال اجرایی', 'تعداد پروژه سایت', 'شرکت‌های تابعه اصلی', 'مدل غالب', 'نیروی انسانی تخمینی', 'دستگاه سنگین فعال', 'تکمیل فیلد سایت ٪', 'ریسک کلان (شبیه‌سازی)', 'اولویت هوش مصنوعی'],
+    columnsEn: ['Domain_Sector', 'Holding_Wing', 'Site_Projects', 'Key_Subsidiaries', 'Primary_Models', 'Est_Workforce', 'Active_Heavy_Units', 'Portal_Detail_Pct', 'Macro_Risk', 'AI_Priority'],
+    previewRows: [
+      { Domain_Sector: 'Road_Bridge_Tunnel', Holding_Wing: 'Civil_Contracting', Site_Projects: 28, Key_Subsidiaries: 'Raman-GenMech-Dey', Primary_Models: 'EPC_EPC+F', Est_Workforce: 2150, Active_Heavy_Units: 340, Portal_Detail_Pct: 12, Macro_Risk: 'High-Geology', AI_Priority: 'Critical-P1' },
+      { Domain_Sector: 'Dams_Water_Marine', Holding_Wing: 'Civil_Contracting', Site_Projects: 14, Key_Subsidiaries: 'Dey-Melli-Bonab', Primary_Models: 'EPC_PC', Est_Workforce: 920, Active_Heavy_Units: 145, Portal_Detail_Pct: 10, Macro_Risk: 'Hydrology-Lag', AI_Priority: 'High-P1' },
+      { Domain_Sector: 'Rail_Metro_Transit', Holding_Wing: 'Civil_Contracting', Site_Projects: 8, Key_Subsidiaries: 'Melli-GenMech', Primary_Models: 'EPC_EPC+F', Est_Workforce: 640, Active_Heavy_Units: 85, Portal_Detail_Pct: 15, Macro_Risk: 'Escalation-Claims', AI_Priority: 'High-P1' },
+      { Domain_Sector: 'Kaveh_Ind_City_Energy', Holding_Wing: 'Investment_Housing', Site_Projects: 2, Key_Subsidiaries: 'Kaveh-Tabiran', Primary_Models: 'BOT_BLT', Est_Workforce: 380, Active_Heavy_Units: 38, Portal_Detail_Pct: 65, Macro_Risk: 'Grid-Effluent-Load', AI_Priority: 'Strategic-P1' },
+      { Domain_Sector: 'Housing_Urban_Renewal', Holding_Wing: 'Investment_Housing', Site_Projects: 0, Key_Subsidiaries: 'Atisaz-Khaneh-Omran', Primary_Models: 'BOT_Invest', Est_Workforce: 410, Active_Heavy_Units: 52, Portal_Detail_Pct: 0, Macro_Risk: 'Portal-Gap-Cost', AI_Priority: 'Immediate-P1' }
+    ],
+    rawCsv: `Domain_Sector,Holding_Wing,Site_Projects,Key_Subsidiaries,Primary_Models,Est_Workforce,Active_Heavy_Units,Portal_Detail_Pct,Macro_Risk,AI_Priority
+Road_Bridge_Tunnel,Civil_Contracting,28,Raman_GenMech_Dey,EPC_EPC+F,2150,340,12,Geology_Claims_UAE_FX,Critical_P1
+Dams_Water_Marine,Civil_Contracting,14,Dey_Melli_Bonab,EPC_PC,920,145,10,Hydrology_Cashflow,High_P1
+Rail_Metro_Transit,Civil_Contracting,8,Melli_GenMech,EPC_EPC+F,640,85,15,Utility_Clash_Escalation,High_P1
+Airport_Terminals,Civil_Contracting,5,GenMech_Salam,EPC_BOT,310,42,18,MEP_Handover_Schedule,Medium_P2
+Industrial_Plants,Civil_Contracting,4,Melli_Sakhteman,EPC_PC,290,48,14,Long_Lead_Equipment,Medium_P2
+MEP_Electrical_Mech,Civil_Contracting,4,Tabiran,EPC_PC,240,22,20,Substation_Vent_Testing,High_P2
+Kaveh_Ind_City_Solar_Plasma,Investment_Housing,2,Kaveh_Tabiran,BOT_BLT,260,30,65,Solar_ColdPlasma_Scale,Strategic_P1
+Housing_Urban_Management,Investment_Housing,0,Atisaz_Khaneh_Omran_Kowsar,Investment_BLT,390,45,0,Portal_0_Projects_Inflation,Immediate_P1`,
+    claudeDashboardPromptFa: `تو مشاور ارشد تحول دیجیتال و هوش مصنوعی مدیرعامل هلدینگ پایا سامان پارس هستی.
+داده‌های CSV زیر نمای کلان پورتفوی هلدینگ در ۸ حوزه کاری (شامل ۶۳ پروژه ثبت‌شده، ۵۰۰۰+ نیروی انسانی، ناوگان سنگین و ۱۴ شرکت تابعه در دو بال) است. (اعداد نیرو، ناوگان و درصد تکمیل پورتال جهت آموزش شبیه‌سازی شده‌اند).
+
+در Claude Artifact یک «اتاق فرماندهی مدیرعامل هلدینگ پایا سامان پارس» با React + Tailwind بساز که شامل بخش‌های زیر باشد:
+۱. کارت‌های کلان بالا: جمع پروژه‌های ثبت‌شده (۶۳ پروژه در ۶ دسته + طرح‌های کاوه و خلأ دسته مسکن)، توزیع ۵۰۰۰+ نیرو و ناوگان ماشین‌آلات بین دو بال.
+۲. نمودار مقایسه‌ای ۸ حوزه تخصصی (از ۲۸ پروژه راه و تونل تا ۱۴ سد، ۸ ریل، ۵ فرودگاه، ۴ صنعتی، ۴ MEP، کاوه و بال مسکن).
+۳. بخش هشدار حکمرانی داده (Data Governance Alert): برجسته‌سازی خلأ اطلاعات کارفرما/مبلغ در صفحات جزئیات سایت و ۰ پروژه در دسته «ابنیه ساختمانی و مدیریت شهری».
+۴. شبیه‌ساز سناریوی هم‌افزایی: جابه‌جایی ناوگان سنگین و تمرکز هوش مصنوعی روی قراردادهای EPC+F و BOT.
+
+دیتاست CSV:
+[داده‌های CSV اینجا قرار می‌گیرد]`,
+    claudeDashboardPromptEn: `You are Chief AI Transformation Advisor to Paya Saman Pars Holding CEO.
+Build an interactive Holding CEO Command Center React Artifact from this simulated 8-sector portfolio CSV:
+1. KPIs covering 63 cataloged projects, 5,000+ staff, heavy fleet, and dual-wing split.
+2. Visual comparison across all 8 domains (28 Roads -> 0 Housing Portal Gap).
+3. Data Governance Alert flagging empty portal detail fields and 0-project Urban/Housing listing.
+4. Interactive wing synergy & EPC+F/BOT priority simulator.`,
+    geminiPythonAnalyticsPromptFa: `تو دانشمند داده ستاد هلدینگ پایا سامان پارس هستی.
+با Python روی دیتاست کلان ۸ حوزه کاری:
+۱. سهم درصدی هر حوزه از کل پروژه‌ها، نیروی انسانی و ناوگان سنگین را محاسبه و نمودار دو محوره ترسیم کن.
+۲. همبستگی بین نبود داده در پورتال (Portal_Detail_Pct پایین) و ریسک حکمرانی پورتفو را تحلیل و برنامه اولویت‌دار Phase I CPMAI برای پرکردن شکاف‌های اطلاعاتی پیشنهاد بده.
+۳. یک گزارش ۳ دقیقه‌ای هیئت‌مدیره به فارسی تولید کن.`,
+    geminiPythonAnalyticsPromptEn: `Analyze Paya Holding's 8-domain macro CSV in Python: compute portfolio/workforce/fleet shares, flag portal data-gap priorities, and output a concise board brief.`
   }
 ];
+
+export function getDatasetsForTrack(trackId: IndustryTrackId = 'CIVIL_INFRA'): EngineeringDataset[] {
+  if (trackId === 'PAYA_SAMAN_PARS') {
+    return ENGINEERING_DATASETS.filter((ds) => ds.trackIds?.includes('PAYA_SAMAN_PARS'));
+  }
+  return ENGINEERING_DATASETS.filter((ds) => !ds.trackIds || ds.trackIds.includes(trackId));
+}
+
