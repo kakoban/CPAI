@@ -101,7 +101,7 @@ export interface UserRegistryItem {
   phone?: string;
   specialty?: string;
   role: string;
-  trackId?: 'CIVIL_INFRA' | 'ENERGY_PETRO' | 'GENERAL_EVERYDAY';
+  trackId?: 'CIVIL_INFRA' | 'ENERGY_PETRO' | 'GENERAL_EVERYDAY' | 'PAYA_SAMAN_PARS';
   disciplineId?: string;
   roleId?: string;
   classId?: string;

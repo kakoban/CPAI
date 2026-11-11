@@ -374,6 +374,273 @@ export const DISCIPLINE_REGISTRY: Record<DisciplineId, DisciplineMetadata> = {
     performanceMetricsEn: ['Interpersonal Conflict Resolution Rate', 'Successful Everyday Negotiation Outcomes %', 'Diplomatic Communication Drafting Speed'],
     descriptionFa: 'نگارش پیام‌های دشوار (مانند پس‌گرفتن پول قرض‌داده‌شده یا درخواست افزایش حقوق)، پاسخ محترمانه به انتقادات، و مذاکره هوشمندانه در مسائل زندگی.',
     descriptionEn: 'Formulating delicate messages (recovering loans, asking for pay raises, setting boundaries) with warmth, poise, and diplomatic firmness.'
+  },
+  // -------------------------------------------------------------
+  // PAYA SAMAN PARS HOLDING DISCIPLINES (8 Disciplines / 3 Groups)
+  // -------------------------------------------------------------
+  paya_portfolio_pmo: {
+    id: 'paya_portfolio_pmo',
+    trackId: 'PAYA_SAMAN_PARS',
+    groupFa: 'گروه الف: ستاد هلدینگ، قراردادها و کنترل پورتفو',
+    groupEn: 'Group A: Holding HQ, Contracts & Portfolio PMO',
+    titleFa: 'کنترل پورتفوی ۶۳ پروژه، PMO، مناقصات و دفتر فنی هلدینگ',
+    titleEn: '63-Project Portfolio Control, Holding PMO, Tendering & Technical Office',
+    shortTitleFa: 'پورتفو، PMO و مناقصات',
+    shortTitleEn: 'Portfolio PMO & Bids',
+    iconName: 'BarChart3',
+    governingStandardsFa: [
+      'استاندارد مدیریت پورتفوی پروژه (PMI PfMP / OPM) و ارزش کسب‌شده (EVM)',
+      'نظام فنی و اجرایی کشور، نشریه ۴۳۱۱ و چارچوب ارزیابی مناقصات هلدینگ'
+    ],
+    governingStandardsEn: [
+      'PMI Portfolio Management (PfMP) & Earned Value (EVM)',
+      'Circular 4311 & Holding Multi-Subsidiary Tender Governance'
+    ],
+    performanceMetricsFa: [
+      'شاخص تحقق برنامه پورتفوی ۶۳ پروژه (SPI تلفیقی)',
+      'حاشیه سود ناخالص تجمیعی دو بال و نرخ تبدیل مناقصات',
+      'درصد پروژه‌های دارای تاخیر بحرانی میان ۱۴ شرکت تابعه',
+      'سرعت تجمیع گزارش‌های هیئت‌مدیره هلدینگ (ساعت)'
+    ],
+    performanceMetricsEn: [
+      'Consolidated 63-Project Portfolio SPI',
+      'Dual-Wing Gross Margin & Bid Win Rate (%)',
+      'Critical-Delay Ratio Across 14 Subsidiaries',
+      'Board Consolidation Lead Time (Hours)'
+    ],
+    descriptionFa: 'تجمیع داده‌های پیشرفت ۶۳ پروژه ثبت‌شده در ۸ حوزه کاری، هماهنگی مناقصات کلان بین شرکت‌های تابعه و ارائه داشبورد یکپارچه دو بال به ستاد هلدینگ پایا سامان پارس.',
+    descriptionEn: 'Consolidating progress telemetry across 63 projects in 8 domains, orchestrating cross-subsidiary mega-tenders, and reporting dual-wing KPIs to Holding Executive Board.'
+  },
+  paya_contracts_epcf_bot: {
+    id: 'paya_contracts_epcf_bot',
+    trackId: 'PAYA_SAMAN_PARS',
+    groupFa: 'گروه الف: ستاد هلدینگ، قراردادها و کنترل پورتفو',
+    groupEn: 'Group A: Holding HQ, Contracts & Portfolio PMO',
+    titleFa: 'امور قراردادها، کنسرسیوم و مدل‌های مالی (EPC / EPC+F / PC / BOT / BLT)',
+    titleEn: 'Contracts Governance, Consortium & EPC+F / BOT / BLT Financial Models',
+    shortTitleFa: 'قراردادهای EPC+F / BOT',
+    shortTitleEn: 'EPC+F / BOT Contracts',
+    iconName: 'Scale',
+    governingStandardsFa: [
+      'شرایط عمومی پیمان (نشریه ۴۳۱۱) و فیدیک EPC / EPC+F بین‌المللی',
+      'ضوابط سرمایه‌گذاری مشارکتی (BOT / BLT) و تشکیل کنسرسیوم‌های اجرایی'
+    ],
+    governingStandardsEn: [
+      'PBO Circular 4311 & FIDIC EPC / EPC+F Turnkey Standards',
+      'BOT / BLT Concession Laws & Multi-Party Consortium Governance'
+    ],
+    performanceMetricsFa: [
+      'نسبت تحقق وصول مطالبات و صورت‌وضعیت‌ها در قراردادهای EPC+F',
+      'نرخ بازگشت داخلی (IRR) پروژه‌های BOT و BLT',
+      'انطباق فرجه اخطارهای قراردادی و لوایح تاخیرات در کنسرسیوم‌ها',
+      'پوشش ریسک ارزی و تعدیل پروژه‌های داخلی و امارات'
+    ],
+    performanceMetricsEn: [
+      'EPC+F Invoice & Financing Collection Ratio',
+      'BOT / BLT Project IRR (%)',
+      'Consortium Delay Notice Compliance (%)',
+      'FX & Price Escalation Hedge Coverage'
+    ],
+    descriptionFa: 'ساختاردهی قراردادهای EPC، EPC+F، PC، BOT، BLT و کنسرسیوم‌های بین‌شرکتی، ممیزی لوایح تاخیرات و پایش تعهدات مالی کارفرمایان داخلی و برون‌مرزی.',
+    descriptionEn: 'Structuring EPC, EPC+F, PC, BOT, BLT, and consortium agreements, auditing delay claims, and governing domestic and UAE cross-border financial covenants.'
+  },
+  paya_hr_fleet_support: {
+    id: 'paya_hr_fleet_support',
+    trackId: 'PAYA_SAMAN_PARS',
+    groupFa: 'گروه الف: ستاد هلدینگ، قراردادها و کنترل پورتفو',
+    groupEn: 'Group A: Holding HQ, Contracts & Portfolio PMO',
+    titleFa: 'سرمایه انسانی (۵۰۰۰ نیرو)، پشتیبانی بین‌شرکتی و ناوگان ماشین‌آلات سنگین',
+    titleEn: '5,000+ Workforce Capital, Cross-Subsidiary Support & Heavy Fleet Logistics',
+    shortTitleFa: 'منابع انسانی و ناوگان سنگین',
+    shortTitleEn: 'HR & Heavy Fleet',
+    iconName: 'Truck',
+    governingStandardsFa: [
+      'نظام طبقه‌بندی مشاغل، ایمنی کارگاهی HSE و مقررات کار در پروژه‌های پراکنده',
+      'دستورالعمل نگهداری پیشگیرانه (PM) و بهره‌برداری ناوگان ماشین‌آلات سنگین هلدینگ'
+    ],
+    governingStandardsEn: [
+      'Distributed Site Workforce Governance & ISO 45001 HSE',
+      'Holding Heavy Machinery Preventive Maintenance (PM) & Dispatch Standard'
+    ],
+    performanceMetricsFa: [
+      'شاخص آماده‌به‌کاری ناوگان ماشین‌آلات سنگین بین کارگاه‌ها (%)',
+      'توزیع بهینه بیش از ۵۰۰۰ نیروی متخصص در ۱۴ شرکت تابعه',
+      'نرخ ماندگاری نیروهای کلیدی و ساعت آموزش هوش مصنوعی',
+      'هزینه خواب ناوگان و تاخیر جابه‌جایی تجهیزات بین پروژه‌ها'
+    ],
+    performanceMetricsEn: [
+      'Cross-Site Heavy Fleet Availability (%)',
+      'Allocation Efficiency of 5,000+ Staff Across 14 Subsidiaries',
+      'Key Talent Retention & AI Readiness Hours',
+      'Fleet Idling & Mobilization Delay Cost'
+    ],
+    descriptionFa: 'مدیریت سرمایه انسانی بیش از ۵۰۰۰ نفر در ۱۴ شرکت تابعه، جابه‌جایی بهینه ناوگان ماشین‌آلات سنگین میان کارگاه‌های کشور و پایش استانداردهای رفاهی و HSE.',
+    descriptionEn: 'Orchestrating 5,000+ specialists across 14 subsidiaries, dispatching heavy machinery across national workfronts, and auditing site HSE and welfare compliance.'
+  },
+  paya_roads_rail_airports: {
+    id: 'paya_roads_rail_airports',
+    trackId: 'PAYA_SAMAN_PARS',
+    groupFa: 'گروه ب: بال پیمانکاری عمرانی و زیربنایی',
+    groupEn: 'Group B: Civil & Infrastructure Contracting Wing',
+    titleFa: 'راه، پل، تونل، حمل‌ونقل ریلی، مترو و فرودگاه (داخلی و امارات)',
+    titleEn: 'Highways, Bridges, Tunnels, Rail, Metro & Airports (Domestic & UAE)',
+    shortTitleFa: 'راه، تونل، ریل و فرودگاه',
+    shortTitleEn: 'Roads, Rail & Airports',
+    iconName: 'Building2',
+    governingStandardsFa: [
+      'آیین‌نامه طرح هندسی راه (نشریه ۴۱۱)، مشخصات فنی راه و تونل (نشریه ۵۵/۲۳۴)',
+      'استانداردهای بین‌المللی ریلی UIC، ایکائو فرودگاهی (ICAO) و ضوابط راهسازی امارات (RTA/Sharjah)'
+    ],
+    governingStandardsEn: [
+      'Highway & Tunnel Specs (Circulars 411/55/234) & UAE Road Codes',
+      'UIC Railway & ICAO Airport Pavement/Terminal Standards'
+    ],
+    performanceMetricsFa: [
+      'پیشرفت جبهه‌های آزادراه تهران–شمال، قلاجه، پل‌ها و تقاطع‌های تهران',
+      'نرخ پیشروی پروژه‌های امارات (SKF2 شیص–خورفکان، R1000C، وادی‌الحلو، R199)',
+      'کیلومتر دوخطه‌سازی ریلی (میانه–اردبیل، کرج–قزوین، شمسی–میبد) و مترو تبریز/تهران',
+      'تحقق نقاط عطف ترمینال و باند فرودگاه‌ها (امام/سلام، کیش، آبادان، اردبیل)'
+    ],
+    performanceMetricsEn: [
+      'Tehran-North, Qalajeh & Urban Interchange Progress',
+      'UAE Export Corridor Advance (SKF2, R1000C, Wadi Al-Helo, R199)',
+      'Rail Double-Tracking (Mianeh-Ardabil) & Metro Station EPC Rate',
+      'Airport Terminal & Runway Milestones (IKIA Salam, Kish, Abadan, Ardabil)'
+    ],
+    descriptionFa: 'اجرای پروژه‌های راه، پل و تونل (۲۸ پروژه)، ریل و مترو (۸ پروژه) و فرودگاه (۵ پروژه) در شرکت‌های رامان، جنرال مکانیک، دی، ملی ساختمان و پایانه سلام.',
+    descriptionEn: 'Delivering 28 road/bridge/tunnel projects, 8 rail/metro corridors, and 5 airport terminals/runways through Raman, General Mechanic, Dey, Melli Sakhteman & Salam.'
+  },
+  paya_dams_marine_industrial: {
+    id: 'paya_dams_marine_industrial',
+    trackId: 'PAYA_SAMAN_PARS',
+    groupFa: 'گروه ب: بال پیمانکاری عمرانی و زیربنایی',
+    groupEn: 'Group B: Civil & Infrastructure Contracting Wing',
+    titleFa: 'سد، تأسیسات آبی، سازه‌های دریایی و ابنیه صنعتی سنگین (فولاد و سیمان)',
+    titleEn: 'Dams, Hydraulic Conveyance, Marine Works & Heavy Industrial Civil',
+    shortTitleFa: 'سد، دریایی و ابنیه صنعتی',
+    shortTitleEn: 'Dams, Marine & Industrial',
+    iconName: 'Layers',
+    governingStandardsFa: [
+      'دستورالعمل‌های طراحی و پایداری سدهای مخزنی و باطله صنعتی و سازه‌های دریایی (BS/PIANC)',
+      'مقررات سیویل و فونداسیون سنگین صنایع فولاد، سیمان، گندله‌سازی و احیای مستقیم'
+    ],
+    governingStandardsEn: [
+      'Embankment/Tailings Dam & Marine Breakwater Engineering Codes (PIANC)',
+      'Heavy Industrial Civil Foundations for Steel, Cement & Direct Reduction'
+    ],
+    performanceMetricsFa: [
+      'حجم بتن‌ریزی و خاکریزی سدها (شهری‌کور، مخملکوه، هشتجین، عمارت، سرنی، قصرشیرین، میمه)',
+      'پیشرفت خطوط انتقال آب، تصفیه‌خانه (بم–بروات، جیرفت) و اسکله/موج‌شکن (بندرانزلی، نگین بوشهر، کلبا)',
+      'تکمیل فونداسیون و سازه صنعتی (فولاد کاوه جنوب کیش، سیمان هگمتان، گندله‌سازی، احیای مستقیم)',
+      'نرخ انطباق کنترل کیفیت بتن سنگین و ابزاردقیق سد (Piezometer/Settlement)'
+    ],
+    performanceMetricsEn: [
+      'Dam Concrete/Earthfill Volume (Shahri-Kour, Makhmalkuh, Hashtjin, Emarat)',
+      'Water Conveyance & Marine Breakwater Progress (Anzali, Bushehr, Kalba)',
+      'Steel & Cement Plant Civil Completion (Kaveh South Kish, Hegmatan)',
+      'Heavy Concrete QA/QC & Piezometer Safety Compliance (%)'
+    ],
+    descriptionFa: 'احداث ۱۴ پروژه سد، انتقال آب، فاضلاب غرب تهران و موج‌شکن به همراه ۴ پروژه ابنیه صنعتی فولاد و سیمان توسط شرکت‌های دی، ملی ساختمان، جنرال مکانیک و بن‌آب.',
+    descriptionEn: 'Constructing 14 dam, water transmission, and marine breakwater works plus 4 heavy steel/cement industrial plants via Dey, Melli Sakhteman, General Mechanic & Bonab.'
+  },
+  paya_mep_tabiran_energy: {
+    id: 'paya_mep_tabiran_energy',
+    trackId: 'PAYA_SAMAN_PARS',
+    groupFa: 'گروه ب: بال پیمانکاری عمرانی و زیربنایی',
+    groupEn: 'Group B: Civil & Infrastructure Contracting Wing',
+    titleFa: 'تأسیسات MEP، پست برق، نیروگاه خورشیدی و تصفیه پلاسمای سرد (تابیران)',
+    titleEn: 'MEP Systems, 63kV Substations, 5MW Solar PV & Cold-Plasma Effluent (Tabiran)',
+    shortTitleFa: 'تأسیسات MEP، خورشیدی و پلاسما',
+    shortTitleEn: 'MEP, Solar & Cold Plasma',
+    iconName: 'Zap',
+    governingStandardsFa: [
+      'مبحث ۱۳ و ۱۴ مقررات ملی ساختمان، NFPA 130 (تهویه و دفع دود مترو) و استانداردهای IEC پست ۶۳kV',
+      'ضوابط اتصال نیروگاه‌های خورشیدی ۵MW و فناوری تصفیه پساب صنعتی با پلاسمای سرد'
+    ],
+    governingStandardsEn: [
+      'NFPA 130 Metro Smoke Control & IEC 63kV Substation Standards',
+      '5MW Solar PV Grid Integration & Cold-Plasma Industrial Effluent Standards'
+    ],
+    performanceMetricsFa: [
+      'پیشرفت تست و راه‌اندازی تهویه/دفع دود مترو شیراز و اصفهان و تأسیسات باب‌الجواد مشهد',
+      'آماده‌به‌کاری و تلفات پست ۶۳ کیلوولت یزدمهر و شبکه‌های تأمین برق و آب',
+      'راندمان تولید برق نیروگاه خورشیدی ۵ مگاواتی کاوه (kWh/روز)',
+      'نرخ تصفیه آلاینده‌ها (COD/BOD) در تصفیه‌خانه پلاسمای سرد کاوه (شهریور ۱۴۰۵)'
+    ],
+    performanceMetricsEn: [
+      'Shiraz/Isfahan Metro Smoke Extraction & Bab-al-Javad MEP Commissioning',
+      'Yazdmehr 63kV Substation Availability & Power/Water Reliability',
+      'Kaveh 5MW Solar Plant Daily Yield (kWh)',
+      'Cold-Plasma Effluent COD/BOD Reduction Rate (Shahrivar 1405)'
+    ],
+    descriptionFa: 'مهندسی و اجرای تأسیسات الکتریکال و مکانیکال مترو، پست برق ۶۳kV، پروژه‌های نیروگاهی/نفتی و طرح‌های نوآورانه خورشیدی ۵MW و پلاسمای سرد با محوریت شرکت تابیران.',
+    descriptionEn: 'Specialized electrical and mechanical engineering across metro ventilation, 63kV substations, power facilities, 5MW solar PV, and cold-plasma treatment led by Tabiran.'
+  },
+  paya_housing_urban: {
+    id: 'paya_housing_urban',
+    trackId: 'PAYA_SAMAN_PARS',
+    groupFa: 'گروه ج: بال سرمایه‌گذاری مسکن و شهرک‌سازی صنعتی',
+    groupEn: 'Group C: Housing Investment & Industrial City Wing',
+    titleFa: 'انبوه‌سازی، برج‌سازی، شهرک‌سازی مسکونی/توریستی و بازآفرینی بافت فرسوده',
+    titleEn: 'Mass Housing, High-Rise Towers, Residential/Tourist Cities & Urban Renewal',
+    shortTitleFa: 'انبوه‌سازی، مسکن و شهرک‌سازی',
+    shortTitleEn: 'Housing & Urban Renewal',
+    iconName: 'Home',
+    governingStandardsFa: [
+      'مقررات ملی ساختمان (مباحث ۲ تا ۱۹)، مبحث ۲۲ (بهره‌برداری) و اصول طراحی شهرک‌های توریستی و اقماری',
+      'مدل‌های مشارکت مدنی، پیش‌فروش، مدیریت دارایی و بازآفرینی بافت فرسوده شهری'
+    ],
+    governingStandardsEn: [
+      'National Building Codes & Satellite Town Masterplanning Standards',
+      'Real Estate Development Finance, Pre-Sales & Urban Renewal Governance'
+    ],
+    performanceMetricsFa: [
+      'متراژ و پیشرفت واحدهای در حال ساخت (آتی‌ساز، شرکت خانه، عمران مسکن ایران/شمال/اصفهان، معین کوثر)',
+      'زمان تحویل و رضایت بهره‌برداران در شهرک‌های اقماری (دریاکنار ۱۴۳۳+ ویلا، شاهین‌شهر، بهارستان، ملک‌شهر)',
+      'نسبت نقدشوندگی، بهای تمام‌شده هر مترمربع و جریان نقدی فروش',
+      'تکمیل بانک اطلاعاتی پروژه‌های مسکن و ابنیه روی پورتال هلدینگ'
+    ],
+    performanceMetricsEn: [
+      'Built Area Progress Across Atisaz, Khaneh, Omran Maskan Iran/Shomal/Isfahan & Moein Kowsar',
+      'Delivery & Resident Satisfaction (Darya-Kenar 1,433+ Villas, Baharestan, Shahinshahr)',
+      'Unit Cost per m2 & Pre-Sale Cashflow Velocity',
+      'Holding Urban & Housing Portfolio Catalog Completeness (%)'
+    ],
+    descriptionFa: 'مدیریت بال سرمایه‌گذاری ساختمانی و مسکن در ۶ شرکت تابعه (آتی‌ساز، خانه، عمران و مسکن ایران/شمال/اصفهان، معین کوثر)؛ از شهرک‌های دریاکنار و اقماری تا برج‌سازی و بازآفرینی شهری.',
+    descriptionEn: 'Leading residential, commercial, tourist city, and urban renewal developments across Atisaz, Khaneh, Omran Maskan Iran/Shomal/Isfahan, and Moein Kowsar.'
+  },
+  paya_kaveh_industrial_city: {
+    id: 'paya_kaveh_industrial_city',
+    trackId: 'PAYA_SAMAN_PARS',
+    groupFa: 'گروه ج: بال سرمایه‌گذاری مسکن و شهرک‌سازی صنعتی',
+    groupEn: 'Group C: Housing Investment & Industrial City Wing',
+    titleFa: 'مدیریت و بهره‌برداری شهر صنعتی و منطقه ویژه اقتصادی کاوه (۳۰۰۰ هکتار ساوه)',
+    titleEn: 'Kaveh Industrial City & Special Economic Zone Management (3,000 Hectares, Saveh)',
+    shortTitleFa: 'شهر صنعتی و منطقه ویژه کاوه',
+    shortTitleEn: 'Kaveh Industrial City',
+    iconName: 'Factory',
+    governingStandardsFa: [
+      'قوانین مناطق ویژه اقتصادی، ضوابط شرکت شهرک‌های صنعتی و استانداردهای زیست‌محیطی پساب',
+      'موازنه انرژی پایدار شهرک صنعتی (نیروگاه خورشیدی ۵ مگاواتی و تصفیه‌خانه پلاسمای سرد)'
+    ],
+    governingStandardsEn: [
+      'Special Economic Zone Customs & Industrial Estate Regulations',
+      'Sustainable Industrial Infrastructure (5MW Solar & Cold-Plasma Effluent Reuse)'
+    ],
+    performanceMetricsFa: [
+      'نرخ بهره‌برداری اراضی صنعتی ۳۰۰۰ هکتاری کاوه در ۱۰۰ کیلومتری تهران',
+      'پایداری تأمین آب، برق، گاز و بازچرخانی پساب تصفیه‌شده برای واحدهای مستقر',
+      'سهم انرژی تجدیدپذیر خورشیدی در تامین بار اوج شهرک',
+      'زمان پاسخگویی به درخواست‌های سرمایه‌گذاران و صدور مجوزهای منطقه ویژه'
+    ],
+    performanceMetricsEn: [
+      '3,000-Hectare Land Utilization & Tenant Occupancy (%)',
+      'Utility Reliability (Power, Water, Gas) & Treated Effluent Reuse',
+      'Solar PV Peak-Shaving Share in Kaveh Grid (%)',
+      'Investor Onboarding & Special Zone Permit SLA (Days)'
+    ],
+    descriptionFa: 'مدیریت بزرگ‌ترین شهر صنعتی کشور (۳۰۰۰ هکتار در ساوه، ۱۰۰ کیلومتری تهران) با تمرکز بر زیرساخت صنعتی، منطقه ویژه اقتصادی، انرژی خورشیدی و تصفیه پلاسمای سرد پساب.',
+    descriptionEn: 'Operating Iran’s largest industrial city (3,000 ha in Saveh, 100km from Tehran) spanning industrial utilities, SEZ customs logistics, 5MW solar power, and cold-plasma treatment.'
   }
 };
 
@@ -933,6 +1200,191 @@ export const DISCIPLINE_EXAMPLES_REGISTRY: Record<DisciplineId, DisciplineExampl
     costBenefitSummaryEn: 'Preserving invaluable relationships while eliminating financial losses from awkward timidity.',
     roiEstimateFa: 'بازگشت سرمایه فوری در اولین پیام ارسالی.',
     roiEstimateEn: 'Instant ROI on the very first delicate message sent.'
+  },
+  // PAYA SAMAN PARS HOLDING DISCIPLINES EXAMPLES (8)
+  paya_portfolio_pmo: {
+    disciplineId: 'paya_portfolio_pmo',
+    titleFa: 'کنترل پورتفوی ۶۳ پروژه، PMO و مناقصات هلدینگ پایا سامان پارس',
+    titleEn: '63-Project Portfolio PMO & Bidding Governance',
+    businessProblemFa: 'پراکندگی گزارش‌های ۶۳ پروژه در ۱۴ شرکت تابعه (بدون تکمیل فیلدهای مبلغ/کارفرما/تاریخ در پورتال و با فایل‌های اکسل ناهمسان)، باعث تاخیر در شناسایی گلوگاه‌های مالی و ریسک مناقصات جدید هلدینگ می‌شود (داده‌های عددی جهت آموزش شبیه‌سازی شده‌اند).',
+    businessProblemEn: 'Fragmented Excel reporting across 63 projects and 14 subsidiaries delays executive visibility into schedule bottlenecks and consortium bidding capacity (simulated training figures).',
+    whyAiFa: 'تجمیع خودکار ساختارهای متنی و جدولی از دو بال پیمانکاری و مسکن و کشف الگوهای تاخیر مشترک میان شرکت‌های تابعه با قوانین ایستا ممکن نیست و نیاز به پایش شناختی چندمنبعی دارد.',
+    whyAiEn: 'Cross-subsidiary anomaly detection across unstructured site logs, contract letters, and EVM tables exceeds static spreadsheet macros.',
+    successCriteriaFa: [
+      'کاهش ۳۵ درصدی زمان تهیه گزارش تلفیقی هیئت‌مدیره هلدینگ (شبیه‌سازی‌شده)',
+      'تکمیل ۱۰۰ درصدی شناسنامه دیجیتال ۶۳ پروژه از ۸ حوزه کاری',
+      'شناسایی زودهنگام پروژه‌های دارای انحراف SPI زیر ۰.۸۸ در دو بال اجرایی'
+    ],
+    successCriteriaEn: [
+      '35% faster holding executive board portfolio consolidation (simulated)',
+      '100% digital dossier completion across 63 cataloged projects',
+      'Early detection of subsidiaries with SPI < 0.88 across both wings'
+    ],
+    costBenefitSummaryFa: 'جلوگیری از هم‌پوشانی مناقصه‌ای بین ۱۴ شرکت تابعه و آزادسازی ظرفیت مهندسان PMO از تجمیع دستی.',
+    costBenefitSummaryEn: 'Eliminates bid cannibalization across 14 subsidiaries and frees PMO staff from manual aggregation.',
+    roiEstimateFa: 'بازگشت سرمایه حدود ۱۶۰٪ در سال اول با بهبود تخصیص نقدینگی بین دو بال (شبیه‌سازی آموزشی).',
+    roiEstimateEn: 'Estimated 160% first-year ROI via improved dual-wing capital allocation (simulated).'
+  },
+  paya_contracts_epcf_bot: {
+    disciplineId: 'paya_contracts_epcf_bot',
+    titleFa: 'امور قراردادها، کنسرسیوم و مدل‌های EPC+F / BOT / BLT',
+    titleEn: 'EPC+F / BOT / BLT & Consortium Contracts Intelligence',
+    businessProblemFa: 'تنوع بالای مدل‌های قراردادی هلدینگ (EPC، EPC+F، PC، BOT، BLT و کنسرسیوم) در پروژه‌های داخلی و امارات، ریسک جاافتادن بندهای فاینانس، مهلت اخطارهای تاخیر و تعارض سهم‌الشرکه شرکا را افزایش داده است.',
+    businessProblemEn: 'Managing heterogeneous EPC, EPC+F, PC, BOT, BLT, and consortium covenants across domestic and UAE contracts creates missed notice time-bars and financing covenant risks.',
+    whyAiFa: 'تقاطع‌گیری هم‌زمان مفاد موافقت‌نامه کنسرسیوم، شرایط خصوصی فاینانس و نامه‌های کارفرما برای کشف مغایرت‌های حقوقی نیازمند درک معنایی متون قراردادی است.',
+    whyAiEn: 'Cross-referencing financing covenants, consortium split terms, and correspondence logs requires semantic contract reasoning rather than keyword search.',
+    successCriteriaFa: [
+      'صفر شدن اخطارهای قراردادی سوخت‌شده ناشی از عبور از فرجه زمانی',
+      'کاهش ۵۰ درصدی زمان ممیزی پیش‌نویس قراردادهای کنسرسیوم و EPC+F (شبیه‌سازی‌شده)',
+      'استخراج دقیق ماتریس ریسک فاینانس و بازپرداخت در طرح‌های BOT/BLT'
+    ],
+    successCriteriaEn: [
+      'Zero missed contractual delay-notice time-bars across active contracts',
+      '50% reduction in consortium & EPC+F pre-award review time (simulated)',
+      'Exact cash-waterfall risk extraction for BOT/BLT concessions'
+    ],
+    costBenefitSummaryFa: 'حفظ حقوق مالی کنسرسیوم‌های هلدینگ و پیشگیری از جرایم قراردادی در پیمان‌های چندملیتی و داخلی.',
+    costBenefitSummaryEn: 'Protects holding consortium margins and prevents liquidated damages in EPC+F and cross-border contracts.',
+    roiEstimateFa: 'جلوگیری از حتی یک لایحه ردشده می‌تواند کل سرمایه‌گذاری هوش مصنوعی بخش حقوقی را پوشش دهد (شبیه‌سازی آموزشی).',
+    roiEstimateEn: 'Preventing a single forfeited claim pays for the entire contracts AI initiative (simulated).'
+  },
+  paya_hr_fleet_support: {
+    disciplineId: 'paya_hr_fleet_support',
+    titleFa: 'سرمایه انسانی (۵۰۰۰ نیرو) و ناوگان ماشین‌آلات سنگین ۱۴ شرکت تابعه',
+    titleEn: '5,000+ Workforce & Heavy Fleet Optimization Across 14 Subsidiaries',
+    businessProblemFa: 'پراکندگی بیش از ۵۰۰۰ نیروی انسانی و ناوگان ماشین‌آلات سنگین بین پروژه‌های کوهستانی راه و تونل، سدها و کارگاه‌های مسکن، باعث خواب تجهیزات در یک شرکت همزمان با اجاره گران در شرکت هم‌گروه می‌شود.',
+    businessProblemEn: 'Dispersing 5,000+ personnel and heavy equipment across mountain tunnels, dams, and housing sites causes idle machinery in one subsidiary while another rents externally.',
+    whyAiFa: 'پیش‌بینی هم‌زمان زمان اتمام جبهه‌های کاری، خرابی تجهیزات بر اساس لاگ تعمیرات و تطبیق مهارت ۵۰۰۰ نیرو برای جابه‌جایی بین شرکتی نیازمند مدل پیش‌بینی و بهینه‌سازی است.',
+    whyAiEn: 'Forecasting demobilization windows, breakdown probabilities, and crew skill matching across 14 companies requires predictive optimization.',
+    successCriteriaFa: [
+      'افزایش ۱۲ درصدی نرخ آماده‌به‌کاری و بهره‌برداری داخلی ناوگان سنگین (شبیه‌سازی‌شده)',
+      'کاهش ۲۵ درصدی هزینه اجاره تجهیزات برون‌سازمانی در زمان هم‌افزایی دو بال',
+      'پایش ۱۰۰ درصدی اضافه‌کاری، خستگی کارگاهی و آموزش‌های ایمنی HSE'
+    ],
+    successCriteriaEn: [
+      '12% boost in internal cross-subsidiary heavy fleet utilization (simulated)',
+      '25% reduction in external equipment rental spend via intra-holding dispatch',
+      '100% visibility over overtime fatigue limits and HSE readiness'
+    ],
+    costBenefitSummaryFa: 'هم‌افزایی واقعی میان ناوگان و سرمایه انسانی شرکت‌های ملی ساختمان، جنرال مکانیک، دی و رامان.',
+    costBenefitSummaryEn: 'Unlocks real machinery and talent synergy across Melli Sakhteman, General Mechanic, Dey, and Raman.',
+    roiEstimateFa: 'صرفه‌جویی قابل توجه در هزینه تجهیز کارگاه و استیجاری ناوگان طی ۶ ماه (شبیه‌سازی آموزشی).',
+    roiEstimateEn: 'Substantial mobilization and rental savings within 6 months (simulated).'
+  },
+  paya_roads_rail_airports: {
+    disciplineId: 'paya_roads_rail_airports',
+    titleFa: 'راه، پل، تونل، ریل و فرودگاه (داخلی و امارات)',
+    titleEn: 'Highways, Bridges, Tunnels, Rail & Airports (Domestic & UAE)',
+    businessProblemFa: 'شرایط سخت زمین‌شناسی در پروژه‌هایی مانند آزادراه تهران–شمال، تونل قلاجه–ایلام و محورهای کوهستانی امارات (SKF2 شیص–خورفکان، R1000C شارجه، جبل‌الکتاب) همراه با هماهنگی دوخطه‌سازی ریلی (میانه–اردبیل، کرج–قزوین) و ترمینال‌های فرودگاهی (امام/سلام، کیش)، ریسک تاخیرات مسیر بحرانی را بالا برده است.',
+    businessProblemEn: 'Complex mountain geology on Tehran-North, Qalajeh, and UAE highways (SKF2, R1000C, Jebel Al-Kitab), alongside rail double-tracking and airport terminals (IKIA Salam, Kish), drives critical-path volatility.',
+    whyAiFa: 'تحلیل گزارش‌های حفاری تونل، نقشه‌های ژئوتکنیک، صورت‌جلسات معارضین و داده‌های راه‌آهن/فرودگاه نیازمند استخراج خودکار الگوهای ریسک پیش از وقوع توقف است.',
+    whyAiEn: 'Synthesizing tunnel geology logs, UAE/domestic progress reports, and utility interference records requires cognitive risk forecasting.',
+    successCriteriaFa: [
+      'کاهش ۲۰ درصدی تاخیرات ناشی از برآورد نادقیق زمین‌شناسی و معارضین (شبیه‌سازی‌شده)',
+      'پایش لحظه‌ای جبهه‌های برون‌مرزی امارات و پروژه‌های مترو تبریز/تهران',
+      'مستندسازی دقیق روزهای قابل تمدید در پیمان‌های راه، ریل و فرودگاه'
+    ],
+    successCriteriaEn: [
+      '20% reduction in geology and utility-driven critical delays (simulated)',
+      'Unified tracking of UAE export corridors and Tabriz/Tehran metro stations',
+      'Substantiated time-extension dossiers across road, rail, and airport assets'
+    ],
+    costBenefitSummaryFa: 'کاهش ریسک جریمه تاخیرات در بزرگ‌ترین سبد هلدینگ (۲۸ پروژه راه + ۸ ریل + ۵ فرودگاه).',
+    costBenefitSummaryEn: 'De-risks the holding’s largest backlog (28 road + 8 rail + 5 airport projects).',
+    roiEstimateFa: 'جلوگیری از توقف جبهه‌های پرهزینه راهسازی و تونل با بازگشت سرمایه سریع در اسپرینت اول (شبیه‌سازی آموزشی).',
+    roiEstimateEn: 'Prevents costly highway/tunnel workfront stoppages with rapid Sprint-1 payback (simulated).'
+  },
+  paya_dams_marine_industrial: {
+    disciplineId: 'paya_dams_marine_industrial',
+    titleFa: 'سد، تأسیسات آبی، سازه‌های دریایی و ابنیه صنعتی',
+    titleEn: 'Dams, Hydraulic Works, Marine & Heavy Industrial Civil',
+    businessProblemFa: 'هماهنگی هم‌زمان پروژه‌های سد مخزنی و باطله (شهری‌کور، مخملکوه، هشتجین، عمارت، قصرشیرین، فولاد شرق کاوه)، پروژه‌های ساحلی/دریایی (بندرانزلی، نگین بوشهر، موج‌شکن کلبا) و سیویل کارخانه‌های فولاد کاوه جنوب کیش و سیمان هگمتان با گلوگاه‌های کیفیت بتن، هیدرولوژی و تحویل نقشه‌های صنعتی روبه‌روست.',
+    businessProblemEn: 'Coordinating reservoir/tailings dams (Shahri-Kour, Makhmalkuh, Hashtjin, Emarat), marine works (Anzali, Bushehr, Kalba), and heavy steel/cement civil plants faces concrete QA, hydrology, and IFC drawing bottlenecks.',
+    whyAiFa: 'تطبیق داده‌های آزمایشگاه بتن، ابزاردقیق پیزومتر/نشست سد و ماتریس تحویل مدارک کارخانه‌های صنعتی بدون کمک هوش مصنوعی بسیار کند و خطاپذیر است.',
+    whyAiEn: 'Correlating dam piezometer telemetry, concrete lab reports, and industrial civil IFC releases requires automated cognitive verification.',
+    successCriteriaFa: [
+      'کاهش خطای عدم انطباق کیفی (NCR) در بتن‌ریزی‌های حجیم سد و فونداسیون صنعتی (شبیه‌سازی‌شده)',
+      'هشدار زودهنگام تاخیر در جبهه‌های موج‌شکن، خطوط انتقال آب و گندله‌سازی',
+      'یکپارچه‌سازی پرونده تحویل (MDR) بین دی، ملی ساختمان و بن‌آب'
+    ],
+    successCriteriaEn: [
+      'Lower concrete NCR rates across massive dams and industrial foundations (simulated)',
+      'Early bottleneck alerts across marine breakwaters and pelletizing plants',
+      'Unified QA/MDR handover tracking across Dey, Melli Sakhteman, and Bonab'
+    ],
+    costBenefitSummaryFa: 'حذف دوباره‌کاری بتن‌های سنگین و تسریع تحویل پروژه‌های آبی و صنعتی کلان.',
+    costBenefitSummaryEn: 'Eliminates costly heavy-concrete rework and accelerates water and industrial turnarounds.',
+    roiEstimateFa: 'صرفه‌جویی قابل توجه در هزینه‌های تست و اصلاح سازه‌ای (شبیه‌سازی آموزشی).',
+    roiEstimateEn: 'Significant savings in structural testing and rework costs (simulated).'
+  },
+  paya_mep_tabiran_energy: {
+    disciplineId: 'paya_mep_tabiran_energy',
+    titleFa: 'تأسیسات MEP، نیروگاه خورشیدی و پلاسمای سرد (تابیران)',
+    titleEn: 'MEP Systems, 5MW Solar PV & Cold-Plasma Effluent (Tabiran)',
+    businessProblemFa: 'در پروژه‌های تأسیساتی (تهویه و دفع دود مترو شیراز و اصفهان، پست ۶۳kV یزدمهر، باب‌الجواد مشهد) و طرح‌های جدید کاوه (نیروگاه خورشیدی ۵ مگاواتی و تصفیه‌خانه پلاسمای سرد ۱۴۰۵)، تداخل تجهیزات الکتریکال/مکانیکال و تنظیم پارامترهای بهره‌برداری انرژی و پساب بهره‌وری را تهدید می‌کند.',
+    businessProblemEn: 'Across metro ventilation (Shiraz/Isfahan), 63kV Yazdmehr substation, Bab-al-Javad MEP, and Kaveh’s new 5MW solar and cold-plasma plants, MEP clashes and operational tuning impact yield.',
+    whyAiFa: 'تحلیل هم‌زمان پارامترهای تصفیه پلاسمای سرد، پیش‌بینی تولید پنل‌های خورشیدی با داده‌های اقلیمی ساوه و کنترل پانچ‌لیست‌های تست سرد و گرم MEP نیازمند مدل شناختی است.',
+    whyAiEn: 'Tuning cold-plasma treatment efficiency, forecasting 5MW solar generation, and auditing multi-site MEP punch lists demand cognitive analytics.',
+    successCriteriaFa: [
+      'افزایش راندمان پیش‌بینی تولید نیروگاه خورشیدی ۵MW و کاهش افت دریفت (شبیه‌سازی‌شده)',
+      'بهینه‌سازی مصرف انرژی و نرخ تصفیه در واحد پلاسمای سرد کاوه',
+      'کاهش ۵۰ درصدی زمان بستن پانچ‌لیست‌های تأسیساتی مترو و پست‌های برق'
+    ],
+    successCriteriaEn: [
+      'Higher 5MW solar forecast accuracy and earlier inverter/dust alerts (simulated)',
+      'Optimized energy-to-COD efficiency in Kaveh cold-plasma treatment',
+      '50% faster MEP commissioning punch-list clearance in metro & substation works'
+    ],
+    costBenefitSummaryFa: 'هم‌افزایی فنی شرکت تابیران با بخش انرژی‌های نو و تصفیه پیشرفته شهر صنعتی کاوه.',
+    costBenefitSummaryEn: 'Connects Tabiran’s MEP engineering depth with Kaveh’s clean energy and cold-plasma assets.',
+    roiEstimateFa: 'بهبود راندمان انرژی و تسریع تحویل پروژه‌های MEP در کمتر از ۴ ماه (شبیه‌سازی آموزشی).',
+    roiEstimateEn: 'Improved energy yield and accelerated MEP handover inside 4 months (simulated).'
+  },
+  paya_housing_urban: {
+    disciplineId: 'paya_housing_urban',
+    titleFa: 'انبوه‌سازی، برج‌سازی و بازآفرینی شهری (بال سرمایه‌گذاری مسکن)',
+    titleEn: 'Mass Housing, High-Rise & Urban Renewal (Housing Wing)',
+    businessProblemFa: 'تعدد شرکت‌های بال مسکن (آتی‌ساز، شرکت خانه، عمران و مسکن ایران، شمال، اصفهان و معین کوثر) در کنار کامل‌نبودن ثبت پروژه‌های ابنیه ساختمانی و مدیریت شهری روی پورتال (۰ پروژه ثبت‌شده در دسته ابنیه)، هماهنگی بهای تمام‌شده، برنامه فروش و بازآفرینی بافت فرسوده را دشوار کرده است.',
+    businessProblemEn: 'Six housing subsidiaries (Atisaz, Khaneh, Omran Maskan Iran/Shomal/Isfahan, Moein Kowsar) plus unlogged urban/building projects on the portal create fragmented cost tracking and sales-to-construction timing.',
+    whyAiFa: 'تحلیل هم‌زمان شاخص قیمت مصالح، سرعت پیشرفت طبقات، کشف گلوگاه‌های پیمانکاران جزء و تطبیق جریان نقدی پیش‌فروش در شهرک‌های اقماری با اکسل سنتی به کندی انجام می‌شود.',
+    whyAiEn: 'Synchronizing material cost inflation, multi-site floor completion velocity, and satellite-town pre-sale cashflows requires cognitive forecasting.',
+    successCriteriaFa: [
+      'برآورد دقیق‌تر بهای تمام‌شده ساخت در پروژه‌های برج‌سازی، ویلاسازی و بافت فرسوده (شبیه‌سازی‌شده)',
+      'ساخت شناسنامه و کاتالوگ یکپارچه پروژه‌های بال مسکن و مدیریت شهری',
+      'هماهنگی برنامه پیشرفت فیزیکی با تعهدات تحویل به خریداران'
+    ],
+    successCriteriaEn: [
+      'Tighter unit-cost forecasting across towers, villas, and urban renewal (simulated)',
+      'Complete digital catalog for previously unpopulated urban/building portfolio',
+      'Synchronized site construction progress against buyer delivery milestones'
+    ],
+    costBenefitSummaryFa: 'شفاف‌سازی سودآوری واقعی پروژه‌های مسکونی و توریستی و پرکردن شکاف اطلاعاتی بال دوم هلدینگ.',
+    costBenefitSummaryEn: 'Clarifies true project margins across housing/tourism developments and closes portal visibility gaps.',
+    roiEstimateFa: 'کاهش انحراف بودجه ساخت و بهبود برنامه نقدینگی در بال سرمایه‌گذاری مسکن (شبیه‌سازی آموزشی).',
+    roiEstimateEn: 'Reduced construction budget variance and stronger cashflow velocity in the housing wing (simulated).'
+  },
+  paya_kaveh_industrial_city: {
+    disciplineId: 'paya_kaveh_industrial_city',
+    titleFa: 'مدیریت شهر صنعتی و منطقه ویژه اقتصادی کاوه (۳۰۰۰ هکتار ساوه)',
+    titleEn: 'Kaveh Industrial City & SEZ Operations (3,000 Hectares)',
+    businessProblemFa: 'مدیریت زیرساخت‌های آب، برق، گاز، گمرک منطقه ویژه اقتصادی، نیروگاه خورشیدی ۵MW و تصفیه‌خانه پلاسمای سرد در مقیاس ۳۰۰۰ هکتار در ساوه با صدها واحد صنعتی مستقر، با درخواست‌های پراکنده بهره‌برداران و چالش بهینه‌سازی مصرف آب و انرژی مواجه است.',
+    businessProblemEn: 'Operating utilities, SEZ customs corridors, 5MW solar power, and cold-plasma wastewater reuse across 3,000 hectares in Saveh creates complex tenant SLA and resource-balancing challenges.',
+    whyAiFa: 'پیش‌بینی بار مصرف آب و برق صنایع مستقر، پایش هوشمند کیفیت پساب بازچرخانی‌شده و پاسخگویی مستند به استعلام‌های سرمایه‌گذاران منطقه ویژه نیازمند دستیارهای دانش‌پایه و مدل پیش‌بینی است.',
+    whyAiEn: 'Forecasting industrial tenant utility load, auditing treated effluent reuse, and handling SEZ investor compliance require grounded AI assistants and predictive telemetry.',
+    successCriteriaFa: [
+      'کاهش ۵۰ درصدی زمان پاسخگویی به استعلام‌های حقوقی و فنی سرمایه‌گذاران منطقه ویژه (شبیه‌سازی‌شده)',
+      'افزایش سهم بازچرخانی آب صنعتی از تصفیه‌خانه پلاسمای سرد در واحدهای کاوه',
+      'پایش ۲۴ ساعته توازن بار خورشیدی و شبکه توزیع شهر صنعتی'
+    ],
+    successCriteriaEn: [
+      '50% faster SEZ investor compliance & technical inquiry turnaround (simulated)',
+      'Higher industrial water reuse ratio from the cold-plasma effluent facility',
+      '24/7 balancing across 5MW solar generation and Kaveh utility distribution'
+    ],
+    costBenefitSummaryFa: 'تبدیل شهر صنعتی کاوه به الگوی هوشمند زیرساخت سبز و بهره‌برداری پایدار در هلدینگ پایا سامان پارس.',
+    costBenefitSummaryEn: 'Positions Kaveh Industrial City as Paya Saman Pars’s flagship smart green industrial ecosystem.',
+    roiEstimateFa: 'بهبود بهره‌وری منابع آب/برق و تسریع جذب سرمایه‌گذار در منطقه ویژه اقتصادی (شبیه‌سازی آموزشی).',
+    roiEstimateEn: 'Higher utility efficiency and faster SEZ investor onboarding (simulated).'
   }
 };
 
@@ -967,6 +1419,38 @@ export interface DisciplinePromptPair {
 export function getDisciplinePromptShowcase(disciplineId: DisciplineId): DisciplinePromptPair {
   const meta = getDisciplineMetadata(disciplineId);
   const content = getDisciplineExampleContent(disciplineId);
+
+  // 0. PAYA SAMAN PARS HOLDING TRACK
+  if (meta.trackId === 'PAYA_SAMAN_PARS') {
+    return {
+      weakPromptFa: `«یک گزارش درباره وضعیت ${meta.titleFa} در هلدینگ پایا سامان پارس بنویس.»`,
+      weakPromptEn: `"Write a status update about ${meta.titleEn} at Paya Saman Pars Holding."`,
+      weakCritiqueFa: `ایراد پرامپت: فاقد جایگاه سازمانی در دو بال هلدینگ، بدون اشاره به شرکت‌های تابعه، مدل قراردادی (EPC/EPC+F/BOT/BLT) و شاخص‌های مشخص (${meta.performanceMetricsFa[0]}). خروجی کلی و غیرقابل استناد در جلسه ستاد است.`,
+      weakCritiqueEn: `Flaw: Lacks holding persona, subsidiary scope, contract model (EPC+F/BOT/BLT), and measurable KPIs (${meta.performanceMetricsEn[0]}). Unusable for executive board decisions.`,
+      engineeredPromptFa: `تو مدیر ارشد و متخصص در حوزه ${meta.titleFa} در هلدینگ پایا سامان پارس (${meta.groupFa || 'دو بال اجرایی'}) بر مبنای ${meta.governingStandardsFa[0]} هستی [Role].
+زمینه مسئله و چالش اجرایی در کارگاه یا ستاد هلدینگ: ${content.businessProblemFa} [Context].
+شاخص‌های پایش و کنترل در اختیار تو شامل [${meta.performanceMetricsFa.join(' | ')}] است (با تفکیک فکت ثبت‌شده از اعداد نیازمند تکمیل).
+وظیفه تو این است که گلوگاه‌های اجرایی، مالی یا قراردادی را تحلیل کرده، هم‌افزایی شرکت‌های تابعه مرتبط را مشخص کنی و برنامه اقدام فوری تدوین نمایی [Task].
+خروجی باید در قالب یک جدول مدیریتی ۴ ستونه با عناوین [محور / پروژه یا شرکت تابعه | ریسک یا گلوگاه کلیدی | اثر بر دو بال و مدل قراردادی | اقدام اصلاحی با مسئول و زمان] بدون مقدمه‌چینی اضافی ارائه شود [Output].`,
+      engineeredPromptEn: `You are a Senior Specialist in ${meta.titleEn} at Paya Saman Pars Holding (${meta.groupEn || 'Dual-Wing Operations'}) adhering to ${meta.governingStandardsEn[0]} [Role].
+Operational & Holding Context: ${content.businessProblemEn} [Context].
+Available control indicators include: [${meta.performanceMetricsEn.join(' | ')}] (strictly distinguishing verified facts from unpopulated portal fields).
+Your task is to diagnose execution/contractual bottlenecks, identify cross-subsidiary synergies, and prescribe concrete immediate actions [Task].
+Output format must be a crisp 4-column executive Markdown table: [Project / Subsidiary | Key Bottleneck | Contract & Wing Impact | Action Owner & Timeline] with zero preamble [Output].`,
+      engineeredBreakdownFa: {
+        role: `متخصص ارشد ${meta.shortTitleFa} · هلدینگ پایا سامان پارس`,
+        context: content.businessProblemFa.slice(0, 100) + '...',
+        task: `تحلیل گلوگاه‌های ${meta.performanceMetricsFa[0]} و هم‌افزایی دو بال و ۱۴ شرکت تابعه`,
+        output: `جدول ۴ ستونه: [پروژه/شرکت تابعه | ریسک کلیدی | اثر قراردادی | اقدام اصلاحی]`
+      },
+      engineeredBreakdownEn: {
+        role: `Senior Lead in ${meta.shortTitleEn} · Paya Saman Pars Holding`,
+        context: content.businessProblemEn.slice(0, 100) + '...',
+        task: `Diagnose ${meta.performanceMetricsEn[0]} bottlenecks across subsidiaries & contract models`,
+        output: `4-column table: [Project / Subsidiary | Bottleneck | Contract Impact | Action Plan]`
+      }
+    };
+  }
 
   // 1. GENERAL & EVERYDAY LIFESTYLE TRACK
   if (meta.trackId === 'GENERAL_EVERYDAY') {

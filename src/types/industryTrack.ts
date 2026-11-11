@@ -1,4 +1,8 @@
-export type IndustryTrackId = 'CIVIL_INFRA' | 'ENERGY_PETRO' | 'GENERAL_EVERYDAY';
+export type IndustryTrackId =
+  | 'CIVIL_INFRA'
+  | 'ENERGY_PETRO'
+  | 'GENERAL_EVERYDAY'
+  | 'PAYA_SAMAN_PARS';
 
 export interface IndustryTrackInfo {
   id: IndustryTrackId;
@@ -10,7 +14,7 @@ export interface IndustryTrackInfo {
   taglineEn: string;
   descriptionFa: string;
   descriptionEn: string;
-  iconName: 'Building2' | 'Factory' | 'Sparkles';
+  iconName: 'Building2' | 'Factory' | 'Sparkles' | 'Landmark';
   scopePillsFa: string[];
   scopePillsEn: string[];
   governingStandardsFa: string[];
@@ -197,16 +201,130 @@ export const INDUSTRY_TRACKS: Record<IndustryTrackId, IndustryTrackInfo> = {
     gradient: 'from-emerald-500 via-teal-500 to-indigo-600',
     borderColor: 'border-emerald-500/40 hover:border-emerald-400',
     glowColor: 'rgba(16, 185, 129, 0.35)'
+  },
+  PAYA_SAMAN_PARS: {
+    id: 'PAYA_SAMAN_PARS',
+    titleFa: 'هلدینگ پایا سامان پارس (پیمانکاری زیرساخت، مسکن و شهرک صنعتی)',
+    titleEn: 'Paya Saman Pars Holding (Infrastructure, Housing & Kaveh Industrial City)',
+    shortTitleFa: 'پایا سامان پارس',
+    shortTitleEn: 'Paya Saman Pars',
+    taglineFa: 'دو بال پیمانکاری عمرانی و سرمایه‌گذاری مسکن/شهرک کاوه · ۸ حوزه، ۶۳ پروژه، ۱۴ شرکت تابعه (EPC+F / BOT / BLT)',
+    taglineEn: 'Dual-Wing Civil Contracting & Housing/Industrial City Portfolio · 8 Sectors, 63 Projects, 14 Subsidiaries',
+    descriptionFa: 'مسیر اختصاصی مدیران، کارشناسان دفتر فنی، امور پیمان و بهره‌برداری هلدینگ پایا سامان پارس و شرکت‌های تابعه (ملی ساختمان، جنرال مکانیک، دی، رامان، تابیران، آتی‌ساز، خانه، عمران مسکن و شهر صنعتی کاوه).',
+    descriptionEn: 'Dedicated track for Paya Saman Pars Holding & subsidiaries spanning EPC/EPC+F/BOT/BLT infrastructure, industrial plants, housing development, and Kaveh Special Economic Zone.',
+    iconName: 'Landmark',
+    scopePillsFa: [
+      'راه، آزادراه، پل، تونل و برون‌مرزی امارات (۲۸ پروژه)',
+      'سد، انتقال آب، دریایی و ریل/فرودگاه (۲۷ پروژه)',
+      'ابنیه صنعتی، MEP، خورشیدی ۵MW و پلاسمای سرد کاوه',
+      'انبوه‌سازی، شهرک‌سازی و منطقه ویژه کاوه (۳۰۰۰ هکتار)',
+      'مدل‌های قراردادی EPC / EPC+F / PC / BOT / BLT و کنسرسیوم'
+    ],
+    scopePillsEn: [
+      'Highways, Tunnels & UAE Cross-Border (28 Projects)',
+      'Dams, Water, Marine, Rail & Airports (27 Projects)',
+      'Industrial Civil, MEP, 5MW Solar & Cold Plasma',
+      'Housing Wing & Kaveh 3,000ha Industrial City',
+      'EPC / EPC+F / PC / BOT / BLT & Consortium Governance'
+    ],
+    governingStandardsFa: [
+      'شرایط عمومی پیمان (نشریه ۴۳۱۱) و فیدیک EPC / EPC+F',
+      'چارچوب‌های سرمایه‌گذاری و مشارکت BOT / BLT و کنسرسیوم',
+      'استانداردهای راه و تونل، نشریه ۵۵، مقررات ملی ساختمان و HSE',
+      'ضوابط بهره‌برداری شهرک‌های صنعتی، انرژی تجدیدپذیر و پلاسمای سرد'
+    ],
+    governingStandardsEn: [
+      'Circular 4311 & FIDIC EPC / EPC+F Contracting Standards',
+      'BOT / BLT Concession & Multi-Subsidiary Consortium Governance',
+      'Civil/Tunneling Specs (Circular 55), Building Codes & ISO HSE',
+      'Industrial City Infrastructure, Solar PV & Cold-Plasma Standards'
+    ],
+    defaultCaseStudy: {
+      projectTitleFa: 'داشبورد فرماندهی هوشمند پورتفوی ۶۳ پروژه‌ای و پایش دو بال هلدینگ پایا سامان پارس',
+      projectTitleEn: 'Cognitive Command Center for Paya Saman Pars 63-Project Dual-Wing Portfolio',
+      organizationFa: 'هلدینگ پایا سامان پارس و ۱۴ شرکت تابعه (ستاد و دو بال اجرایی)',
+      organizationEn: 'Paya Saman Pars Holding & 14 Subsidiary Companies',
+      coreProblemFa: 'تجمیع ناهمگون گزارش‌های ۶۳ پروژه در ۸ حوزه (از آزادراه تهران–شمال و پروژه‌های امارات تا شهر صنعتی کاوه و بال مسکن)، تاخیر در پایش قراردادهای EPC+F/BOT و نبود هشدار پیش‌دستانه انحراف منابع (۵۰۰۰+ نیرو و ناوگان سنگین).',
+      coreProblemEn: 'Fragmented multi-subsidiary reporting across 63 infrastructure, UAE export, housing, and Kaveh Industrial City projects without unified EPC+F/BOT risk forecasting.',
+      aiPatternFa: 'الگوی پیش‌بینی (Predictive)، شناخت ناهنجاری (Anomaly Detection) و تعامل مکالمه‌ای مستند (Conversational / Grounded AI)',
+      aiPatternEn: 'Predictive Analytics, Anomaly Detection & Source-Grounded Conversational AI',
+      expectedRoiFa: 'کاهش ۳۵ درصدی زمان تجمیع گزارش‌های ستاد هلدینگ و شناسایی زودهنگام گلوگاه‌های مالی و تاخیرات در دو بال اجرایی (برآورد شبیه‌سازی‌شده آموزشی).',
+      expectedRoiEn: '35% faster executive holding consolidation and proactive bottleneck detection across both contracting and investment wings (educational simulation).'
+    },
+    accentColor: 'text-violet-600 dark:text-violet-400',
+    gradient: 'from-violet-600 via-purple-600 to-indigo-700',
+    borderColor: 'border-violet-500/40 hover:border-violet-400',
+    glowColor: 'rgba(139, 92, 246, 0.35)'
   }
 };
 
 const STORAGE_KEY_TRACK = 'cpmai_selected_industry_track';
 
-export const getSavedIndustryTrack = (): IndustryTrackId => {
+export const resolveTrackFromUrl = (
+  pathname?: string,
+  search?: string
+): IndustryTrackId | null => {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY_TRACK);
-    if (saved === 'CIVIL_INFRA' || saved === 'ENERGY_PETRO' || saved === 'GENERAL_EVERYDAY') {
-      return saved;
+    const rawPath =
+      pathname !== undefined
+        ? pathname
+        : typeof window !== 'undefined'
+        ? window.location.pathname
+        : '';
+    const rawSearch =
+      search !== undefined
+        ? search
+        : typeof window !== 'undefined'
+        ? window.location.search
+        : '';
+
+    const normalizedPath = rawPath.toLowerCase().replace(/\/+$/, '');
+    if (
+      normalizedPath === '/paya' ||
+      normalizedPath.endsWith('/paya') ||
+      normalizedPath === '/paya-saman-pars' ||
+      normalizedPath.endsWith('/paya-saman-pars')
+    ) {
+      return 'PAYA_SAMAN_PARS';
+    }
+
+    if (rawSearch) {
+      const params = new URLSearchParams(rawSearch);
+      const trackParam = (params.get('track') || '').trim().toUpperCase();
+      if (trackParam === 'PAYA' || trackParam === 'PAYA_SAMAN_PARS') {
+        return 'PAYA_SAMAN_PARS';
+      }
+      if (
+        trackParam === 'CIVIL_INFRA' ||
+        trackParam === 'ENERGY_PETRO' ||
+        trackParam === 'GENERAL_EVERYDAY'
+      ) {
+        return trackParam;
+      }
+    }
+  } catch {
+    // URL parsing error
+  }
+  return null;
+};
+
+export const getSavedIndustryTrack = (): IndustryTrackId => {
+  const urlTrack = resolveTrackFromUrl();
+  if (urlTrack) {
+    saveIndustryTrack(urlTrack);
+    return urlTrack;
+  }
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY_TRACK);
+      if (
+        saved === 'CIVIL_INFRA' ||
+        saved === 'ENERGY_PETRO' ||
+        saved === 'GENERAL_EVERYDAY' ||
+        saved === 'PAYA_SAMAN_PARS'
+      ) {
+        return saved;
+      }
     }
   } catch {
     // LocalStorage error
@@ -216,7 +334,9 @@ export const getSavedIndustryTrack = (): IndustryTrackId => {
 
 export const saveIndustryTrack = (track: IndustryTrackId): void => {
   try {
-    localStorage.setItem(STORAGE_KEY_TRACK, track);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY_TRACK, track);
+    }
   } catch {
     // LocalStorage error
   }
@@ -252,7 +372,21 @@ export type GeneralDisciplineId =
   | 'general_personal_productivity'
   | 'general_customer_care';
 
-export type DisciplineId = CivilDisciplineId | PetroDisciplineId | GeneralDisciplineId;
+export type PayaDisciplineId =
+  | 'paya_portfolio_pmo'
+  | 'paya_contracts_epcf_bot'
+  | 'paya_hr_fleet_support'
+  | 'paya_roads_rail_airports'
+  | 'paya_dams_marine_industrial'
+  | 'paya_mep_tabiran_energy'
+  | 'paya_housing_urban'
+  | 'paya_kaveh_industrial_city';
+
+export type DisciplineId =
+  | CivilDisciplineId
+  | PetroDisciplineId
+  | GeneralDisciplineId
+  | PayaDisciplineId;
 
 export type EngineeringRoleId =
   | 'director'            // مدیر طرح / مدیر ارشد پروژه
@@ -263,6 +397,8 @@ export type EngineeringRoleId =
 export interface DisciplineMetadata {
   id: DisciplineId;
   trackId: IndustryTrackId;
+  groupFa?: string;
+  groupEn?: string;
   titleFa: string;
   titleEn: string;
   shortTitleFa: string;
@@ -297,23 +433,29 @@ const STORAGE_KEY_ROLE = 'cpmai_selected_engineering_role';
 
 export const getSavedDiscipline = (track: IndustryTrackId = 'CIVIL_INFRA'): DisciplineId => {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY_DISCIPLINE) as DisciplineId;
-    if (saved) {
-      if (track === 'CIVIL_INFRA' && saved.startsWith('civil_')) return saved;
-      if (track === 'ENERGY_PETRO' && saved.startsWith('petro_')) return saved;
-      if (track === 'GENERAL_EVERYDAY' && saved.startsWith('general_')) return saved;
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY_DISCIPLINE) as DisciplineId;
+      if (saved) {
+        if (track === 'CIVIL_INFRA' && saved.startsWith('civil_')) return saved;
+        if (track === 'ENERGY_PETRO' && saved.startsWith('petro_')) return saved;
+        if (track === 'GENERAL_EVERYDAY' && saved.startsWith('general_')) return saved;
+        if (track === 'PAYA_SAMAN_PARS' && saved.startsWith('paya_')) return saved;
+      }
     }
   } catch {
     // LocalStorage error
   }
   if (track === 'ENERGY_PETRO') return 'petro_process_safety';
   if (track === 'GENERAL_EVERYDAY') return 'general_household_finance';
+  if (track === 'PAYA_SAMAN_PARS') return 'paya_portfolio_pmo';
   return 'civil_tbm_tunnel';
 };
 
 export const saveDiscipline = (disciplineId: DisciplineId): void => {
   try {
-    localStorage.setItem(STORAGE_KEY_DISCIPLINE, disciplineId);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY_DISCIPLINE, disciplineId);
+    }
   } catch {
     // LocalStorage error
   }
@@ -321,9 +463,11 @@ export const saveDiscipline = (disciplineId: DisciplineId): void => {
 
 export const getSavedRole = (): EngineeringRoleId => {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY_ROLE) as EngineeringRoleId;
-    if (saved && ['director', 'lead_superintendent', 'technical_engineer', 'site_operator'].includes(saved)) {
-      return saved;
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY_ROLE) as EngineeringRoleId;
+      if (saved && ['director', 'lead_superintendent', 'technical_engineer', 'site_operator'].includes(saved)) {
+        return saved;
+      }
     }
   } catch {
     // LocalStorage error
@@ -333,7 +477,9 @@ export const getSavedRole = (): EngineeringRoleId => {
 
 export const saveRole = (role: EngineeringRoleId): void => {
   try {
-    localStorage.setItem(STORAGE_KEY_ROLE, role);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY_ROLE, role);
+    }
   } catch {
     // LocalStorage error
   }
