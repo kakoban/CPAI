@@ -1,0 +1,781 @@
+/* ============================================================
+   OWJ Markdown Studio Pro — Theme, Typography & Renderer Styles
+   ============================================================ */
+
+.md-studio-root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent-color: #6366f1;
+  --accent-hover: #4f46e5;
+  --border-color: #e2e8f0;
+  --code-bg: #1e293b;
+  --code-text: #f8fafc;
+  --blockquote-bg: #eef2ff;
+  --blockquote-border: #6366f1;
+  --table-header-bg: #f8fafc;
+  --table-row-alt: #f8fafc;
+}
+
+.md-studio-root.theme-light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent-color: #6366f1;
+  --accent-hover: #4f46e5;
+  --border-color: #e2e8f0;
+  --code-bg: #1e293b;
+  --code-text: #f8fafc;
+  --blockquote-bg: #eef2ff;
+  --blockquote-border: #6366f1;
+  --table-header-bg: #f8fafc;
+  --table-row-alt: #f8fafc;
+}
+
+.md-studio-root.theme-dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  --accent-color: #818cf8;
+  --accent-hover: #6366f1;
+  --border-color: #334155;
+  --code-bg: #020617;
+  --code-text: #e2e8f0;
+  --blockquote-bg: rgba(99, 102, 241, 0.12);
+  --blockquote-border: #818cf8;
+  --table-header-bg: #1e293b;
+  --table-row-alt: rgba(30, 41, 59, 0.5);
+}
+
+.md-studio-root.theme-sepia {
+  --bg-primary: #fbf7f0;
+  --bg-secondary: #f3ece0;
+  --bg-tertiary: #e6dccb;
+  --text-primary: #3d3124;
+  --text-secondary: #685642;
+  --text-muted: #9a8670;
+  --accent-color: #b45309;
+  --accent-hover: #92400e;
+  --border-color: #e2d5c1;
+  --code-bg: #292118;
+  --code-text: #f5ebe0;
+  --blockquote-bg: #f5ebe0;
+  --blockquote-border: #b45309;
+  --table-header-bg: #f3ece0;
+  --table-row-alt: #f6f0e6;
+}
+
+.md-studio-root.theme-nord {
+  --bg-primary: #2e3440;
+  --bg-secondary: #3b4252;
+  --bg-tertiary: #434c5e;
+  --text-primary: #eceff4;
+  --text-secondary: #d8dee9;
+  --text-muted: #81a1c1;
+  --accent-color: #88c0d0;
+  --accent-hover: #5e81ac;
+  --border-color: #4c566a;
+  --code-bg: #242933;
+  --code-text: #eceff4;
+  --blockquote-bg: rgba(136, 192, 208, 0.12);
+  --blockquote-border: #88c0d0;
+  --table-header-bg: #3b4252;
+  --table-row-alt: rgba(59, 66, 82, 0.5);
+}
+
+.md-studio-root.theme-cyber {
+  --bg-primary: #090d16;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1f2937;
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --accent-color: #10b981;
+  --accent-hover: #059669;
+  --border-color: #1f2937;
+  --code-bg: #030712;
+  --code-text: #34d399;
+  --blockquote-bg: rgba(16, 185, 129, 0.1);
+  --blockquote-border: #10b981;
+  --table-header-bg: #111827;
+  --table-row-alt: rgba(17, 24, 39, 0.6);
+}
+
+.md-studio-root.theme-academic {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f0f7ff;
+  --bg-tertiary: #e0effe;
+  --text-primary: #0c2340;
+  --text-secondary: #334e68;
+  --text-muted: #627d98;
+  --accent-color: #0284c7;
+  --accent-hover: #0369a1;
+  --border-color: #bae6fd;
+  --code-bg: #0f172a;
+  --code-text: #f0f9ff;
+  --blockquote-bg: #f0f9ff;
+  --blockquote-border: #0284c7;
+  --table-header-bg: #e0f2fe;
+  --table-row-alt: #f8fafc;
+}
+
+.md-studio-root.theme-editorial {
+  --bg-primary: #fffdfa;
+  --bg-secondary: #fff5f5;
+  --bg-tertiary: #ffe3e3;
+  --text-primary: #1c1917;
+  --text-secondary: #44403c;
+  --text-muted: #78716c;
+  --accent-color: #e11d48;
+  --accent-hover: #be123c;
+  --border-color: #fecdd3;
+  --code-bg: #18181b;
+  --code-text: #fafafa;
+  --blockquote-bg: #fff1f2;
+  --blockquote-border: #e11d48;
+  --table-header-bg: #ffe4e6;
+  --table-row-alt: #fffafb;
+}
+
+/* Font families */
+.md-font-vazir {
+  font-family: 'Vazirmatn', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.md-font-sans {
+  font-family: 'Plus Jakarta Sans', 'Vazirmatn', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.md-font-serif {
+  font-family: 'Lora', 'Vazirmatn', Georgia, serif;
+}
+
+.md-font-mono {
+  font-family: 'Fira Code', 'Vazirmatn', monospace;
+}
+
+/* ============================================================
+   Markdown Body Typography & Elements
+   ============================================================ */
+.markdown-body {
+  color: var(--text-primary);
+  line-height: 1.85;
+  word-wrap: break-word;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+.markdown-body > *:first-child {
+  margin-top: 0 !important;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  color: var(--text-primary);
+  font-weight: 800;
+  line-height: 1.35;
+  margin-top: 1.9em;
+  margin-bottom: 0.75em;
+  scroll-margin-top: 5rem;
+  position: relative;
+}
+
+.markdown-body h1 {
+  font-size: 2.15em;
+  padding-bottom: 0.45em;
+  border-bottom: 3px solid var(--accent-color);
+  letter-spacing: -0.02em;
+}
+
+.markdown-body h2 {
+  font-size: 1.65em;
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.markdown-body h2::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 1.1em;
+  background: var(--accent-color);
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.markdown-body h3 {
+  font-size: 1.32em;
+  color: var(--accent-color);
+}
+
+.markdown-body h4 {
+  font-size: 1.12em;
+}
+
+.markdown-body h5 {
+  font-size: 1em;
+}
+
+.markdown-body h6 {
+  font-size: 0.9em;
+  color: var(--text-secondary);
+}
+
+.markdown-body p {
+  margin-top: 0;
+  margin-bottom: 1.25em;
+  text-align: justify;
+}
+
+.markdown-body a {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--accent-color);
+  transition: all 0.2s ease;
+}
+
+.markdown-body a:hover {
+  color: var(--accent-hover);
+  border-bottom-style: solid;
+  background-color: var(--blockquote-bg);
+  border-radius: 3px;
+}
+
+.markdown-body strong {
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.markdown-body em {
+  font-style: italic;
+}
+
+.markdown-body del {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+/* ============================================================
+   6-Color Educational Highlighter Marker System
+   ============================================================ */
+.markdown-body mark,
+.markdown-body mark.md-highlight {
+  padding: 0.14em 0.45em;
+  margin: 0 0.08em;
+  border-radius: 0.4em;
+  font-weight: 600;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.markdown-body mark.md-highlight-yellow {
+  background: linear-gradient(120deg, rgba(253, 224, 71, 0.55) 0%, rgba(250, 204, 21, 0.85) 100%);
+  color: #422006;
+  border-bottom: 2px solid #eab308;
+}
+
+.markdown-body mark.md-highlight-green {
+  background: linear-gradient(120deg, rgba(134, 239, 172, 0.5) 0%, rgba(74, 222, 128, 0.8) 100%);
+  color: #052e16;
+  border-bottom: 2px solid #22c55e;
+}
+
+.markdown-body mark.md-highlight-blue {
+  background: linear-gradient(120deg, rgba(125, 211, 252, 0.5) 0%, rgba(56, 189, 248, 0.8) 100%);
+  color: #082f49;
+  border-bottom: 2px solid #0ea5e9;
+}
+
+.markdown-body mark.md-highlight-pink {
+  background: linear-gradient(120deg, rgba(249, 168, 212, 0.55) 0%, rgba(244, 114, 182, 0.8) 100%);
+  color: #500724;
+  border-bottom: 2px solid #ec4899;
+}
+
+.markdown-body mark.md-highlight-purple {
+  background: linear-gradient(120deg, rgba(216, 180, 254, 0.55) 0%, rgba(192, 132, 252, 0.8) 100%);
+  color: #3b0764;
+  border-bottom: 2px solid #a855f7;
+}
+
+.markdown-body mark.md-highlight-orange {
+  background: linear-gradient(120deg, rgba(253, 186, 116, 0.55) 0%, rgba(251, 146, 60, 0.85) 100%);
+  color: #431407;
+  border-bottom: 2px solid #f97316;
+}
+
+/* Dark theme adjustments for highlights */
+.md-studio-root.theme-dark .markdown-body mark.md-highlight-yellow,
+.md-studio-root.theme-nord .markdown-body mark.md-highlight-yellow,
+.md-studio-root.theme-cyber .markdown-body mark.md-highlight-yellow {
+  background: rgba(234, 179, 8, 0.28);
+  color: #fef08a;
+  border-bottom-color: #facc15;
+}
+
+.md-studio-root.theme-dark .markdown-body mark.md-highlight-green,
+.md-studio-root.theme-nord .markdown-body mark.md-highlight-green,
+.md-studio-root.theme-cyber .markdown-body mark.md-highlight-green {
+  background: rgba(34, 197, 94, 0.28);
+  color: #bbf7d0;
+  border-bottom-color: #4ade80;
+}
+
+.md-studio-root.theme-dark .markdown-body mark.md-highlight-blue,
+.md-studio-root.theme-nord .markdown-body mark.md-highlight-blue,
+.md-studio-root.theme-cyber .markdown-body mark.md-highlight-blue {
+  background: rgba(14, 165, 233, 0.28);
+  color: #bae6fd;
+  border-bottom-color: #38bdf8;
+}
+
+.md-studio-root.theme-dark .markdown-body mark.md-highlight-pink,
+.md-studio-root.theme-nord .markdown-body mark.md-highlight-pink,
+.md-studio-root.theme-cyber .markdown-body mark.md-highlight-pink {
+  background: rgba(236, 72, 153, 0.28);
+  color: #fbcfe8;
+  border-bottom-color: #f472b6;
+}
+
+.md-studio-root.theme-dark .markdown-body mark.md-highlight-purple,
+.md-studio-root.theme-nord .markdown-body mark.md-highlight-purple,
+.md-studio-root.theme-cyber .markdown-body mark.md-highlight-purple {
+  background: rgba(168, 85, 247, 0.28);
+  color: #e9d5ff;
+  border-bottom-color: #c084fc;
+}
+
+.md-studio-root.theme-dark .markdown-body mark.md-highlight-orange,
+.md-studio-root.theme-nord .markdown-body mark.md-highlight-orange,
+.md-studio-root.theme-cyber .markdown-body mark.md-highlight-orange {
+  background: rgba(249, 115, 22, 0.28);
+  color: #fed7aa;
+  border-bottom-color: #fb923c;
+}
+
+/* ============================================================
+   Lists & Interactive Checkboxes
+   ============================================================ */
+.markdown-body ul,
+.markdown-body ol {
+  margin-top: 0;
+  margin-bottom: 1.35em;
+  padding-inline-start: 1.85em;
+}
+
+.markdown-body ul {
+  list-style-type: disc;
+}
+
+.markdown-body ol {
+  list-style-type: decimal;
+}
+
+.markdown-body li {
+  margin-bottom: 0.45em;
+  line-height: 1.75;
+}
+
+.markdown-body li > ul,
+.markdown-body li > ol {
+  margin-top: 0.4em;
+  margin-bottom: 0.4em;
+}
+
+.markdown-body input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 2px solid var(--accent-color);
+  border-radius: 0.35rem;
+  margin-inline-end: 0.55rem;
+  vertical-align: -0.22rem;
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+  background-color: var(--bg-primary);
+  transition: all 0.15s ease;
+}
+
+.markdown-body input[type="checkbox"]:checked {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.markdown-body input[type="checkbox"]:checked::before {
+  content: "";
+  width: 0.6rem;
+  height: 0.6rem;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  background-color: #ffffff;
+}
+
+/* ============================================================
+   Blockquotes & Admonition Callouts
+   ============================================================ */
+.markdown-body blockquote {
+  margin: 1.5em 0;
+  padding: 1.1em 1.35em;
+  background-color: var(--blockquote-bg);
+  border-inline-start: 4px solid var(--blockquote-border);
+  border-radius: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.markdown-body blockquote > *:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body .admonition {
+  margin: 1.5em 0;
+  padding: 1.1rem 1.35rem;
+  border-radius: 0.85rem;
+  border-inline-start: 5px solid;
+  box-shadow: 0 2px 10px -2px rgba(15, 23, 42, 0.05);
+}
+
+.markdown-body .admonition-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 800;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.markdown-body .admonition-content > *:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body .admonition-note {
+  background-color: rgba(59, 130, 246, 0.09);
+  border-inline-start-color: #3b82f6;
+}
+.markdown-body .admonition-note .admonition-title {
+  color: #2563eb;
+}
+
+.markdown-body .admonition-tip {
+  background-color: rgba(16, 185, 129, 0.09);
+  border-inline-start-color: #10b981;
+}
+.markdown-body .admonition-tip .admonition-title {
+  color: #059669;
+}
+
+.markdown-body .admonition-important {
+  background-color: rgba(139, 92, 246, 0.09);
+  border-inline-start-color: #8b5cf6;
+}
+.markdown-body .admonition-important .admonition-title {
+  color: #7c3aed;
+}
+
+.markdown-body .admonition-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-inline-start-color: #f59e0b;
+}
+.markdown-body .admonition-warning .admonition-title {
+  color: #d97706;
+}
+
+.markdown-body .admonition-caution {
+  background-color: rgba(239, 68, 68, 0.09);
+  border-inline-start-color: #ef4444;
+}
+.markdown-body .admonition-caution .admonition-title {
+  color: #dc2626;
+}
+
+/* ============================================================
+   Code Blocks, Inline Code & PrismJS Syntax Highlighting
+   ============================================================ */
+.markdown-body code:not(pre code) {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.875em;
+  background-color: var(--bg-tertiary);
+  color: var(--accent-color);
+  padding: 0.18em 0.45em;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border-color);
+  direction: ltr;
+  unicode-bidi: embed;
+  display: inline-block;
+}
+
+.markdown-body .code-block-wrapper {
+  margin: 1.5em 0;
+  border-radius: 0.85rem;
+  overflow: hidden;
+  background-color: var(--code-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+  direction: ltr;
+  text-align: left;
+}
+
+.markdown-body .code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 1rem;
+  background-color: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.markdown-body .code-lang {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+.markdown-body .copy-code-btn,
+.markdown-body .run-code-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.markdown-body .copy-code-btn {
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.markdown-body .copy-code-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.markdown-body .run-code-btn {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.markdown-body .run-code-btn:hover {
+  background: rgba(16, 185, 129, 0.25);
+  color: #6ee7b7;
+}
+
+.markdown-body .code-block-wrapper pre {
+  margin: 0;
+  padding: 1.15rem 1.25rem;
+  overflow-x: auto;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: var(--code-text);
+  background: transparent;
+}
+
+/* PrismJS Token Colors */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #64748b;
+  font-style: italic;
+}
+
+.token.punctuation {
+  color: #94a3b8;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #f472b6;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #34d399;
+}
+
+.token.operator,
+.token.entity,
+.token.url {
+  color: #38bdf8;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #c084fc;
+}
+
+.token.function,
+.token.class-name {
+  color: #60a5fa;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  color: #fbbf24;
+}
+
+/* ============================================================
+   Tables (Executive Responsive Tables)
+   ============================================================ */
+.markdown-body .table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  margin: 1.65em 0;
+  border-radius: 0.85rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.05);
+}
+
+.markdown-body table.custom-markdown-table,
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92em;
+}
+
+.markdown-body th,
+.markdown-body td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.markdown-body th {
+  background-color: var(--table-header-bg);
+  color: var(--text-primary);
+  font-weight: 800;
+  border-bottom: 2px solid var(--accent-color);
+}
+
+.markdown-body tr:nth-child(even) td {
+  background-color: var(--table-row-alt);
+}
+
+.markdown-body tr:hover td {
+  background-color: var(--blockquote-bg);
+}
+
+/* ============================================================
+   Images, Dividers & Math
+   ============================================================ */
+.markdown-body figure.md-image-figure {
+  margin: 1.75em 0;
+  text-align: center;
+}
+
+.markdown-body figure.md-image-figure img,
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.85rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.markdown-body figure.md-image-figure figcaption {
+  margin-top: 0.55rem;
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
+.markdown-body hr {
+  height: 2px;
+  border: 0;
+  background: linear-gradient(90deg, transparent, var(--border-color), var(--accent-color), var(--border-color), transparent);
+  margin: 2.5em 0;
+}
+
+.markdown-body .katex-block {
+  margin: 1.5em 0;
+  padding: 1rem;
+  overflow-x: auto;
+  background-color: var(--bg-secondary);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+  direction: ltr;
+  text-align: center;
+}
+
+/* ============================================================
+   Presentation Slide View Cards
+   ============================================================ */
+.slide-card-dark {
+  background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  color: #f8fafc;
+}
+
+.slide-card-light {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+}
+
+/* ============================================================
+   CodeMirror 6 Overrides
+   ============================================================ */
+.md-studio-codemirror .cm-editor {
+  height: 100%;
+  outline: none !important;
+}
+
+.md-studio-codemirror .cm-scroller {
+  font-family: 'Vazirmatn', 'Fira Code', monospace !important;
+  line-height: 1.8 !important;
+}
+
+/* ============================================================
+   Print Support Override (Allows printing Markdown Studio docs)
+   ============================================================ */
+@media print {
+  body.md-studio-printing * {
+    visibility: visible !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+  }
+
+  body.md-studio-printing::before {
+    display: none !important;
+    content: none !important;
+  }
+
+  body.md-studio-printing .no-print {
+    display: none !important;
+  }
+}

@@ -31,6 +31,7 @@ import { ClassLeaderboardModal } from './components/leaderboard/ClassLeaderboard
 import { AdminControlCenterModal } from './components/admin/AdminControlCenterModal';
 import { AjaBrandIntro } from './components/intro/AjaBrandIntro';
 import { LlmForHumansBookModal } from './components/book/LlmForHumansBookModal';
+import { OwjMarkdownStudioModal } from './components/markdown-studio/OwjMarkdownStudioModal';
 import {
   IndustryTrackId,
   DisciplineId,
@@ -56,7 +57,7 @@ import { UserProfile } from './types/auth';
 import { SessionLockEntity } from './types/lms';
 import { Footer } from './components/Footer';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from './data/logo';
-import { Clock, Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud, Calculator, Bot, Server, Sparkles, Trophy, Lock, Unlock, GraduationCap, Menu, PanelLeftClose, Home } from 'lucide-react';
+import { Clock, Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud, Calculator, Bot, Server, Sparkles, Trophy, Lock, Unlock, GraduationCap, Menu, PanelLeftClose, Home, FileCode2 } from 'lucide-react';
 
 export type AppPage = 'landing' | 'quiz' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21;
 
@@ -121,6 +122,7 @@ export default function App() {
   const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState<boolean>(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
   const [isBookModalOpen, setIsBookModalOpen] = useState<boolean>(false);
+  const [isMarkdownStudioOpen, setIsMarkdownStudioOpen] = useState<boolean>(false);
   const [industryTrack, setIndustryTrack] = useState<IndustryTrackId>(() => getSavedIndustryTrack());
   const [isIndustryModalOpen, setIsIndustryModalOpen] = useState<boolean>(false);
   const [activeDiscipline, setActiveDiscipline] = useState<DisciplineId>(() => getSavedDiscipline(getSavedIndustryTrack()));
@@ -834,6 +836,7 @@ export default function App() {
         <AgentifyLanding
           onReplayIntro={() => setShowBrandIntro(true)}
           onOpenBookModal={() => setIsBookModalOpen(true)}
+          onOpenMarkdownStudio={() => setIsMarkdownStudioOpen(true)}
           currentTrack={industryTrack}
           onSelectTrack={handleSelectIndustryTrack}
           onOpenTrackModal={() => setIsIndustryModalOpen(true)}
@@ -901,6 +904,12 @@ export default function App() {
             lang={lang}
           />
         )}
+
+        <OwjMarkdownStudioModal
+          isOpen={isMarkdownStudioOpen}
+          onClose={() => setIsMarkdownStudioOpen(false)}
+          lang={lang}
+        />
 
         {/* LLM For Humans Book Modal */}
         <LlmForHumansBookModal
@@ -1010,7 +1019,8 @@ export default function App() {
               currentTrack={industryTrack}
               onSelectTrack={handleSelectIndustryTrack}
               onOpenSelectorModal={() => setIsIndustryModalOpen(true)}
-              className="shrink-0 scale-90 sm:scale-100 origin-right"
+              variant="dropdown"
+              className="shrink-0"
             />
             <DisciplineBadge
               currentTrack={industryTrack}
@@ -1023,7 +1033,16 @@ export default function App() {
 
           {/* Section 3: Tools & Utilities */}
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* Contextual AI Tutor Toggle Button */}
+            {/* OWJ Markdown Studio Pro Trigger Button */}
+            <button
+              type="button"
+              onClick={() => setIsMarkdownStudioOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30 hover:bg-indigo-500/20 active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
+              title={lang === 'fa' ? 'استودیو مارک‌دان اوج: آپلود، مرور، هایلایت ۶ رنگ و ویرایش زنده فایل‌های .md' : 'OWJ Markdown Studio Pro: Upload, Browse & Edit Markdown'}
+            >
+              <FileCode2 className="w-3.5 h-3.5 shrink-0 text-indigo-500" />
+              <span className="hidden md:inline whitespace-nowrap">{lang === 'fa' ? 'استودیو مارک‌دان' : 'Markdown'}</span>
+            </button>
             <button
               type="button"
               onClick={toggleTutor}
@@ -1125,6 +1144,7 @@ export default function App() {
           onClose={() => setIsSidebarOpen(false)}
           isSessionLocked={isSessionLocked}
           onOpenBookModal={() => setIsBookModalOpen(true)}
+          onOpenMarkdownStudio={() => setIsMarkdownStudioOpen(true)}
           industryTrack={industryTrack}
           disciplineId={activeDiscipline}
         />
@@ -1717,6 +1737,12 @@ export default function App() {
             lang={lang}
           />
         )}
+
+        <OwjMarkdownStudioModal
+          isOpen={isMarkdownStudioOpen}
+          onClose={() => setIsMarkdownStudioOpen(false)}
+          lang={lang}
+        />
 
         {/* LLM For Humans Book Modal */}
         <LlmForHumansBookModal

@@ -35,7 +35,8 @@ import {
   Database,
   Filter,
   BarChart3,
-  Rocket
+  Rocket,
+  FileCode2
 } from 'lucide-react';
 
 interface WorkspaceSidebarProps {
@@ -46,6 +47,7 @@ interface WorkspaceSidebarProps {
   onClose: () => void;
   isSessionLocked: (sessionNum: number) => boolean;
   onOpenBookModal: () => void;
+  onOpenMarkdownStudio?: () => void;
   industryTrack?: IndustryTrackId;
   disciplineId?: DisciplineId;
 }
@@ -231,6 +233,7 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
   onClose,
   isSessionLocked,
   onOpenBookModal,
+  onOpenMarkdownStudio,
   industryTrack,
   disciplineId
 }) => {
@@ -666,6 +669,21 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
 
           {/* More Nav (.more) */}
           <nav className="pt-3 border-t border-white/60 dark:border-white/10 space-y-1">
+            {onOpenMarkdownStudio && (
+              <button
+                onClick={() => {
+                  onOpenMarkdownStudio();
+                  if (window.innerWidth < 1024) onClose();
+                }}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-indigo-600/15 to-purple-600/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 hover:from-indigo-600 hover:to-purple-600 hover:text-white text-start transition-all cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <FileCode2 className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>{lang === 'fa' ? 'استودیو مارک‌دان (آپلود و ویرایش)' : 'OWJ Markdown Studio'}</span>
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-indigo-500/20">MD</span>
+              </button>
+            )}
             <button
               onClick={() => {
                 onOpenBookModal();

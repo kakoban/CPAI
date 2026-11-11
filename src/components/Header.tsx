@@ -1,7 +1,7 @@
 import React from 'react';
 import { Language, Theme } from '../types/cpmai';
 import { UI_TRANSLATIONS } from '../data/translations';
-import { Moon, Sun, Globe, FileDown, Settings, Printer } from 'lucide-react';
+import { Moon, Sun, Globe, FileDown, Settings, Printer, FileCode2 } from 'lucide-react';
 
 interface HeaderProps {
   lang: Language;
@@ -10,6 +10,7 @@ interface HeaderProps {
   onToggleTheme: () => void;
   onOpenExport: () => void;
   onOpenSettings: () => void;
+  onOpenMarkdownStudio?: () => void;
   overallProgress: number;
 }
 
@@ -20,6 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleTheme,
   onOpenExport,
   onOpenSettings,
+  onOpenMarkdownStudio,
   overallProgress
 }) => {
   const t = UI_TRANSLATIONS[lang];
@@ -53,11 +55,23 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Zone 3: Actions */}
         <div className="flex items-center gap-2">
+          {/* Markdown Studio Button */}
+          {onOpenMarkdownStudio && (
+            <button
+              onClick={onOpenMarkdownStudio}
+              title={lang === 'fa' ? 'استودیو مارک‌دان اوج (آپلود، مرور و ویرایش فایل‌های .md)' : 'OWJ Markdown Studio'}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm hover:opacity-95 transition-all cursor-pointer"
+            >
+              <FileCode2 className="w-3.5 h-3.5 text-amber-300" />
+              <span>{lang === 'fa' ? 'استودیو مارک‌دان' : 'Markdown Studio'}</span>
+            </button>
+          )}
+
           {/* Print / PDF Button */}
           <button
             onClick={() => window.print()}
             title={t.printBtn}
-            className="p-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#e0533c] dark:hover:border-[#fb7185] transition-colors"
+            className="p-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#e0533c] dark:hover:border-[#fb7185] transition-colors cursor-pointer"
           >
             <Printer className="w-4 h-4" />
           </button>
@@ -65,7 +79,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Export Dossier Modal Button */}
           <button
             onClick={onOpenExport}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#e0533c] dark:hover:border-[#fb7185] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#e0533c] dark:hover:border-[#fb7185] transition-colors cursor-pointer"
           >
             <FileDown className="w-3.5 h-3.5 text-[#e0533c] dark:text-[#fb7185]" />
             <span className="hidden sm:inline">{t.exportBtn}</span>
@@ -75,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onOpenSettings}
             title={t.settingsBtn}
-            className="p-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#e0533c] dark:hover:border-[#fb7185] transition-colors"
+            className="p-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#e0533c] dark:hover:border-[#fb7185] transition-colors cursor-pointer"
           >
             <Settings className="w-4 h-4" />
           </button>
@@ -83,7 +97,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Language Switcher */}
           <button
             onClick={onToggleLang}
-            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#e0533c] dark:hover:border-[#fb7185] transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#e0533c] dark:hover:border-[#fb7185] transition-colors cursor-pointer"
           >
             <Globe className="w-3.5 h-3.5" />
             <span>{t.switchLang}</span>
@@ -93,7 +107,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onToggleTheme}
             title={t.themeToggle}
-            className="p-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#e0533c] dark:hover:border-[#fb7185] transition-colors"
+            className="p-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#e0533c] dark:hover:border-[#fb7185] transition-colors cursor-pointer"
           >
             {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>

@@ -5,8 +5,8 @@ import { AgentifyHero } from './AgentifyHero';
 import { MediaCustomizerModal } from './MediaCustomizerModal';
 import { UserProfile } from '../../types/auth';
 import { LandingMediaConfig } from '../../types/media';
-import { mediaService, DEFAULT_MEDIA_CONFIG } from '../../services/mediaConfig';
-import { X, Play, BookOpen, Film, Sliders, Sparkles } from 'lucide-react';
+import { mediaService } from '../../services/mediaConfig';
+import { X, Play, BookOpen, Film, Sparkles } from 'lucide-react';
 
 import { IndustryTrackId } from '../../types/industryTrack';
 
@@ -17,6 +17,7 @@ interface AgentifyLandingProps {
   onGoToQuiz?: () => void;
   onReplayIntro?: () => void;
   onOpenBookModal?: () => void;
+  onOpenMarkdownStudio?: () => void;
   currentTrack?: IndustryTrackId;
   onSelectTrack?: (track: IndustryTrackId) => void;
   onOpenTrackModal?: () => void;
@@ -29,6 +30,7 @@ export const AgentifyLanding: React.FC<AgentifyLandingProps> = ({
   onGoToQuiz,
   onReplayIntro,
   onOpenBookModal,
+  onOpenMarkdownStudio,
   currentTrack,
   onSelectTrack,
   onOpenTrackModal
@@ -69,6 +71,7 @@ export const AgentifyLanding: React.FC<AgentifyLandingProps> = ({
           onOpenMediaCustomizer={() => setIsMediaModalOpen(true)}
           onReplayIntro={onReplayIntro}
           onOpenBookModal={onOpenBookModal}
+          onOpenMarkdownStudio={onOpenMarkdownStudio}
           currentTrack={currentTrack}
           onSelectTrack={onSelectTrack}
           onOpenTrackModal={onOpenTrackModal}
