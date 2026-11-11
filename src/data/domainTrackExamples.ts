@@ -376,6 +376,126 @@ export const DOMAIN_PHASE_EXAMPLES: DomainTrackExamplesRegistry = {
         relatedQuestionsEn: ['How does the family assistant cache pantry inventory during temporary network disconnections?']
       }
     }
+  },
+  PAYA_SAMAN_PARS: {
+    1: {
+      phaseId: 1,
+      trackId: 'PAYA_SAMAN_PARS',
+      titleFa: 'درک کسب‌وکار: سامانه فرماندهی پورتفوی ۶۳ پروژه‌ای و دو بال هلدینگ پایا سامان پارس',
+      titleEn: 'Business Understanding: Paya Saman Pars 63-Project Dual-Wing Portfolio Command Center',
+      exampleNoteFa:
+        'مثال: هدف اصلی، تجمیع هوشمند وضعیت ۶۳ پروژه در ۸ حوزه تخصصی و ۱۴ شرکت تابعه (دو بال پیمانکاری عمرانی و سرمایه‌گذاری مسکن/شهر صنعتی کاوه) جهت شناسایی زودهنگام گلوگاه‌های قراردادهای EPC+F، BOT و BLT و بهینه‌سازی تخصیص ۵۰۰۰+ نیرو و ناوگان سنگین است.',
+      exampleNoteEn:
+        'Example: Primary goal is unifying telemetry across 63 projects in 8 domains and 14 subsidiaries (contracting wing + housing/Kaveh investment wing) to catch EPC+F/BOT/BLT bottlenecks early and optimize 5,000+ staff and heavy machinery deployment.',
+      artifacts: {
+        backgroundFa:
+          'هلدینگ پایا سامان پارس با ۶۳ پروژه (۲۸ راه/پل/تونل شامل تهران–شمال و پروژه‌های امارات، ۱۴ سد/آبی، ۸ ریل/مترو، ۵ فرودگاه، ۴ ابنیه صنعتی، ۴ تأسیسات MEP به‌علاوه خورشیدی ۵MW و پلاسمای سرد کاوه) و بال مسکن (آتی‌ساز، خانه، عمران مسکن و شهر صنعتی ۳۰۰۰ هکتاری کاوه)، با گزارش‌های پراکنده و خلأ فیلدهای مالی/کارفرمایی در پورتال مواجه است.',
+        backgroundEn:
+          'Paya Saman Pars Holding manages 63 projects across 8 sectors, UAE export corridors, 14 subsidiaries, 5,000+ personnel, and Kaveh Industrial City (3,000 ha), while facing fragmented reporting and unpopulated portal contract fields.',
+        primaryObjectiveFa:
+          'طراحی داشبورد شناختی پیش‌بینی تاخیر و تعادل نقدینگی/منابع میان دو بال اجرایی برای مدیریت ریسک قراردادهای EPC، EPC+F، BOT و BLT (داده‌های عددی شبیه‌سازی‌شده آموزشی).',
+        primaryObjectiveEn:
+          'Architect a cognitive delay-forecasting and dual-wing resource balancing platform across EPC, EPC+F, BOT, and BLT contracts (educational simulated figures).',
+        relatedQuestionsFa: [
+          'کدام یک از ۱۴ شرکت تابعه (رامان، جنرال مکانیک، دی، ملی ساختمان، تابیران، آتی‌ساز، کاوه...) بیشترین تداخل زمانی ناوگان ماشین‌آلات سنگین را در فصل پیش رو دارند؟',
+          'چگونه می‌توان انحرافات مالی قراردادهای EPC+F و طرح‌های BOT/BLT را پیش از رسیدن به نقطه بحران جریان نقدی پیش‌بینی کرد؟'
+        ],
+        relatedQuestionsEn: [
+          'Which subsidiaries face overlapping heavy-fleet mobilization bottlenecks in the upcoming quarter?',
+          'How can cognitive models surface cashflow and delay risks in EPC+F and BOT/BLT contracts before critical-path impact?'
+        ],
+        sampleDatasetTitleFa: 'گزارش‌های تجمیعی ۶۳ پروژه، تردد ناوگان ماشین‌آلات و صورت‌وضعیت‌های دو بال',
+        sampleDatasetTitleEn: '63-project consolidated logs, heavy fleet telemetry & dual-wing IPC summaries',
+        sampleContractClauseFa: 'اسناد کنسرسیومی، شرایط عمومی پیمان ۴۳۱۱ و قراردادهای EPC+F / BOT / BLT هلدینگ',
+        sampleContractClauseEn: 'Holding consortium covenants, Circular 4311 & EPC+F / BOT / BLT agreements'
+      }
+    },
+    2: {
+      phaseId: 2,
+      trackId: 'PAYA_SAMAN_PARS',
+      titleFa: 'درک داده‌ها: تجمیع گزارش‌های ۱۴ شرکت تابعه، پروژه‌های امارات و شهر صنعتی کاوه',
+      titleEn: 'Data Understanding: Auditing 14-Subsidiary Reports, UAE Corridors & Kaveh Telemetry',
+      exampleNoteFa:
+        'مثال: ممیزی فایل‌های اکسل پیشرفت ماهانه شرکت‌های رامان، جنرال مکانیک، دی و ملی ساختمان، تلمتری انرژی نیروگاه خورشیدی ۵MW و تصفیه‌خانه پلاسمای سرد کاوه، و سوابق پروژه‌های مسکن آتی‌ساز و عمران مسکن.',
+      exampleNoteEn:
+        'Example: Auditing monthly progress workbooks from Raman, General Mechanic, Dey & Melli Sakhteman alongside Kaveh 5MW solar/cold-plasma logs and housing wing delivery data.',
+      artifacts: {
+        backgroundFa: 'داده‌های پورتال هلدینگ شامل ۶۳ عنوان پروژه است اما فیلدهای کلیدی (کارفرما، مشاور، مبلغ پیمان، تاریخ شروع/پایان) روی سایت خالی مانده و جداول شرکت‌های تابعه قالب یکسان ندارند.',
+        backgroundEn: 'Public portal listings contain 63 titles with empty detail fields, while internal subsidiary spreadsheets lack unified schemas across civil and housing units.',
+        primaryObjectiveFa: 'شناسایی شکاف‌های داده‌ای (Missing Fields)، ناهمگونی قالب‌های ۱۴ شرکت تابعه و یکپارچه‌سازی شناسنامه دیجیتال پروژه‌ها.',
+        primaryObjectiveEn: 'Catalog missing metadata gaps, reconcile 14 subsidiary schemas, and establish clean digital project passports.',
+        relatedQuestionsFa: ['چند درصد از گزارش‌های واصله بال مسکن و ابنیه فاقد کد استاندارد پروژه و شاخص SPI/CPI تاییدشده هستند؟'],
+        relatedQuestionsEn: ['What percentage of housing and urban renewal reports lack standardized WBS codes and verified SPI/CPI metrics?']
+      }
+    },
+    3: {
+      phaseId: 3,
+      trackId: 'PAYA_SAMAN_PARS',
+      titleFa: 'آماده‌سازی داده‌ها: استانداردسازی شناسنامه ۶۳ پروژه و جداسازی فکت از تخمین',
+      titleEn: 'Data Preparation: Standardizing 63-Project Taxonomy & Separating Facts from Estimates',
+      exampleNoteFa:
+        'مثال: تبدیل جداول ادغام‌شده (Merged Excel) شرکت‌های تابعه به CSV ماشین‌خوان، هم‌ترازسازی تقویم شمسی پروژه‌های داخلی با میلادی پروژه‌های امارات (SKF2، R1000C)، و تفکیک پروژه‌های EPC از سرمایه‌گذاری BOT/BLT.',
+      exampleNoteEn: 'Example: Flattening merged subsidiary spreadsheets into machine-readable CSVs, aligning Jalali domestic and Gregorian UAE dates, and tagging EPC+F vs BOT contracts.',
+      artifacts: {
+        backgroundFa: 'برای تحلیل دقیق پورتفو، نباید پروژه‌های عمرانی ریالی با پروژه‌های برون‌مرزی امارات یا درآمدهای اجاره/بهره‌برداری شهر صنعتی کاوه بدون نرمال‌سازی ترکیب شوند.',
+        backgroundEn: 'Cross-border UAE contracts, domestic civil EPC works, and recurring Kaveh industrial estate revenues require clean normalization before modeling.',
+        primaryObjectiveFa: 'تولید مخزن داده پاک‌سازی‌شده دو بال با تفکیک نوع قرارداد، شرکت مجری، منطقه جغرافیایی و برچسب‌گذاری داده‌های تاییدنشده.',
+        primaryObjectiveEn: 'Deliver a normalized dual-wing feature table tagged by contract model, subsidiary, currency, and verification status.',
+        relatedQuestionsFa: ['چگونه صورت‌وضعیت‌های ارزی پروژه‌های امارات با تعدیل ریالی پروژه‌های راه و سد هم‌مقیاس شوند؟'],
+        relatedQuestionsEn: ['How should UAE foreign-currency billings and domestic inflation-indexed IPCs be normalized?']
+      }
+    },
+    4: {
+      phaseId: 4,
+      trackId: 'PAYA_SAMAN_PARS',
+      titleFa: 'توسعه مدل: پیش‌بینی تاخیر مسیر بحرانی، ناهنجاری نقدینگی و بهینه‌سازی ناوگان هلدینگ',
+      titleEn: 'Model Development: Dual-Wing Delay Forecasting, Cashflow Anomalies & Fleet Optimization',
+      exampleNoteFa:
+        'مثال: آموزش مدل پیش‌بینی احتمال عبور پروژه‌های راه و تونل از مهلت پیمان، مدل کشف ناهنجاری در مصرف انرژی/پساب شهر صنعتی کاوه، و الگوریتم تخصیص ماشین‌آلات سنگین بین پروژه‌های ۱۴ شرکت تابعه.',
+      exampleNoteEn: 'Example: Training delay-probability models for highway/tunnel jobs, utility anomaly detectors in Kaveh Industrial City, and cross-subsidiary heavy fleet dispatch optimizers.',
+      artifacts: {
+        backgroundFa: 'ترکیب الگوی پیش‌بینی تاخیر و هزینه، الگوی کشف ناهنجاری در کارکرد ناوگان/پساب و سیستم دستیار مستند قراردادی در NotebookLM.',
+        backgroundEn: 'Combining predictive schedule risk, equipment/effluent anomaly detection, and grounded contract assistants in NotebookLM.',
+        primaryObjectiveFa: 'پیش‌بینی ۴۵ روزه گلوگاه‌های بحرانی در سبد ۶۳ پروژه و ارائه سناریوهای جایگزین تخصیص منابع میان دو بال.',
+        primaryObjectiveEn: 'Provide 45-day early warning on critical-path slips across the 63-project portfolio and optimize inter-wing resource allocation.',
+        relatedQuestionsFa: ['مدل در بال مسکن و شهر صنعتی کاوه کدام متغیرها را به عنوان پیش‌نگر اصلی تاخیر تحویل یا افت بازدهی تشخیص داده است؟'],
+        relatedQuestionsEn: ['Which leading features best predict delivery slips in the housing wing and utility spikes in Kaveh?']
+      }
+    },
+    5: {
+      phaseId: 5,
+      trackId: 'PAYA_SAMAN_PARS',
+      titleFa: 'ارزیابی مدل: صحت‌سنجی با مدیران دو بال، مهار توهم عددی و نرخ پذیرش ستاد',
+      titleEn: 'Model Evaluation: Dual-Wing Executive Audit, Zero-Hallucination & Adoption Gate',
+      exampleNoteFa:
+        'مثال: بررسی خروجی مدل در کمیته مشترک مدیران ستاد، بال پیمانکاری (ملی ساختمان/جنرال مکانیک/دی/رامان/تابیران) و بال مسکن/کاوه با تایید ۱۰۰٪ ارجاع به سند در ادعاهای EPC+F و حذف کامل اعداد حدسی.',
+      exampleNoteEn: 'Example: Joint audit by HQ and both wings’ directors verifying 100% clause citations on EPC+F claims and zero unverified financial hallucinations.',
+      artifacts: {
+        backgroundFa: 'در پورتفوی یک هلدینگ چندشرکتی، هرگونه گزارش اشتباه درباره خسارت تاخیر یا سودآوری یک شرکت تابعه باعث تصمیمات نادرست در کنسرسیوم و مجمع می‌شود.',
+        backgroundEn: 'In a multi-subsidiary holding, fabricated claim dates or distorted margin alerts derail consortium and board governance.',
+        primaryObjectiveFa: 'تضمین عدم توهم (Zero Hallucination) در استنادهای قراردادی، و تایید عملیاتی داشبورد توسط معاونت‌های هلدینگ پیش از استقرار عمومی.',
+        primaryObjectiveEn: 'Enforce strict zero-hallucination verification on contract citations and secure executive sign-off prior to rollout.',
+        relatedQuestionsFa: ['آیا سیستم در صورت خالی‌بودن فیلد مبلغ یا کارفرما در سند ورودی، صریحاً وضعیت «ثبت‌نشده» را اعلام می‌کند؟'],
+        relatedQuestionsEn: ['Does the system explicitly flag missing contract amounts or client names instead of guessing?']
+      }
+    },
+    6: {
+      phaseId: 6,
+      trackId: 'PAYA_SAMAN_PARS',
+      titleFa: 'عملیاتی‌سازی: استقرار داشبورد دو بال، مهارت‌های SKILL.md و پایپ‌لاین MCP بین ۱۴ شرکت',
+      titleEn: 'Model Operationalization: Dual-Wing Command Center, SKILL.md & MCP Across 14 Subsidiaries',
+      exampleNoteFa:
+        'مثال: استقرار استاندارد مهارت‌های ممیزی (`SKILL.md`) و اتصال پوشه‌های گزارش‌های ۱۴ شرکت تابعه با MCP به بوم داشبورد مدیریتی و مخزن GitHub جهت گزارش‌گیری هفتگی خودکار ستاد هلدینگ.',
+      exampleNoteEn: 'Example: Deploying shared auditing `SKILL.md` playbooks and MCP connectors linking all 14 subsidiary folders to automated holding board dashboards.',
+      artifacts: {
+        backgroundFa: 'پایش مداوم مدل برای تطبیق با تغییرات تورم فصلی، ابلاغ بخشنامه‌های تعدیل جدید، افتتاح طرح‌های تازه کاوه (۱۴۰۵) و الحاق پروژه‌های جدید مسکن.',
+        backgroundEn: 'Continuous monitoring across inflation index updates, new Kaveh green-energy launches, and newly awarded consortium projects.',
+        primaryObjectiveFa: 'استفاده پایدار ماهانه توسط مدیران و کارشناسان دو بال با حفظ امنیت دسترسی داده‌های قراردادی هر شرکت تابعه.',
+        primaryObjectiveEn: 'Sustained monthly adoption across all 14 subsidiaries with strict access governance and drift recalibration.',
+        relatedQuestionsFa: ['چگونه سطح دسترسی مدیران هر شرکت تابعه در پایپ‌لاین مشترک هلدینگ بدون نشت اطلاعات محرمانه تفکیک می‌شود؟'],
+        relatedQuestionsEn: ['How is subsidiary data isolation enforced within the shared holding MCP and Knowledge Base architecture?']
+      }
+    }
   }
 };
 

@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import * as trackTypes from '../src/types/industryTrack.ts';
 import * as disciplineReg from '../src/data/disciplineExamplesRegistry.ts';
+import * as domainExamples from '../src/data/domainTrackExamples.ts';
+import * as quizData from '../src/data/placement_quiz_data.ts';
 
 // Task 1 Assertions
 assert.ok(
@@ -46,3 +48,36 @@ for (const d of payaDisciplines) {
 assert.equal(trackTypes.getSavedDiscipline('PAYA_SAMAN_PARS' as any), 'paya_portfolio_pmo');
 
 console.log('Task 1 verification passed');
+
+// Task 2 Assertions
+for (let phase = 1; phase <= 6; phase++) {
+  const payaEx = domainExamples.getDomainPhaseExample(phase, 'PAYA_SAMAN_PARS' as any);
+  const civilEx = domainExamples.getDomainPhaseExample(phase, 'CIVIL_INFRA');
+  assert.equal(payaEx.trackId, 'PAYA_SAMAN_PARS', `Phase ${phase} trackId mismatch`);
+  assert.notEqual(payaEx.titleFa, civilEx.titleFa, `Phase ${phase} title must differ from CIVIL_INFRA`);
+  assert.notEqual(payaEx.exampleNoteFa, civilEx.exampleNoteFa, `Phase ${phase} note must differ from CIVIL_INFRA`);
+}
+
+const beginnerPayaQ = quizData.getAdaptedQuizQuestions('beginner', 'paya_portfolio_pmo', 'PAYA_SAMAN_PARS' as any);
+for (const qid of [1, 2, 3]) {
+  const item = beginnerPayaQ.find((q) => q.id === qid);
+  assert.ok(item, `Missing beginner question ${qid}`);
+  const combined = `${item.scenarioFa} ${item.realWorldContextFa}`;
+  assert.ok(
+    combined.includes('پایا') || combined.includes('کاوه') || combined.includes('EPC+F'),
+    `Beginner question ${qid} not adapted to Paya`
+  );
+}
+
+const interPayaQ = quizData.getAdaptedQuizQuestions('intermediate', 'paya_portfolio_pmo', 'PAYA_SAMAN_PARS' as any);
+for (const qid of [13, 16, 20, 21]) {
+  const item = interPayaQ.find((q) => q.id === qid);
+  assert.ok(item, `Missing intermediate question ${qid}`);
+  const combined = `${item.questionFa} ${item.scenarioFa} ${item.realWorldContextFa}`;
+  assert.ok(
+    combined.includes('پایا') || combined.includes('کاوه') || combined.includes('EPC+F') || combined.includes('تابعه'),
+    `Intermediate question ${qid} not adapted to Paya`
+  );
+}
+
+console.log('Task 2 verification passed');

@@ -1237,7 +1237,7 @@ export interface QuizQuestionAdaptation {
 }
 
 export const DISCIPLINE_QUIZ_ADAPTATIONS: Record<
-  'ENERGY_PETRO' | 'GENERAL_EVERYDAY',
+  'ENERGY_PETRO' | 'GENERAL_EVERYDAY' | 'PAYA_SAMAN_PARS',
   Record<number, QuizQuestionAdaptation>
 > = {
   ENERGY_PETRO: {
@@ -1366,6 +1366,70 @@ export const DISCIPLINE_QUIZ_ADAPTATIONS: Record<
       scenarioEn: 'A smart household grocery bot working flawlessly in autumn fails to predict March holiday shopping and seasonal New Year expenses.',
       realWorldContextFa: 'دریفت مفهومی (Concept Drift) زمانی رخ می‌دهد که الگوهای تقویمی، تورم یا مناسبت‌ها تغییر می‌کنند و رفتار خرید خانواده دیگر شبیه روزهای عادی نیست.',
       realWorldContextEn: 'Concept drift occurs when seasonal festivities, school terms, or macro-inflation fundamentally alter normal family purchase cadences.'
+    }
+  },
+  PAYA_SAMAN_PARS: {
+    1: {
+      scenarioFa: 'در جلسه هماهنگی ستاد هلدینگ پایا سامان پارس، یکی از مدیران شرکت‌های تابعه می‌پرسد چرا نباید فایل‌های اکسل تجمیع پیشرفت ۶۳ پروژه را هوشمند و مبتنی بر AI بنامیم؟',
+      scenarioEn: 'During a Paya Saman Pars Holding sync, a subsidiary manager asks why aggregated 63-project progress Excel sheets cannot be labeled AI.',
+      realWorldContextFa: 'اکسل فقط درصدهای پیشرفت و انحراف بودجه ثبت‌شده را جمع می‌زند؛ هوش مصنوعی شناختی الگوهای پنهان هم‌زمانی تاخیر در دو بال (مثلاً اثر کمبود ناوگان رامان و دی بر پروژه‌های راه و سد) را کشف می‌کند.',
+      realWorldContextEn: 'Spreadsheets sum reported progress; Cognitive AI uncovers cross-subsidiary bottlenecks and hidden schedule risks across both Paya wings.'
+    },
+    2: {
+      scenarioFa: 'یک مدل چت‌بات عمومی هنگام پاسخ به سوال کارشناس امور قراردادهای پایا سامان پارس، شماره بخشنامه تعدیل یا مبلغ قراردادی یک پروژه را که اصلاً در سند نبوده از خودش می‌سازد.',
+      scenarioEn: 'A generic LLM fabricates an escalation circular number and contract price when answering a Paya Saman Pars contracts specialist.',
+      realWorldContextFa: 'در قراردادهای کنسرسیومی EPC+F و BOT هلدینگ پایا سامان پارس (به‌ویژه با توجه به خالی‌بودن برخی فیلدهای پورتال)، توهم عددی هوش مصنوعی می‌تواند به تصمیم‌گیری غلط مالی در هیئت‌مدیره منجر شود.',
+      realWorldContextEn: 'In Paya’s EPC+F and BOT consortium agreements, hallucinated figures or invented contract dates can trigger serious executive and financial errors.'
+    },
+    3: {
+      realWorldContextFa: 'به جای پرامپت کلی، می‌نویسیم: «در نقش کارشناس ارشد PMO هلدینگ پایا سامان پارس (R)، با توجه به داده‌های ۶۳ پروژه در دو بال پیمانکاری و مسکن/کاوه (C)، گلوگاه‌های تاخیر را تحلیل کن (T) در قالب جدول ۴ ستونه مدیریتی (O)».',
+      realWorldContextEn: 'Instead of vague prompts: "As Senior Holding PMO at Paya Saman Pars (R), given the 63-project dual-wing logs (C), diagnose critical delays (T) in a 4-column executive table (O)".'
+    },
+    7: {
+      scenarioFa: 'گزارش‌های ماهانه ۱۴ شرکت تابعه (از جمله ملی ساختمان، جنرال مکانیک، آتی‌ساز و عمران مسکن) با فرمت‌های ناهمسان، سلول‌های ادغام‌شده و فیلدهای خالی کارفرما وارد مدل پیش‌بینی می‌شوند.',
+      scenarioEn: 'Monthly spreadsheets from 14 subsidiaries arrive with merged cells, inconsistent date formats, and unpopulated contract metadata fields.',
+      realWorldContextFa: 'اگر فیلدهای مبلغ پیمان، تاریخ شروع یا شرکت مجری در فایل‌های ورودی پورتفوی پایا سامان پارس استانداردسازی نشوند، تحلیل تلفیقی دو بال خروجی گمراه‌کننده تولید می‌کند.',
+      realWorldContextEn: 'Without clean machine-readable schemas across Paya’s 14 subsidiaries, portfolio forecasting yields unreliable executive KPIs.'
+    },
+    10: {
+      realWorldContextFa: 'در هلدینگ پایا سامان پارس، قراردادن دو نمونه مکاتبه رسمی ابلاغ یا لایحه تاخیرات شرکت‌های تابعه در پرامپت (Few-Shot) باعث می‌شود مدل دقیقاً با ادبیات و ساختار اداری هلدینگ بنویسد.',
+      realWorldContextEn: 'Including two sample official holding memos or consortium claim drafts enables the model to match Paya Saman Pars corporate tone reliably.'
+    },
+    11: {
+      scenarioFa: 'یک سیستم هوشمند مدیریت منابع، دستور جابه‌جایی فوری ناوگان سنگین از کارگاه آزادراه تهران–شمال به شهر صنعتی کاوه یا تعلیق پیش‌فروش مسکن را به صورت خودکار صادر کرده است.',
+      scenarioEn: 'An automated AI tool unilaterally issues an order to demobilize heavy machinery from Tehran-North Highway to Kaveh Industrial City.',
+      realWorldContextFa: 'هوش مصنوعی می‌تواند بهترین سناریوی هم‌افزایی ناوگان و منابع بین ۱۴ شرکت تابعه را پیشنهاد دهد، اما تصمیم نهایی جابه‌جایی سرمایه و ماشین‌آلات نیازمند تایید مدیران بال مربوطه و ستاد هلدینگ است.',
+      realWorldContextEn: 'AI recommends optimal cross-subsidiary fleet dispatch, while mobilization decisions require human approval from wing directors.'
+    },
+    13: {
+      scenarioFa: 'یکی از شرکت‌های تابعه هلدینگ پایا سامان پارس پیشنهاد می‌دهد بدون تعیین هدف تجاری و بودجه، فوراً یک سیستم پیچیده هوش مصنوعی برای پیش‌بینی کل ۶۳ پروژه خریداری شود.',
+      scenarioEn: 'One subsidiary proposes buying an expensive end-to-end AI suite for all 63 projects before defining business goals or sprint scope.',
+      realWorldContextFa: 'متدولوژی CPMAI تاکید می‌کند پیش از انتخاب الگوریتم، باید هدف تکرار اول (مثلاً کنترل ریسک کنسرسیوم یا بهینه‌سازی مصرف در شهر صنعتی کاوه) و ROI شفاف مشخص شود.',
+      realWorldContextEn: 'CPMAI Phase I requires anchoring a focused iteration objective (e.g., Kaveh utility optimization or consortium risk control) and clear ROI first.'
+    },
+    16: {
+      questionFa: 'در سامانه هوش مصنوعی کنترل کیفیت بتن سدها، آزادراه‌ها و سازه‌های صنعتی پایا سامان پارس و همچنین پایش تصفیه‌خانه پلاسمای سرد کاوه، چرا «پوشش حداکثری عیوب (High Recall)» حیاتی‌تر از «دقت خالص (Precision)» است؟',
+      questionEn: 'In AI quality inspection for Paya’s dams/industrial plants and Kaveh cold-plasma effluent monitoring, why is High Recall more critical than Precision?',
+      scenarioFa: 'سیستم بازرسی هوشمند گاهی یک نمونه مشکوک را به اشتباه نیاز به تست مجدد اعلام می‌کند (False Positive)، اما هیچ عیب سازه‌ای یا آلودگی پساب خطرناک را از قلم نمی‌اندازد.',
+      scenarioEn: 'The inspection AI occasionally flags safe batches for re-testing (False Positive) but never lets a defective concrete pour or toxic effluent slip through.',
+      realWorldContextFa: 'تست مجدد یک قطعه سالم هزینه ناچیزی دارد، اما از قلم افتادن یک ترک بحرانی در سد مخملکوه، پل یا خروج پساب تصفیه‌نشده از شهر صنعتی کاوه خسارت جبران‌ناپذیر ایمنی و زیست‌محیطی ایجاد می‌کند.',
+      realWorldContextEn: 'Re-testing a borderline sample is cheap, whereas missing a critical structural flaw or untreated industrial discharge carries massive safety liability.'
+    },
+    17: {
+      realWorldContextFa: 'پیشگیری از تاخیر بحرانی در حتی یک پروژه کلان راه/تونل یا بهینه‌سازی بهره‌برداری نیروگاه خورشیدی ۵MW و تصفیه‌خانه کاوه می‌تواند بازگشت سرمایه کل دوره تحول هوشمند هلدینگ را توجیه کند (برآورد آموزشی).',
+      realWorldContextEn: 'Preventing critical delays on one highway/tunnel project or optimizing Kaveh’s 5MW solar and cold-plasma plant justifies holding-wide AI investment (simulated).'
+    },
+    20: {
+      scenarioFa: 'در پیش‌بینی حوادث نادر ایمنی کارگاهی (HSE) یا نکول ناگهانی تعهدات فاینانس در پروژه‌های EPC+F و BOT (کمتر از ۰.۵٪ دوره‌ها)، چرا معیار Accuracy گمراه‌کننده است؟',
+      scenarioEn: 'When predicting rare site HSE incidents or sudden EPC+F/BOT covenant breaches (< 0.5% of weeks), why is simple Accuracy misleading?',
+      realWorldContextFa: 'در ۹۹.۵٪ روزهای کارگاه اتفاق حاد رخ نمی‌دهد؛ مدلی که همیشه بگوید «وضعیت عادی است» ۹۹.۵٪ صحت دارد اما هیچ‌یک از ریسک‌های بحرانی پروژه‌های هلدینگ را شکار نمی‌کند!',
+      realWorldContextEn: 'Because 99.5% of days are incident-free, a naive model always predicting "Normal" scores 99.5% accuracy while missing every critical crisis.'
+    },
+    21: {
+      scenarioFa: 'مدل برآورد بهای تمام‌شده ساخت مسکن در شرکت‌های آتی‌ساز و عمران مسکن که پارسال دقیق بود، با جهش قیمت مصالح و ابلاغ طرح‌های جدید شهر صنعتی کاوه در سال ۱۴۰۵ دچار افت دقت شده است.',
+      scenarioEn: 'A housing unit-cost forecast model accurate last year for Atisaz and Omran Maskan degrades sharply under 1405 inflation and new Kaveh tariffs.',
+      realWorldContextFa: 'دریفت مفهومی (Concept Drift) زمانی رخ می‌دهد که تورم مصالح، نرخ ارز در پروژه‌های امارات یا تعرفه‌های جدید انرژی و پساب تغییر کرده و الگوهای تاریخی مدل را منسوخ می‌کنند.',
+      realWorldContextEn: 'Concept drift occurs when material inflation, UAE FX shifts, or updated 1405 energy/effluent regulations invalidate historical model weights.'
     }
   }
 };
