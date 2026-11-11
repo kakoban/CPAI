@@ -8,6 +8,7 @@ import * as sampleContracts from '../src/data/engineering_sample_contracts.ts';
 import * as s1s5 from '../src/data/session1_and_5_curriculum.ts';
 import * as nlmGuide from '../src/data/notebooklm_engineering_guide.ts';
 import * as nlmDocs from '../src/data/notebooklm_sample_documents.ts';
+import * as payaSim from '../src/components/PayaHoldingArtifactSimulator.tsx';
 
 // Task 1 Assertions
 assert.ok(
@@ -170,3 +171,16 @@ for (const ex of payaNlm.exercises) {
 }
 
 console.log('Task 4 verification passed');
+
+// Task 5 Assertions
+assert.ok(payaSim.PayaHoldingArtifactSimulator, 'PayaHoldingArtifactSimulator must be exported');
+assert.ok(payaSim.PAYA_MOCK_PORTFOLIO_DATA, 'PAYA_MOCK_PORTFOLIO_DATA must be exported');
+assert.ok(
+  String(payaSim.PAYA_MOCK_PORTFOLIO_DATA.simulated_notice).includes('شبیه‌سازی'),
+  'PAYA_MOCK_PORTFOLIO_DATA must explicitly state simulated_notice'
+);
+assert.equal(payaSim.PAYA_MOCK_PORTFOLIO_DATA.holding_stats.cataloged_projects, 63);
+const simWings = new Set(payaSim.PAYA_MOCK_PORTFOLIO_DATA.featured_projects.map((p: any) => p.wing));
+assert.equal(simWings.size, 2, 'Simulator projects must cover both holding wings');
+
+console.log('Task 5 verification passed');
