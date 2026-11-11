@@ -1,3 +1,5 @@
+import { IndustryTrackId } from '../types/industryTrack';
+
 export interface SampleSubDocument {
   id: string;
   fileName: string;
@@ -925,3 +927,220 @@ If the Contractor fails to achieve the Taking-Over Certificate by the Time for C
     ]
   }
 };
+
+// ============================================================================
+// PAYA SAMAN PARS HOLDING DEDICATED NOTEBOOKLM SAMPLE DOCUMENTS
+// ============================================================================
+export const PAYA_SAMPLE_DEPARTMENT_DOCS: Record<string, SampleDepartmentDocument> = {
+  paya_tech_bids: {
+    id: 'paya_doc_tech_bids',
+    departmentId: 'paya_tech_bids',
+    fileName: 'paya_tech_bids_tunnel_uae_specs_sim.md',
+    titleFa: 'دفترچه خلاصه مشخصات فنی مناقصات راه و تونل (تهران–شمال و پروژه‌های امارات SKF2/R1000C)',
+    titleEn: 'Paya Technical Tender Specs: Mountain Tunnels & UAE Corridors (Simulated)',
+    fileSizeApprox: '4.2 KB',
+    summaryFa: 'مقایسه مشخصات فنی تونل‌های کوهستانی داخلی (نشریه ۵۵) با محورهای برون‌مرزی امارات (SKF2 شیص–خورفکان، R1000C شارجه، وادی‌الحلو). داده‌های عددی برای تمرین کلاسی شبیه‌سازی‌شده‌اند.',
+    summaryEn: 'Technical tender brief comparing domestic Circular 55 mountain specs against UAE export corridors (SKF2, R1000C).',
+    markdownContent: `# خلاصه مشخصات فنی مناقصات راه و تونل هلدینگ پایا سامان پارس (شبیه‌سازی آموزشی)
+**واحد متولی:** دفتر فنی و مناقصات کلان (مشترک رامان، جنرال مکانیک و دی)
+**توجه:** فیلدهای مبلغ و تاریخ واقعی پورتال خالی بوده و مقادیر فنی زیر برای تمرین طراحی شده‌اند.
+
+---
+
+## ۱. الزامات حفاری و نگهداری تونل‌های کوهستانی (داخلی - نشریه ۵۵)
+* مقاطع تونلی متفاوت در پروژه‌های آزادراه تهران–شمال، قلاجه–ایلام و قائمشهر–پل سفید.
+* ضرورت ارزیابی پایداری سینه کار، زهکشی آب‌های کوهستانی و پوشش نهایی بتن درجا.
+* کنترل معارضین دسترسی در جاده‌های چاه‌های اکتشافی (نظیر گچاب-۱ و دهنو-۱).
+
+## ۲. الزامات صادرات خدمات فنی-مهندسی در محورهای امارات (SKF2، R1000C، R199، جبل‌الکتاب)
+* رعایت دقیق ضوابط راهداری امارات، گرماژ بالای قیر اصلاح‌شده پلیمری (PG 76-10) در دمای تابستانی بالای ۵۰ درجه سانتی‌گراد.
+* استاندارد کنترل ترافیک، روشنایی تونل و ایمنی کوهستانی در مسیرهای شیص–خورفکان و وادی‌الحلو–کلبا.
+* مستندسازی انگلیسی روزانه جهت تایید دستگاه نظارت بین‌المللی.`
+  },
+  paya_contracts_epcf: {
+    id: 'paya_doc_contracts_epcf',
+    departmentId: 'paya_contracts_epcf',
+    fileName: 'paya_epcf_consortium_contract_sim.md',
+    titleFa: 'قرارداد نمونه کنسرسیومی EPC+F زیرساخت (رامان، جنرال مکانیک، دی و تابیران - شبیه‌سازی)',
+    titleEn: 'Paya EPC+F Consortium Specimen Contract (Simulated)',
+    fileSizeApprox: '3.9 KB',
+    summaryFa: 'سند قراردادی آموزشی شامل تقسیم کار بین شرکت‌های تابعه، تعهدات ۶۵٪ فاینانس EPC+F، فرجه ۲۱ روزه ماده ۳۰ و جابه‌جایی بین‌شرکتی ناوگان.',
+    summaryEn: 'Simulated consortium contract covering subsidiary shares, 65% EPC+F financing, 21-day notice rule, and fleet dispatch.',
+    markdownContent: `# قرارداد نمونه کنسرسیومی EPC+F هلدینگ پایا سامان پارس (شبیه‌سازی آموزشی)
+* **شریک راهبر:** هلدینگ پایا سامان پارس
+* **سهم شرکای کنسرسیوم (شبیه‌سازی):** شرکت رامان (۵۰٪ راه و پل) · شرکت جنرال مکانیک (۳۰٪ تونل) · شرکت دی و تابیران (۲۰٪ ابنیه و MEP)
+* **ماده ۱ (مدل EPC+F):** تامین ۶۵٪ منابع مالی توسط کنسرسیوم؛ تاخیر بالای ۳۰ روز کارفرما در تضمین اقساط فاینانس موجب حق تعلیق و تمدید مدت پیمان است.
+* **ماده ۲ (هم‌افزایی ناوگان):** جابه‌جایی ماشین‌آلات سنگین بین پروژه‌های اعضای کنسرسیوم با ثبت حواله داخلی مجاز است.
+* **ماده ۳ (فرجه اخطار ماده ۳۰):** کارفرما موظف به آزادسازی معارض ظرف ۲۰ روز و کنسرسیوم موظف به ارسال اخطار کتبی ظرف ۲۱ روز تقویمی از وقوع مانع است.`
+  },
+  paya_portfolio_pmo: {
+    id: 'paya_doc_portfolio_pmo',
+    departmentId: 'paya_portfolio_pmo',
+    fileName: 'paya_63_projects_dual_wing_dossier_sim.md',
+    titleFa: 'گزارش جامع پورتفوی ۶۳ پروژه و ۱۴ شرکت تابعه در دو بال هلدینگ پایا سامان پارس',
+    titleEn: 'Paya 63-Project Dual-Wing & 14-Subsidiary Executive Dossier',
+    fileSizeApprox: '5.1 KB',
+    summaryFa: 'سند مرجع واقعی ساختار هلدینگ (۶۳ پروژه در ۸ حوزه و ۱۴ شرکت) به همراه داده‌های پیشرفت شبیه‌سازی‌شده برای تمرین ساخت پرزنتیشن هیئت‌مدیره.',
+    summaryEn: 'Verified holding structure (63 projects, 8 domains, 14 subsidiaries) paired with simulated progress KPIs for executive deck extraction.',
+    markdownContent: `# پرونده پورتفوی کلان هلدینگ پایا سامان پارس (تأسیس ۱۳۸۶)
+**منبع ساختار واقعی سایت + مقادیر عددی پیشرفت شبیه‌سازی‌شده آموزشی**
+
+## ۱. مشخصات کلان ثبت‌شده در پورتال هلدینگ
+* **نیروی انسانی:** بیش از ۵,۰۰۰ نفر به همراه ناوگان گسترده ماشین‌آلات سنگین
+* **مدل‌های قراردادی:** EPC، EPC+F، PC، BOT، BLT و کنسرسیوم
+* **توزیع ۶۳ پروژه ثبت‌شده روی سایت:**
+  1. راه، پل و تونل: **۲۸ پروژه** (از تهران–شمال و قلاجه تا پروژه‌های امارات SKF2 و R1000C)
+  2. سد و تأسیسات آبی: **۱۴ پروژه** (شهری‌کور، مخملکوه، هشتجین، عمارت، سرنی، قصرشیرین ۱و۲، میمه، سد باطله کاوه، بندرانزلی، نگین بوشهر، موج‌شکن کلبا)
+  3. حمل‌ونقل ریلی: **۸ پروژه** (میانه–اردبیل، کرج–قزوین، شمسی–میبد، مترو تبریز خط ۱، تهران M3/N4، اصفهان)
+  4. فرودگاه و تأسیسات جانبی: **۵ پروژه** (امام خمینی فاز ۱ و سلام، کیش، آبادان، اردبیل)
+  5. ابنیه صنعتی: **۴ پروژه** (فولاد کاوه جنوب کیش، سیمان هگمتان، گندله‌سازی، احیای مستقیم)
+  6. تأسیسات MEP: **۴ پروژه** (تهویه مترو شیراز و اصفهان، پست ۶۳kV یزدمهر، باب‌الجواد مشهد) + پروژه‌های ۱۴۰۵ کاوه (خورشیدی ۵MW و پلاسمای سرد)
+  7. ابنیه ساختمانی و مدیریت شهری: **۰ پروژه ثبت‌شده روی سایت** (شکاف اطلاعاتی پورتال علی‌رغم فعالیت ۶ شرکت بال مسکن!)
+
+## ۲. وضعیت ۱۴ شرکت تابعه در دو بال اجرایی
+* **بال پیمانکاری عمرانی:** ملی ساختمان (۱۳۳۷)، جنرال مکانیک (۱۳۳۳)، دی (۱۳۳۷)، رامان، تابیران (۱۳۵۳)، بن‌آب، احداث و راه‌اندازی پایانه سلام.
+* **بال سرمایه‌گذاری مسکن و شهرک صنعتی:** آتی‌ساز (۱۳۴۱)، شرکت خانه (۱۳۵۲)، عمران و مسکن ایران (۱۳۷۳)، عمران و مسکن شمال (۱۳۷۳)، عمران و مسکن اصفهان (۱۳۶۷)، شهر صنعتی و منطقه ویژه کاوه (۱۳۵۲)، معین کوثر.
+* **گزارش خلأ داده پورتال:** فیلدهای کارفرما، مشاور، مبلغ پیمان، تاریخ شروع/پایان روی صفحات جزئیات پروژه‌ها خالی است؛ در بخش شبیه‌سازی کارگاهی، متوسط SPI بال عمرانی ۰.۹۲ و بال مسکن ۰.۹۱ برآورد شده است.`
+  },
+  paya_kaveh_energy: {
+    id: 'paya_doc_kaveh_energy',
+    departmentId: 'paya_kaveh_energy',
+    fileName: 'paya_kaveh_solar_cold_plasma_dossier_sim.md',
+    titleFa: 'پرونده فنی و BOT/BLT شهر صنعتی ۳۰۰۰ هکتاری کاوه (نیروگاه خورشیدی ۵MW و پلاسمای سرد ۱۴۰۵)',
+    titleEn: 'Kaveh Industrial City 5MW Solar & Cold-Plasma Dossier (Simulated)',
+    fileSizeApprox: '3.7 KB',
+    summaryFa: 'مشخصات منطقه ویژه اقتصادی کاوه در ساوه (۱۰۰ کیلومتری تهران)، نیروگاه خورشیدی ۵ مگاواتی، تصفیه‌خانه پلاسمای سرد شهریور ۱۴۰۵ و شروط SLA.',
+    summaryEn: 'Kaveh 3,000ha SEZ profile, 5MW solar PV, 1405 cold-plasma effluent plant, and SLA guarantees.',
+    markdownContent: `# پرونده شهر صنعتی و منطقه ویژه اقتصادی کاوه (تأسیس ۱۳۵۲)
+* **مقیاس:** بزرگ‌ترین شهر صنعتی کشور، **۳۰۰۰ هکتار** در ساوه (۱۰۰ کیلومتری تهران)
+* **طرح‌های نوآورانه ۱۴۰۵ (بخش اخبار سایت + شبیه‌سازی کارگاهی):**
+  1. **نیروگاه خورشیدی ۵ مگاواتی (مدل BOT ۱۵ ساله):** تامین برق پاک و کاهش پیک بار واحدهای صنعتی؛ در صورت افت بازده بیش از ۱۰٪ نسبت به منحنی مبنا، مهلت شستشو و تنظیم اینورترها ۴۸ ساعت است.
+  2. **تصفیه‌خانه پساب صنعتی با فناوری پلاسمای سرد (مدل BLT ۱۰ ساله - شهریور ۱۴۰۵):** تعهد کاهش حداقل ۸۸٪ شاخص COD جهت بازچرخانی آب صنعتی در واحدهای مستقر.
+  3. **شرط تحویل پایان دوره:** در انتهای دوره ۱۰ ساله BLT و ۱۵ ساله BOT، تاسیسات با حداقل ۸۵٪ ظرفیت اسمی تحویل می‌گردند.
+* **مزایای سرمایه‌گذاری در منطقه ویژه کاوه:** دسترسی ریلی/جاده‌ای، معافیت‌های گمرکی منطقه ویژه و زیرساخت یکپارچه آب، برق، گاز و پساب.`
+  },
+  paya_housing_wing: {
+    id: 'paya_doc_housing_wing',
+    departmentId: 'paya_housing_wing',
+    fileName: 'paya_housing_wing_catalog_sim.md',
+    titleFa: 'کاتالوگ پروژه‌ها و چالش‌های بال سرمایه‌گذاری مسکن (آتی‌ساز، خانه، عمران مسکن و معین کوثر)',
+    titleEn: 'Paya Housing Wing Portfolio & Urban Portal Gap Dossier (Simulated)',
+    fileSizeApprox: '3.6 KB',
+    summaryFa: 'معرفی پروژه‌های شاخص شهرک دریاکنار (۱۴۳۳+ ویلا)، شهرک‌های اقماری شاهین‌شهر/بهارستان/ملک‌شهر و تحلیل شکاف ۰ پروژه‌ای در سایت هلدینگ.',
+    summaryEn: 'Overview of Atisaz Darya-Kenar (1,433+ villas), Isfahan/Shomal/Iran housing towns, and portal catalog gap.',
+    markdownContent: `# پرونده بال سرمایه‌گذاری ساختمانی، مسکن و بازآفرینی شهری هلدینگ پایا سامان پارس
+* **شرکت‌های تابعه بال مسکن:**
+  * **آتی‌ساز (تأسیس ۱۳۴۱):** انبوه‌سازی و شهرک‌سازی (نخستین پروژه شاخص: شهرک دریاکنار با بیش از ۱,۴۳۳ ویلا) و مجتمع‌های بلندمرتبه.
+  * **شرکت خانه (تأسیس ۱۳۵۲):** احداث شهرک‌های توریستی و مجتمع‌های مسکونی/اداری/تجاری.
+  * **عمران و مسکن ایران (تأسیس ۱۳۷۳):** ساختمان‌سازی و بلندمرتبه‌سازی کلان.
+  * **عمران و مسکن شمال (تأسیس ۱۳۷۳):** ویلاسازی و پروژه‌های مسکن نوار شمالی کشور.
+  * **عمران و مسکن اصفهان (شروع ۱۳۶۷):** توسعه شهرک‌های اقماری مرکز ایران (شاهین‌شهر، بهارستان، ملک‌شهر).
+  * **گروه سرمایه‌گذاری معین کوثر:** بازوی تکمیلی سرمایه‌گذاری مسکن و ساختمان.
+* **شکاف اطلاعاتی سایت:** با وجود این سابقه گسترده، صفحه «ابنیه ساختمانی و مدیریت شهری» روی پورتال فعلی با ۰ پروژه خالی مانده و نیازمند جمع‌آوری شناسنامه پروژه‌های فعال است.`
+  },
+  paya_fleet_hse: {
+    id: 'paya_doc_fleet_hse',
+    departmentId: 'paya_fleet_hse',
+    fileName: 'paya_heavy_fleet_and_hse_brief_sim.md',
+    titleFa: 'گزارش آماده‌به‌کاری ناوگان ماشین‌آلات سنگین و پروتکل‌های ایمنی کارگاه‌های هلدینگ (شبیه‌سازی)',
+    titleEn: 'Paya Heavy Fleet Readiness & Multi-Site HSE Brief (Simulated)',
+    fileSizeApprox: '3.5 KB',
+    summaryFa: 'داده‌های شبیه‌سازی‌شده تردد و خواب ماشین‌آلات سنگین بین کارگاه‌های دی، رامان و جنرال مکانیک به همراه ۴ رکن ایمنی تونل، سد و برج‌سازی.',
+    summaryEn: 'Simulated fleet utilization across Dey, Raman & General Mechanic plus 4-pillar HSE rules.',
+    markdownContent: `# گزارش ناوگان ماشین‌آلات سنگین و نظام ایمنی HSE پایا سامان پارس (شبیه‌سازی آموزشی)
+## ۱. وضعیت ناوگان بین شرکت‌های تابعه (مقادیر تمرینی)
+* **جبهه سد مخملکوه (شرکت دی):** ۲ دستگاه تاورکرین و ۱ بچینگ سیار آماده جابه‌جایی پس از اتمام مقطع سرریز.
+* **جبهه آزادراه و تونل (رامان و جنرال مکانیک):** کمبود ۲ دستگاه جامبوجت حفاری و ۳ دامپتراک سنگین در قطعه کوهستانی.
+* **پیشنهاد هم‌افزایی:** جابه‌جایی داخلی از مخملکوه به کارگاه راه/تونل به جای اجاره برون‌سازمانی با ۲۲٪ صرفه‌جویی هزینه تجهیز.
+
+## ۲. چهار رکن ایمنی HSE در پروژه‌های متنوع هلدینگ
+1. تهویه مستمر و گازسنجی تونل‌ها (O2 بین ۱۹.۵ تا ۲۳.۵٪، CO زیر 25 ppm).
+2. مهار گود و ایمنی کار در ارتفاع برای برج‌های مسکونی و سازه‌های صنعتی.
+3. قفل‌گذاری و برچسب‌گذاری (LOTO) در تست پست‌های ۶۳ کیلوولت تابیران.
+4. کنترل خستگی شیفت‌های متوالی کارگاهی در مناطق کوهستانی و دریایی.`
+  },
+  paya_hr_holding: {
+    id: 'paya_doc_hr_holding',
+    departmentId: 'paya_hr_holding',
+    fileName: 'paya_holding_hr_and_camp_policy_sim.md',
+    titleFa: 'ضوابط سرمایه انسانی (۵۰۰۰+ نیرو)، اضافه‌کاری و تجهیز کارگاه بین ۱۴ شرکت تابعه (شبیه‌سازی)',
+    titleEn: 'Paya Holding 5,000+ Staff HR, Overtime & Camp Governance (Simulated)',
+    fileSizeApprox: '3.8 KB',
+    summaryFa: 'بخشنامه آموزشی هماهنگی نیروی انسانی میان پروژه‌های دوردست راه/سد و شهر صنعتی کاوه، سقف اضافه‌کاری و استانداردهای کمپ کارگاهی.',
+    summaryEn: 'Simulated HR directive governing remote mountain/dam shift caps, inter-subsidiary transfers, and camp welfare.',
+    markdownContent: `# دستورالعمل سرمایه انسانی و رفاهی هلدینگ پایا سامان پارس (شبیه‌سازی آموزشی)
+**محدوده:** بیش از ۵,۰۰۰ پرسنل ستادی و کارگاهی در ۱۴ شرکت تابعه
+
+## ۱. ضوابط کنترلی اضافه‌کاری و خستگی ایمنی
+* سقف اضافه‌کاری کارگاه‌های کوهستانی و سدسازی: حداکثر **۸۵ ساعت** در ماه با تایید مدیر پروژه.
+* **خط قرمز HSE:** بیش از **۱۴ روز کار متوالی** بدون استراحت هفتگی در کارگاه‌های راه، تونل و دریایی ممنوع است.
+* کار شبانه در پروژه‌های پیمانکاری مشروط به اطلاع‌رسانی مکتوب به دستگاه نظارت طبق بندهای شرایط خصوصی است.
+
+## ۲. نمونه گزارش ماهانه کارگاه‌ها (شبیه‌سازی آموزشی)
+* **جبهه آزادراه کوهستانی (رامان):** ۹۸ ساعت اضافه‌کاری ثبت‌شده و ۱۶ روز کار متوالی ۴ اپراتور ماشین‌آلات سنگین (نیازمند اصلاح فوری شیفت!).
+* **تیم شهر صنعتی کاوه و تابیران:** ۷۲ ساعت اضافه‌کاری با مجوز کامل تست پست ۶۳kV و نیروگاه خورشیدی (منطبق).
+* **بال مسکن (عمران مسکن/آتی‌ساز):** ۶۰ ساعت اضافه‌کاری مهندسان ناظر و دفتر فنی (منطبق).`
+  }
+};
+
+export const PAYA_SAMPLE_BLUEPRINT_DOCS: Record<string, SampleDepartmentDocument> = {
+  paya_board_dual_wing_deck: PAYA_SAMPLE_DEPARTMENT_DOCS.paya_portfolio_pmo,
+  paya_kaveh_investor_infographic: PAYA_SAMPLE_DEPARTMENT_DOCS.paya_kaveh_energy,
+  paya_audio_consortium_briefing: PAYA_SAMPLE_DEPARTMENT_DOCS.paya_contracts_epcf
+};
+
+export const PAYA_SAMPLE_EXERCISE_DOCS: Record<string, SampleDepartmentDocument> = {
+  paya_ex1_consortium_audit: PAYA_SAMPLE_DEPARTMENT_DOCS.paya_contracts_epcf,
+  paya_ex2_kaveh_bot_audio: PAYA_SAMPLE_DEPARTMENT_DOCS.paya_kaveh_energy,
+  paya_ex3_63projects_board_deck: PAYA_SAMPLE_DEPARTMENT_DOCS.paya_portfolio_pmo,
+  paya_ex4_hr_fleet_cross_audit: {
+    id: 'paya_doc_ex4_hr_fleet',
+    departmentId: 'paya_hr_holding',
+    fileName: 'paya_hr_and_fleet_bundle_sim.md',
+    titleFa: 'بسته دوقلوی تمرین پایا: دستورالعمل سرمایه انسانی (۵۰۰۰ نیرو) + گزارش ناوگان ماشین‌آلات سنگین',
+    titleEn: 'Paya Dual-Source Package: Holding HR Policy + Heavy Fleet Utilization',
+    fileSizeApprox: '7.1 KB (۲ منبع مجزا)',
+    summaryFa: 'ترکیب دو منبع شبیه‌سازی‌شده برای تمرین تقاطع‌گیری ضوابط اضافه‌کاری و هم‌افزایی ناوگان سنگین میان ۱۴ شرکت تابعه.',
+    summaryEn: 'Dual-source training package combining holding HR rules and cross-subsidiary fleet dispatch logs.',
+    markdownContent: `${PAYA_SAMPLE_DEPARTMENT_DOCS.paya_hr_holding.markdownContent}\n\n---\n\n${PAYA_SAMPLE_DEPARTMENT_DOCS.paya_fleet_hse.markdownContent}`,
+    subDocuments: [
+      {
+        id: 'paya_hr_source_1',
+        fileName: 'paya_holding_hr_and_camp_policy_sim.md',
+        labelFa: '📄 منبع ۱: دستورالعمل سرمایه انسانی و رفاهی هلدینگ پایا سامان پارس',
+        labelEn: 'Source 1: Paya Holding HR & Camp Welfare Directive',
+        markdownContent: PAYA_SAMPLE_DEPARTMENT_DOCS.paya_hr_holding.markdownContent
+      },
+      {
+        id: 'paya_fleet_source_2',
+        fileName: 'paya_heavy_fleet_and_hse_brief_sim.md',
+        labelFa: '📄 منبع ۲: گزارش ناوگان ماشین‌آلات سنگین و هم‌افزایی شرکت‌های تابعه',
+        labelEn: 'Source 2: Inter-Subsidiary Heavy Fleet & HSE Brief',
+        markdownContent: PAYA_SAMPLE_DEPARTMENT_DOCS.paya_fleet_hse.markdownContent
+      }
+    ]
+  }
+};
+
+export interface NotebookLmDocsBundle {
+  departmentDocs: Record<string, SampleDepartmentDocument>;
+  blueprintDocs: Record<string, SampleDepartmentDocument>;
+  exerciseDocs: Record<string, SampleDepartmentDocument>;
+}
+
+export function getNotebookLmSampleDocsForTrack(
+  trackId: IndustryTrackId = 'CIVIL_INFRA'
+): NotebookLmDocsBundle {
+  if (trackId === 'PAYA_SAMAN_PARS') {
+    return {
+      departmentDocs: PAYA_SAMPLE_DEPARTMENT_DOCS,
+      blueprintDocs: PAYA_SAMPLE_BLUEPRINT_DOCS,
+      exerciseDocs: PAYA_SAMPLE_EXERCISE_DOCS
+    };
+  }
+  return {
+    departmentDocs: SAMPLE_DEPARTMENT_DOCS,
+    blueprintDocs: SAMPLE_BLUEPRINT_DOCS,
+    exerciseDocs: SAMPLE_EXERCISE_DOCS
+  };
+}

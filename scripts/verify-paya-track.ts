@@ -5,6 +5,9 @@ import * as domainExamples from '../src/data/domainTrackExamples.ts';
 import * as quizData from '../src/data/placement_quiz_data.ts';
 import * as sampleDatasets from '../src/data/engineering_sample_datasets.ts';
 import * as sampleContracts from '../src/data/engineering_sample_contracts.ts';
+import * as s1s5 from '../src/data/session1_and_5_curriculum.ts';
+import * as nlmGuide from '../src/data/notebooklm_engineering_guide.ts';
+import * as nlmDocs from '../src/data/notebooklm_sample_documents.ts';
 
 // Task 1 Assertions
 assert.ok(
@@ -122,3 +125,48 @@ assert.equal(civilContracts.length, 2);
 assert.ok(civilContracts.every((c: any) => !String(c.id).startsWith('paya_')));
 
 console.log('Task 3 verification passed');
+
+// Task 4 Assertions
+assert.equal(typeof (s1s5 as any).getSessionCurriculumForTrack, 'function', 'getSessionCurriculumForTrack must be exported');
+assert.equal(typeof (nlmGuide as any).getNotebookLmGuideForTrack, 'function', 'getNotebookLmGuideForTrack must be exported');
+assert.equal(typeof (nlmDocs as any).getNotebookLmSampleDocsForTrack, 'function', 'getNotebookLmSampleDocsForTrack must be exported');
+
+const civilCurr = (s1s5 as any).getSessionCurriculumForTrack('CIVIL_INFRA');
+assert.equal(civilCurr.s1DemoSlides, s1s5.S1_DEMO_SLIDES);
+assert.equal(civilCurr.readmeMd, s1s5.SAMPLE_ENGINEERING_README_MD);
+assert.equal(civilCurr.cleanCsvContent, s1s5.SAMPLE_CLEAN_CSV_CONTENT);
+
+const payaCurr = (s1s5 as any).getSessionCurriculumForTrack('PAYA_SAMAN_PARS');
+assert.notEqual(payaCurr.s1DemoSlides, s1s5.S1_DEMO_SLIDES);
+assert.ok(payaCurr.s1DemoSlides.length >= 6);
+assert.ok(payaCurr.s1DriveSlides.length >= 5);
+assert.ok(payaCurr.s1MarkdownSlides.length >= 5);
+assert.ok(payaCurr.s1GithubSlides.length >= 6);
+assert.ok(payaCurr.s5CapstoneSlides.length >= 4);
+assert.ok(payaCurr.s5CapstoneSlides[1]?.codeSnippet, 'PAYA_S5_CAPSTONE_SLIDES[1].codeSnippet required');
+assert.ok(
+  payaCurr.s1DemoSlides.some((s: any) => s.titleFa.includes('پایا') || s.pointsFa.join(' ').includes('پایا سامان پارس')),
+  'Paya S1 demo slides must mention Paya Saman Pars'
+);
+assert.ok(payaCurr.readmeMd.includes('پایا سامان پارس'));
+const csvLines = payaCurr.cleanCsvContent.trim().split(/\r?\n/);
+assert.ok(csvLines.length >= 5);
+const csvCols = csvLines[0].split(',').length;
+csvLines.forEach((l: string) => assert.equal(l.split(',').length, csvCols));
+
+const payaNlm = (nlmGuide as any).getNotebookLmGuideForTrack('PAYA_SAMAN_PARS');
+const payaDocs = (nlmDocs as any).getNotebookLmSampleDocsForTrack('PAYA_SAMAN_PARS');
+assert.equal(payaNlm.departments.length, 7, 'Paya NotebookLM must have 7 departments');
+for (const dept of payaNlm.departments) {
+  assert.ok(payaDocs.departmentDocs[dept.id], `Missing Paya NotebookLM doc for department ${dept.id}`);
+}
+assert.ok(payaNlm.blueprints.length >= 3);
+for (const bp of payaNlm.blueprints) {
+  assert.ok(payaDocs.blueprintDocs[bp.id], `Missing Paya NotebookLM doc for blueprint ${bp.id}`);
+}
+assert.ok(payaNlm.exercises.length >= 4);
+for (const ex of payaNlm.exercises) {
+  assert.ok(payaDocs.exerciseDocs[ex.id], `Missing Paya NotebookLM doc for exercise ${ex.id}`);
+}
+
+console.log('Task 4 verification passed');

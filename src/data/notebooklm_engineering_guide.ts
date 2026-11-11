@@ -1,3 +1,5 @@
+import { IndustryTrackId } from '../types/industryTrack';
+
 export interface DepartmentUseCase {
   id: string;
   departmentFa: string;
@@ -919,3 +921,568 @@ export const NOTEBOOKLM_EXERCISES: NotebookLmExercise[] = [
     ]
   }
 ];
+
+// ============================================================================
+// PAYA SAMAN PARS HOLDING DEDICATED NOTEBOOKLM WORKSHOP GUIDE
+// ============================================================================
+export const PAYA_NOTEBOOKLM_OVERVIEW = {
+  ...NOTEBOOKLM_OVERVIEW,
+  titleFa: 'گوگل نوت‌بوک ال‌ام (Google NotebookLM): موتور دانش‌پایه هلدینگ پایا سامان پارس',
+  titleEn: 'Google NotebookLM: Source-Grounded Intelligence for Paya Saman Pars Holding',
+  taglineFa: 'تجمیع اسناد مناقصات ۶۳ پروژه، قراردادهای EPC+F / BOT / BLT، گزارش‌های ۱۴ شرکت تابعه، پرونده‌های برون‌مرزی امارات و شهر صنعتی کاوه با ارجاع خط‌به‌خط و صفر توهم.'
+};
+
+export const PAYA_UNIT_MANAGERS_MATRIX: DepartmentUseCase[] = [
+  {
+    id: 'paya_tech_bids',
+    departmentFa: 'دفتر فنی، مناقصات و برآورد کلان (ستاد و شرکت‌های تابعه)',
+    departmentEn: 'Holding Technical Office, Mega-Tendering & Estimation',
+    managerRoleFa: 'مدیر دفتر فنی و مهندسی مناقصات (پایا سامان پارس)',
+    managerRoleEn: 'Technical Office & Mega-Tendering Lead',
+    iconName: 'Building2',
+    colorTheme: '#7c3aed',
+    recommendedSourcesFa: [
+      'اسناد فنی مناقصات راه و تونل (تهران–شمال، قلاجه، محورهای امارات SKF2/R1000C)',
+      'دفترچه‌های مشخصات فنی سدها، مترو تبریز/تهران، فرودگاه سلام و کارخانه‌های فولاد/سیمان',
+      'بخشنامه‌های فهرست‌بها و نشریه ۵۵ سازمان برنامه و بودجه'
+    ],
+    recommendedSourcesEn: [
+      'Road, tunnel & UAE highway technical tender binders (SKF2, R1000C)',
+      'Dam, metro, airport (Salam) & heavy industrial steel/cement specs',
+      'National unit-price catalogs & Circular 55 technical codes'
+    ],
+    keyDeliverablesFa: [
+      'کشف مغایرت‌های مشخصات فنی بین اسناد کارفرما و پیشنهاد فنی کنسرسیوم',
+      'استخراج سریع لیست اقلام ریسکی و تجهیزات خاص پیش از قیمت‌گذاری مناقصه',
+      'پاسخگویی مستند به سوالات فنی کارگاه‌ها با رفرنس صفحه و بند'
+    ],
+    keyDeliverablesEn: [
+      'Cross-document discrepancy detection across tender specifications',
+      'Rapid extraction of high-risk work items prior to consortium pricing',
+      'Clause-cited technical Q&A for field engineers'
+    ],
+    samplePromptFa: `بر اساس اسناد فنی و مناقصاتی بارگذاری‌شده:
+۱. ریسک‌های زمین‌شناسی و اجرایی اصلی جبهه تونل و راه کوهستانی را در قالب جدول استخراج کن.
+۲. کدام الزامات فنی بین پروژه داخلی و استاندارد محور برون‌مرزی امارات تفاوت کلیدی دارند؟ شماره صفحه هر مورد را ذکر کن.
+۳. اگر مبلغ یا کارفرما در سند موجود نبود، صراحتاً بنویس «در منبع ثبت نشده است».`,
+    samplePromptEn: `From uploaded technical specs: extract mountain tunnel risks, compare domestic vs UAE technical clauses with page citations, and explicitly flag any missing client/price metadata.`,
+    practicalValueFa: 'کاهش شدید زمان بررسی اسناد مناقصات چندصدصفحه‌ای بین رامان، دی، جنرال مکانیک و ملی ساختمان.',
+    practicalValueEn: 'Slashes multi-hundred-page tender review cycles across Paya’s contracting subsidiaries.'
+  },
+  {
+    id: 'paya_contracts_epcf',
+    departmentFa: 'امور قراردادها، کنسرسیوم و مدل‌های EPC+F / BOT / BLT',
+    departmentEn: 'Contracts, Consortiums & EPC+F / BOT / BLT Legal',
+    managerRoleFa: 'مدیر امور قراردادها و حقوقی هلدینگ پایا سامان پارس',
+    managerRoleEn: 'Holding Contracts & Consortium Legal Director',
+    iconName: 'Scale',
+    colorTheme: '#b87333',
+    recommendedSourcesFa: [
+      'قراردادهای کنسرسیومی EPC+F بین شرکت‌های تابعه هلدینگ',
+      'قراردادهای BOT / BLT شهر صنعتی کاوه، پایانه‌ها و مشارکت مسکن',
+      'مکاتبات معارضین، ابلاغ زمین، و ماده ۳۰ شرایط عمومی پیمان (نشریه ۴۳۱۱)'
+    ],
+    recommendedSourcesEn: [
+      'Inter-subsidiary EPC+F consortium agreements',
+      'BOT/BLT concession documents for Kaveh, terminals & housing',
+      'Site handover correspondence and Circular 4311 Clause 30 dossiers'
+    ],
+    keyDeliverablesFa: [
+      'استخراج دقیق سهم مسئولیت هر شرکت تابعه در کنسرسیوم و مرز تضامین',
+      'کنترل مهلت‌های اخطار ۲۱ روزه تاخیرات و شروط تعلیق در تاخیر فاینانس EPC+F',
+      'تنظیم خلاصه پرونده حقوقی جهت دفاع در برابر جرایم تاخیر'
+    ],
+    keyDeliverablesEn: [
+      'Consortium liability & financing milestone audit per subsidiary',
+      '21-day delay notice & financing suspension trigger tracking',
+      'Drafting cited delay defense briefs'
+    ],
+    samplePromptFa: `به عنوان مشاور حقوقی کنسرسیوم پایا سامان پارس:
+۱. تعهدات تامین مالی کارفرما و پیمانکار در قرارداد EPC+F را با شماره ماده استخراج کن.
+۲. مهلت قانونی ارسال اخطار کتبی تاخیر برای معارضین و تاخیر تحویل زمین چند روز است؟
+۳. سهم مسئولیت شرکت‌های رامان، جنرال مکانیک، دی و تابیران را در یک جدول تفکیک کن.`,
+    samplePromptEn: `Extract EPC+F financing covenants, delay notice deadlines, and workshare liability splits across Raman, General Mechanic, Dey, and Tabiran with exact article numbers.`,
+    practicalValueFa: 'جلوگیری از ازدست‌رفتن حقوق مالی کنسرسیوم‌ها در پیمان‌های فاینانس‌دار و مشارکتی.',
+    practicalValueEn: 'Protects consortium financial rights across complex financed and concession contracts.'
+  },
+  {
+    id: 'paya_portfolio_pmo',
+    departmentFa: 'کنترل پورتفوی ۶۳ پروژه و گزارش‌دهی هیئت‌مدیره',
+    departmentEn: '63-Project Portfolio PMO & Executive Board Reporting',
+    managerRoleFa: 'مدیر برنامه‌ریزی و کنترل پورتفوی هلدینگ',
+    managerRoleEn: 'Holding Portfolio Controls & PMO Director',
+    iconName: 'FileSpreadsheet',
+    colorTheme: '#2f7d5b',
+    recommendedSourcesFa: [
+      'گزارش‌های ماهانه پیشرفت و EVM شرکت‌های تابعه (اعداد شبیه‌سازی‌شده آموزشی)',
+      'فهرست جامع ۶۳ پروژه ثبت‌شده در ۸ حوزه کاری و شکاف‌های اطلاعاتی پورتال',
+      'خلاصه مصوبات ماهانه ستاد هلدینگ پایا سامان پارس'
+    ],
+    recommendedSourcesEn: [
+      'Subsidiary monthly progress & EVM workbooks (educational simulation)',
+      '63-project holding registry across 8 sectors & portal gap tracker',
+      'Monthly holding executive board resolution minutes'
+    ],
+    keyDeliverablesFa: [
+      'تولید اسلایدبریف ۱۰ صفحه‌ای هیئت‌مدیره هلدینگ با تفکیک دو بال',
+      'تشخیص پروژه‌های دارای SPI زیر ۰.۹۰ و دسته‌بندی علل ریشه‌ای مشترک',
+      'تهیه فهرست پروژه‌های فاقد مشخصات کامل (کارفرما/مبلغ/تاریخ) برای تکمیل توسط دفاتر فنی'
+    ],
+    keyDeliverablesEn: [
+      '10-slide dual-wing executive board outline from multi-subsidiary logs',
+      'Cross-subsidiary SPI < 0.90 root-cause synthesis',
+      'Audit list of portal projects missing contract price/client metadata'
+    ],
+    samplePromptFa: `با تحلیل گزارش‌های پورتفو و ماتریس ۸ حوزه پایا سامان پارس:
+۱. مقایسه وضعیت دو بال (پیمانکاری زیرساختی در برابر سرمایه‌گذاری مسکن و کاوه) را در ۳ بولت‌پوینت عددی بنویس.
+۲. کدام پروژه‌ها بیشترین شکاف اطلاعاتی در پورتال یا انحراف زمانی دارند؟
+۳. ۳ تصمیم اولویت‌دار برای دستور جلسه هیئت‌مدیره هلدینگ پیشنهاد بده (با تفکیک عدد واقعی از شبیه‌سازی).`,
+    samplePromptEn: `Compare both Paya holding wings from uploaded logs, list projects with portal gaps or schedule slips, and extract 3 Board decisions while separating verified vs simulated figures.`,
+    practicalValueFa: 'تبدیل ده‌ها گزارش پراکنده ۱۴ شرکت به یک تصویر شفاف تصمیم‌گیری برای مدیرعامل و هیئت‌مدیره.',
+    practicalValueEn: 'Distills scattered reports from 14 subsidiaries into a single executive board brief.'
+  },
+  {
+    id: 'paya_kaveh_energy',
+    departmentFa: 'شهر صنعتی کاوه، انرژی خورشیدی و تصفیه پلاسمای سرد (تابیران/کاوه)',
+    departmentEn: 'Kaveh Industrial City, 5MW Solar, MEP & Cold-Plasma Tech',
+    managerRoleFa: 'مدیر بهره‌برداری شهر صنعتی کاوه / مدیر پروژه‌های MEP تابیران',
+    managerRoleEn: 'Kaveh Industrial City Operations / Tabiran MEP Director',
+    iconName: 'Zap',
+    colorTheme: '#0284c7',
+    recommendedSourcesFa: [
+      'قرارداد BOT نیروگاه خورشیدی ۵ مگاواتی و مشخصات پست ۶۳kV یزدمهر',
+      'گزارش فنی تصفیه‌خانه پساب با فناوری پلاسمای سرد کاوه (شهریور ۱۴۰۵)',
+      'ضوابط سرمایه‌گذاری و بهره‌برداری منطقه ویژه اقتصادی کاوه (۳۰۰۰ هکتار ساوه)'
+    ],
+    recommendedSourcesEn: [
+      'Kaveh 5MW solar BOT dossier & 63kV Yazdmehr substation specs',
+      'Kaveh cold-plasma industrial effluent plant logs (Shahrivar 1405)',
+      'Kaveh Special Economic Zone (3,000 ha) tenant & utility regulations'
+    ],
+    keyDeliverablesFa: [
+      'پاسخگویی مستند و سریع به استعلام‌های سرمایه‌گذاران منطقه ویژه کاوه',
+      'پایش انطباق شاخص‌های تصفیه پساب (COD) و تعهدات SLA برق خورشیدی',
+      'تهیه بریف‌های فنی پروژه‌های تهویه مترو شیراز/اصفهان و تأسیسات مشهد'
+    ],
+    keyDeliverablesEn: [
+      'Source-cited responses to SEZ investor utility & customs inquiries',
+      'Cold-plasma COD & solar availability SLA compliance briefs',
+      'MEP punch summaries for Shiraz/Isfahan metro & Mashhad works'
+    ],
+    samplePromptFa: `از اسناد شهر صنعتی کاوه و تاسیسات تابیران:
+۱. تمام تعهدات کمّی کاهش آلودگی پساب (COD) در واحد پلاسمای سرد و مهلت واکنش افت بازده نیروگاه خورشیدی ۵ مگاواتی را استخراج کن.
+۲. چک‌لیست ۵ مرحله‌ای پذیرش سرمایه‌گذار جدید در منطقه ویژه اقتصادی ۳۰۰۰ هکتاری کاوه را آماده کن.`,
+    samplePromptEn: `Extract quantitative COD targets for Kaveh cold-plasma treatment, 5MW solar SLA rules, and a 5-step investor onboarding checklist for the 3,000ha SEZ.`,
+    practicalValueFa: 'حکمرانی دقیق انرژی‌های تجدیدپذیر، فناوری سبز پلاسمای سرد و خدمات منطقه ویژه کاوه.',
+    practicalValueEn: 'Accelerates renewable energy, cold-plasma governance, and SEZ tenant services at Kaveh.'
+  },
+  {
+    id: 'paya_housing_wing',
+    departmentFa: 'بال انبوه‌سازی، شهرک‌سازی و بازآفرینی شهری (آتی‌ساز/خانه/عمران مسکن)',
+    departmentEn: 'Housing Development, Towers, Towns & Urban Renewal Wing',
+    managerRoleFa: 'مدیر توسعه پروژه‌های مسکن و شهری بال سرمایه‌گذاری',
+    managerRoleEn: 'Housing Wing & Urban Development Director',
+    iconName: 'Home',
+    colorTheme: '#db2777',
+    recommendedSourcesFa: [
+      'گزارش پروژه‌های آتی‌ساز (شهرک دریاکنار ۱۴۳۳+ ویلا)، شرکت خانه و معین کوثر',
+      'سوابق شهرک‌های اقماری عمران و مسکن اصفهان (شاهین‌شهر، بهارستان، ملک‌شهر)، ایران و شمال',
+      'بخشنامه‌های فروش، مشارکت مدنی و بازآفرینی بافت فرسوده شهری'
+    ],
+    recommendedSourcesEn: [
+      'Project files from Atisaz (Darya-Kenar 1,433+ villas), Khaneh & Moein Kowsar',
+      'Omran Maskan Iran/Shomal/Isfahan satellite town records (Baharestan, Shahinshahr)',
+      'Joint-venture pre-sale & urban renewal guidelines'
+    ],
+    keyDeliverablesFa: [
+      'تدوین شناسنامه دیجیتال کامل برای پرکردن شکاف ۰ پروژه‌ای دسته ابنیه در سایت هلدینگ',
+      'مقایسه بهای تمام‌شده و زمان تحویل بین برج‌سازی و شهرک‌سازی‌های شمال/مرکز',
+      'پادکست صوتی مرور عملکرد ۶ شرکت بال مسکن برای مدیران سرمایه‌گذاری'
+    ],
+    keyDeliverablesEn: [
+      'Complete digital project profiles to populate the empty Urban/Building portal category',
+      'Unit-cost and handover cycle comparisons across towers and satellite cities',
+      'Audio Overview briefing across all 6 housing subsidiaries'
+    ],
+    samplePromptFa: `بر اساس اسناد پروژه‌های مسکن، شهرک‌سازی و بافت فرسوده بارگذاری‌شده:
+۱. یک جدول شناسنامه استاندارد برای معرفی پروژه‌های شاخص شرکت‌های آتی‌ساز، خانه و عمران مسکن ایران/شمال/اصفهان آماده کن تا دسته «ابنیه ساختمانی و مدیریت شهری» در سایت تکمیل شود.
+۲. مهم‌ترین ریسک‌های بهای تمام‌شده و برنامه پیش‌فروش را فهرست کن.`,
+    samplePromptEn: `Generate a structured catalog table for Atisaz, Khaneh & Omran Maskan projects to fill the empty Urban/Building portal category, plus top cost/pre-sale risks.`,
+    practicalValueFa: 'احیای شفافیت اطلاعاتی بال مسکن در سطح هلدینگ و استانداردسازی مدل‌های سرمایه‌گذاری ساختمانی.',
+    practicalValueEn: 'Restores portfolio visibility across the housing wing and standardizes development feasibility.'
+  },
+  {
+    id: 'paya_fleet_hse',
+    departmentFa: 'ناوگان ماشین‌آلات سنگین، تجهیزات و ایمنی HSE کارگاه‌ها',
+    departmentEn: 'Heavy Machinery Fleet Logistics & Multi-Site HSE',
+    managerRoleFa: 'مدیر ناوگان ماشین‌آلات سنگین و سرپرست HSE هلدینگ',
+    managerRoleEn: 'Holding Heavy Fleet & HSE Compliance Director',
+    iconName: 'Shield',
+    colorTheme: '#e0533c',
+    recommendedSourcesFa: [
+      'گزارش آماده‌به‌کاری ناوگان سنگین در پروژه‌های راه، تونل، سد و بنادر',
+      'دستورالعمل‌های HSE حفر تونل (تهران–شمال/قلاجه)، کار در ارتفاع برج‌ها و پست ۶۳kV',
+      'سوابق جابه‌جایی تجهیزات بین شرکت‌های رامان، دی، جنرال مکانیک و ملی ساختمان'
+    ],
+    recommendedSourcesEn: [
+      'Heavy machinery availability logs across road, tunnel, dam & port sites',
+      'HSE manuals for tunneling, high-rise construction & 63kV substations',
+      'Inter-subsidiary equipment mobilization records'
+    ],
+    keyDeliverablesFa: [
+      'اینفوگرافیک ۵ بلوکه نکات حیاتی ایمنی تونل و ماشین‌آلات سنگین برای کارگاه‌ها',
+      'شناسایی دستگاه‌های در حال خواب جهت جابه‌جایی بین پروژه‌های ۶۳گانه',
+      'پادکست آموزشی ایمنی کارگاهی برای سرپرستان اجرا'
+    ],
+    keyDeliverablesEn: [
+      '5-block site HSE & heavy machinery infographic briefs',
+      'Idle equipment detection for intra-holding dispatch',
+      'Conversational HSE briefing podcasts for site superintendents'
+    ],
+    samplePromptFa: `گزارش‌های کارکرد ناوگان و دستورالعمل ایمنی بارگذاری‌شده را بررسی کن:
+۱. کدام جبهه‌های کاری بیشترین ساعات خواب ماشین‌آلات یا خطر ایمنی در حفر تونل و کار در ارتفاع را دارند؟
+۲. یک طرح محتوایی پوستر اینفوگرافیک برای نصب در کارگاه‌های بال پیمانکاری با ۴ رکن ایمنی استخراج کن.`,
+    samplePromptEn: `Audit fleet downtime and HSE risks from uploaded reports, then draft a 4-block site safety infographic brief for contracting workfronts.`,
+    practicalValueFa: 'کاهش حوادث کارگاهی و جلوگیری از اجاره موازی ماشین‌آلات سنگین میان شرکت‌های تابعه.',
+    practicalValueEn: 'Reduces site safety incidents and prevents duplicate machinery rentals across subsidiaries.'
+  },
+  {
+    id: 'paya_hr_holding',
+    departmentFa: 'سرمایه انسانی و امور اداری بین‌شرکتی (۵۰۰۰+ نیرو در ۱۴ شرکت)',
+    departmentEn: 'Holding Human Capital & Inter-Subsidiary HR (5,000+ Staff)',
+    managerRoleFa: 'مدیر سرمایه انسانی هلدینگ پایا سامان پارس',
+    managerRoleEn: 'Chief Human Resources Officer · Paya Saman Pars Holding',
+    iconName: 'Users',
+    colorTheme: '#0f766e',
+    recommendedSourcesFa: [
+      'بخشنامه داخلی کنترل اضافه‌کاری، مأموریت کارگاهی و جابه‌جایی نیرو بین ۱۴ شرکت تابعه',
+      'الزامات نیروی انسانی، بیمه و کمپ کارگاهی قراردادهای EPC+F و BOT هلدینگ',
+      'ماتریس مهارت‌های فنی و نیازهای آموزشی هوش مصنوعی در ستاد و کارگاه‌ها'
+    ],
+    recommendedSourcesEn: [
+      'Holding overtime, field allowance & cross-subsidiary mobility directives',
+      'EPC+F / BOT contractual manpower, SSO insurance & site camp obligations',
+      '5,000+ staff skill taxonomy & AI literacy training tracks'
+    ],
+    keyDeliverablesFa: [
+      'تقاطع‌گیری ضوابط داخلی هلدینگ با تعهدات کارفرمایی تجهیز کارگاه و پرسنل',
+      'پایش خط قرمزهای خستگی کارگاهی در شیفت‌های کوهستانی و پروژه‌های مستمر',
+      'طراحی کوییز و دستورالعمل آنبوردینگ سریع کارشناسان جدید ۱۴ شرکت تابعه'
+    ],
+    keyDeliverablesEn: [
+      'Auditing internal HR caps against contractual camp & staffing obligations',
+      'Detecting consecutive-shift fatigue red-lines on remote mountain/dam sites',
+      'Generating compliance quizzes and onboarding briefs across 14 subsidiaries'
+    ],
+    samplePromptFa: `با مقایسه بخشنامه داخلی سرمایه انسانی هلدینگ و الزامات قراردادی پروژه‌ها:
+۱. انحرافات اضافه‌کاری و کار متوالی بیش از سقف ایمنی در کارگاه‌های دوردست را شناسایی کن.
+۲. خلاصه تعهدات تجهیز کمپ، تغذیه و نیروی خدماتی کارفرما در برابر پرسنل شرکت تابعه را در یک جدول بیاور.
+۳. ۵ سوال چهارگزینه‌ای برای سنجش تسلط کارشناسان اداری شرکت‌های تابعه طراحی کن.`,
+    samplePromptEn: `Cross-check internal holding HR caps vs project contract clauses: flag remote-site fatigue violations, tabulate camp welfare duties, and design a 5-question HR compliance quiz.`,
+    practicalValueFa: 'حکمرانی یکپارچه منابع انسانی برای بیش از ۵۰۰۰ نیروی پراکنده در سراسر کشور و پروژه‌های برون‌مرزی.',
+    practicalValueEn: 'Unifies HR compliance and welfare governance across 5,000+ employees nationwide and abroad.'
+  }
+];
+
+export const PAYA_PRESENTATION_INFOGRAPHIC_GUIDES: PresentationInfographicBlueprint[] = [
+  {
+    id: 'paya_board_dual_wing_deck',
+    titleFa: 'استخراج اسلایدبریف گزارش تلفیقی هیئت‌مدیره هلدینگ پایا سامان پارس (دو بال و ۶۳ پروژه)',
+    titleEn: 'Paya Holding Dual-Wing & 63-Project Board Presentation Deck',
+    categoryFa: 'گزارش هیئت‌مدیره هلدینگ',
+    categoryEn: 'Holding Board Briefing',
+    descriptionFa: 'تبدیل گزارش‌های پراکنده شرکت‌های بال پیمانکاری (رامان، دی، جنرال مکانیک، ملی ساختمان، تابیران) و بال مسکن/کاوه به یک ارائه ۱۰ اسلایدی استاندارد و مستند برای مدیرعامل و هیئت‌مدیره.',
+    descriptionEn: 'Distill multi-subsidiary reports from both Paya wings into an executive 10-slide board presentation outline.',
+    stepByStepGuideFa: [
+      '۱. فایل گزارش تلفیقی پایا (دانلودی از بخش منابع همین کارگاه) و شیت‌های پیشرفت شرکت‌های تابعه را در NotebookLM بارگذاری کنید.',
+      '۲. پرامپت زیر را کپی و در چت نوت‌بوک ارسال کنید.',
+      '۳. ساختار ۱۰ اسلایدی شامل شاخص‌های دو بال، پروژه‌های امارات، طرح‌های کاوه و مصوبات مورد نیاز را دریافت کنید.',
+      '۴. متن ساختاریافته را در PowerPoint / Gamma / Canva قرار دهید.'
+    ],
+    stepByStepGuideEn: [
+      '1. Upload the Paya dual-wing holding dossier into NotebookLM.',
+      '2. Paste the Board Deck prompt below.',
+      '3. Review the 10-slide executive outline with source citations.',
+      '4. Paste into PowerPoint, Google Slides, or Gamma.'
+    ],
+    copyablePromptFa: `بر پایه اسناد بارگذاری‌شده هلدینگ پایا سامان پارس، ساختار یک ارائه ۸ اسلایدی برای جلسه هیئت‌مدیره هلدینگ بساز.
+الزامات:
+- اسلاید ۱: نمای کلان ۶۳ پروژه در ۸ حوزه و دو بال اجرایی (پیمانکاری + مسکن و شهر صنعتی کاوه).
+- اسلاید ۲ تا ۴: وضعیت پروژه‌های شاخص راه/تونل (داخلی و امارات SKF2)، سد/آبی، ریل/فرودگاه و صنعتی/MEP.
+- اسلاید ۵: عملکرد شهر صنعتی کاوه (۳۰۰۰ هکتار، خورشیدی ۵MW و تصفیه پلاسمای سرد ۱۴۰۵) و بال مسکن (آتی‌ساز/خانه/عمران).
+- اسلاید ۶ و ۷: ریسک‌های قراردادهای EPC+F و BOT/BLT + شکاف‌های داده پورتال (فیلدهای خالی).
+- اسلاید ۸: مصوبات فوری مورد نیاز از هیئت‌مدیره (هم‌افزایی ناوگان بین ۱۴ شرکت و تکمیل شناسنامه دیجیتال).
+برای اعداد تمرینی حتماً قید «برآورد شبیه‌سازی‌شده» را حفظ کن.`,
+    copyablePromptEn: `Generate an 8-slide Paya Saman Pars Board Deck covering the 63-project portfolio across both wings, UAE export works, Kaveh 5MW solar/cold-plasma, housing gap closure, EPC+F/BOT risks, and Board decisions, flagging simulated values.`,
+    outputPreviewHighlightsFa: [
+      'پوشش متوازن هر دو بال هلدینگ و ۱۴ شرکت تابعه در یک ارائه واحد',
+      'تفکیک دقیق فکت‌های ثبت‌شده از اعداد شبیه‌سازی‌شده یا فیلدهای خالی پورتال',
+      'آماده خروجی‌گیری فوری به پاورپوینت یا Gamma'
+    ],
+    outputPreviewHighlightsEn: [
+      'Balanced executive coverage of both holding wings and 14 subsidiaries',
+      'Clear separation between portal facts, gaps, and simulated values',
+      'Ready for immediate PowerPoint or Gamma conversion'
+    ]
+  },
+  {
+    id: 'paya_kaveh_investor_infographic',
+    titleFa: 'طراحی بریف اینفوگرافیک جذب سرمایه‌گذار و تحول سبز شهر صنعتی کاوه (خورشیدی ۵MW و پلاسما)',
+    titleEn: 'Kaveh Industrial City Green Transformation Infographic Brief',
+    categoryFa: 'اینفوگرافیک شهر صنعتی کاوه',
+    categoryEn: 'Kaveh SEZ Infographic',
+    descriptionFa: 'استخراج بلوک‌های تصویری دقیق از اسناد شهر صنعتی ۳۰۰۰ هکتاری کاوه، منطقه ویژه اقتصادی، نیروگاه خورشیدی ۵ مگاواتی و تصفیه‌خانه پلاسمای سرد ۱۴۰۵.',
+    descriptionEn: 'Extract visual infographic blocks from Kaveh 3,000ha SEZ, 5MW solar PV, and 1405 cold-plasma treatment documentation.',
+    stepByStepGuideFa: [
+      '۱. سند شهر صنعتی کاوه و قرارداد BOT/BLT را به نوت‌بوک اضافه کنید.',
+      '۲. پرامپت استخراج ۵ بلوک اینفوگرافیک را ارسال کنید.',
+      '۳. خروجی را با ارجاعات دقیق جهت طراحی پوستر یا بروشور سرمایه‌گذاری استفاده کنید.'
+    ],
+    stepByStepGuideEn: [
+      '1. Upload the Kaveh SEZ & BOT/BLT dossier.',
+      '2. Send the 5-block infographic prompt.',
+      '3. Export verified hero metrics and flows to your design tool.'
+    ],
+    copyablePromptFa: `از اسناد شهر صنعتی و منطقه ویژه اقتصادی کاوه، بریف محتوایی یک پوستر اینفوگرافیک سرمایه‌گذاری در ۵ بلوک بساز:
+بلوک ۱: تیتر اصلی (بزرگ‌ترین شهر صنعتی کشور: ۳۰۰۰ هکتار در ساوه، ۱۰۰ کیلومتری تهران)
+بلوک ۲: ۴ عدد شاخص (ظرفیت نیروگاه خورشیدی ۵ مگاواتی، کاهش COD در تصفیه‌خانه پلاسمای سرد، مدت BOT/BLT، دسترسی منطقه ویژه)
+بلوک ۳: مسیر ۴ مرحله‌ای خدمات زیرساختی به واحدهای صنعتی مستقر
+بلوک ۴: مزایای فناوری پلاسمای سرد در بازچرخانی پساب صنعتی
+بلوک ۵: دعوت به اقدام سرمایه‌گذاران.`,
+    copyablePromptEn: `Produce a 5-block investment infographic brief for Kaveh Industrial City (3,000ha, 100km from Tehran, 5MW solar, cold-plasma effluent reuse, BOT/BLT terms).`,
+    outputPreviewHighlightsFa: [
+      'مناسب ارائه به سرمایه‌گذاران و همایش‌های صنعتی منطقه ویژه کاوه',
+      'تلفیق مزیت مکانی با فناوری‌های پاک ۱۴۰۵ (خورشیدی + پلاسمای سرد)',
+      'صفر درصد خطای آماری به لطف ارجاع مستقیم به اسناد'
+    ],
+    outputPreviewHighlightsEn: [
+      'Tailored for SEZ investor briefings and industrial showcases',
+      'Highlights 1405 clean-tech milestones (5MW Solar + Cold Plasma)',
+      '100% source-grounded statistics'
+    ]
+  },
+  {
+    id: 'paya_audio_consortium_briefing',
+    titleFa: 'ساخت پادکست صوتی عمیق دو نفره برای مدیران ۱۴ شرکت تابعه پایا سامان پارس',
+    titleEn: '2-Host Executive Audio Overview for Paya Holding Directors',
+    categoryFa: 'پادکست مدیریتی دو بال',
+    categoryEn: 'Executive Audio Briefing',
+    descriptionFa: 'تبدیل اسناد قراردادهای EPC+F، گزارش‌های پورتفوی ۶۳ پروژه و نکات ایمنی/کیفی به یک گفت‌وگوی صوتی ۱۰ دقیقه‌ای شنیدنی در مسیر کارگاه‌ها و جلسات.',
+    descriptionEn: 'Convert EPC+F consortium agreements and 63-project portfolio briefs into a 10-minute two-host audio briefing.',
+    stepByStepGuideFa: [
+      '۱. قرارداد EPC+F کنسرسیوم یا گزارش دو بال هلدینگ را در NotebookLM بارگذاری کنید.',
+      '۲. در پنل Studio روی Customize در بخش Audio Overview کلیک کنید.',
+      '۳. دستورالعمل جهت‌دهی زیر را وارد کرده و Generate را بزنید.'
+    ],
+    stepByStepGuideEn: [
+      '1. Upload the EPC+F contract or Dual-Wing dossier.',
+      '2. Click Customize under Studio Audio Overview.',
+      '3. Paste the focus instruction below and Generate.'
+    ],
+    copyablePromptFa: `لطفاً گفت‌وگو را با تمرکز بر نکات زیر هدایت کنید:
+- توضیح تفاوت مدل‌های EPC+F و BOT/BLT در پروژه‌های هلدینگ پایا سامان پارس.
+- تحلیل ریسک کنسرسیوم بین شرکت‌های تابعه (رامان، جنرال مکانیک، دی، تابیران) و اهمیت اخطار ۲۱ روزه ماده ۳۰.
+- نقش هم‌افزایی ناوگان سنگین و پرکردن شکاف اطلاعاتی پورتال ۶۳ پروژه.`,
+    copyablePromptEn: `Focus the Audio Overview on Paya Saman Pars EPC+F vs BOT/BLT models, subsidiary consortium risk, 21-day notice rules, and closing portal data gaps across the 63-project portfolio.`,
+    outputPreviewHighlightsFa: [
+      'مرور شنیدنی اسناد حقوقی و فنی در مسیر بین تهران، ساوه و کارگاه‌ها',
+      'تمرکز دقیق مجریان هوش مصنوعی روی نکات کلیدی مدیران هلدینگ',
+      'قابل دانلود و اشتراک در جمع مدیران پروژه'
+    ],
+    outputPreviewHighlightsEn: [
+      'Ideal commute listening across Tehran, Saveh, and project sites',
+      'AI hosts focus strictly on requested executive risks',
+      'Downloadable MP3 audio brief'
+    ]
+  }
+];
+
+export const PAYA_NOTEBOOKLM_EXERCISES: NotebookLmExercise[] = [
+  {
+    exerciseNumber: 1,
+    id: 'paya_ex1_consortium_audit',
+    titleFa: 'تمرین ۱ پایا: ممیزی قرارداد کنسرسیومی EPC+F و تقسیم مسئولیت شرکت‌های تابعه',
+    titleEn: 'Paya Exercise 1: Auditing EPC+F Consortium Clauses & Subsidiary Splits',
+    targetDepartmentFa: 'امور قراردادها، مناقصات و مدیران طرح',
+    targetDepartmentEn: 'Contracts, Bids & Project Directors',
+    estimatedMinutes: 15,
+    difficultyFa: 'متوسط',
+    difficultyEn: 'Intermediate',
+    requiredSourceFa: 'قرارداد کنسرسیومی EPC+F پایا (قابل دانلود از همین بخش یا بخش ۳-۲)',
+    requiredSourceEn: 'Paya EPC+F Consortium Specimen Contract (.md)',
+    sourceDownloadNoteFa: 'فایل Markdown قرارداد را از کارت منبع زیر دانلود یا کپی کرده و در NotebookLM بارگذاری کنید.',
+    sourceDownloadNoteEn: 'Download or copy the consortium contract below and add it to NotebookLM.',
+    objectiveFa: 'استخراج دقیق شروط تعلیق، سهم تامین مالی ۶۵٪، مسئولیت شرکت‌های رامان/جنرال مکانیک/دی/تابیران و مهلت ۲۱ روزه ماده ۳۰ بدون یک کلمه توهم.',
+    objectiveEn: 'Extract 65% contractor financing clauses, workshare obligations, and 21-day delay notices with exact citations.',
+    instructionsFa: [
+      'یک Notebook جدید به نام «ممیزی قراردادهای پایا سامان پارس» بسازید.',
+      'فایل قرارداد نمونه EPC+F را اضافه کنید.',
+      'پرامپت تمرین ۱ را بفرستید و روی شماره‌های استناد کلیک کنید.'
+    ],
+    instructionsEn: [
+      'Create a Notebook named "Paya Consortium Audit".',
+      'Upload the EPC+F contract specimen.',
+      'Send Exercise 1 prompt and inspect inline citations.'
+    ],
+    promptToCopyFa: `با استناد صرف به متن قرارداد کنسرسیومی بارگذاری‌شده:
+۱. سهم درصد و محدوده مسئولیت هر یک از شرکت‌های تابعه (رامان، جنرال مکانیک، دی و تابیران) چیست؟
+۲. در صورت تاخیر بیش از ۳۰ روز کارفرما در تضمین اقساط فاینانس EPC+F، کنسرسیوم چه حقی دارد؟
+۳. فرجه اخطار تاخیر ماده ۳ چند روز است و چه ضابطه‌ای برای جابه‌جایی ناوگان بین شرکت‌ها وجود دارد؟`,
+    promptToCopyEn: `From the uploaded EPC+F contract: extract subsidiary workshares, 30-day financing delay rights, 21-day notice rule, and inter-company fleet transfer rules with article citations.`,
+    successVerificationFa: [
+      'استخراج دقیق سهم ۵۰٪ رامان، ۳۰٪ جنرال مکانیک و ۲۰٪ دی/تابیران',
+      'ارجاع به شرط ۳۰ روز تاخیر فاینانس و ۲۱ روز فرجه اخطار ماده ۳',
+      'اعلام صریح «نامشخص» در صورت پرسش درباره داده‌ای که در سند نیست'
+    ],
+    successVerificationEn: [
+      'Accurately extracts 50%/30%/20% subsidiary split',
+      'Cites 30-day financing trigger and 21-day notice rule',
+      'Refuses to fabricate missing contract details'
+    ]
+  },
+  {
+    exerciseNumber: 2,
+    id: 'paya_ex2_kaveh_bot_audio',
+    titleFa: 'تمرین ۲ پایا: تحلیل قرارداد BOT/BLT شهر صنعتی کاوه (خورشیدی ۵MW و پلاسمای سرد) + پادکست',
+    titleEn: 'Paya Exercise 2: Kaveh BOT/BLT Solar & Cold-Plasma Analysis + Audio Briefing',
+    targetDepartmentFa: 'مدیران شهر صنعتی کاوه، تابیران و بال مسکن',
+    targetDepartmentEn: 'Kaveh SEZ, Tabiran & Housing Wing Managers',
+    estimatedMinutes: 12,
+    difficultyFa: 'آسان و کاربردی',
+    difficultyEn: 'Easy & Practical',
+    requiredSourceFa: 'قرارداد BOT/BLT شهر صنعتی کاوه و مسکن (.md)',
+    requiredSourceEn: 'Kaveh BOT/BLT Concession Specimen (.md)',
+    sourceDownloadNoteFa: 'سند کاوه و بال مسکن را از پایین دانلود یا کپی و به NotebookLM بدهید.',
+    sourceDownloadNoteEn: 'Upload the Kaveh BOT/BLT dossier to NotebookLM.',
+    objectiveFa: 'استخراج شاخص‌های SLA نیروگاه خورشیدی و پلاسمای سرد + ساخت پادکست معرفی فرصت‌ها و تعهدات کاوه.',
+    objectiveEn: 'Extract solar & cold-plasma SLA rules and generate a customized Audio Overview.',
+    instructionsFa: [
+      'فایل قرارداد BOT/BLT کاوه را در نوت‌بوک اضافه کنید.',
+      'پرامپت استخراج SLA را ارسال کنید و سپس یک Audio Overview سفارشی بسازید.'
+    ],
+    instructionsEn: [
+      'Add the Kaveh BOT/BLT document.',
+      'Run the SLA extraction prompt and generate a customized Audio Overview.'
+    ],
+    promptToCopyFa: `از روی سند قرارداد BOT/BLT کاوه:
+۱. حداقل درصد کاهش شاخص COD در تصفیه‌خانه پلاسمای سرد و مهلت واکنش به افت بازده خورشیدی چند است؟
+۲. مدت دوره بهره‌برداری نیروگاه خورشیدی در برابر تصفیه‌خانه پلاسمای سرد چقدر است و چه ظرفیت حداقلی برای انتقال مالکیت الزامی است؟`,
+    promptToCopyEn: `Extract Kaveh cold-plasma COD reduction %, solar remediation hours, BOT vs BLT concession periods, and transfer capacity threshold.`,
+    successVerificationFa: [
+      'استخراج عدد ۸۸٪ کاهش COD و مهلت ۴۸ ساعته نیروگاه خورشیدی',
+      'تفکیک درست دوره ۱۵ ساله BOT خورشیدی در برابر ۱۰ ساله BLT تصفیه‌خانه و شرط ۸۵٪ ظرفیت'
+    ],
+    successVerificationEn: [
+      'Cites 88% COD reduction and 48h solar remediation SLA',
+      'Distinguishes 15-year BOT vs 10-year BLT and 85% handover capacity'
+    ]
+  },
+  {
+    exerciseNumber: 3,
+    id: 'paya_ex3_63projects_board_deck',
+    titleFa: 'تمرین ۳ پایا: استخراج اسلایدبریف پورتفوی ۶۳ پروژه و کشف فیلدهای خالی پورتال هلدینگ',
+    titleEn: 'Paya Exercise 3: 63-Project Board Deck & Portal Data Gap Audit',
+    targetDepartmentFa: 'ستاد هلدینگ، PMO و دفتر فنی',
+    targetDepartmentEn: 'Holding HQ, PMO & Technical Office',
+    estimatedMinutes: 15,
+    difficultyFa: 'متوسط',
+    difficultyEn: 'Intermediate',
+    requiredSourceFa: 'پرونده پورتفوی ۶۳ پروژه‌ای و دو بال پایا سامان پارس (.md)',
+    requiredSourceEn: 'Paya 63-Project Dual-Wing Portfolio Brief (.md)',
+    sourceDownloadNoteFa: 'فایل گزارش پورتفو را دانلود کرده و در NotebookLM آپلود کنید.',
+    sourceDownloadNoteEn: 'Download and upload the Paya portfolio brief below.',
+    objectiveFa: 'تولید اسلایدبریف هیئت‌مدیره بدون توهم به همراه لیست دقیق شکاف‌های داده (فیلدهای خالی پورتال و دسته ۰ پروژه‌ای ابنیه).',
+    objectiveEn: 'Generate a grounded board slide brief flagging portal metadata gaps and the empty urban category.',
+    instructionsFa: [
+      'پرونده گزارش پورتفوی هلدینگ را آپلود کنید.',
+      'پرامپت پایین را اجرا کرده و چک کنید مدل دقیقاً بین فکت‌های ثابت سایت (۶۳ پروژه / ۲۸ راه / ۸ حوزه) و اعداد شبیه‌سازی تفکیک قائل شود.'
+    ],
+    instructionsEn: [
+      'Upload the portfolio brief.',
+      'Run the prompt and confirm NotebookLM cleanly separates verified site counts from simulated metrics.'
+    ],
+    promptToCopyFa: `از پرونده پورتفوی پایا سامان پارس یک ساختار ۶ اسلایدی برای گزارش وضعیت به معاونت برنامه‌ریزی هلدینگ تهیه کن.
+حتماً در اسلایدهای جداگانه مشخص کن:
+۱. توزیع واقعی ۶۳ پروژه ثبت‌شده روی سایت در ۶ دسته و دلیل خالی‌بودن دسته «ابنیه ساختمانی و مدیریت شهری».
+۲. شرکت‌های تابعه دو بال (بال عمرانی در برابر بال مسکن و کاوه).
+۳. فهرست فیلدهایی که روی صفحات جزئیات سایت خالی هستند و نباید حدس زده شوند.`,
+    promptToCopyEn: `Draft a 6-slide planning brief breaking down the 63 site-listed projects, empty urban category, dual-wing subsidiaries, and unpopulated portal fields without guessing.`,
+    successVerificationFa: [
+      'گزارش دقیق تعداد ۲۸ راه، ۱۴ سد، ۸ ریل، ۵ فرودگاه، ۴ صنعتی، ۴ MEP و ۰ ابنیه شهری',
+      'تفکیک صریح ۱۴ شرکت تابعه در دو بال اجرایی',
+      'هشدار درباره خالی‌بودن کارفرما، مشاور، مبلغ و تاریخ در سایت'
+    ],
+    successVerificationEn: [
+      'Accurately reports 28/14/8/5/4/4 and 0 urban counts',
+      'Separates subsidiaries cleanly into both wings',
+      'Flags missing client/consultant/price/date portal fields'
+    ]
+  },
+  {
+    exerciseNumber: 4,
+    id: 'paya_ex4_hr_fleet_cross_audit',
+    titleFa: 'تمرین ۴ پایا: تقاطع‌گیری ضوابط سرمایه انسانی (۵۰۰۰ نیرو) و ناوگان ماشین‌آلات ۱۴ شرکت تابعه',
+    titleEn: 'Paya Exercise 4: Cross-Auditing 5,000-Staff HR Rules & Inter-Subsidiary Fleet Mobilization',
+    targetDepartmentFa: 'سرمایه انسانی، پشتیبانی و بهره‌برداری ناوگان',
+    targetDepartmentEn: 'HR, Support & Fleet Operations',
+    estimatedMinutes: 15,
+    difficultyFa: 'جامع',
+    difficultyEn: 'Comprehensive',
+    requiredSourceFa: 'دستورالعمل بین‌شرکتی سرمایه انسانی و جابه‌جایی ناوگان پایا (.md)',
+    requiredSourceEn: 'Paya Inter-Subsidiary HR & Heavy Fleet Directive (.md)',
+    sourceDownloadNoteFa: 'دو منبع تمرین HR و ناوگان پایا را کپی یا دانلود کرده و در یک Notebook مقایسه کنید.',
+    sourceDownloadNoteEn: 'Load the Paya HR & Fleet documents as sources in one Notebook.',
+    objectiveFa: 'کشف انحرافات اضافه‌کاری کارگاهی، خط قرمز خستگی و فرصت‌های هم‌افزایی ماشین‌آلات سنگین میان شرکت‌های تابعه.',
+    objectiveEn: 'Detect field overtime/fatigue breaches and heavy fleet sharing opportunities across subsidiaries.',
+    instructionsFa: [
+      'فایل دستورالعمل سرمایه انسانی و گزارش ناوگان پایا را بارگذاری کنید.',
+      'پرامپت تقاطع‌گیری را اجرا کرده و خروجی جدول تصمیم را بررسی کنید.'
+    ],
+    instructionsEn: [
+      'Upload the Paya HR & Fleet dossier.',
+      'Execute the cross-audit prompt and verify findings.'
+    ],
+    promptToCopyFa: `با تقاطع‌گیری قوانین داخلی سرمایه انسانی و گزارش کارگاهی پایا سامان پارس:
+۱. کدام جبهه‌ها (تهران–شمال، سد مخملکوه، کاوه، آتی‌ساز) انحراف اضافه‌کاری یا ریسک خستگی بیش از ۱۴ روز متوالی دارند؟
+۲. کدام تجهیزات سنگین در یک شرکت تابعه مازاد/بیکار هستند و باید به کدام پروژه هم‌گروه منتقل شوند؟
+۳. پیش‌نویس یک نامه ابلاغ اصلاحی از طرف ستاد هلدینگ بنویس.`,
+    promptToCopyEn: `Cross-check Paya HR rules and fleet logs: identify 14-day fatigue breaches, list idle equipment for cross-subsidiary dispatch, and draft a formal HQ directive memo.`,
+    successVerificationFa: [
+      'کشف انحراف شیفت مستمر در کارگاه کوهستانی و صدور اخطار ایمنی',
+      'پیشنهاد جابه‌جایی بهینه ماشین‌آلات بین شرکت‌های دی، رامان و جنرال مکانیک',
+      'نگارش نامه ابلاغ رسمی با ارجاع به بند بخشنامه داخلی'
+    ],
+    successVerificationEn: [
+      'Flags continuous-shift fatigue violations',
+      'Identifies cross-subsidiary equipment sharing across Dey, Raman & General Mechanic',
+      'Drafts an official HQ compliance memo citing directive clauses'
+    ]
+  }
+];
+
+export interface NotebookLmGuideBundle {
+  overview: typeof NOTEBOOKLM_OVERVIEW;
+  departments: DepartmentUseCase[];
+  blueprints: PresentationInfographicBlueprint[];
+  exercises: NotebookLmExercise[];
+}
+
+export function getNotebookLmGuideForTrack(
+  trackId: IndustryTrackId = 'CIVIL_INFRA'
+): NotebookLmGuideBundle {
+  if (trackId === 'PAYA_SAMAN_PARS') {
+    return {
+      overview: PAYA_NOTEBOOKLM_OVERVIEW,
+      departments: PAYA_UNIT_MANAGERS_MATRIX,
+      blueprints: PAYA_PRESENTATION_INFOGRAPHIC_GUIDES,
+      exercises: PAYA_NOTEBOOKLM_EXERCISES
+    };
+  }
+  return {
+    overview: NOTEBOOKLM_OVERVIEW,
+    departments: UNIT_MANAGERS_MATRIX,
+    blueprints: PRESENTATION_INFOGRAPHIC_GUIDES,
+    exercises: NOTEBOOKLM_EXERCISES
+  };
+}
+

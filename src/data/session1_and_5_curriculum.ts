@@ -1,4 +1,5 @@
 import { ProjectorSlideItem } from '../components/ProjectorSlideModal';
+import { IndustryTrackId } from '../types/industryTrack';
 
 // ============================================================================
 // SESSION 1 - MODULE 1-1: 15-MIN END-TO-END DEMO & COURSE VISION (6 SLIDES)
@@ -599,3 +600,471 @@ LOG-102,2026-11-02,Process_Piping,Refinery_Unit_14,High_Pressure_Welding_NDT,65.
 LOG-103,2026-11-03,Electrical_HV,Substation_North,Transformer_Testing,40.0,28.0,NO,Estimated verbally by subcontractor - awaiting test sheet
 LOG-104,2026-11-04,Civil_Structural,Station_Central,Foundation_Concrete_Pour,90.0,90.0,YES,Completed and approved by QA/QC
 `;
+
+// ============================================================================
+// PAYA SAMAN PARS HOLDING DEDICATED SLIDES & SAMPLE ASSETS
+// ============================================================================
+export const PAYA_S1_DEMO_SLIDES: ProjectorSlideItem[] = [
+  {
+    stepNumber: 'گام ۰۱',
+    keyHint: 'P-D1',
+    badgeFa: 'مسئله محوری هلدینگ',
+    titleFa: 'چالش واقعی در هلدینگ پایا سامان پارس: ۶۳ پروژه در ۸ حوزه و ۱۴ شرکت تابعه، اما گزارش‌های جزیره‌ای',
+    titleEn: 'Paya Saman Pars Challenge: 63 Projects Across 14 Subsidiaries in Isolated Files',
+    pointsFa: [
+      'وسعت عملیات دو بال هلدینگ: بیش از ۵۰۰۰ نیروی انسانی و ناوگان ماشین‌آلات سنگین از آزادراه تهران–شمال و پروژه‌های امارات تا بال مسکن (آتی‌ساز/خانه/عمران مسکن) و شهر صنعتی ۳۰۰۰ هکتاری کاوه.',
+      'چالش گزارش‌گیری ستاد: اکسل‌های ناهمسان در شرکت‌های ملی ساختمان، جنرال مکانیک، دی، رامان و تابیران، و خالی‌بودن فیلدهای مبلغ/کارفرما/تاریخ در بسیاری از شناسنامه‌های پروژه.',
+      'چرا چت تفننی جواب نمی‌دهد؟ کپی‌کردن یک جدول از گزارش رامان یا کاوه داخل چت معمولی، دفعه بعد فراموش می‌شود و استاندارد کنسرسیومی هلدینگ را رعایت نمی‌کند.'
+    ],
+    proTipFa:
+      'هدف دوره ۵ جلسه‌ای شما در پایا سامان پارس، ساخت یک خط تولید استاندارد هوشمند برای هر دو بال پیمانکاری و مسکن/شهرک صنعتی است.'
+  },
+  {
+    stepNumber: 'گام ۰۲',
+    keyHint: 'P-D2',
+    badgeFa: 'معماری ۴ ستونی پایا',
+    titleFa: 'معادله تحول در پایا سامان پارس: استاندارد داده + LLM + مهارت (SKILL.md) + پایپ‌لاین MCP',
+    titleEn: 'Paya 2026 AI Stack: Standard Data + LLM + Skills + MCP',
+    pointsFa: [
+      'ستون ۱ (زیرساخت Drive و GitHub هلدینگ): یکسان‌سازی جداول ۶۳ پروژه و اسناد قراردادهای EPC / EPC+F / BOT / BLT بدون سلول‌های Merge شده.',
+      'ستون ۲ (مغز متفکر Claude Projects و Gemini Gems): تعریف مشاوران مقیم برای امور پیمان، PMO دو بال، MEP تابیران و مدیریت بهره‌برداری شهر صنعتی کاوه.',
+      'ستون ۳ (مهارت‌های سازمانی SKILL.md): تبدیل چک‌لیست‌های کنترل پروژه، ممیزی صورت‌وضعیت و خطاهای پورتال به دستورالعمل دائمی هوش مصنوعی.',
+      'ستون ۴ (پروتکل MCP): اتصال زنده کلود به پوشه‌های گزارش ماهانه شرکت‌های تابعه و مخزن گیت‌هاب بدون کپی-پیست دستی.'
+    ],
+    proTipFa:
+      'وقتی این ۴ ستون متصل شوند، گزارش تلفیقی هیئت‌مدیره هلدینگ از چند روز تجمیع اکسل به چند دقیقه تحلیل مستند تبدیل می‌شود.'
+  },
+  {
+    stepNumber: 'گام ۰۳',
+    keyHint: 'P-D3',
+    badgeFa: 'چرایی جلسه اول',
+    titleFa: 'چرا در هلدینگ پایا سامان پارس اول سراغ Drive استاندارد و GitHub می‌رویم؟',
+    titleEn: 'Why Paya Teams Start with Clean Drive Tables & GitHub DCC',
+    pointsFa: [
+      'قانون Garbage In, Garbage Out در ۶۳ پروژه: وقتی فیلدهای کارفرما، مبلغ پیمان و شرکت مجری خالی یا ادغام‌شده باشند، هیچ هوش مصنوعی خروجی قابل اتکا نمی‌دهد.',
+      'گیت‌هاب به عنوان مخزن مشترک ۱۴ شرکت تابعه: فایل‌های `SKILL.md` و قالب‌های پرامپت دفتر فنی/قراردادها یک‌بار نوشته شده و بین رامان، دی، آتی‌ساز و کاوه به اشتراک گذاشته می‌شوند.',
+      'انتشار داشبوردهای مدیریتی: خروجی‌های گرافیکی وضعیت آزادراه‌ها، سدها، مترو و نیروگاه خورشیدی ۵MW کاوه به‌صورت استاندارد نسخه‌بندی و منتشر می‌شوند.'
+    ],
+    proTipFa:
+      'هر شرکت تابعه که امروز شیت‌هایش را در جلسه ۱ استاندارد کند، در جلسات ۳ و ۵ بلافاصله به خط تولید خودکار وصل می‌شود.'
+  },
+  {
+    stepNumber: 'گام ۰۴',
+    keyHint: 'P-D4',
+    badgeFa: 'دموی زنده جلسه ۵',
+    titleFa: 'پرده اول دمو: خوانش خودکار گزارش‌های ۱۴ شرکت تابعه و کاوه با Filesystem/Drive MCP',
+    titleEn: 'Demo Act I: Automated Multi-Subsidiary Ingestion via MCP',
+    pointsFa: [
+      'بدون آپلود دستی تک‌تک فایل‌ها: در جلسه ۵، مدل مستقیماً پوشه گزارش‌های بال پیمانکاری (رامان/دی/جنرال/ملی) و بال مسکن/کاوه را می‌خواند.',
+      'تقاطع‌گیری لحظه‌ای: مقایسه پیشرفت پروژه‌های داخلی (تهران–شمال، قلاجه، مخملکوه) با محورهای برون‌مرزی امارات (SKF2، R1000C) و وضعیت کاوه (خورشیدی ۵MW و پلاسمای سرد).',
+      'صرفه‌جویی ده‌ها نفر-ساعت کارشناسی در دفتر فنی و PMO ستاد هلدینگ در پایان هر ماه.'
+    ],
+    proTipFa:
+      'پیش‌شرط اجرای این دمو، حذف سلول‌های Merge و رعایت ساختار ستون‌بندی واحد در جلسه ۱ است.'
+  },
+  {
+    stepNumber: 'گام ۰۵',
+    keyHint: 'P-D5',
+    badgeFa: 'دموی زنده جلسه ۵',
+    titleFa: 'پرده دوم دمو: ممیزی با SKILL.md، داشبورد دو بال در Artifact و ثبت در GitHub',
+    titleEn: 'Demo Act II: Holding SKILL.md Audit, Dual-Wing Artifact & GitHub Commit',
+    pointsFa: [
+      'فعال‌سازی SKILL.md اختصاصی هلدینگ: مدل به‌صورت خودکار فیلدهای خالی کارفرما/مبلغ، پروژه‌های دارای تاخیر و تداخل ناوگان ماشین‌آلات سنگین را علامت‌گذاری می‌کند.',
+      'تولید داشبورد مدیریتی یک‌صفحه‌ای در Artifact: تفکیک دو بال اجرایی، نمایش پروژه‌های BOT/EPC+F و هشدار «نیازمند راستی‌آزمایی ⚠️» برای اعداد فاقد سند.',
+      'ثبت ریویژن تاییدشده در مخزن GitHub هلدینگ با تایید نهایی مدیر (Human-in-the-Loop).'
+    ],
+    proTipFa:
+      'این چرخه دقیقاً همان چیزی است که در انتهای دوره برای یک فرآیند واقعی در واحد خودتان در پایا سامان پارس تحویل می‌دهید.'
+  },
+  {
+    stepNumber: 'گام ۰۶',
+    keyHint: 'P-D6',
+    badgeFa: 'نقشه راه ۵ جلسه',
+    titleFa: 'مسیر ۲۰ ساعته دوره برای تیم‌های هلدینگ پایا سامان پارس',
+    titleEn: '20-Hour Roadmap for Paya Saman Pars Teams',
+    pointsFa: [
+      'جلسه ۱: استانداردسازی شیت‌های پروژه‌های هلدینگ در Google Drive، زبان Markdown و منطق GitHub DCC.',
+      'جلسه ۲: فرمول RCTO، ساخت مشاوران مقیم (Gems/Projects) و داشبوردسازی دو بال در Artifacts/Canvas.',
+      'جلسه ۳: تحلیل قراردادهای EPC+F، BOT، BLT و اسناد فنی با NotebookLM + ساخت مهارت `SKILL.md`.',
+      'جلسه ۴ و ۵: اتصال MCP، امنیت توکن و اطلاعات شرکت‌ها، مغز دوم Obsidian، پروژه جامع دو بال و ورود به Vibe Coding.'
+    ],
+    proTipFa:
+      'بیایید از همین ماژول ۱-۲ ساختار فایل‌های هلدینگ را ماشین‌خوان کنیم.'
+  }
+];
+
+export const PAYA_S1_DRIVE_SLIDES: ProjectorSlideItem[] = [
+  {
+    stepNumber: 'فصل ۰۱',
+    keyHint: 'P-G1',
+    badgeFa: 'زیرساخت ابری هلدینگ',
+    titleFa: 'چرا Google Drive و Sheets برای هماهنگی ۱۴ شرکت تابعه پایا حیاتی است؟',
+    titleEn: 'Why Google Drive & Sheets Matter for Paya’s 14 Subsidiaries',
+    pointsFa: [
+      'حذف جزایر فایلی بین شرکت‌ها: به جای ارسال فایل‌های جداگانه از کارگاه آزادراه تهران–شمال، شهر صنعتی کاوه، آتی‌ساز و پروژه‌های امارات در پیام‌رسان‌ها، یک لینک مرجع واحد ایجاد می‌شود.',
+      'آمادگی اتصال مستقیم به AI: جمنای (`@Google Drive`) و کلود مستقیماً شیت‌های استاندارد را می‌خوانند؛ در حالی که فایل‌های اکسل محلی پراکنده برای هوش مصنوعی نامرئی‌اند.'
+    ],
+    proTipFa:
+      'یک جدول تمیز در Google Sheets ستون فقرات گزارش‌دهی ستاد هلدینگ و کارگاه است.'
+  },
+  {
+    stepNumber: 'فصل ۰۲',
+    keyHint: 'P-G2',
+    badgeFa: 'بحران فایل‌های سنتی',
+    titleFa: 'مشکل جداول سنتی پروژه‌ها در پورتال و اکسل‌های کارگاهی',
+    titleEn: 'Broken Spreadsheets vs. Machine-Readable Portfolio Logs',
+    pointsFa: [
+      'سلول‌های ادغام‌شده (Merged Cells): وقتی نام شرکت «ملی ساختمان» یا «جنرال مکانیک» برای ۵ پروژه زیر هم Merge شود، ردیف‌های ۲ تا ۵ برای هوش مصنوعی خالی دیده می‌شوند!',
+      'فیلدهای خالی یا ترکیبی: نوشتن عباراتی مثل «حدود ۷۰٪ - کارفرما بعداً تکمیل شود» در یک سلول عددی، محاسبه SPI و مقایسه دو بال را خراب می‌کند.'
+    ],
+    proTipFa:
+      'در این دوره هیچ سلول ادغام‌شده‌ای در شیت داده خام (`Raw_Data`) مجاز نیست.'
+  },
+  {
+    stepNumber: 'فصل ۰۳',
+    keyHint: 'P-G3',
+    badgeFa: '۳ قانون طلایی پایا',
+    titleFa: '۳ قانون ساخت جدول استاندارد ۶۳ پروژه پایا سامان پارس',
+    titleEn: '3 Golden Rules for Paya 63-Project Tables',
+    pointsFa: [
+      'قانون ۱ (نام ستون یک‌سطری انگلیسی/شفاف): هر پروژه دقیقاً در یک ردیف با ستون‌های ثابت (`Project_ID`, `Wing`, `Subsidiary`, `Contract_Model`, `Planned_Pct`, `Actual_Pct`).',
+      'قانون ۲ (تکرار کامل نام شرکت و بال): در هر ردیف نام کامل شرکت تابعه (`Raman`, `Dey`, `Atisaz`, `Kaveh`) تکرار شود.',
+      'قانون ۳ (جداسازی داده تاییدنشده): اگر مبلغ پیمان یا تاریخ روی پورتال خالی است، ستون وضعیت (`Data_Status`) صراحتاً مقدار `MISSING_PORTAL_FIELD` یا `SIMULATED` بگیرد.'
+    ],
+    proTipFa:
+      'با رعایت این ۳ قانون، مدل AI هرگز داده‌های کارفرمایی و قراردادی خالی را حدس نمی‌زند.'
+  },
+  {
+    stepNumber: 'فصل ۰۴',
+    keyHint: 'P-G4',
+    badgeFa: 'معماری پوشه درایو',
+    titleFa: 'ساختار پوشه استاندارد واحدهای هلدینگ پایا در Google Drive',
+    titleEn: 'Standard Paya Unit Folder Taxonomy in Drive',
+    pointsFa: [
+      'پوشه `01_Contracts_EPCF_BOT/`: اسناد کنسرسیوم، نشریه ۴۳۱۱، فیدیک و مجوزهای کاوه/مسکن.',
+      'پوشه `02_Live_Portfolio_Sheets/`: شیت‌های CSV و Google Sheets پیشرفت ۶۳ پروژه و ناوگان ماشین‌آلات.',
+      'پوشه `03_AI_Audits_Dashboards/`: خروجی‌های ممیزی ماهانه ستاد و گزارش‌های هیئت‌مدیره.'
+    ],
+    proTipFa:
+      'تمام فایل‌های نمونه CSV پایین این بخش را می‌توانید همین الان دانلود و در پوشه تمرینی درایو تست کنید.'
+  },
+  {
+    stepNumber: 'فصل ۰۵',
+    keyHint: 'P-G5',
+    badgeFa: 'تمرین عملی',
+    titleFa: 'تمرین ۱۵ دقیقه‌ای کلاس: استانداردسازی ۵ ردیف از پروژه‌های شرکت تابعه خودتان',
+    titleEn: '15-Min Lab: Normalize 5 Rows from Your Paya Subsidiary',
+    pointsFa: [
+      'گام ۱: در Drive پوشه `Paya_AI_Workspace` بسازید.',
+      'گام ۲: فایل نمونه `paya_portfolio_clean.csv` را باز کرده یا ۵ پروژه واقعی از واحد خودتان (مثلاً رامان، تابیران، آتی‌ساز یا کاوه) بدون Merge در جدول وارد کنید.',
+      'گام ۳: برای هر ردیفی که مبلغ یا کارفرمایش هنوز در پورتال ثبت نشده، برچسب دقیق وضعیت بگذارید.'
+    ],
+    proTipFa:
+      'این جدول پایه، خوراک مستقیم کارگاه داشبوردسازی جلسه ۲ و خط لوله MCP جلسه ۵ خواهد بود.'
+  }
+];
+
+export const PAYA_S1_MARKDOWN_SLIDES: ProjectorSlideItem[] = [
+  {
+    stepNumber: 'فصل ۰۱',
+    keyHint: 'P-M1',
+    badgeFa: 'زبان مشترک',
+    titleFa: 'چرا استاندارد Markdown (`.md`) برای مکاتبات و دستورالعمل‌های هلدینگ پایا بهترین قالب است؟',
+    titleEn: 'Why Markdown (.md) Fits Paya Technical & Contract Workflows',
+    pointsFa: [
+      'تبدیل دستورالعمل‌های Word و PDF طولانی شرکت‌های تابعه به متن بدون نویز، سبک و ۱۰۰٪ قابل درک برای Claude، Gemini و NotebookLM.',
+      'حفظ دقیق سلسله‌مراتب مواد قراردادی (ماده با `#`، تبصره با `##`، تعهدات با `-` و جدول سهم کنسرسیوم با `|`).'
+    ],
+    proTipFa:
+      'وقتی ساختار فایل `README.md` و قراردادهای `EPC+F / BOT` با Markdown تدوین شود، نرخ خطای ارجاع به بندها به صفر نزدیک می‌شود.'
+  },
+  {
+    stepNumber: 'فصل ۰۲',
+    keyHint: 'P-M2',
+    badgeFa: 'چرایی حذف نویز',
+    titleFa: 'مقایسه فایل Word اداری در برابر `.md` در تحلیل قراردادهای EPC+F و BOT',
+    titleEn: 'Word XML Bloat vs. Clean .md Contract Auditing',
+    pointsFa: [
+      'در قراردادهای حجیم و چندشریک (مثل کنسرسیوم رامان/جنرال/دی یا قرارداد کاوه)، فرمت‌بندی Word پنجره زمینه (Context) را با تگ‌های فونت و جدول هدر می‌دهد.',
+      'در Markdown تمام تمرکز مدل صرف منطق بندهای تاخیر، فاینانس، جرایم و مسئولیت شرکا می‌شود.'
+    ],
+    proTipFa:
+      'در کارگاه امروز هم قراردادهای نمونه را مستقیماً به فرمت `.md` دانلود می‌کنید.'
+  },
+  {
+    stepNumber: 'فصل ۰۳',
+    keyHint: 'P-M3',
+    badgeFa: 'الگوی پایا در Markdown',
+    titleFa: 'الگوی استاندارد نوشتن شناسنامه پروژه یا دستورالعمل `SKILL.md` در پایا سامان پارس',
+    titleEn: 'Standard Paya Project Dossier & SKILL.md Template',
+    pointsFa: [
+      'استفاده از `#` برای نام پروژه/شرکت تابعه، `**گاردریل:**` برای ممنوعیت حدس زدن فیلدهای خالی پورتال، و جدول `|` برای شاخص‌های دو بال.',
+      'قابلیت کپی مستقیم به کلود، جمنای، گیت‌هاب و آبسیدین بدون به‌هم‌ریختگی.'
+    ],
+    codeTitleFa: 'نمونه شناسنامه استاندارد پروژه در هلدینگ پایا (Markdown):',
+    codeDir: 'rtl',
+    codeSnippet: `# شناسنامه هوشمند پروژه · هلدینگ پایا سامان پارس
+- **بال اجرایی:** بال پیمانکاری عمرانی | شرکت تابعه: جنرال مکانیک / رامان
+- **مدل قراردادی:** EPC+F (یا BOT / BLT در شهر صنعتی کاوه)
+
+| شاخص | مقدار ثبت‌شده | وضعیت تایید |
+|---|---|---|
+| کارفرما / مبلغ پیمان | ثبت‌نشده در پورتال عمومی | [نیازمند تکمیل از دفتر فنی ⚠️] |
+| پیشرفت فیزیکی (شبیه‌سازی) | ۷۱.۵٪ | [شبیه‌سازی کارگاهی] |`,
+    proTipFa:
+      'همین قالب ساده، پایه استانداردسازی ۶۳ پروژه پورتال هلدینگ است.'
+  },
+  {
+    stepNumber: 'فصل ۰۴',
+    keyHint: 'P-M4',
+    badgeFa: 'تبدیل خودکار',
+    titleFa: 'چگونه گزارش‌ها و صورت‌جلسات Word قدیمی شرکت تابعه را در ۱۰ ثانیه Markdown کنیم؟',
+    titleEn: 'Converting Legacy Subsidiary Word Docs to Clean Markdown',
+    pointsFa: [
+      'کافی است متن صورت‌جلسه یا قرارداد را کپی کرده و به AI بگویید: «این متن را بدون حذف حتی یک بند یا عدد، به Markdown تمیز با جدول تعهدات و برچسب فیلدهای خالی تبدیل کن».',
+      'از ابزار داخلی «استودیو مارک‌دان اوج» در نوار بالای همین پلتفرم نیز می‌توانید برای مرور و ویرایش زنده استفاده کنید.'
+    ],
+    proTipFa:
+      'با استفاده از استودیو مارک‌دان همین صفحه، فایل‌های `.md` خروجی را بلافاصله با هایلایت و دیاگرام بررسی کنید.'
+  },
+  {
+    stepNumber: 'فصل ۰۵',
+    keyHint: 'P-M5',
+    badgeFa: 'کاربرد در کل دوره',
+    titleFa: 'نقش Markdown در جلسات ۲ تا ۵ دوره هلدینگ پایا سامان پارس',
+    titleEn: 'Markdown Across Sessions 2–5 in Paya Holding',
+    pointsFa: [
+      'جلسه ۲: نوشتن System Instruction مشاوران Gems و Projects برای هر یک از ۱۴ شرکت تابعه.',
+      'جلسه ۳: ساخت فایل‌های `SKILL.md` ممیزی گزارش‌های کارگاه و قراردادهای EPC+F.',
+      'جلسه ۴ و ۵: ذخیره دانش سازمانی در Obsidian و انتقال ساختار نرم‌افزار به Vibe Coding.'
+    ],
+    proTipFa:
+      'هر سند `.md` که امروز می‌سازید، یک دارایی دائمی برای سازمان شماست.'
+  }
+];
+
+export const PAYA_S1_GITHUB_SLIDES: ProjectorSlideItem[] = [
+  {
+    stepNumber: 'فصل ۰۱',
+    keyHint: 'P-GH1',
+    badgeFa: 'منطق DCC هلدینگی',
+    titleFa: 'گیت‌هاب (GitHub) به زبان دفتر فنی و کنترل مدارک (DCC) هلدینگ پایا سامان پارس',
+    titleEn: 'GitHub Translated to Paya Holding DCC Language',
+    pointsFa: [
+      'Repository (مخزن) = زونکن دیجیتال یکپارچه یک پروژه یا یک شرکت تابعه (مثل مخزن استانداردهای بال مسکن یا پورتفوی کاوه).',
+      'Commit (کامیت) = صدور ریویژن رسمی (`Rev.01 -> Rev.02`) همراه با تاریخ، نام ثبت‌کننده و توضیح دقیق تغییر.',
+      'Branch & Pull Request = نسخه پیش‌نویس کارشناس دفتر فنی (`draft`) که پس از بررسی رنگی تغییرات (Diff) و تایید مدیر طرح، به نسخه رسمی (`main / IFC`) تبدیل می‌شود.'
+    ],
+    proTipFa:
+      'به‌جای ارسال ۱۰ فایل `Gozaresh_Final_v4.xlsx` در گروه‌های پیام‌رسان، کل تاریخچه تغییرات در یک ریپوی امن متمرکز می‌شود.'
+  },
+  {
+    stepNumber: 'فصل ۰۲',
+    keyHint: 'P-GH2',
+    badgeFa: 'محرمانگی سازمانی',
+    titleFa: 'مخزن Private در برابر Public: خط قرمز محرمانگی اسناد پایا سامان پارس',
+    titleEn: 'Private vs. Public Repos: Holding Confidentiality Guardrail',
+    pointsFa: [
+      'اسناد واقعی مناقصات، برآوردهای مالی، قراردادهای امارات (`SKF2`, `R1000C`) و مشخصات داخلی شرکت‌های تابعه **هرگز** نباید در مخزن Public یا چت‌بات عمومی بدون تنظیمات حریم خصوصی بارگذاری شوند.',
+      'در گیت‌هاب از مخازن `Private` (قفل‌دار) برای اسناد داخلی و تنها از ساختارهای خالی یا داده‌های شبیه‌سازی‌شده برای تمرین کلاسی استفاده می‌کنیم.'
+    ],
+    proTipFa:
+      'امنیت داده و محرمانگی قراردادهای هلدینگ در جلسه ۴ با جزییات کامل و قواعد PAT مرور می‌شود.'
+  },
+  {
+    stepNumber: 'فصل ۰۳',
+    keyHint: 'P-GH3',
+    badgeFa: 'ساختار مخزن نمونه',
+    titleFa: 'آناتومی مخزن هوش مصنوعی پیشنهادی برای یک واحد در پایا سامان پارس',
+    titleEn: 'Recommended Paya Holding AI Hub Repository Structure',
+    pointsFa: [
+      '`README.md`: معرفی ماموریت واحد، قوانین عدم توهم و لیست پروژه‌های مرتبط.',
+      '`prompts/`: کتابخانه پرامپت‌های RCTO برای امور پیمان، دفتر فنی، HSE و کاوه.',
+      '`skills/`: مهارت‌های `SKILL.md` ممیزی گزارش‌های ۱۴ شرکت تابعه.',
+      '`dashboards/`: خروجی‌های Artifact مدیریتی برای انتشار روی GitHub Pages.'
+    ],
+    codeTitleFa: 'ساختار مخزن نمونه هلدینگ پایا سامان پارس:',
+    codeDir: 'ltr',
+    codeSnippet: `📦 paya-saman-pars-ai-hub/
+ ├── 📄 README.md
+ ├── 📁 prompts/     (RCTO templates for EPC+F, BOT, Housing & Kaveh)
+ ├── 📁 skills/      (SKILL.md for 63-project audit & missing-field checks)
+ ├── 📁 data-specs/  (Clean CSV schema for 14 subsidiaries)
+ └── 📁 dashboards/  (Dual-Wing Artifacts & KPI trackers)`,
+    proTipFa:
+      'تمام ۱۴ شرکت تابعه می‌توانند از همین ساختار پایه مشترک در GitHub پیروی کنند.'
+  },
+  {
+    stepNumber: 'فصل ۰۴',
+    keyHint: 'P-GH4',
+    badgeFa: 'کار با مرورگر بدون کد',
+    titleFa: 'چگونه بدون خط فرمان (Command Line) و فقط با مرورگر مخزن بسازیم؟',
+    titleEn: 'Browser-Only GitHub Workflow for Project Managers',
+    pointsFa: [
+      'با حساب GitHub وارد شوید و `+ New repository` را بزنید (نوع `Private` و تیک `Add a README file`).',
+      'روی آیکون مداد (✏️) کلیک کرده، فایل `README.md` اختصاصی پایا سامان پارس را جای‌گذاری و `Commit changes` کنید.'
+    ],
+    proTipFa:
+      'پس از ثبت اولین Commit، از نسخه داشبورد GitHub Pages در جلسه ۲ و ۵ لذت خواهید برد.'
+  },
+  {
+    stepNumber: 'فصل ۰۵',
+    keyHint: 'P-GH5',
+    badgeFa: 'انتشار داشبورد',
+    titleFa: 'GitHub Pages: تبدیل داشبورد خروجی کلود به لینک ارائه هیئت‌مدیره',
+    titleEn: 'GitHub Pages: Live Executive Links for Paya Board Briefings',
+    pointsFa: [
+      'خروجی HTML/Tailwind داشبورد دو بال هلدینگ یا شهر صنعتی کاوه را در مخزن گذاشته و از `Settings > Pages` منتشر کنید.',
+      'مدیران هلدینگ و شرکت‌های تابعه بدون نصب هیچ نرم‌افزاری، گزارش تعاملی را روی موبایل و دسکتاپ می‌بینند.'
+    ],
+    proTipFa:
+      'برای اسناد محرمانه داخلی، به جای GitHub Pages عمومی از خروجی داخلی یا Private Deploy استفاده کنید.'
+  },
+  {
+    stepNumber: 'فصل ۰۶',
+    keyHint: 'P-GH6',
+    badgeFa: 'کارگاه پایان جلسه ۱',
+    titleFa: 'چک‌لیست عملی انتهای جلسه ۱ برای اعضای هلدینگ پایا سامان پارس',
+    titleEn: 'End-of-Session 1 Action Checklist for Paya Trainees',
+    pointsFa: [
+      '۱. ساخت پوشه استاندارد در Google Drive + یک جدول CSV تمیز بدون Merge.',
+      '۲. دانلود فایل `README.md` اختصاصی پایا از پایین صفحه و بررسی آن در استودیو مارک‌دان.',
+      '۳. ساخت مخزن `paya-ai-workspace` (ترجیحاً Private) و ثبت اولین Commit.'
+    ],
+    proTipFa:
+      'با انجام این ۳ گام، برای کارگاه پرامپت‌نویسی RCTO و Gems/Projects در جلسه ۲ کاملاً آماده‌اید.'
+  }
+];
+
+export const PAYA_S5_CAPSTONE_SLIDES: ProjectorSlideItem[] = [
+  {
+    stepNumber: 'گام ۰۱',
+    keyHint: 'P-C1',
+    badgeFa: 'ارکستراسیون در هلدینگ',
+    titleFa: 'پروژه جامع پایانی پایا سامان پارس: اتصال دو بال، ۶۳ پروژه و شهر صنعتی کاوه در یک پایپ‌لاین',
+    titleEn: 'Paya Capstone: Orchestrating Both Wings, 63 Projects & Kaveh in One Pipeline',
+    pointsFa: [
+      'ترکیب تمام دستاوردهای جلسات ۱ تا ۴: جداول استاندارد ۱۴ شرکت تابعه + مشاوران Gems/Projects + پایگاه دانش قراردادی NotebookLM + مهارت `SKILL.md` + اتصال MCP.',
+      'خروجی واقعی: تبدیل گزارش‌های پراکنده بال پیمانکاری (رامان/دی/جنرال/ملی/تابیران) و بال مسکن/کاوه به یک گزارش ممیزی و داشبورد مدیریتی بدون توهم عددی.'
+    ],
+    proTipFa:
+      'اینجا دیگر با یک چت‌بات صحبت نمی‌کنید؛ یک کارمند ستادی هوشمند را روی استاندارد پایا هدایت می‌کنید.'
+  },
+  {
+    stepNumber: 'گام ۰۲',
+    keyHint: 'P-C2',
+    badgeFa: 'خط تولید ۵ مرحله‌ای',
+    titleFa: '۵ ایستگاه خط تولید خودکار گزارش‌دهی و ممیزی در هلدینگ پایا سامان پارس',
+    titleEn: '5-Station Automated Paya Holding Reporting Pipeline',
+    pointsFa: [
+      'ایستگاه ۱ (ورودی استاندارد): فایل‌های CSV تمیز پروژه‌های بال عمرانی، بال مسکن و کاوه در پوشه کاری.',
+      'ایستگاه ۲ (خوانش با MCP): خواندن مستقیم گزارش‌ها با Filesystem / Drive MCP بدون آپلود دستی.',
+      'ایستگاه ۳ (ممیزی با SKILL.md): کشف خودکار فیلدهای خالی کارفرما/مبلغ، پروژه‌های SPI < 0.90 و تداخل ناوگان.',
+      'ایستگاه ۴ و ۵ (Artifact + GitHub MCP): ساخت داشبورد دو بال هلدینگ و ثبت ریویژن با تایید نهایی مدیر.'
+    ],
+    codeTitleFa: 'پرامپت واحد ارکستراسیون هلدینگ پایا سامان پارس:',
+    codeDir: 'rtl',
+    codeSnippet: `لطفاً مراحل زیر را برای ستاد هلدینگ پایا سامان پارس به ترتیب اجرا کن:
+۱. از طریق Filesystem MCP فایل‌های گزارش هفتگی بال پیمانکاری و بال مسکن/کاوه (paya_portfolio_clean.csv) را بخوان.
+۲. طبق قوانین مهارت ممیزی هلدینگ (paya-dual-wing-auditor)، پروژه‌های دارای SPI زیر ۰.۹۰، موارد نیازمند جابه‌جایی ناوگان بین شرکت‌های تابعه و ردیف‌های فاقد تاییدیه را جدا کن (هیچ عدد مفقودی را حدس نزن).
+۳. یک داشبورد مدیریتی تک‌صفحه‌ای HTML/Tailwind برای ارائه به مدیران دو بال در Artifact بساز.
+۴. پس از تایید من (Human-in-the-Loop)، گزارش Markdown و کد داشبورد را در مخزن گیت‌هاب تیم ثبت کن.`,
+    proTipFa:
+      'عبارت «هیچ عدد مفقودی را حدس نزن» و «پس از تایید من» ضامن امنیت و دقت گزارش‌های ستادی است.'
+  },
+  {
+    stepNumber: 'گام ۰۳',
+    keyHint: 'P-C3',
+    badgeFa: 'پل ورود به Vibe Coding',
+    titleFa: 'گام بعدی برای تیم‌های فناوری و دفتر فنی پایا: ورود به دنیای Vibe Coding',
+    titleEn: 'Next Step for Paya Teams: Entering Vibe Coding',
+    pointsFa: [
+      'تفاوت داشبورد تک‌صفحه‌ای (Artifact) با سامانه سازمانی کامل: در محیط‌هایی مثل Cursor و Claude Code می‌توانید پورتال داخلی تکمیل شناسنامه ۶۳ پروژه یا سامانه رصد ناوگان ۱۴ شرکت تابعه را با دیتابیس واقعی بسازید.',
+      'کدنویسی با هدایت معماری: کارشناس دفتر فنی یا PMO پایا نیازمند دانش برنامه‌نویسی عمیق نیست؛ منطق قراردادهای EPC+F/BOT و WBS را هدایت می‌کند و ایجنت کد می‌نویسد.'
+    ],
+    proTipFa:
+      'سخت‌ترین بخش ساخت نرم‌افزار در هلدینگ (نظم داده و بیان دقیق قواعد کسب‌وکار) را در این دوره تکمیل کرده‌اید.'
+  },
+  {
+    stepNumber: 'گام ۰۴',
+    keyHint: 'P-C4',
+    badgeFa: 'انتقال دارایی‌های هلدینگ',
+    titleFa: 'انتقال مستقیم خروجی‌های ۵ جلسه به پروژه‌های نرم‌افزاری پایا سامان پارس',
+    titleEn: 'Transferring Paya Session 1–5 Assets into Production Apps',
+    pointsFa: [
+      '۱. مخزن GitHub شما تبدیل به ریپازیتوری پروژه پرتال تکمیل اطلاعات ۶۳ پروژه می‌شود.',
+      '۲. فایل‌های `README.md` و `CLAUDE.md` تبدیل به قوانین پایه هوش مصنوعی سازمان در IDE می‌شوند.',
+      '۳. مهارت‌های `SKILL.md` و سرورهای MCP مستقیم به محیط توسعه وصل شده و فرآیند تست و ساخت را تسریع می‌کنند.'
+    ],
+    proTipFa:
+      'آماده‌اید فردا پس از کارگاه، اولین سامانه یا دستیار اختصاصی واحد خودتان را در هلدینگ پایا سامان پارس کلید بزنید!'
+  }
+];
+
+export const PAYA_README_MD = `# پرونده هوشمند پروژه و قوانین پایه — هلدینگ پایا سامان پارس (Rev.01)
+
+## ۱. شناسنامه واحد / شرکت تابعه
+- **سازمان مادر:** هلدینگ پایا سامان پارس (تأسیس ۱۳۸۶ · دو بال پیمانکاری عمرانی و سرمایه‌گذاری مسکن/شهرک صنعتی)
+- **بال / شرکت تابعه:** [مثلاً ستاد هلدینگ / رامان / جنرال مکانیک / دی / ملی ساختمان / تابیران / آتی‌ساز / کاوه]
+- **مسئول مخزن (Owner):** [نام و نام خانوادگی کارشناس یا مدیر واحد]
+
+---
+
+## ۲. قوانین طلایی هوش مصنوعی در هلدینگ (Zero-Hallucination Guardrails)
+1. **عدم حدس فیلدهای خالی پورتال:** اگر نام کارفرما، مشاور، مبلغ پیمان یا تاریخ شروع/پایان در سند مرجع ثبت نشده بود، صریحاً عبارت \`[نیازمند تکمیل از اسناد کارفرما/پیمان ⚠️]\` درج شود.
+2. **جداسازی داده شبیه‌سازی‌شده از فکت پیمان:** هر عدد تمرینی یا برآوردی با برچسب \`[شبیه‌سازی‌شده آموزشی]\` از ارقام تاییدشده تفکیک گردد.
+3. **تفکیک مدل قراردادی:** در تحلیل هر پروژه، مدل آن (\`EPC\`, \`EPC+F\`, \`PC\`, \`BOT\`, \`BLT\`, \`کنسرسیوم\`) و شرکت تابعه مجری قید شود.
+
+---
+
+## ۳. ساختار استاندارد پوشه‌های مخزن
+| پوشه | کاربرد در هلدینگ پایا سامان پارس | جلسه |
+|---|---|---|
+| \`/prompts\` | پرامپت‌های RCTO دفتر فنی، قراردادها و شهر صنعتی کاوه | جلسه ۲ |
+| \`/skills\` | مهارت‌های \`SKILL.md\` ممیزی گزارش ۶۳ پروژه و ۱۴ شرکت تابعه | جلسه ۳ |
+| \`/dashboards\` | داشبوردهای تعاملی دو بال خروجی Claude Artifacts / Canvas | جلسه ۲ و ۵ |
+`;
+
+export const PAYA_CLEAN_CSV_CONTENT = `Record_ID,Wing,Subsidiary,Project_Or_Unit,Contract_Model,Planned_Pct,Actual_Pct,Data_Source_Status,Bottleneck_Note
+PSP-101,Civil_Contracting,General_Mechanic,Tehran_North_Freeway,EPC,78.0,71.5,SIMULATED_TRAINING,Mountain tunnel support & rock class variance
+PSP-102,Civil_Contracting,Raman,UAE_Shis_Khorfakkan_SKF2,EPC+F,92.0,90.0,SIMULATED_TRAINING,UAE export corridor milestone on track
+PSP-103,Civil_Contracting,Dey,Makhmalkuh_Storage_Dam,PC,64.0,55.0,PORTAL_MISSING_FIELDS,Spillway schedule lag - employer fields pending
+PSP-104,Civil_Contracting,Tabiran,Kaveh_5MW_Solar_And_Substation,BOT,91.0,91.0,SIMULATED_TRAINING,Grid synchronization & Yazdmehr 63kV check
+PSP-105,Investment_Housing,Atisaz_And_Kaveh,Kaveh_Cold_Plasma_And_Housing,BLT,85.0,82.0,SIMULATED_TRAINING,1405 cold-plasma effluent & urban catalog update
+`;
+
+export interface SessionCurriculumBundle {
+  s1DemoSlides: ProjectorSlideItem[];
+  s1DriveSlides: ProjectorSlideItem[];
+  s1MarkdownSlides: ProjectorSlideItem[];
+  s1GithubSlides: ProjectorSlideItem[];
+  s5CapstoneSlides: ProjectorSlideItem[];
+  readmeMd: string;
+  cleanCsvContent: string;
+}
+
+export function getSessionCurriculumForTrack(
+  trackId: IndustryTrackId = 'CIVIL_INFRA'
+): SessionCurriculumBundle {
+  if (trackId === 'PAYA_SAMAN_PARS') {
+    return {
+      s1DemoSlides: PAYA_S1_DEMO_SLIDES,
+      s1DriveSlides: PAYA_S1_DRIVE_SLIDES,
+      s1MarkdownSlides: PAYA_S1_MARKDOWN_SLIDES,
+      s1GithubSlides: PAYA_S1_GITHUB_SLIDES,
+      s5CapstoneSlides: PAYA_S5_CAPSTONE_SLIDES,
+      readmeMd: PAYA_README_MD,
+      cleanCsvContent: PAYA_CLEAN_CSV_CONTENT
+    };
+  }
+  return {
+    s1DemoSlides: S1_DEMO_SLIDES,
+    s1DriveSlides: S1_DRIVE_SLIDES,
+    s1MarkdownSlides: S1_MARKDOWN_SLIDES,
+    s1GithubSlides: S1_GITHUB_SLIDES,
+    s5CapstoneSlides: S5_CAPSTONE_SLIDES,
+    readmeMd: SAMPLE_ENGINEERING_README_MD,
+    cleanCsvContent: SAMPLE_CLEAN_CSV_CONTENT
+  };
+}
+
