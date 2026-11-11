@@ -13,7 +13,8 @@ import {
   Check,
   Building2,
   Factory,
-  Sparkles
+  Sparkles,
+  Landmark
 } from 'lucide-react';
 
 interface DisciplineSelectorModalProps {
@@ -64,6 +65,7 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
   const disciplines = getDisciplinesByTrack(currentTrack);
   const isRtl = lang === 'fa';
   const isEveryday = currentTrack === 'GENERAL_EVERYDAY';
+  const isPaya = currentTrack === 'PAYA_SAMAN_PARS';
 
   // Side A (Disciplines, right side in RTL = +x shift):
   const colASign = isMobile ? 0 : isRtl ? 1 : -1;
@@ -110,6 +112,37 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
           titleEn: 'Student, Self-Learner & Everyday AI Explorer',
           descFa: 'تکالیف درسی و پژوهشی، یادگیری خودآموز، مهارت‌های نوین دیجیتال و حل هوشمند مسائل روزمره',
           descEn: 'Coursework mastery, rapid skill acquisition, homework shortcuts and hands-on AI experiments'
+        }
+      ]
+    : isPaya
+    ? [
+        {
+          id: 'director' as EngineeringRoleId,
+          titleFa: 'مدیرعامل / معاونت هلدینگ یا مدیرعامل شرکت تابعه',
+          titleEn: 'Holding Executive / Subsidiary Managing Director',
+          descFa: 'حاکمیت ۶۳ پروژه در دو بال پیمانکاری و مسکن/کاوه، تصمیم‌گیری کنسرسیومی EPC+F/BOT و گزارش‌دهی هیئت‌مدیره',
+          descEn: 'Dual-wing governance across 63 projects & 14 subsidiaries, EPC+F/BOT portfolio allocation & board strategy'
+        },
+        {
+          id: 'lead_superintendent' as EngineeringRoleId,
+          titleFa: 'مدیر طرح، کنسرسیوم یا سرپرست بهره‌برداری شهر صنعتی / مسکن',
+          titleEn: 'Consortium / Program Lead or Kaveh / Housing Director',
+          descFa: 'راهبری جبهه‌های متعدد راه/سد/ریل/فرودگاه یا بهره‌برداری شهر صنعتی کاوه، خورشیدی ۵MW و شهرک‌سازی',
+          descEn: 'Leading domestic/UAE infrastructure corridors, Kaveh 3,000ha SEZ, 5MW solar/cold-plasma & mass housing'
+        },
+        {
+          id: 'technical_engineer' as EngineeringRoleId,
+          titleFa: 'کارشناس ارشد دفتر فنی، مناقصات، کنترل پروژه و امور پیمان',
+          titleEn: 'Holding Technical Office, Bidding, PMO & Contracts Specialist',
+          descFa: 'تجمیع گزارش‌های ۱۴ شرکت تابعه، تکمیل شناسنامه پروژه‌ها، متره، تعدیل و لوایح تاخیرات ماده ۳۰/فیدیک',
+          descEn: '14-subsidiary progress aggregation, tender estimation, EPC+F claims & Circular 4311 / BOT compliance'
+        },
+        {
+          id: 'site_operator' as EngineeringRoleId,
+          titleFa: 'رئیس کارگاه، ناظر اجرا، مهندس MEP و سرپرست ناوگان',
+          titleEn: 'Site Superintendent, MEP Engineer & Heavy Fleet Lead',
+          descFa: 'اجرای کارگاهی راه/تونل/سد/ابنیه، تست تأسیسات تابیران، پایش ناوگان ماشین‌آلات سنگین و ایمنی HSE',
+          descEn: 'Field construction execution, Tabiran MEP/63kV testing, heavy machinery dispatch & site HSE checks'
         }
       ]
     : [
@@ -170,6 +203,8 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
               <Building2 className="w-5 h-5" />
             ) : currentTrack === 'ENERGY_PETRO' ? (
               <Factory className="w-5 h-5" />
+            ) : currentTrack === 'PAYA_SAMAN_PARS' ? (
+              <Landmark className="w-5 h-5 text-violet-300" />
             ) : (
               <Sparkles className="w-5 h-5 text-emerald-400" />
             )}
@@ -183,9 +218,13 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
                 {lang === 'fa'
                   ? isEveryday
                     ? 'انتخاب حوزه کاربردی و نقش شما در زندگی و خانواده'
+                    : isPaya
+                    ? 'انتخاب دیسیپلین (سه گروه هلدینگ) و رده سازمانی پایا سامان پارس'
                     : 'انتخاب دیسیپلین تخصصی و رده سازمانی'
                   : isEveryday
                   ? 'Lifestyle Focus Area & Personal / Family Role Selection'
+                  : isPaya
+                  ? 'Paya Holding 3-Group Discipline & Role Selection'
                   : 'Discipline & Organizational Role Selection'}
               </span>
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#eaf2f1] dark:bg-[#172d31] text-[#587479] dark:text-[#8ca8ab]">
@@ -193,6 +232,8 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
                   ? (lang === 'fa' ? 'هلدینگ راه و شهرسازی' : 'Civil & Infrastructure Holding')
                   : currentTrack === 'ENERGY_PETRO'
                   ? (lang === 'fa' ? 'هلدینگ پتروشیمی و پالایشگاه' : 'Oil & Gas EPCC Holding')
+                  : currentTrack === 'PAYA_SAMAN_PARS'
+                  ? (lang === 'fa' ? 'هلدینگ پایا سامان پارس · ۶۳ پروژه و ۱۴ شرکت' : 'Paya Saman Pars Holding · 63 Projects')
                   : (lang === 'fa' ? 'سبک زندگی، خانواده و کاربردهای روزمره' : 'Family, Lifestyle & Everyday AI')}
               </span>
             </h1>
@@ -200,9 +241,13 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
               {lang === 'fa'
                 ? isEveryday
                   ? 'بر اساس نیاز و جایگاه خود، حوزه تمرکز و نقش خود را انتخاب کنید تا مثال‌ها و تمرین‌ها شخصی‌سازی شوند.'
+                  : isPaya
+                  ? 'دیسیپلین خود را از میان سه گروه ستاد، بال پیمانکاری عمرانی و بال مسکن/شهرک کاوه انتخاب کنید تا کل کارگاه‌ها شخصی‌سازی شوند.'
                   : 'بر اساس ساختار سازمانی (OBS) مرجع، دیسیپلین و رده خود را انتخاب کنید تا مثال‌ها و تمرین‌ها اختصاصی شوند.'
                 : isEveryday
                 ? 'Select your lifestyle focus area and personal/family role to customize everyday AI examples.'
+                : isPaya
+                ? 'Choose your Paya Holding wing discipline & role across HQ, Civil Contracting, and Housing/Kaveh.'
                 : 'Select your OBS discipline & hierarchical role to customize CPMAI examples and worksheets.'}
             </p>
           </div>
@@ -247,90 +292,115 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
                 : 'Select a domain; its KPIs will populate your exercises and examples.'}
             </p>
 
-            <div className="space-y-2 pt-1" role="radiogroup">
-              {disciplines.map((d) => {
-                const isChecked = selectedDiscipline === d.id;
-                return (
-                  <motion.div
-                    key={d.id}
-                    onClick={() => setSelectedDiscipline(d.id)}
-                    initial={false}
-                    style={{
-                      borderRadius: isChecked ? '18px' : colARestRadius
-                    }}
-                    whileHover={{
-                      x: colASign * SHIFT,
-                      borderRadius: `${R_HOVER}px`,
-                      boxShadow: '0 16px 32px -12px rgba(18, 52, 59, 0.28)',
-                      zIndex: 10
-                    }}
-                    whileFocus={{
-                      x: colASign * SHIFT,
-                      borderRadius: `${R_HOVER}px`
-                    }}
-                    whileTap={{ scale: 0.985 }}
-                    transition={spring}
-                    className={`block p-3.5 border transition-colors cursor-pointer relative select-none ${
-                      isChecked
-                        ? 'bg-[#fdf0d8] dark:bg-[#2b2412] border-[#d98a1f] dark:border-[#f0b04a] shadow-xs'
-                        : 'bg-white/60 dark:bg-white/[0.03] border-[#c3d4d4] dark:border-[#274347] hover:bg-[#eaf2f1] dark:hover:bg-[#172d31]'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      {/* Radio Circle Indicator (.mark) */}
-                      <span
-                        className={`w-5 h-5 rounded-full border-2 mt-0.5 shrink-0 flex items-center justify-center transition-all ${
-                          isChecked
-                            ? 'border-[#d98a1f] dark:border-[#f0b04a] bg-white dark:bg-[#0f1f22]'
-                            : 'border-[#c3d4d4] dark:border-[#587479]'
-                        }`}
-                      >
-                        {isChecked && (
-                          <motion.span
-                            initial={{ scale: 0.3, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={springSnappy}
-                            className="w-2.5 h-2.5 rounded-full bg-[#d98a1f] dark:bg-[#f0b04a]"
-                          />
-                        )}
-                      </span>
+            <div className="space-y-3 pt-1" role="radiogroup">
+              {(() => {
+                const renderDisciplineCard = (d: (typeof disciplines)[number]) => {
+                  const isChecked = selectedDiscipline === d.id;
+                  return (
+                    <motion.div
+                      key={d.id}
+                      onClick={() => setSelectedDiscipline(d.id)}
+                      initial={false}
+                      style={{
+                        borderRadius: isChecked ? '18px' : colARestRadius
+                      }}
+                      whileHover={{
+                        x: colASign * SHIFT,
+                        borderRadius: `${R_HOVER}px`,
+                        boxShadow: '0 16px 32px -12px rgba(18, 52, 59, 0.28)',
+                        zIndex: 10
+                      }}
+                      whileFocus={{
+                        x: colASign * SHIFT,
+                        borderRadius: `${R_HOVER}px`
+                      }}
+                      whileTap={{ scale: 0.985 }}
+                      transition={spring}
+                      className={`block p-3.5 border transition-colors cursor-pointer relative select-none ${
+                        isChecked
+                          ? 'bg-[#fdf0d8] dark:bg-[#2b2412] border-[#d98a1f] dark:border-[#f0b04a] shadow-xs'
+                          : 'bg-white/60 dark:bg-white/[0.03] border-[#c3d4d4] dark:border-[#274347] hover:bg-[#eaf2f1] dark:hover:bg-[#172d31]'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        {/* Radio Circle Indicator (.mark) */}
+                        <span
+                          className={`w-5 h-5 rounded-full border-2 mt-0.5 shrink-0 flex items-center justify-center transition-all ${
+                            isChecked
+                              ? 'border-[#d98a1f] dark:border-[#f0b04a] bg-white dark:bg-[#0f1f22]'
+                              : 'border-[#c3d4d4] dark:border-[#587479]'
+                          }`}
+                        >
+                          {isChecked && (
+                            <motion.span
+                              initial={{ scale: 0.3, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={springSnappy}
+                              className="w-2.5 h-2.5 rounded-full bg-[#d98a1f] dark:bg-[#f0b04a]"
+                            />
+                          )}
+                        </span>
 
-                      {/* Text & Expandable Details */}
-                      <div className="flex-1 min-w-0">
-                        <b className="block text-xs sm:text-sm font-bold leading-snug">
-                          {lang === 'fa' ? d.titleFa : d.titleEn}
-                        </b>
+                        {/* Text & Expandable Details */}
+                        <div className="flex-1 min-w-0">
+                          <b className="block text-xs sm:text-sm font-bold leading-snug">
+                            {lang === 'fa' ? d.titleFa : d.titleEn}
+                          </b>
 
-                        {/* Accordion (.more) - expanded when checked */}
-                        {isChecked && (
-                          <div className="mt-2 pt-2 border-t border-[#c3d4d4]/60 dark:border-[#274347] animate-fade-in space-y-2">
-                            <p className="text-xs text-[#587479] dark:text-[#8ca8ab] leading-relaxed">
-                              {lang === 'fa' ? d.descriptionFa : d.descriptionEn}
-                            </p>
+                          {/* Accordion (.more) - expanded when checked */}
+                          {isChecked && (
+                            <div className="mt-2 pt-2 border-t border-[#c3d4d4]/60 dark:border-[#274347] animate-fade-in space-y-2">
+                              <p className="text-xs text-[#587479] dark:text-[#8ca8ab] leading-relaxed">
+                                {lang === 'fa' ? d.descriptionFa : d.descriptionEn}
+                              </p>
 
-                            {/* KPI Tags Pills (.kpi) */}
-                            <div className="pt-1">
-                              <span className="block text-[11px] font-semibold text-[#587479] dark:text-[#8ca8ab] mb-1.5">
-                                {lang === 'fa' ? 'شاخص‌هایی که در مثال‌ها می‌بینید:' : 'KPIs populated in your examples:'}
-                              </span>
-                              <div className="flex flex-wrap gap-1.5">
-                                {(lang === 'fa' ? d.performanceMetricsFa : d.performanceMetricsEn).map((kpi, kIdx) => (
-                                  <span
-                                    key={kIdx}
-                                    className="px-2 py-0.5 rounded-md text-[11px] font-mono bg-white dark:bg-[#172d31] border border-[#c3d4d4] dark:border-[#274347] text-[#12343b] dark:text-[#e4f0ee]"
-                                  >
-                                    {kpi}
-                                  </span>
-                                ))}
+                              {/* KPI Tags Pills (.kpi) */}
+                              <div className="pt-1">
+                                <span className="block text-[11px] font-semibold text-[#587479] dark:text-[#8ca8ab] mb-1.5">
+                                  {lang === 'fa' ? 'شاخص‌هایی که در مثال‌ها می‌بینید:' : 'KPIs populated in your examples:'}
+                                </span>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {(lang === 'fa' ? d.performanceMetricsFa : d.performanceMetricsEn).map((kpi, kIdx) => (
+                                    <span
+                                      key={kIdx}
+                                      className="px-2 py-0.5 rounded-md text-[11px] font-mono bg-white dark:bg-[#172d31] border border-[#c3d4d4] dark:border-[#274347] text-[#12343b] dark:text-[#e4f0ee]"
+                                    >
+                                      {kpi}
+                                    </span>
+                                  ))}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        )}
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                };
+
+                if (isPaya) {
+                  const groupOrder: string[] = [];
+                  for (const d of disciplines) {
+                    const g = (lang === 'fa' ? d.groupFa : d.groupEn) || '';
+                    if (g && !groupOrder.includes(g)) groupOrder.push(g);
+                  }
+                  return groupOrder.map((groupLabel) => (
+                    <div key={groupLabel} className="space-y-2">
+                      <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-violet-500/10 border border-violet-500/20 text-[11px] font-black text-violet-800 dark:text-violet-300">
+                        <span className="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0" />
+                        <span>{groupLabel}</span>
+                      </div>
+                      <div className="space-y-2">
+                        {disciplines
+                          .filter((d) => ((lang === 'fa' ? d.groupFa : d.groupEn) || '') === groupLabel)
+                          .map(renderDisciplineCard)}
                       </div>
                     </div>
-                  </motion.div>
-                );
-              })}
+                  ));
+                }
+
+                return <div className="space-y-2">{disciplines.map(renderDisciplineCard)}</div>;
+              })()}
             </div>
           </section>
 
@@ -361,9 +431,13 @@ export const DisciplineSelectorModal: React.FC<DisciplineSelectorModalProps> = (
               {lang === 'fa'
                 ? isEveryday
                   ? 'از مدیریت بودجه خانه تا فریلنسری و یادگیری فردی.'
+                  : isPaya
+                  ? 'از حاکمیت ۶۳ پروژه و دو بال در ستاد تا اجرای کارگاهی و کاوه.'
                   : 'از تصمیم‌گیری کلان تا اجرای میدانی.'
                 : isEveryday
                 ? 'From household management to freelancing and personal growth.'
+                : isPaya
+                ? 'From Holding Board & 63-project governance down to field execution.'
                 : 'From strategic executive down to site execution.'}
             </p>
 

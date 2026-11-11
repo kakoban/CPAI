@@ -16,6 +16,13 @@ const ROLE_LABELS: Record<EngineeringRoleId, { titleFa: string; titleEn: string 
   technical_engineer: { titleFa: 'مهندس دفتر فنی / کنترل پروژه / ناظر', titleEn: 'Technical / Planning Engineer' },
   site_operator: { titleFa: 'اپراتور / جنرال فورمن / بازرس کیفی', titleEn: 'Site Operator / QA Inspector' }
 };
+
+const PAYA_ROLE_LABELS: Record<EngineeringRoleId, { titleFa: string; titleEn: string }> = {
+  director: { titleFa: 'مدیرعامل / معاونت هلدینگ یا شرکت تابعه', titleEn: 'Holding Executive / Subsidiary MD' },
+  lead_superintendent: { titleFa: 'مدیر طرح، کنسرسیوم یا سرپرست شهر صنعتی کاوه / مسکن', titleEn: 'Consortium / Kaveh / Housing Lead' },
+  technical_engineer: { titleFa: 'کارشناس ارشد دفتر فنی، مناقصات، PMO و امور پیمان', titleEn: 'Holding PMO, Bidding & Contracts Specialist' },
+  site_operator: { titleFa: 'رئیس کارگاه، ناظر اجرا، مهندس MEP و سرپرست ناوگان', titleEn: 'Site Superintendent, MEP & Fleet Lead' }
+};
 import {
   Bot,
   Sparkles,
@@ -457,7 +464,8 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
   const pageMeta: PageTutorMetadata = CPMAI_PAGE_TUTOR_CONTEXT[pageKey] || CPMAI_PAGE_TUTOR_CONTEXT['1'];
   const trackMeta = INDUSTRY_TRACKS[industryTrack];
   const discMeta = getDisciplineMetadata(disciplineId);
-  const roleMeta = ROLE_LABELS[roleId];
+  const activeRoleLabels = industryTrack === 'PAYA_SAMAN_PARS' ? PAYA_ROLE_LABELS : ROLE_LABELS;
+  const roleMeta = activeRoleLabels[roleId];
 
   // Store conversation history per page key so switching pages keeps relevant thread or lets user continue
   const [threadsByPage, setThreadsByPage] = useState<Record<string, TutorChatMessage[]>>(() => {

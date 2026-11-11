@@ -673,13 +673,22 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
                     <option value="NONE">بدون آزمون</option>
                   </select>
 
-                  {/* Discipline Filter (16 OBS Disciplines) */}
+                  {/* Discipline Filter (32 OBS Disciplines) */}
                   <select
                     value={disciplineFilter}
                     onChange={(e) => setDisciplineFilter(e.target.value)}
                     className="px-3 py-1.5 text-xs rounded-xl border border-black/[0.1] dark:border-white/[0.15] bg-white dark:bg-[#12181d] text-[#1c2830] dark:text-[#e8ebe9] cursor-pointer font-bold"
                   >
-                    <option value="ALL">کلیه دیسیپلین‌ها (۲۴ دیسیپلین)</option>
+                    <option value="ALL">کلیه دیسیپلین‌ها (۳۲ دیسیپلین)</option>
+                    <optgroup label="هلدینگ پایا سامان پارس (۸ دیسیپلین دو بال)">
+                      {Object.values(DISCIPLINE_REGISTRY)
+                        .filter((d) => d.trackId === 'PAYA_SAMAN_PARS')
+                        .map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.shortTitleFa}
+                          </option>
+                        ))}
+                    </optgroup>
                     <optgroup label="مگاپروژه‌های راه، ترابری و ابنیه (عمران)">
                       {Object.values(DISCIPLINE_REGISTRY)
                         .filter((d) => d.trackId === 'CIVIL_INFRA')

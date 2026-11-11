@@ -379,12 +379,16 @@ export const WorkspaceSidebar: React.FC<WorkspaceSidebarProps> = ({
                         ? 'راه و ابنیه'
                         : industryTrack === 'ENERGY_PETRO'
                         ? 'پتروشیمی'
+                        : industryTrack === 'PAYA_SAMAN_PARS'
+                        ? 'پایا سامان پارس'
                         : 'روزمره و خانواده'
                     } · ${discMeta.shortTitleFa}`
                   : industryTrack === 'CIVIL_INFRA'
                   ? 'هلدینگ راه و ابنیه'
                   : industryTrack === 'ENERGY_PETRO'
                   ? 'هلدینگ نفت و انرژی'
+                  : industryTrack === 'PAYA_SAMAN_PARS'
+                  ? 'هلدینگ پایا سامان پارس'
                   : 'سبک زندگی و خانواده'}
               </span>
             </div>

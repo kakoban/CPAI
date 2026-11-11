@@ -310,6 +310,8 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
         ? `حوزه ارزیابی‌شده: سبک زندگی، خانواده و کاربردهای روزمره (${discMeta.titleFa})`
         : effectiveTrack === 'ENERGY_PETRO'
         ? `حوزه تخصصی ارزیابی‌شده: صنایع نفت، گاز، پالایش و پتروشیمی (${discMeta.titleFa})`
+        : effectiveTrack === 'PAYA_SAMAN_PARS'
+        ? `حوزه اختصاصی ارزیابی‌شده: هلدینگ پایا سامان پارس — دو بال زیرساخت و مسکن/کاوه (${discMeta.titleFa})`
         : `حوزه تخصصی ارزیابی‌شده: مگاپروژه‌های عمرانی، راه، ترابری و ابنیه کلان (${discMeta.titleFa})`;
 
     const domainTrackBadgeEn =
@@ -317,6 +319,8 @@ export const InteractivePlacementQuiz: React.FC<InteractivePlacementQuizProps> =
         ? `Evaluated Track: Everyday & Family AI (${discMeta.titleEn})`
         : effectiveTrack === 'ENERGY_PETRO'
         ? `Evaluated Industry Track: Oil, Gas & Petrochemical Engineering (${discMeta.titleEn})`
+        : effectiveTrack === 'PAYA_SAMAN_PARS'
+        ? `Evaluated Dedicated Track: Paya Saman Pars Holding (${discMeta.titleEn})`
         : `Evaluated Industry Track: Mega Civil & Transportation Infrastructure (${discMeta.titleEn})`;
 
     const toolsListReport = TOOL_READINESS_ITEMS.map((item) => {

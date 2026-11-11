@@ -10,7 +10,8 @@ import {
   FileText,
   Database,
   Layers,
-  ChevronRight
+  ChevronRight,
+  Landmark
 } from 'lucide-react';
 import { IndustryTrackId, INDUSTRY_TRACKS } from '../../types/industryTrack';
 
@@ -83,11 +84,18 @@ export const IndustryTrackSelectorModal: React.FC<IndustryTrackSelectorModalProp
             </p>
           </div>
 
-          {/* Triple Industry Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+          {/* Quadruple Industry Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
             {tracks.map((track) => {
               const isSelected = track.id === currentTrack;
-              const Icon = track.iconName === 'Building2' ? Building2 : track.iconName === 'Factory' ? Factory : Sparkles;
+              const Icon =
+                track.iconName === 'Building2'
+                  ? Building2
+                  : track.iconName === 'Factory'
+                  ? Factory
+                  : track.iconName === 'Landmark'
+                  ? Landmark
+                  : Sparkles;
 
               return (
                 <div
@@ -202,7 +210,7 @@ export const IndustryTrackSelectorModal: React.FC<IndustryTrackSelectorModalProp
           <div className="pt-4 border-t border-black/[0.06] dark:border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
             <span className="flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-cyan-600" />
-              <span>شما در هر زمان می‌توانید با کلیک روی سوئیچر بالای صفحه، بین هر سه حوزه جابه‌جا شوید.</span>
+              <span>شما در هر زمان می‌توانید با کلیک روی سوئیچر بالای صفحه، بین هر چهار حوزه جابه‌جا شوید.</span>
             </span>
             <span className="font-mono text-[11px] text-cyan-600">PMI-CPMAI · OWJ COUNCIL</span>
           </div>

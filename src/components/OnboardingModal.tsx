@@ -3,6 +3,7 @@ import { UserProfile, AiFamiliarityLevel, OnboardingPayload } from '../types/aut
 import { authApi } from '../services/authApi';
 import { getAutoTimeSlotCode } from '../utils/timeSlot';
 import { Language } from '../types/cpmai';
+import { IndustryTrackId } from '../types/industryTrack';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from '../data/logo';
 import {
   User,
@@ -28,7 +29,19 @@ interface OnboardingModalProps {
   onComplete: (user: UserProfile) => void;
   onLogout: () => void;
   lang: Language;
+  industryTrack?: IndustryTrackId;
 }
+
+const PAYA_SPECIALTY_PRESETS = [
+  'کنترل پورتفو، PMO و دفتر فنی هلدینگ پایا',
+  'امور قراردادها، کنسرسیوم و EPC+F / BOT / BLT',
+  'پیمانکاری راه، پل، تونل، ریل و فرودگاه',
+  'سد، تأسیسات آبی، سازه‌های دریایی و ابنیه صنعتی',
+  'تأسیسات MEP، پست برق و انرژی (تابیران)',
+  'انبوه‌سازی، مسکن و شهرک‌سازی (آتی‌ساز/خانه/عمران)',
+  'بهره‌برداری شهر صنعتی و منطقه ویژه کاوه',
+  'سرمایه انسانی، پشتیبانی و ناوگان ماشین‌آلات سنگین'
+];
 
 const SPECIALTY_PRESETS = [
   'عمران، سازه و ژئوتکنیک',
@@ -48,8 +61,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   currentUser,
   onComplete,
   onLogout,
-  lang
+  lang,
+  industryTrack
 }) => {
+  const activePresets =
+    industryTrack === 'PAYA_SAMAN_PARS'
+      ? [...PAYA_SPECIALTY_PRESETS, ...SPECIALTY_PRESETS]
+      : SPECIALTY_PRESETS;
   const [fullName, setFullName] = useState<string>(
     currentUser.displayName &&
       !currentUser.displayName.includes('@') &&
@@ -262,7 +280,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
               {/* Quick Preset Tags */}
               <div className="flex flex-wrap gap-1.5 pt-1">
-                {SPECIALTY_PRESETS.map((preset) => (
+                {activePresets.map((preset) => (
                   <button
                     key={preset}
                     type="button"
