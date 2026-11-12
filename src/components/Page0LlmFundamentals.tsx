@@ -20,6 +20,7 @@ import {
   Lightbulb,
   Play,
   RotateCcw,
+  RotateCw,
   Bot,
   Scale,
   Building2,
@@ -51,8 +52,12 @@ import {
   Globe,
   BookOpen,
   AlertTriangle,
-  Landmark
+  Landmark,
+  X as CloseIcon,
+  Compass,
+  List as ListIcon
 } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { getDatasetsForTrack } from '../data/engineering_sample_datasets';
 import { getContractsForTrack } from '../data/engineering_sample_contracts';
 import { Page0EngineeringMasterclass } from './Page0EngineeringMasterclass';
@@ -349,6 +354,783 @@ const renderOtherLlmLogo = (id: OtherLlmPlatform['id']) => {
   }
 };
 
+interface OrbitSessionNode {
+  id: 's1' | 's2' | 's3' | 's4' | 's5';
+  hoursFa: string;
+  titleFa: string;
+  titleEn: string;
+  modules: { id: string }[];
+}
+
+interface OrbitRoadmapHubProps {
+  lang: Language;
+  sessions: OrbitSessionNode[];
+  activeSessionId: OrbitSessionNode['id'];
+  completedSessions: Record<string, boolean>;
+  isAdmin: boolean;
+  onSelectSession: (id: OrbitSessionNode['id']) => void;
+  onOpenSession: (id: OrbitSessionNode['id']) => void;
+  onToggleComplete: (id: string, e: React.MouseEvent) => void;
+  widgetHidden?: boolean;
+  onRestoreWidget?: () => void;
+}
+
+const ORBIT_W = 760;
+const ORBIT_H = 640;
+const ORBIT_R = 230;
+const ORBIT_STEP = 72;
+const ORBIT_RING_R = 94;
+const ORBIT_RING_C = 2 * Math.PI * ORBIT_RING_R;
+
+const normalizeDeg = (deg: number) => ((((deg + 180) % 360) + 360) % 360) - 180;
+
+/**
+ * Rotatable radial/orbital roadmap: 5 sessions on a pentagon around the OWJ hub.
+ * Works like a dial — the session at 12 o'clock is the active one. Users can drag
+ * the orbit, use the rotate buttons, or click a card to open that session's content.
+ */
+const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
+  lang,
+  sessions,
+  activeSessionId,
+  completedSessions,
+  isAdmin,
+  onSelectSession,
+  onOpenSession,
+  onToggleComplete,
+  widgetHidden,
+  onRestoreWidget
+}) => {
+  const count = sessions.length;
+  const baseAngles = sessions.map((_, i) => i * ORBIT_STEP);
+  const CX = ORBIT_W / 2;
+  const CY = ORBIT_H / 2;
+
+  const [rotation, setRotation] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const rotationRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const suppressClickRef = useRef(false);
+  const dragRef = useRef<{
+    pointerId: number;
+    lastAngle: number;
+    accum: number;
+    startRotation: number;
+    moved: boolean;
+  } | null>(null);
+
+  const applyRotation = (deg: number) => {
+    rotationRef.current = deg;
+    setRotation(deg);
+  };
+
+  const stopAnimation = () => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  };
+
+  const animateTo = (target: number) => {
+    stopAnimation();
+    const from = rotationRef.current;
+    const delta = target - from;
+    if (Math.abs(delta) < 0.5) {
+      applyRotation(target);
+      return;
+    }
+    const duration = 650;
+    const t0 = performance.now();
+    const step = (now: number) => {
+      const t = Math.min(1, (now - t0) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      applyRotation(from + delta * eased);
+      rafRef.current = t < 1 ? requestAnimationFrame(step) : null;
+    };
+    rafRef.current = requestAnimationFrame(step);
+  };
+
+  useEffect(() => () => stopAnimation(), []);
+
+  const indexAtTop = (rot: number) => {
+    const steps = Math.round(-rot / ORBIT_STEP);
+    return ((steps % count) + count) % count;
+  };
+
+  // Keep the active session spun to 12 o'clock (also when it changes from elsewhere, e.g. the pager).
+  useEffect(() => {
+    const idx = sessions.findIndex((s) => s.id === activeSessionId);
+    if (idx < 0) return;
+    const desired = -baseAngles[idx];
+    const cur = rotationRef.current;
+    animateTo(cur + normalizeDeg(desired - cur));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSessionId]);
+
+  const settleAt = (target: number) => {
+    animateTo(target);
+    const sess = sessions[indexAtTop(target)];
+    if (sess && sess.id !== activeSessionId) {
+      playTactileSound('thock');
+      onSelectSession(sess.id);
+    }
+  };
+
+  const rotateByStep = (dir: 1 | -1) => {
+    const snapped = Math.round(rotationRef.current / ORBIT_STEP) * ORBIT_STEP;
+    settleAt(snapped + dir * ORBIT_STEP);
+  };
+
+  const pointerAngle = (clientX: number, clientY: number) => {
+    const rect = stageRef.current?.getBoundingClientRect();
+    if (!rect) return 0;
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    return (Math.atan2(clientX - cx, -(clientY - cy)) * 180) / Math.PI;
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    suppressClickRef.current = false;
+    dragRef.current = {
+      pointerId: e.pointerId,
+      lastAngle: pointerAngle(e.clientX, e.clientY),
+      accum: 0,
+      startRotation: rotationRef.current,
+      moved: false
+    };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    const a = pointerAngle(e.clientX, e.clientY);
+    drag.accum += normalizeDeg(a - drag.lastAngle);
+    drag.lastAngle = a;
+    if (!drag.moved && Math.abs(drag.accum) > 4) {
+      drag.moved = true;
+      suppressClickRef.current = true;
+      stopAnimation();
+      setIsDragging(true);
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch {
+        // ignore capture errors
+      }
+    }
+    if (drag.moved) {
+      applyRotation(drag.startRotation + drag.accum);
+    }
+  };
+
+  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    dragRef.current = null;
+    if (!drag.moved) return;
+    setIsDragging(false);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // ignore release errors
+    }
+    settleAt(Math.round(rotationRef.current / ORBIT_STEP) * ORBIT_STEP);
+  };
+
+  const completedCount = sessions.filter((s) => !!completedSessions[s.id]).length;
+  const totalModules = sessions.reduce((acc, s) => acc + s.modules.length, 0);
+  const progress = count ? completedCount / count : 0;
+
+  const renderHub = (small: boolean) => (
+    <div className={`relative flex items-center justify-center shrink-0 ${small ? 'w-48 h-48' : 'w-[200px] h-[200px]'}`}>
+      <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full -rotate-90" aria-hidden="true">
+        <circle cx="100" cy="100" r={ORBIT_RING_R} fill="none" stroke="#f1d9d4" strokeWidth="6" />
+        <circle
+          cx="100"
+          cy="100"
+          r={ORBIT_RING_R}
+          fill="none"
+          stroke="#10b981"
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeDasharray={ORBIT_RING_C}
+          strokeDashoffset={ORBIT_RING_C * (1 - progress)}
+          style={{ transition: 'stroke-dashoffset 600ms ease' }}
+        />
+      </svg>
+      <div className="w-44 h-44 rounded-full bg-white/90 dark:bg-[#201729] backdrop-blur-md shadow-xl border border-white/70 dark:border-[#382645] flex flex-col items-center justify-center gap-2 relative z-10 pointer-events-none">
+        <img
+          src={OWJ_LOGO}
+          alt="OWJ Business Council"
+          draggable={false}
+          className="w-28 h-auto object-contain"
+          referrerPolicy="no-referrer"
+          onError={(e) => {
+            e.currentTarget.src = OWJ_LOGO_FALLBACK;
+          }}
+        />
+        <span className="px-2.5 py-0.5 rounded-full bg-[#1d4f69]/10 text-[#1d4f69] dark:text-[#9cc9e0] text-[10px] font-black">
+          {lang === 'fa' ? `۲۰ ساعت • ${totalModules.toLocaleString('fa-IR')} ماژول` : `20h • ${totalModules} modules`}
+        </span>
+        <span dir="ltr" className="text-[10px] font-mono font-bold text-emerald-600">
+          {completedCount * 20}%
+        </span>
+      </div>
+    </div>
+  );
+
+  const renderCard = (sess: OrbitSessionNode) => {
+    const isSessActive = activeSessionId === sess.id;
+    const isCompleted = !!completedSessions[sess.id];
+    const metaFa = `${sess.hoursFa} • ${sess.modules.length.toLocaleString('fa-IR')} ماژول`;
+    const metaEn = `4h • ${sess.modules.length} modules`;
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => {
+          if (suppressClickRef.current) return;
+          onOpenSession(sess.id);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onOpenSession(sess.id);
+          }
+        }}
+        dir="rtl"
+        className={`p-3 rounded-2xl border text-right transition-[background,box-shadow,transform,border-color] duration-200 cursor-pointer flex flex-col gap-2 select-none w-full ${
+          isSessActive
+            ? 'bg-gradient-to-br from-purple-600 via-fuchsia-600 to-orange-500 text-white scale-105 ring-4 ring-purple-200 dark:ring-purple-900 border-transparent shadow-xl'
+            : isCompleted
+            ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-950 dark:text-emerald-100 border-emerald-400/60 shadow-xs hover:shadow-md'
+            : 'bg-white dark:bg-[#201729] text-[#261a1d] dark:text-[#faedf3] border-[#ecdcd8] dark:border-[#382645] shadow-xs hover:shadow-md hover:border-[#e0533c]/50'
+        }`}
+      >
+        <div className="flex items-center justify-between gap-1.5">
+          <span className={`text-[10px] font-bold ${isSessActive ? 'text-white/90' : 'text-[#755e66] dark:text-[#ad99ab]'}`}>
+            {lang === 'fa' ? metaFa : metaEn}
+          </span>
+          {isAdmin ? (
+            <button
+              type="button"
+              onClick={(e) => onToggleComplete(sess.id, e)}
+              title={isCompleted ? 'لغو وضعیت تکمیل (ویژه ادمین)' : 'ثبت به عنوان تکمیل‌شده / سبز کردن (ویژه ادمین)'}
+              className={`px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 transition-all cursor-pointer ${
+                isCompleted
+                  ? 'bg-emerald-500 text-white shadow-2xs'
+                  : isSessActive
+                  ? 'bg-white/25 text-white hover:bg-white/35'
+                  : 'bg-black/[0.05] dark:bg-white/[0.08] text-[#755e66] dark:text-[#ad99ab] hover:bg-emerald-500/20 hover:text-emerald-700'
+              }`}
+            >
+              <CheckCircle2 className="w-3 h-3 shrink-0" />
+              <span>
+                {isCompleted ? (lang === 'fa' ? 'تکمیل شد' : 'Done') : lang === 'fa' ? '✓ سبز کردن' : '✓ Mark done'}
+              </span>
+            </button>
+          ) : isCompleted ? (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 bg-emerald-500 text-white">
+              <CheckCircle2 className="w-3 h-3 shrink-0" />
+              <span>{lang === 'fa' ? 'تکمیل‌شده' : 'Done'}</span>
+            </span>
+          ) : null}
+        </div>
+        <div className="font-extrabold text-xs leading-snug">{lang === 'fa' ? sess.titleFa : sess.titleEn}</div>
+      </div>
+    );
+  };
+
+  return (
+    <div
+      dir="rtl"
+      className="rounded-3xl bg-gradient-to-br from-[#fff7f5] to-[#fdf2f8] dark:from-[#1a1222] dark:to-[#221629] border border-[#f3e1e4] dark:border-[#382645] p-3 sm:p-4"
+    >
+      {/* Desktop / tablet: rotatable radial pentagon orbit */}
+      <div className="hidden md:block">
+        <div
+          ref={stageRef}
+          dir="ltr"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onClickCapture={(e) => {
+            if (suppressClickRef.current) {
+              e.stopPropagation();
+              e.preventDefault();
+              suppressClickRef.current = false;
+            }
+          }}
+          className={`relative mx-auto w-full max-w-[760px] select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          style={{ aspectRatio: `${ORBIT_W} / ${ORBIT_H}`, touchAction: 'pan-y' }}
+        >
+          <svg viewBox={`0 0 ${ORBIT_W} ${ORBIT_H}`} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
+            <circle
+              cx={CX}
+              cy={CY}
+              r={ORBIT_R}
+              fill="none"
+              stroke="#e0533c"
+              strokeOpacity="0.28"
+              strokeWidth="1.5"
+              strokeDasharray="4 8"
+              transform={`rotate(${rotation} ${CX} ${CY})`}
+            />
+            {sessions.map((sess, i) => {
+              const rad = ((baseAngles[i] + rotation) * Math.PI) / 180;
+              const x = CX + ORBIT_R * Math.sin(rad);
+              const y = CY - ORBIT_R * Math.cos(rad);
+              const isActive = activeSessionId === sess.id;
+              const isDone = !!completedSessions[sess.id];
+              const stroke = isActive ? '#c026d3' : isDone ? '#10b981' : '#e5cfcb';
+              return (
+                <line
+                  key={sess.id}
+                  x1={CX}
+                  y1={CY}
+                  x2={x}
+                  y2={y}
+                  stroke={stroke}
+                  strokeWidth={isActive ? 3 : 2}
+                  strokeLinecap="round"
+                  strokeDasharray={isActive ? '7 6' : isDone ? undefined : '3 6'}
+                >
+                  {isActive && (
+                    <animate attributeName="stroke-dashoffset" from="26" to="0" dur="1s" repeatCount="indefinite" />
+                  )}
+                </line>
+              );
+            })}
+          </svg>
+
+          <div className="absolute z-10" style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
+            {renderHub(false)}
+          </div>
+
+          {sessions.map((sess, i) => {
+            const rad = ((baseAngles[i] + rotation) * Math.PI) / 180;
+            const x = CX + ORBIT_R * Math.sin(rad);
+            const y = CY - ORBIT_R * Math.cos(rad);
+            return (
+              <div
+                key={sess.id}
+                className={`absolute ${activeSessionId === sess.id ? 'z-30' : 'z-20'}`}
+                style={{
+                  left: `${(x / ORBIT_W) * 100}%`,
+                  top: `${(y / ORBIT_H) * 100}%`,
+                  width: '27%',
+                  transform: 'translate(-50%, -50%)'
+                }}
+              >
+                {renderCard(sess)}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Rotation controls */}
+        <div className="flex items-center justify-center gap-3 pt-1">
+          <button
+            type="button"
+            onClick={() => rotateByStep(1)}
+            className="px-3 py-1.5 rounded-full bg-white dark:bg-[#201729] border border-gray-300 dark:border-[#382645] hover:bg-orange-50 hover:border-orange-200 text-[#0A101D] dark:text-[#faedf3] text-[11px] font-bold flex items-center gap-1.5 shadow-xs hover:shadow-md active:scale-95 transition-all cursor-pointer"
+            title={lang === 'fa' ? 'چرخش ساعتگرد (جلسه قبل)' : 'Rotate clockwise (previous session)'}
+          >
+            <RotateCw className="w-3.5 h-3.5 text-[#e0533c]" />
+            <span>{lang === 'fa' ? 'جلسه قبل' : 'Previous'}</span>
+          </button>
+          <span className="text-[10px] text-[#755e66] dark:text-[#ad99ab]">
+            {lang === 'fa'
+              ? 'مدار را با ماوس بچرخانید؛ با کلیک روی هر جلسه، محتوای آن باز می‌شود'
+              : 'Drag to rotate; click a session to open its content'}
+          </span>
+          <button
+            type="button"
+            onClick={() => rotateByStep(-1)}
+            className="px-3 py-1.5 rounded-full bg-white dark:bg-[#201729] border border-gray-300 dark:border-[#382645] hover:bg-orange-50 hover:border-orange-200 text-[#0A101D] dark:text-[#faedf3] text-[11px] font-bold flex items-center gap-1.5 shadow-xs hover:shadow-md active:scale-95 transition-all cursor-pointer"
+            title={lang === 'fa' ? 'چرخش پادساعتگرد (جلسه بعد)' : 'Rotate counter-clockwise (next session)'}
+          >
+            <span>{lang === 'fa' ? 'جلسه بعد' : 'Next'}</span>
+            <RotateCcw className="w-3.5 h-3.5 text-[#e0533c]" />
+          </button>
+          {widgetHidden && onRestoreWidget && (
+            <button
+              type="button"
+              onClick={onRestoreWidget}
+              className="px-3 py-1.5 rounded-full bg-orange-50 dark:bg-[#e0533c]/15 border border-orange-200 dark:border-[#e0533c]/40 text-orange-800 dark:text-orange-200 text-[11px] font-bold flex items-center gap-1.5 hover:bg-orange-100 active:scale-95 transition-all cursor-pointer"
+            >
+              <Compass className="w-3.5 h-3.5" />
+              <span>{lang === 'fa' ? 'نمایش ویجت همراه' : 'Show floating map'}</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile: hub on top, then vertical timeline */}
+      <div className="md:hidden flex flex-col items-center gap-5">
+        {renderHub(true)}
+        <div className="w-full relative pr-5 space-y-3">
+          <span
+            className="absolute right-1.5 top-2 bottom-2 w-0.5 bg-gradient-to-b from-[#e0533c]/60 to-[#c026d3]/30 rounded-full"
+            aria-hidden="true"
+          />
+          {sessions.map((sess) => {
+            const isActive = activeSessionId === sess.id;
+            const isDone = !!completedSessions[sess.id];
+            return (
+              <div key={sess.id} className="relative">
+                <span
+                  className={`absolute -right-[19px] top-4 w-3.5 h-3.5 rounded-full border-2 border-white ${
+                    isActive ? 'bg-fuchsia-600' : isDone ? 'bg-emerald-500' : 'bg-[#e0533c]/50'
+                  }`}
+                  aria-hidden="true"
+                />
+                {renderCard(sess)}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+interface FloatingOrbitModule {
+  id: string;
+  num: string;
+  titleFa: string;
+  titleEn: string;
+}
+
+interface FloatingOrbitSession extends OrbitSessionNode {
+  modules: FloatingOrbitModule[];
+}
+
+interface FloatingOrbitWidgetProps {
+  lang: Language;
+  sessions: FloatingOrbitSession[];
+  activeSessionId: OrbitSessionNode['id'];
+  activeTab: string | null;
+  completedSessions: Record<string, boolean>;
+  onOpenSession: (id: OrbitSessionNode['id']) => void;
+  onOpenModule: (moduleId: string) => void;
+  onBackToMap: () => void;
+  onClose: () => void;
+}
+
+const WIDGET_SIZE = 148;
+const WIDGET_NODE_R = 52;
+const WIDGET_RING_R = 70;
+const WIDGET_RING_C = 2 * Math.PI * WIDGET_RING_R;
+const WIDGET_POS_KEY = 'cpmai_orbit_widget_pos_v1';
+const WIDGET_FA_DIGITS = ['۱', '۲', '۳', '۴', '۵', '۶', '۷'];
+
+const clampWidgetPos = (x: number, y: number) => {
+  const maxX = Math.max(8, window.innerWidth - WIDGET_SIZE - 8);
+  const maxY = Math.max(8, window.innerHeight - WIDGET_SIZE - 8);
+  return { x: Math.min(Math.max(8, x), maxX), y: Math.min(Math.max(8, y), maxY) };
+};
+
+/**
+ * Small draggable, dismissible mini-orbit that follows the reader while scrolling
+ * through the chapters. Click a node to jump to that session's content, open the
+ * module list to jump to a specific module, or click the OWJ hub to return to the full map.
+ */
+const FloatingOrbitWidget: React.FC<FloatingOrbitWidgetProps> = ({
+  lang,
+  sessions,
+  activeSessionId,
+  activeTab,
+  completedSessions,
+  onOpenSession,
+  onOpenModule,
+  onBackToMap,
+  onClose
+}) => {
+  const [pos, setPos] = useState<{ x: number; y: number }>(() => {
+    try {
+      const saved = localStorage.getItem(WIDGET_POS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed?.x === 'number' && typeof parsed?.y === 'number') {
+          return clampWidgetPos(parsed.x, parsed.y);
+        }
+      }
+    } catch {
+      // ignore storage error
+    }
+    return clampWidgetPos(20, window.innerHeight - WIDGET_SIZE - 96);
+  });
+  const [showModules, setShowModules] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [rotation, setRotation] = useState(0);
+  const rotationRef = useRef(0);
+  const suppressClickRef = useRef(false);
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    originX: number;
+    originY: number;
+    moved: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    const onResize = () => setPos((p) => clampWidgetPos(p.x, p.y));
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // Spin the active session to 12 o'clock (shortest path).
+  useEffect(() => {
+    const idx = sessions.findIndex((s) => s.id === activeSessionId);
+    if (idx < 0) return;
+    const desired = -idx * ORBIT_STEP;
+    const next = rotationRef.current + normalizeDeg(desired - rotationRef.current);
+    rotationRef.current = next;
+    setRotation(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSessionId]);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    suppressClickRef.current = false;
+    dragRef.current = {
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      originX: pos.x,
+      originY: pos.y,
+      moved: false
+    };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = dragRef.current;
+    if (!d || d.pointerId !== e.pointerId) return;
+    const dx = e.clientX - d.startX;
+    const dy = e.clientY - d.startY;
+    if (!d.moved && Math.hypot(dx, dy) > 5) {
+      d.moved = true;
+      suppressClickRef.current = true;
+      setIsDragging(true);
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch {
+        // ignore capture errors
+      }
+    }
+    if (d.moved) setPos(clampWidgetPos(d.originX + dx, d.originY + dy));
+  };
+
+  const handlePointerEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = dragRef.current;
+    if (!d || d.pointerId !== e.pointerId) return;
+    dragRef.current = null;
+    if (!d.moved) return;
+    setIsDragging(false);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // ignore release errors
+    }
+    const finalPos = clampWidgetPos(d.originX + e.clientX - d.startX, d.originY + e.clientY - d.startY);
+    setPos(finalPos);
+    try {
+      localStorage.setItem(WIDGET_POS_KEY, JSON.stringify(finalPos));
+    } catch {
+      // ignore storage error
+    }
+  };
+
+  const activeIdx = Math.max(0, sessions.findIndex((s) => s.id === activeSessionId));
+  const activeSess = sessions[activeIdx];
+  const completedCount = sessions.filter((s) => !!completedSessions[s.id]).length;
+  const progress = sessions.length ? completedCount / sessions.length : 0;
+  const openUp = pos.y > window.innerHeight / 2;
+  const onLeftHalf = pos.x + WIDGET_SIZE / 2 < window.innerWidth / 2;
+  const digit = (i: number) => (lang === 'fa' ? WIDGET_FA_DIGITS[i] ?? String(i + 1) : String(i + 1));
+
+  return createPortal(
+    <div
+      dir="rtl"
+      className="fixed z-[90] select-none animate-fadeIn"
+      style={{ left: pos.x, top: pos.y, width: WIDGET_SIZE, touchAction: 'none' }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
+      onPointerCancel={handlePointerEnd}
+      onClickCapture={(e) => {
+        if (suppressClickRef.current) {
+          e.stopPropagation();
+          e.preventDefault();
+          suppressClickRef.current = false;
+        }
+      }}
+    >
+      <div
+        className={`relative rounded-full bg-white/95 dark:bg-[#1a1222]/95 backdrop-blur-md border border-[#f3e1e4] dark:border-[#382645] shadow-2xl transition-transform ${
+          isDragging ? 'cursor-grabbing scale-105' : 'cursor-grab'
+        }`}
+        style={{ width: WIDGET_SIZE, height: WIDGET_SIZE }}
+        title={lang === 'fa' ? 'نقشه همراه — برای جابه‌جایی بکشید' : 'Floating map — drag to move'}
+      >
+        {/* Progress ring */}
+        <svg viewBox={`0 0 ${WIDGET_SIZE} ${WIDGET_SIZE}`} className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" aria-hidden="true">
+          <circle cx={WIDGET_SIZE / 2} cy={WIDGET_SIZE / 2} r={WIDGET_RING_R} fill="none" stroke="#f1d9d4" strokeWidth="4" />
+          <circle
+            cx={WIDGET_SIZE / 2}
+            cy={WIDGET_SIZE / 2}
+            r={WIDGET_RING_R}
+            fill="none"
+            stroke="#10b981"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeDasharray={WIDGET_RING_C}
+            strokeDashoffset={WIDGET_RING_C * (1 - progress)}
+            style={{ transition: 'stroke-dashoffset 600ms ease' }}
+          />
+          <circle
+            cx={WIDGET_SIZE / 2}
+            cy={WIDGET_SIZE / 2}
+            r={WIDGET_NODE_R}
+            fill="none"
+            stroke="#e0533c"
+            strokeOpacity="0.3"
+            strokeWidth="1"
+            strokeDasharray="3 5"
+          />
+        </svg>
+
+        {/* Center hub: back to full map */}
+        <button
+          type="button"
+          onClick={onBackToMap}
+          title={lang === 'fa' ? 'بازگشت به نقشه کامل دوره' : 'Back to the full roadmap'}
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] shadow-md flex items-center justify-center hover:ring-2 hover:ring-[#e0533c]/40 transition-all cursor-pointer"
+        >
+          <img
+            src={OWJ_LOGO}
+            alt="OWJ"
+            draggable={false}
+            className="w-10 h-auto object-contain pointer-events-none"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              e.currentTarget.src = OWJ_LOGO_FALLBACK;
+            }}
+          />
+        </button>
+
+        {/* Session nodes (rotating pentagon, labels kept upright) */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 550ms cubic-bezier(0.22, 1, 0.36, 1)' }}
+        >
+          {sessions.map((sess, i) => {
+            const rad = (i * ORBIT_STEP * Math.PI) / 180;
+            const x = WIDGET_SIZE / 2 + WIDGET_NODE_R * Math.sin(rad);
+            const y = WIDGET_SIZE / 2 - WIDGET_NODE_R * Math.cos(rad);
+            const isActive = sess.id === activeSessionId;
+            const isDone = !!completedSessions[sess.id];
+            return (
+              <button
+                key={sess.id}
+                type="button"
+                onClick={() => onOpenSession(sess.id)}
+                title={lang === 'fa' ? sess.titleFa : sess.titleEn}
+                className={`pointer-events-auto absolute w-7 h-7 -ml-3.5 -mt-3.5 rounded-full text-[11px] font-black flex items-center justify-center border-2 cursor-pointer ${
+                  isActive
+                    ? 'bg-gradient-to-br from-purple-600 via-fuchsia-600 to-orange-500 text-white border-white ring-2 ring-purple-300 shadow-md'
+                    : isDone
+                    ? 'bg-emerald-500 text-white border-white shadow-xs'
+                    : 'bg-white dark:bg-[#201729] text-[#261a1d] dark:text-[#faedf3] border-[#ecdcd8] dark:border-[#382645] hover:border-[#e0533c]'
+                }`}
+                style={{
+                  left: x,
+                  top: y,
+                  transform: `rotate(${-rotation}deg)`,
+                  transition: 'transform 550ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms'
+                }}
+              >
+                {digit(i)}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Close */}
+        <button
+          type="button"
+          onClick={onClose}
+          title={lang === 'fa' ? 'بستن ویجت (از نقشه اصلی دوباره باز می‌شود)' : 'Hide widget'}
+          className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-white dark:bg-[#201729] border border-gray-300 dark:border-[#382645] text-[#755e66] dark:text-[#ad99ab] hover:text-[#e0533c] hover:border-[#e0533c]/50 shadow-xs flex items-center justify-center cursor-pointer"
+        >
+          <CloseIcon className="w-3.5 h-3.5" />
+        </button>
+
+        {/* Module list toggle */}
+        <button
+          type="button"
+          onClick={() => setShowModules((v) => !v)}
+          className={`absolute -bottom-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 whitespace-nowrap shadow-md border cursor-pointer transition-colors ${
+            showModules
+              ? 'bg-gradient-to-r from-[#e0533c] to-[#c026d3] text-white border-transparent'
+              : 'bg-white dark:bg-[#201729] text-[#261a1d] dark:text-[#faedf3] border-gray-300 dark:border-[#382645] hover:bg-orange-50'
+          }`}
+        >
+          <ListIcon className="w-3 h-3" />
+          <span>{lang === 'fa' ? `ماژول‌های جلسه ${digit(activeIdx)}` : `Session ${activeIdx + 1}`}</span>
+        </button>
+      </div>
+
+      {showModules && activeSess && (
+        <div
+          className={`absolute w-64 p-3 rounded-2xl bg-white/95 dark:bg-[#1a1222]/95 backdrop-blur-md border border-[#f3e1e4] dark:border-[#382645] shadow-2xl space-y-2 cursor-default ${
+            openUp ? 'bottom-full mb-3' : 'top-full mt-5'
+          } ${onLeftHalf ? 'left-0' : 'right-0'}`}
+          style={{ touchAction: 'pan-y' }}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <div className="text-[11px] font-extrabold leading-snug text-[#261a1d] dark:text-[#faedf3]">
+            {lang === 'fa' ? activeSess.titleFa : activeSess.titleEn}
+          </div>
+          <div className="flex flex-col gap-1.5 max-h-64 overflow-y-auto">
+            {activeSess.modules.map((m) => {
+              const isCurrent = activeTab === m.id;
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => onOpenModule(m.id)}
+                  className={`w-full px-2.5 py-1.5 rounded-xl text-right text-[11px] flex items-center gap-2 border transition-colors cursor-pointer ${
+                    isCurrent
+                      ? 'bg-gradient-to-r from-[#e0533c] to-[#c026d3] text-white border-transparent shadow-xs'
+                      : 'bg-white dark:bg-[#201729] text-[#0A101D] dark:text-[#faedf3] border-gray-200 dark:border-[#382645] hover:bg-orange-50 hover:border-orange-200'
+                  }`}
+                >
+                  <span
+                    dir="ltr"
+                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-black font-mono shrink-0 ${
+                      isCurrent ? 'bg-white/20 text-white' : 'bg-[#e0533c] text-white'
+                    }`}
+                  >
+                    {m.num}
+                  </span>
+                  <span className="font-bold leading-tight">{lang === 'fa' ? m.titleFa : m.titleEn}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>,
+    document.body
+  );
+};
+
 export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   lang,
   content,
@@ -462,6 +1244,8 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   const [instructionCopiedId, setInstructionCopiedId] = useState<string | null>(null);
 
   const navPillsRef = useRef<HTMLDivElement | null>(null);
+  const chapterStartRef = useRef<HTMLDivElement | null>(null);
+  const [isOrbitWidgetHidden, setIsOrbitWidgetHidden] = useState<boolean>(false);
 
   const TRACK_METAPHORS = {
     CIVIL_INFRA: {
@@ -776,10 +1560,33 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
       if (found) setActiveSessionId(found.sessionId);
     }
     setIsQuickDrawerOpen(false);
-    if (scrollToTop && navPillsRef.current) {
+    if (scrollToTop) {
+      const targetEl = chapterStartRef.current || navPillsRef.current;
+      if (targetEl) {
+        setTimeout(() => {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 60);
+      }
+    }
+  };
+
+  const handleOpenSession = (
+    sessionId: 's1' | 's2' | 's3' | 's4' | 's5',
+    scrollToChapter = true
+  ) => {
+    playTactileSound('thock');
+    setActiveSessionId(sessionId);
+    const targetSession = FIVE_SESSIONS.find((s) => s.id === sessionId);
+    if (targetSession && targetSession.modules.length > 0) {
+      setActiveTab(targetSession.modules[0].id);
+    }
+    setIsQuickDrawerOpen(false);
+    if (scrollToChapter) {
+      setIsOrbitWidgetHidden(false);
       setTimeout(() => {
-        navPillsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 40);
+        const targetEl = chapterStartRef.current || navPillsRef.current;
+        targetEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 140);
     }
   };
 
@@ -1311,207 +2118,27 @@ Tasks:
     }
   ];
 
-  const renderOrbitHub = () => {
-    const R = 230;
-    const W = 760;
-    const H = 640;
-    const CX = W / 2;
-    const CY = H / 2;
-    const ANGLES = [0, 72, 144, 216, 288];
-    const completedCount = FIVE_SESSIONS.filter((s) => !!completedSessions[s.id]).length;
-    const totalModules = FIVE_SESSIONS.reduce((acc, s) => acc + s.modules.length, 0);
-    const RING_R = 94;
-    const RING_C = 2 * Math.PI * RING_R;
-    const progress = completedCount / FIVE_SESSIONS.length;
-
-    const renderHub = (small: boolean) => (
-      <div className={`relative flex items-center justify-center shrink-0 ${small ? 'w-44 h-44' : 'w-[200px] h-[200px]'}`}>
-        <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full -rotate-90" aria-hidden="true">
-          <circle cx="100" cy="100" r={RING_R} fill="none" stroke="#f1d9d4" strokeWidth="6" />
-          <circle
-            cx="100"
-            cy="100"
-            r={RING_R}
-            fill="none"
-            stroke="#10b981"
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeDasharray={RING_C}
-            strokeDashoffset={RING_C * (1 - progress)}
-            style={{ transition: 'stroke-dashoffset 600ms ease' }}
-          />
-        </svg>
-        <div className="w-44 h-44 rounded-full bg-white/90 dark:bg-[#201729] backdrop-blur-md shadow-xl border border-white/70 dark:border-[#382645] flex flex-col items-center justify-center gap-2 relative z-10">
-          <img
-            src={OWJ_LOGO}
-            alt="OWJ Business Council"
-            className="w-28 h-auto object-contain"
-            referrerPolicy="no-referrer"
-            onError={(e) => {
-              e.currentTarget.src = OWJ_LOGO_FALLBACK;
-            }}
-          />
-          <span className="px-2.5 py-0.5 rounded-full bg-[#1d4f69]/10 text-[#1d4f69] dark:text-[#9cc9e0] text-[10px] font-black">
-            {lang === 'fa' ? `۲۰ ساعت • ${totalModules.toLocaleString('fa-IR')} ماژول` : `20h • ${totalModules} modules`}
-          </span>
-          <span dir="ltr" className="text-[10px] font-mono font-bold text-emerald-600">{completedCount * 20}%</span>
-        </div>
-      </div>
-    );
-
-    const renderCard = (sess: (typeof FIVE_SESSIONS)[number]) => {
-      const isSessActive = activeSessionId === sess.id;
-      const isCompleted = !!completedSessions[sess.id];
-      const metaFa = `${sess.hoursFa} • ${sess.modules.length.toLocaleString('fa-IR')} ماژول`;
-      const metaEn = `4h • ${sess.modules.length} modules`;
-      return (
-        <div
-          key={sess.id}
-          role="button"
-          tabIndex={0}
-          onClick={() => {
-            playTactileSound('thock');
-            setActiveSessionId(sess.id);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              playTactileSound('thock');
-              setActiveSessionId(sess.id);
-            }
-          }}
-          dir="rtl"
-          className={`p-3 rounded-2xl border text-right transition-all duration-200 cursor-pointer flex flex-col gap-2 select-none w-full ${
-            isSessActive
-              ? 'bg-gradient-to-br from-purple-600 via-fuchsia-600 to-orange-500 text-white scale-105 ring-4 ring-purple-200 border-transparent shadow-xl'
-              : isCompleted
-              ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-950 dark:text-emerald-100 border-emerald-400/60 shadow-xs hover:shadow-md'
-              : 'bg-white dark:bg-[#201729] text-[#261a1d] dark:text-[#faedf3] border-[#ecdcd8] dark:border-[#382645] shadow-xs hover:shadow-md hover:border-[#e0533c]/50'
-          }`}
-        >
-          <div className="flex items-center justify-between gap-1.5">
-            <span className={`text-[10px] font-bold ${isSessActive ? 'text-white/90' : 'text-[#755e66] dark:text-[#ad99ab]'}`}>
-              {lang === 'fa' ? metaFa : metaEn}
-            </span>
-            {isAdmin ? (
-              <button
-                type="button"
-                onClick={(e) => toggleSessionCompletion(sess.id, e)}
-                title={isCompleted ? 'لغو وضعیت تکمیل (ویژه ادمین)' : 'ثبت به عنوان تکمیل‌شده / سبز کردن (ویژه ادمین)'}
-                className={`px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 transition-all cursor-pointer ${
-                  isCompleted
-                    ? 'bg-emerald-500 text-white shadow-2xs'
-                    : isSessActive
-                    ? 'bg-white/25 text-white hover:bg-white/35'
-                    : 'bg-black/[0.05] dark:bg-white/[0.08] text-[#755e66] dark:text-[#ad99ab] hover:bg-emerald-500/20 hover:text-emerald-700'
-                }`}
-              >
-                <CheckCircle2 className="w-3 h-3 shrink-0" />
-                <span>{isCompleted ? (lang === 'fa' ? 'تکمیل شد' : 'Done') : lang === 'fa' ? '✓ سبز کردن' : '✓ Mark done'}</span>
-              </button>
-            ) : isCompleted ? (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 bg-emerald-500 text-white">
-                <CheckCircle2 className="w-3 h-3 shrink-0" />
-                <span>{lang === 'fa' ? 'تکمیل‌شده' : 'Done'}</span>
-              </span>
-            ) : null}
-          </div>
-          <div className="font-extrabold text-xs leading-snug">{lang === 'fa' ? sess.titleFa : sess.titleEn}</div>
-        </div>
-      );
-    };
-
-    return (
-      <div dir="rtl" className="rounded-3xl bg-gradient-to-br from-[#fff7f5] to-[#fdf2f8] dark:from-[#1a1222] dark:to-[#221629] border border-[#f3e1e4] dark:border-[#382645] p-3 sm:p-4">
-        {/* Desktop / tablet: radial pentagon orbit */}
-        <div dir="ltr" className="hidden md:block relative mx-auto w-full max-w-[760px]" style={{ aspectRatio: `${W} / ${H}` }}>
-          <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full" aria-hidden="true">
-            <circle cx={CX} cy={CY} r={R} fill="none" stroke="#e0533c" strokeOpacity="0.28" strokeWidth="1.5" strokeDasharray="4 8" />
-            {FIVE_SESSIONS.map((sess, i) => {
-              const rad = (ANGLES[i] * Math.PI) / 180;
-              const x = CX + R * Math.sin(rad);
-              const y = CY - R * Math.cos(rad);
-              const isActive = activeSessionId === sess.id;
-              const isDone = !!completedSessions[sess.id];
-              const stroke = isActive ? '#c026d3' : isDone ? '#10b981' : '#e5cfcb';
-              return (
-                <line
-                  key={sess.id}
-                  x1={CX}
-                  y1={CY}
-                  x2={x}
-                  y2={y}
-                  stroke={stroke}
-                  strokeWidth={isActive ? 3 : 2}
-                  strokeLinecap="round"
-                  strokeDasharray={isActive ? '7 6' : isDone ? undefined : '3 6'}
-                >
-                  {isActive && (
-                    <animate attributeName="stroke-dashoffset" from="26" to="0" dur="1s" repeatCount="indefinite" />
-                  )}
-                </line>
-              );
-            })}
-          </svg>
-
-          <div className="absolute z-10" style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
-            {renderHub(false)}
-          </div>
-
-          {FIVE_SESSIONS.map((sess, i) => {
-            const rad = (ANGLES[i] * Math.PI) / 180;
-            const x = CX + R * Math.sin(rad);
-            const y = CY - R * Math.cos(rad);
-            return (
-              <div
-                key={sess.id}
-                className="absolute z-20"
-                style={{
-                  left: `${(x / W) * 100}%`,
-                  top: `${(y / H) * 100}%`,
-                  width: '27%',
-                  transform: 'translate(-50%, -50%)'
-                }}
-              >
-                {renderCard(sess)}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Mobile: hub on top, then vertical timeline */}
-        <div className="md:hidden flex flex-col items-center gap-5">
-          {renderHub(true)}
-          <div className="w-full relative pr-5 space-y-3">
-            <span className="absolute right-1.5 top-2 bottom-2 w-0.5 bg-gradient-to-b from-[#e0533c]/60 to-[#c026d3]/30 rounded-full" aria-hidden="true" />
-            {FIVE_SESSIONS.map((sess) => {
-              const isActive = activeSessionId === sess.id;
-              const isDone = !!completedSessions[sess.id];
-              return (
-                <div key={sess.id} className="relative">
-                  <span
-                    className={`absolute -right-[19px] top-4 w-3.5 h-3.5 rounded-full border-2 border-white ${
-                      isActive ? 'bg-fuchsia-600' : isDone ? 'bg-emerald-500' : 'bg-[#e0533c]/50'
-                    }`}
-                    aria-hidden="true"
-                  />
-                  {renderCard(sess)}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
 
   const renderCurriculumNav = () => (
     <div className="space-y-3">
-      {renderOrbitHub()}
+      <OrbitRoadmapHub
+        lang={lang}
+        sessions={FIVE_SESSIONS}
+        activeSessionId={activeSessionId}
+        completedSessions={completedSessions}
+        isAdmin={!!isAdmin}
+        onSelectSession={(id) => handleOpenSession(id, false)}
+        onOpenSession={(id) => handleOpenSession(id, true)}
+        onToggleComplete={toggleSessionCompletion}
+        widgetHidden={isOrbitWidgetHidden}
+        onRestoreWidget={() => setIsOrbitWidgetHidden(false)}
+      />
 
-      {/* Track-Adaptive Metaphor Strip for Active Session */}
-      <div className="px-3.5 py-2.5 rounded-xl bg-[#fdeee9]/70 dark:bg-[#341528]/50 border border-[#e0533c]/25 flex flex-wrap items-center justify-between gap-2 text-xs">
+      {/* Track-Adaptive Metaphor Strip for Active Session (Scroll Target when opening a session) */}
+      <div
+        ref={chapterStartRef}
+        className="scroll-mt-4 px-3.5 py-2.5 rounded-xl bg-[#fdeee9]/70 dark:bg-[#341528]/50 border border-[#e0533c]/25 flex flex-wrap items-center justify-between gap-2 text-xs"
+      >
         <div className="flex flex-wrap items-center gap-2 min-w-0">
           <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-[#e0533c] text-white shrink-0">
             استعاره مسیر {activeTrackMetaphor.trackLabelFa}
@@ -5171,6 +5798,23 @@ Tasks:
           onChangeIndex={setS1SlideIndex}
           copyToClipboard={copyToClipboard}
           copiedId={copiedId}
+        />
+      )}
+
+      {!isOrbitWidgetHidden && (
+        <FloatingOrbitWidget
+          lang={lang}
+          sessions={FIVE_SESSIONS}
+          activeSessionId={activeSessionId}
+          activeTab={activeTab}
+          completedSessions={completedSessions}
+          onOpenSession={(id) => handleOpenSession(id, true)}
+          onOpenModule={(modId) => handleTabClick(modId as typeof activeTab, undefined, true)}
+          onBackToMap={() => {
+            playTactileSound('thock');
+            navPillsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+          onClose={() => setIsOrbitWidgetHidden(true)}
         />
       )}
     </div>
