@@ -20,6 +20,7 @@ export interface DepartmentUseCase {
 
 export interface PresentationInfographicBlueprint {
   id: string;
+  kind?: 'deck' | 'infographic' | 'audio' | 'hr';
   titleFa: string;
   titleEn: string;
   categoryFa: string;
@@ -1187,6 +1188,7 @@ export const PAYA_UNIT_MANAGERS_MATRIX: DepartmentUseCase[] = [
 export const PAYA_PRESENTATION_INFOGRAPHIC_GUIDES: PresentationInfographicBlueprint[] = [
   {
     id: 'paya_board_dual_wing_deck',
+    kind: 'deck',
     titleFa: 'استخراج اسلایدبریف گزارش تلفیقی هیئت‌مدیره هلدینگ پایا سامان پارس (دو بال و ۶۳ پروژه)',
     titleEn: 'Paya Holding Dual-Wing & 63-Project Board Presentation Deck',
     categoryFa: 'گزارش هیئت‌مدیره هلدینگ',
@@ -1227,6 +1229,7 @@ export const PAYA_PRESENTATION_INFOGRAPHIC_GUIDES: PresentationInfographicBluepr
   },
   {
     id: 'paya_kaveh_investor_infographic',
+    kind: 'infographic',
     titleFa: 'طراحی بریف اینفوگرافیک جذب سرمایه‌گذار و تحول سبز شهر صنعتی کاوه (خورشیدی ۵MW و پلاسما)',
     titleEn: 'Kaveh Industrial City Green Transformation Infographic Brief',
     categoryFa: 'اینفوگرافیک شهر صنعتی کاوه',
@@ -1263,6 +1266,7 @@ export const PAYA_PRESENTATION_INFOGRAPHIC_GUIDES: PresentationInfographicBluepr
   },
   {
     id: 'paya_audio_consortium_briefing',
+    kind: 'audio',
     titleFa: 'ساخت پادکست صوتی عمیق دو نفره برای مدیران ۱۴ شرکت تابعه پایا سامان پارس',
     titleEn: '2-Host Executive Audio Overview for Paya Holding Directors',
     categoryFa: 'پادکست مدیریتی دو بال',

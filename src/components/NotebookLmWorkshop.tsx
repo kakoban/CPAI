@@ -137,18 +137,27 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
     {
       id: 'blueprints',
       keyHint: 'N3',
-      titleFa: '۲. پرزنتیشن و ممیزی HR',
-      titleEn: '2. Slide Decks & HR Audit',
-      subtitleFa: 'اسلاید، اینفوگرافیک، پادکست و منابع انسانی',
-      subtitleEn: 'Decks, Infographics & HR Compliance',
+      titleFa:
+        industryTrack === 'PAYA_SAMAN_PARS'
+          ? '۲. پرزنتیشن، کاوه و پادکست'
+          : '۲. پرزنتیشن و ممیزی HR',
+      titleEn:
+        industryTrack === 'PAYA_SAMAN_PARS'
+          ? '2. Board Decks, Kaveh & Audio'
+          : '2. Slide Decks & HR Audit',
+      subtitleFa:
+        industryTrack === 'PAYA_SAMAN_PARS'
+          ? 'هیئت‌مدیره دو بال، اینفوگرافیک کاوه و پادکست'
+          : 'اسلاید، اینفوگرافیک، پادکست و منابع انسانی',
+      subtitleEn: 'Decks, Infographics & Audio Briefings',
       activeClass: 'bg-gradient-to-b from-[#b87333] to-[#965b24] text-white border-[#78471a] border-b-[#593412] ring-2 ring-[#b87333]/30',
       icon: <FileBarChart className="w-4 h-4 shrink-0 mt-0.5" />,
     },
     {
       id: 'exercises',
       keyHint: 'N4',
-      titleFa: '۳. تمرینات عملی (۵ تمرین)',
-      titleEn: '3. Hands-On Labs (5)',
+      titleFa: `۳. تمرینات عملی (${NOTEBOOKLM_EXERCISES.length.toLocaleString('fa-IR')} تمرین)`,
+      titleEn: `3. Hands-On Labs (${NOTEBOOKLM_EXERCISES.length})`,
       subtitleFa: 'سناریوهای واقعی با فایل‌های آماده تست',
       subtitleEn: 'Real Scenarios with Sample Docs',
       activeClass: 'bg-gradient-to-b from-[#2f7d5b] to-[#236146] text-white border-[#1a4934] border-b-[#113123] ring-2 ring-[#2f7d5b]/30',
@@ -1301,9 +1310,23 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
       {activeSubTab === 'blueprints' && (
         <div className="space-y-5">
           {/* Blueprint Selector Tabs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div
+            className={`grid grid-cols-1 sm:grid-cols-2 ${
+              PRESENTATION_INFOGRAPHIC_GUIDES.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'
+            } gap-3`}
+          >
             {PRESENTATION_INFOGRAPHIC_GUIDES.map((blueprint) => {
               const isSelected = blueprint.id === selectedBlueprintId;
+              const isAudio =
+                blueprint.kind === 'audio' ||
+                blueprint.id === 'audio_overview_deep_dive' ||
+                blueprint.id === 'paya_audio_consortium_briefing';
+              const isInfographic =
+                blueprint.kind === 'infographic' ||
+                blueprint.id === 'infographic_blueprint_workflow' ||
+                blueprint.id === 'paya_kaveh_investor_infographic';
+              const isHr =
+                blueprint.kind === 'hr' || blueprint.id === 'hr_overtime_compliance_blueprint';
               return (
                 <button
                   key={blueprint.id}
@@ -1318,11 +1341,11 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#b87333]/10 text-[#b87333]">
                       {lang === 'fa' ? blueprint.categoryFa : blueprint.categoryEn}
                     </span>
-                    {blueprint.id === 'audio_overview_deep_dive' ? (
+                    {isAudio ? (
                       <Headphones className="w-4 h-4 text-[#b87333]" />
-                    ) : blueprint.id === 'infographic_blueprint_workflow' ? (
+                    ) : isInfographic ? (
                       <Sliders className="w-4 h-4 text-[#b87333]" />
-                    ) : blueprint.id === 'hr_overtime_compliance_blueprint' ? (
+                    ) : isHr ? (
                       <Users className="w-4 h-4 text-[#b87333]" />
                     ) : (
                       <FileBarChart className="w-4 h-4 text-[#b87333]" />
@@ -1535,7 +1558,9 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                   <div className="flex items-center gap-2 text-[#b87333] font-bold text-xs">
                     <Sparkles className="w-4 h-4" />
                     <span>
-                      {selectedBlueprint.id === 'audio_overview_deep_dive'
+                      {selectedBlueprint.kind === 'audio' ||
+                      selectedBlueprint.id === 'audio_overview_deep_dive' ||
+                      selectedBlueprint.id === 'paya_audio_consortium_briefing'
                         ? lang === 'fa'
                           ? 'دستورالعمل سفارشی‌سازی پادکست (Audio Overview Customize):'
                           : 'Audio Overview Custom Instruction:'
@@ -1545,7 +1570,11 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                     </span>
                   </div>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/5 dark:bg-white/10 text-[#5d6b73] dark:text-[#9aa8b0]">
-                    {selectedBlueprint.id === 'audio_overview_deep_dive' ? 'NotebookLM Studio' : 'NotebookLM Chat'}
+                    {selectedBlueprint.kind === 'audio' ||
+                    selectedBlueprint.id === 'audio_overview_deep_dive' ||
+                    selectedBlueprint.id === 'paya_audio_consortium_briefing'
+                      ? 'NotebookLM Studio'
+                      : 'NotebookLM Chat'}
                   </span>
                 </div>
 
@@ -1625,7 +1654,11 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
       {activeSubTab === 'exercises' && (
         <div className="space-y-5">
           {/* Exercise Selector Pills */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div
+            className={`grid grid-cols-1 sm:grid-cols-2 ${
+              NOTEBOOKLM_EXERCISES.length === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-5'
+            } gap-3`}
+          >
             {NOTEBOOKLM_EXERCISES.map((ex) => {
               const isSelected = ex.id === selectedExerciseId;
               return (

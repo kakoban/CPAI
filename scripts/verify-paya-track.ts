@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import * as trackTypes from '../src/types/industryTrack.ts';
 import * as disciplineReg from '../src/data/disciplineExamplesRegistry.ts';
 import * as domainExamples from '../src/data/domainTrackExamples.ts';
@@ -184,3 +186,62 @@ const simWings = new Set(payaSim.PAYA_MOCK_PORTFOLIO_DATA.featured_projects.map(
 assert.equal(simWings.size, 2, 'Simulator projects must cover both holding wings');
 
 console.log('Task 5 verification passed');
+
+// Final Review Fix Pass Assertions (RED -> GREEN)
+// 1. Critical #1: Page0 downloads must use downloadTextFile(rawCsv / markdownContent), not dead static <a href={...fileDownloadPath}>
+const page0Source = fs.readFileSync(path.resolve('src/components/Page0LlmFundamentals.tsx'), 'utf8');
+const page0Norm = page0Source.replace(/\s+/g, ' ');
+assert.ok(
+  !page0Source.includes('href={currentDataset.fileDownloadPath}'),
+  'Page0 must not link datasets to missing static fileDownloadPath'
+);
+assert.ok(
+  !page0Source.includes('href={currentContract.fileDownloadPath}'),
+  'Page0 must not link contracts to missing static fileDownloadPath'
+);
+assert.ok(
+  page0Norm.includes('downloadTextFile( currentDataset.fileName, currentDataset.rawCsv') ||
+    page0Norm.includes('downloadTextFile(currentDataset.fileName, currentDataset.rawCsv')
+);
+assert.ok(
+  page0Norm.includes('downloadTextFile( currentContract.fileName, currentContract.markdownContent') ||
+    page0Norm.includes('downloadTextFile(currentContract.fileName, currentContract.markdownContent')
+);
+
+// 2. Important #2: Switching tracks clears /paya and ?track= from URL
+assert.equal(
+  typeof (trackTypes as any).getCleanedUrlAfterTrackChange,
+  'function',
+  'getCleanedUrlAfterTrackChange must be exported'
+);
+assert.equal((trackTypes as any).getCleanedUrlAfterTrackChange('/paya', ''), '/');
+assert.equal((trackTypes as any).getCleanedUrlAfterTrackChange('/paya-saman-pars', '?page=1'), '/?page=1');
+assert.equal((trackTypes as any).getCleanedUrlAfterTrackChange('/', '?track=PAYA_SAMAN_PARS&page=0'), '/?page=0');
+assert.equal((trackTypes as any).getCleanedUrlAfterTrackChange('/', '?track=paya'), '/');
+assert.equal((trackTypes as any).getCleanedUrlAfterTrackChange('/other', '?page=2'), '/other?page=2');
+
+const appSource = fs.readFileSync(path.resolve('src/App.tsx'), 'utf8');
+assert.ok(
+  appSource.includes('getCleanedUrlAfterTrackChange'),
+  'App.tsx handleSelectIndustryTrack must clean track URL state via getCleanedUrlAfterTrackChange'
+);
+
+// 3. Important #3: NotebookLM workshop audio/infographic kind & dynamic exercise counts
+const payaBlueprints = payaNlm.blueprints;
+const audioBp = payaBlueprints.find((b: any) => b.id === 'paya_audio_consortium_briefing');
+const infoBp = payaBlueprints.find((b: any) => b.id === 'paya_kaveh_investor_infographic');
+assert.equal(audioBp?.kind, 'audio', 'paya_audio_consortium_briefing must carry kind="audio"');
+assert.equal(infoBp?.kind, 'infographic', 'paya_kaveh_investor_infographic must carry kind="infographic"');
+
+const nlmWorkshopSource = fs.readFileSync(path.resolve('src/components/NotebookLmWorkshop.tsx'), 'utf8');
+assert.ok(
+  !nlmWorkshopSource.includes("'۳. تمرینات عملی (۵ تمرین)'"),
+  'NotebookLmWorkshop exercises sub-tab count must be dynamic, not hardcoded 5'
+);
+assert.ok(
+  nlmWorkshopSource.includes("selectedBlueprint.kind === 'audio'") ||
+    nlmWorkshopSource.includes("'paya_audio_consortium_briefing'"),
+  'NotebookLmWorkshop must recognize Paya audio blueprint'
+);
+
+console.log('Review fix assertions passed');

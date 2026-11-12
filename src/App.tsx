@@ -38,6 +38,7 @@ import {
   EngineeringRoleId,
   getSavedIndustryTrack,
   saveIndustryTrack,
+  getCleanedUrlAfterTrackChange,
   getSavedDiscipline,
   saveDiscipline,
   getSavedRole,
@@ -169,6 +170,12 @@ export default function App() {
   const handleSelectIndustryTrack = (track: IndustryTrackId) => {
     setIndustryTrack(track);
     saveIndustryTrack(track);
+    if (typeof window !== 'undefined') {
+      const nextUrl = getCleanedUrlAfterTrackChange(window.location.pathname, window.location.search);
+      if (nextUrl !== window.location.pathname + window.location.search) {
+        window.history.replaceState({}, '', nextUrl);
+      }
+    }
     const fallbackDisc = getSavedDiscipline(track);
     setActiveDiscipline(fallbackDisc);
     saveDiscipline(fallbackDisc);

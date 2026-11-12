@@ -308,6 +308,25 @@ export const resolveTrackFromUrl = (
   return null;
 };
 
+export const getCleanedUrlAfterTrackChange = (
+  pathname: string,
+  search: string
+): string => {
+  const normalizedPath = pathname.toLowerCase().replace(/\/+$/, '');
+  const nextPath =
+    normalizedPath === '/paya' ||
+    normalizedPath.endsWith('/paya') ||
+    normalizedPath === '/paya-saman-pars' ||
+    normalizedPath.endsWith('/paya-saman-pars')
+      ? '/'
+      : pathname || '/';
+
+  const params = new URLSearchParams(search || '');
+  params.delete('track');
+  const nextQuery = params.toString();
+  return nextQuery ? `${nextPath}?${nextQuery}` : nextPath;
+};
+
 export const getSavedIndustryTrack = (): IndustryTrackId => {
   const urlTrack = resolveTrackFromUrl();
   if (urlTrack) {

@@ -3355,14 +3355,20 @@ Tasks:
 
                 {/* Direct File Actions */}
                 <div className="flex items-center gap-2 shrink-0">
-                  <a
-                    href={currentDataset.fileDownloadPath}
-                    download={currentDataset.fileName}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#2f7d5b] hover:bg-[#25664a] text-white text-xs font-semibold shadow-xs transition-colors"
+                  <button
+                    type="button"
+                    onClick={() =>
+                      downloadTextFile(
+                        currentDataset.fileName,
+                        currentDataset.rawCsv,
+                        'text/csv;charset=utf-8;'
+                      )
+                    }
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#2f7d5b] hover:bg-[#25664a] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>{lang === 'fa' ? 'دانلود فایل CSV' : 'Download CSV'}</span>
-                  </a>
+                  </button>
 
                   <button
                     onClick={() => {
@@ -3731,14 +3737,20 @@ Tasks:
 
                 {/* Direct Actions: Download & Copy Markdown */}
                 <div className="flex items-center gap-2 shrink-0">
-                  <a
-                    href={currentContract.fileDownloadPath}
-                    download={currentContract.fileName}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#2f7d5b] hover:bg-[#25664a] text-white text-xs font-semibold shadow-xs transition-colors"
+                  <button
+                    type="button"
+                    onClick={() =>
+                      downloadTextFile(
+                        currentContract.fileName,
+                        currentContract.markdownContent,
+                        'text/markdown;charset=utf-8;'
+                      )
+                    }
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#2f7d5b] hover:bg-[#25664a] text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>{lang === 'fa' ? 'دانلود فایل قرارداد (.md)' : 'Download Contract (.md)'}</span>
-                  </a>
+                  </button>
 
                   <button
                     onClick={() => {
