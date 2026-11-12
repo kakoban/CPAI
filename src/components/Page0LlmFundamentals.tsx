@@ -162,6 +162,193 @@ const TRACK_RCTO_PILLARS: Record<IndustryTrackId, RctoPillarExample> = {
   }
 };
 
+interface OtherLlmPlatform {
+  id: 'deepseek' | 'qwen' | 'perplexity' | 'grok' | 'mistral' | 'meta_llama';
+  name: string;
+  company: string;
+  url: string;
+  domainLabel: string;
+  badgeFa: string;
+  badgeEn: string;
+  descFa: string;
+  descEn: string;
+  modelsFa: string;
+  modelsEn: string;
+  accentHex: string;
+  bgTintClass: string;
+}
+
+const OTHER_LLM_PLATFORMS: OtherLlmPlatform[] = [
+  {
+    id: 'deepseek',
+    name: 'DeepSeek',
+    company: 'DeepSeek AI',
+    url: 'https://chat.deepseek.com',
+    domainLabel: 'chat.deepseek.com',
+    badgeFa: 'استدلال عمیق و متن‌باز',
+    badgeEn: 'Open-Weight & Reasoning',
+    descFa: 'مدل قدرتمند استدلال گام‌به‌گام (R1) و مکالمه سریع (V3)؛ فوق‌العاده قوی در منطق مهندسی، ریاضیات، کدنویسی و تحلیل داده با دسترسی وب رایگان.',
+    descEn: 'Open-weight reasoning powerhouse (R1) and flagship chat (V3), excelling at logic, engineering math, coding, and free web access.',
+    modelsFa: 'DeepSeek-R1 · DeepSeek-V3',
+    modelsEn: 'DeepSeek-R1 · DeepSeek-V3',
+    accentHex: '#4D6BFE',
+    bgTintClass: 'bg-[#4D6BFE]/10 border-[#4D6BFE]/25 text-[#4D6BFE]'
+  },
+  {
+    id: 'qwen',
+    name: 'Qwen (کوئن)',
+    company: 'Alibaba Cloud',
+    url: 'https://chat.qwen.ai',
+    domainLabel: 'chat.qwen.ai',
+    badgeFa: 'قدرتمند در فارسی و کد',
+    badgeEn: 'Multilingual & Coding',
+    descFa: 'خانواده مدل‌های چندزبانه و متن‌باز علی‌بابا با تسلط چشمگیر بر زبان فارسی، قابلیت Artifacts، جستجوی وب و ابزارهای تخصصی کد و بینایی.',
+    descEn: "Alibaba's flagship multilingual & open-weight family with strong Persian fluency, web search, Artifacts, and specialized coder/vision models.",
+    modelsFa: 'Qwen3 · Qwen2.5-Max · Qwen-Coder',
+    modelsEn: 'Qwen3 · Qwen2.5-Max · Qwen-Coder',
+    accentHex: '#615CED',
+    bgTintClass: 'bg-[#615CED]/10 border-[#615CED]/25 text-[#615CED]'
+  },
+  {
+    id: 'perplexity',
+    name: 'Perplexity',
+    company: 'Perplexity AI',
+    url: 'https://www.perplexity.ai',
+    domainLabel: 'perplexity.ai',
+    badgeFa: 'تحقیق با منبع دقیق',
+    badgeEn: 'Cited Live Research',
+    descFa: 'موتور پژوهش و پاسخگویی متصل به وب زنده که کنار هر ادعا لینک منبع معتبر ارائه می‌دهد و ریسک توهم را در بررسی استانداردها و بازار به حداقل می‌رساند.',
+    descEn: 'Live AI research engine that cites verifiable web sources inline, drastically reducing hallucination in standards & market research.',
+    modelsFa: 'Sonar · Deep Research',
+    modelsEn: 'Sonar · Deep Research',
+    accentHex: '#20808D',
+    bgTintClass: 'bg-[#20808D]/10 border-[#20808D]/25 text-[#20808D]'
+  },
+  {
+    id: 'grok',
+    name: 'Grok',
+    company: 'xAI',
+    url: 'https://grok.com',
+    domainLabel: 'grok.com',
+    badgeFa: 'رصد زنده و DeepSearch',
+    badgeEn: 'Real-Time & DeepSearch',
+    descFa: 'دسترسی آنی به اخبار و نبض لحظه‌ای پلتفرم X، مجهز به حالت استدلال عمیق (Think) و جستجوی چندمنبعی برای رصد سریع رقبا و بازار.',
+    descEn: 'Real-time intelligence paired with Think reasoning mode and multi-source DeepSearch for rapid market & news tracking.',
+    modelsFa: 'Grok 3 · DeepSearch · Think',
+    modelsEn: 'Grok 3 · DeepSearch · Think',
+    accentHex: '#475569',
+    bgTintClass: 'bg-slate-500/10 border-slate-500/25 text-slate-700 dark:text-slate-300'
+  },
+  {
+    id: 'mistral',
+    name: 'Le Chat (Mistral)',
+    company: 'Mistral AI',
+    url: 'https://chat.mistral.ai',
+    domainLabel: 'chat.mistral.ai',
+    badgeFa: 'سرعت بالا و اروپایی',
+    badgeEn: 'European Speed & Privacy',
+    descFa: 'پرچم‌دار هوش مصنوعی اروپا با سرعت پاسخ‌گویی استثنایی (Flash Answers)، کدنویسی دقیق، تحلیل سند و رعایت سخت‌گیرانه حریم خصوصی GDPR.',
+    descEn: 'Leading European LLM lab known for ultra-fast Flash Answers, strong coding/OCR, and strict enterprise data privacy.',
+    modelsFa: 'Mistral Large · Codestral · Pixtral',
+    modelsEn: 'Mistral Large · Codestral · Pixtral',
+    accentHex: '#FA520F',
+    bgTintClass: 'bg-[#FA520F]/10 border-[#FA520F]/25 text-[#FA520F]'
+  },
+  {
+    id: 'meta_llama',
+    name: 'Meta AI (Llama)',
+    company: 'Meta',
+    url: 'https://www.meta.ai',
+    domainLabel: 'meta.ai',
+    badgeFa: 'استاندارد استقرار داخلی',
+    badgeEn: 'Open-Source Standard',
+    descFa: 'محبوب‌ترین استاندارد مدل‌های متن‌باز جهان؛ پایه اصلی بسیاری از استقرارهای خصوصی و آفلاین هوش مصنوعی روی سرورهای داخلی سازمان‌ها (On-Premise).',
+    descEn: 'The global open-weight benchmark powering private, air-gapped, and on-premise enterprise AI deployments.',
+    modelsFa: 'Llama 4 · Llama 3.3',
+    modelsEn: 'Llama 4 · Llama 3.3',
+    accentHex: '#0668E1',
+    bgTintClass: 'bg-[#0668E1]/10 border-[#0668E1]/25 text-[#0668E1]'
+  }
+];
+
+const renderOtherLlmLogo = (id: OtherLlmPlatform['id']) => {
+  switch (id) {
+    case 'deepseek':
+      return (
+        <svg viewBox="0 0 24 24" className="w-6 h-6" aria-label="DeepSeek">
+          <path
+            fill="#4D6BFE"
+            d="M19.8 11.4c-1.1-2.8-3.8-4.6-6.9-4.6-2.4 0-4.6 1.1-6 3-.7-.4-1.5-.6-2.4-.5-1.4.2-2.5 1.3-2.5 2.7 0 .8.4 1.5 1 2-.1.5-.1 1-.1 1.5 0 3.1 2.9 5.5 7.4 5.5 5 0 9.6-3.1 10.6-7.6.2-.7-.4-1.5-1.1-2zm-5.2 2.4a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4z"
+          />
+          <path
+            fill="#93A8FF"
+            d="M12.3 5.5c.8-1.4 2.3-2.3 3.9-2.4-.5 1.3-.4 2.7.2 3.8-1.3-.7-2.7-1.2-4.1-1.4z"
+          />
+        </svg>
+      );
+    case 'qwen':
+      return (
+        <svg viewBox="0 0 24 24" className="w-6 h-6" aria-label="Qwen">
+          <defs>
+            <linearGradient id="qwenGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#615CED" />
+              <stop offset="100%" stopColor="#A855F7" />
+            </linearGradient>
+          </defs>
+          <path
+            fill="url(#qwenGrad)"
+            d="M12 2.2 14.9 7l5.5 1-3.9 4 .9 5.5-5.4-2.6L6.6 17.5l.9-5.5L3.6 8 9.1 7 12 2.2z"
+          />
+          <circle cx="12" cy="11.2" r="2.6" fill="#ffffff" />
+          <path d="M13.6 13l3.6 3.8" stroke="#615CED" strokeWidth="2.1" strokeLinecap="round" />
+        </svg>
+      );
+    case 'perplexity':
+      return (
+        <svg viewBox="0 0 24 24" className="w-6 h-6" aria-label="Perplexity">
+          <g fill="none" stroke="#20808D" strokeWidth="1.9" strokeLinejoin="round" strokeLinecap="round">
+            <path d="M12 2.5v19M4.5 7l7.5 4.8L19.5 7M4.5 17l7.5-4.8 7.5 4.8" />
+            <rect x="6" y="4.5" width="12" height="15" rx="1.5" />
+          </g>
+        </svg>
+      );
+    case 'grok':
+      return (
+        <svg viewBox="0 0 24 24" className="w-6 h-6 text-[#111827] dark:text-[#f1f5f9]" aria-label="Grok">
+          <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" strokeWidth="2.2" />
+          <path d="M5.5 18.5 18.8 5.2" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+        </svg>
+      );
+    case 'mistral':
+      return (
+        <svg viewBox="0 0 24 24" className="w-6 h-6" aria-label="Mistral AI">
+          <rect x="3" y="4" width="3.6" height="3.2" fill="#FFD700" />
+          <rect x="17.4" y="4" width="3.6" height="3.2" fill="#FFD700" />
+          <rect x="3" y="7.8" width="7.2" height="3.2" fill="#FFAF00" />
+          <rect x="13.8" y="7.8" width="7.2" height="3.2" fill="#FFAF00" />
+          <rect x="3" y="11.6" width="18" height="3.2" fill="#FF8205" />
+          <rect x="3" y="15.4" width="3.6" height="4.2" fill="#FA520F" />
+          <rect x="10.2" y="15.4" width="3.6" height="4.2" fill="#FA520F" />
+          <rect x="17.4" y="15.4" width="3.6" height="4.2" fill="#FA520F" />
+        </svg>
+      );
+    case 'meta_llama':
+    default:
+      return (
+        <svg viewBox="0 0 24 24" className="w-6 h-6" aria-label="Meta AI">
+          <path
+            fill="none"
+            stroke="#0668E1"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M3.2 14.5c0-4 2.4-7.2 4.9-7.2 1.9 0 3.1 1.7 3.9 3.6.8-1.9 2-3.6 3.9-3.6 2.5 0 4.9 3.2 4.9 7.2 0 2.5-1.3 4.2-3.2 4.2-1.9 0-3.3-1.8-5.6-6.2-2.3 4.4-3.7 6.2-5.6 6.2-1.9 0-3.2-1.7-3.2-4.2z"
+          />
+        </svg>
+      );
+  }
+};
+
 export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   lang,
   content,
@@ -196,8 +383,9 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     | 's1_drive'
     | 's1_markdown'
     | 's1_github'
-    | 'tools'
+    | 'prompt_definition'
     | 'prompting'
+    | 'tools'
     | 'prompts_library'
     | 'advanced_features'
     | 'engineering_dashboards'
@@ -388,13 +576,13 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
       metaphorFa: 'استخدام «مشاوران مقیم» (Gems/Projects) و ساخت «ابزارهای محاسباتی و داشبورد» (Artifacts/Canvas)',
       modules: [
         {
-          id: 'tools' as const,
+          id: 'prompt_definition' as const,
           sessionId: 's2' as const,
           num: '۲-۱',
-          titleFa: 'سه غول هوش مصنوعی و مهندسی زمینه',
-          subFa: 'ChatGPT · Claude · Gemini · Context',
-          titleEn: 'Top 3 LLMs & Context',
-          subEn: 'ChatGPT, Claude, Gemini'
+          titleFa: 'پرامپت چیست؟ (تعریف و آناتومی)',
+          subFa: 'ورودی دقیق ← خروجی دقیق · Zero-Shot تا مهندسی پرامپت',
+          titleEn: 'What is a Prompt? (Anatomy)',
+          subEn: 'Instruction, Context & Constraints'
         },
         {
           id: 'prompting' as const,
@@ -406,9 +594,18 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
           subEn: 'Role, Context, Task, Output'
         },
         {
-          id: 'prompts_library' as const,
+          id: 'tools' as const,
           sessionId: 's2' as const,
           num: '۲-۳',
+          titleFa: 'غول‌های هوش مصنوعی و LLMهای مطرح',
+          subFa: 'ChatGPT · Claude · Gemini · DeepSeek · Qwen و ...',
+          titleEn: 'AI Giants & Leading LLMs',
+          subEn: 'ChatGPT, Claude, Gemini, DeepSeek, Qwen & more'
+        },
+        {
+          id: 'prompts_library' as const,
+          sessionId: 's2' as const,
+          num: '۲-۴',
           titleFa: 'کتابخانه پرامپت‌های آماده دیسیپلین‌ها',
           subFa: 'پرامپت‌های تخصصی و روزمره قابل کپی',
           titleEn: 'Ready Prompt Library',
@@ -417,7 +614,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
         {
           id: 'advanced_features' as const,
           sessionId: 's2' as const,
-          num: '۲-۴',
+          num: '۲-۵',
           titleFa: 'میز کار هوشمند: Gems و Projects',
           subFa: 'ساخت مشاور مقیم با دانش پایه اختصاصی',
           titleEn: 'Gems & Claude Projects',
@@ -426,7 +623,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
         {
           id: 'engineering_dashboards' as const,
           sessionId: 's2' as const,
-          num: '۲-۵',
+          num: '۲-۶',
           titleFa: 'ساخت داشبورد و ابزار در Artifacts و Canvas',
           subFa: 'تولید نرم‌افزار و نمودار بدون کدنویسی',
           titleEn: 'Artifacts & Canvas Lab',
@@ -1223,8 +1420,8 @@ Tasks:
         </span>
       </div>
 
-      {/* Level 2: Modules Inside Active Session */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 text-xs">
+      {/* Level 2: Modules Inside Active Session (Pill CSS modeled after Hero CTAs) */}
+      <div className="flex flex-wrap items-center gap-2.5 text-xs">
         {activeSessionObj.modules.map((item) => {
           const isSelected = activeTab === item.id;
           return (
@@ -1233,29 +1430,32 @@ Tasks:
               type="button"
               onClick={(e) => handleTabClick(item.id, e, false)}
               data-active={isSelected}
-              className={`group relative p-2.5 rounded-xl border text-right transition-all duration-200 cursor-pointer flex items-center gap-2 select-none active:scale-[0.98] ${
+              className={`group relative px-4 py-2.5 rounded-full text-right transition-all duration-300 cursor-pointer flex items-center gap-2.5 select-none active:scale-95 ${
                 isSelected
-                  ? 'bg-[#261a1d] dark:bg-white text-white dark:text-[#16101c] border-transparent shadow-md ring-2 ring-[#e0533c]'
-                  : 'bg-white dark:bg-[#201729] text-[#261a1d] dark:text-[#faedf3] border-[#ecdcd8] dark:border-[#382645] hover:border-[#e0533c]/50 hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 shadow-2xs'
+                  ? 'bg-gradient-to-r from-[#e0533c] to-[#c026d3] hover:from-[#c2410c] hover:to-[#9333ea] text-white border border-transparent shadow-lg hover:shadow-xl font-semibold'
+                  : 'bg-white dark:bg-[#201729] hover:bg-orange-50 dark:hover:bg-[#2d1a33] border border-gray-300 dark:border-[#382645] hover:border-orange-200 dark:hover:border-[#e0533c]/50 text-[#0A101D] dark:text-[#faedf3] hover:text-orange-800 dark:hover:text-white font-medium shadow-xs hover:shadow-md'
               }`}
             >
               <span
-                className={`px-1.5 py-1 rounded-lg font-mono text-[10px] font-black flex items-center justify-center shrink-0 ${
+                dir="ltr"
+                className={`px-2.5 py-1 rounded-full font-mono text-[11px] font-black flex items-center justify-center shrink-0 transition-colors ${
                   isSelected
-                    ? 'bg-[#e0533c] text-white'
-                    : 'bg-black/[0.05] dark:bg-white/[0.08] text-[#e0533c] dark:text-[#fb7185]'
+                    ? 'bg-white/20 text-white shadow-2xs'
+                    : 'bg-[#e0533c] text-white shadow-xs group-hover:bg-[#c2410c]'
                 }`}
               >
                 {item.num}
               </span>
 
-              <div className="min-w-0 flex-1">
-                <span className="font-extrabold text-[11px] leading-tight block truncate">
+              <div className="min-w-0 text-right">
+                <span className="font-bold text-xs leading-tight block">
                   {lang === 'fa' ? item.titleFa : item.titleEn}
                 </span>
                 <span
-                  className={`text-[9px] leading-tight block truncate ${
-                    isSelected ? 'text-white/80 dark:text-[#16101c]/75' : 'text-[#755e66] dark:text-[#ad99ab]'
+                  className={`text-[10px] leading-tight block ${
+                    isSelected
+                      ? 'text-white/85'
+                      : 'text-[#5d6b73] dark:text-[#ad99ab] group-hover:text-orange-700/85 dark:group-hover:text-white/80'
                   }`}
                 >
                   {lang === 'fa' ? item.subFa : item.subEn}
@@ -2274,230 +2474,160 @@ Tasks:
         </section>
       )}
 
-      {/* SECTION 1: THE BIG 3 LLMs */}
-      {(activeTab === 'all' || activeTab === 'tools') && (
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
+      {/* SECTION 2-1: WHAT IS A PROMPT? (DEFINITION & ANATOMY) */}
+      {(activeTab === 'all' || activeTab === 'prompt_definition') && (
+        <section className="space-y-5">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]">
-                <Bot className="w-5 h-5" />
+              <div className="p-2 rounded-lg bg-[#e0533c]/10 text-[#e0533c] dark:text-[#fb7185]">
+                <MessageSquare className="w-5 h-5" />
               </div>
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
-                  <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#c026d3] text-white text-xs font-black">۲-۱</span>
+                  <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#e0533c] text-white text-xs font-black">۲-۱</span>
                   <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
-                    {lang === 'fa' ? 'سه ابزار اصلی هوش مصنوعی و لینک‌های دسترسی' : 'The Top 3 LLM Platforms & Direct Access'}
+                    {lang === 'fa'
+                      ? 'پرامپت (Prompt) چیست؟ تعریف، منطق کار و تفاوت دستور خام با دستور حرفه‌ای'
+                      : 'What is a Prompt? Definition, Mechanics & Anatomy'}
                   </h2>
                 </div>
                 <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
                   {lang === 'fa'
-                    ? 'کدام مدل برای کار شما مناسب‌تر است؟ با یک کلیک ثبت‌نام و استفاده را شروع کنید.'
-                    : 'Choose the right LLM for your workflow. Register and start with one click.'}
+                    ? 'پیش از شناخت ابزارها و فرمول‌ها، باید بدانیم هوش مصنوعی چگونه دستور ما را می‌فهمد و چرا کیفیت ورودی تعیین‌کننده کیفیت خروجی است.'
+                    : 'Before picking tools or frameworks, understand how LLMs interpret your input and why input clarity dictates output precision.'}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {/* ChatGPT Card */}
-            <div className="group/card p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col">
-              <div className="h-full rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 flex flex-col justify-between shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-2xl bg-[#e3f6f0] dark:bg-[#10a37f]/20 border border-[#10a37f]/30 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
-                        <svg viewBox="0 0 24 24" className="w-6 h-6 spin-gear-chatgpt" aria-label="ChatGPT">
-                          <g transform="translate(12 12)" fill="none" stroke="#10A37F" strokeWidth="1.9">
-                            <ellipse cy="-5.5" rx="3.6" ry="6.5" />
-                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(60)" />
-                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(120)" />
-                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(180)" />
-                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(240)" />
-                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(300)" />
-                          </g>
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">ChatGPT</h3>
-                        <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">OpenAI</span>
-                      </div>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#10a37f]/10 text-[#10a37f] border border-[#10a37f]/20">
-                      {lang === 'fa' ? 'همه‌فن‌حریف و جامع' : 'Most Versatile'}
-                    </span>
-                  </div>
+          {/* Core Definition Hero Card */}
+          <div className="p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
+            <div className="rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+              <div className="lg:col-span-7 space-y-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#e0533c]/10 text-[#e0533c] dark:text-[#fb7185] border border-[#e0533c]/20">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{lang === 'fa' ? 'تعریف بنیادین پرامپت (Prompt)' : 'Core Definition of a Prompt'}</span>
+                </span>
+                <h3 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9] leading-snug">
+                  {lang === 'fa'
+                    ? 'پرامپت یعنی «دستورالعمل، مسئله، داده و چارچوبی که به هوش مصنوعی می‌دهید» تا دقیقاً پاسخ مطلوب شما را تولید کند.'
+                    : 'A Prompt is the instruction, context, data, and constraints you give an AI model to shape its exact response.'}
+                </h3>
+                <p className="text-xs sm:text-[13px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                  {lang === 'fa'
+                    ? 'برخلاف جستجوی گوگل که فقط دنبال کلمات کلیدی می‌گردد، مدل زبانی بزرگ (LLM) کل نیت، نقش، داده‌های زمینه‌ای و قالب مورد انتظار شما را تحلیل می‌کند. هوش مصنوعی ذهن‌خوان نیست؛ هر جزئیاتی که در پرامپت ننویسید را خودش حدس می‌زند (و همین ریشه کلی‌گویی یا خطاست).'
+                    : 'Unlike traditional keyword search, an LLM reads intent, persona, situational background, and output rules. AI cannot read your mind—any context omitted from the prompt gets guessed.'}
+                </p>
+              </div>
 
-                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    {lang === 'fa'
-                      ? 'بهترین ابزار عمومی با پشتیبانی از وب‌سرچ زنده، اجرای کدهای پایتون، تحلیل پیشرفته داده‌ها، ساخت عکس و اکوسیستم وسیع افزونه‌ها (Custom GPTs).'
-                      : 'The most popular all-rounder with live web browsing, Python code execution, advanced data analytics, image generation, and Custom GPTs.'}
-                  </p>
-
-                  <div className="space-y-1.5 pt-2 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 text-xs">
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#10a37f] shrink-0" />
-                      <span>{lang === 'fa' ? 'مدل‌های کلیدی: GPT-4o, GPT-4o mini, o1' : 'Key Models: GPT-4o, 4o-mini, o1'}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#10a37f] shrink-0" />
-                      <span>{lang === 'fa' ? 'قابلیت شاخص: تحلیل فایل اکسل و پروژه‌ها' : 'Feature: Code Interpreter & Projects'}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#10a37f] shrink-0" />
-                      <span>{lang === 'fa' ? 'ثبت‌نام ساده با جیمیل یا مایکروسافت' : 'Easy signup with Google/Microsoft'}</span>
-                    </div>
-                  </div>
+              <div className="lg:col-span-5 p-4 rounded-2xl bg-gradient-to-br from-[#fdeee9] via-[#fff7f3] to-[#f8f0fc] dark:from-[#2c1523] dark:via-[#221629] dark:to-[#1a1626] border border-[#e0533c]/25 space-y-2.5">
+                <div className="text-xs font-black text-[#e0533c] dark:text-[#fb7185]">
+                  {lang === 'fa' ? 'معادله طلایی کیفیت پاسخ AI:' : 'The AI Output Quality Equation:'}
                 </div>
-
-                <div className="pt-3 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60">
-                  <button
-                    type="button"
-                    onClick={() => openCompanionWindow('https://chatgpt.com', 'chatgpt_companion')}
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#10a37f] hover:bg-[#0e8e6e] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150 cursor-pointer"
-                  >
-                    <span>{lang === 'fa' ? 'ورود به ChatGPT در پنجره کناری' : 'Open ChatGPT in Side Window'}</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </button>
+                <div className="p-3 rounded-xl bg-white/90 dark:bg-[#12171b] border border-black/[0.06] dark:border-white/[0.08] text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed">
+                  {lang === 'fa'
+                    ? 'پرامپت مبهم (۱ خطی) ← پاسخ عمومی، تکراری یا همراه با حدس و خطا'
+                    : 'Vague 1-line prompt -> Generic, guesswork-heavy output'}
+                </div>
+                <div className="p-3 rounded-xl bg-[#ecfdf5] dark:bg-[#10241b] border border-[#34d399]/40 text-xs font-bold text-[#047857] dark:text-[#34d399] leading-relaxed">
+                  {lang === 'fa'
+                    ? 'پرامپت مهندسی‌شده (دستور + زمینه + قید + قالب) ← خروجی دقیق، قابل ممیزی و آماده اجرا'
+                    : 'Structured prompt (Instruction + Context + Constraints + Format) -> Actionable, auditable output'}
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Claude Card */}
-            <div className="group/card p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col">
-              <div className="h-full rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 flex flex-col justify-between shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-2xl bg-[#fdeee6] dark:bg-[#d97706]/20 border border-[#d97706]/30 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
-                        <svg viewBox="0 0 24 24" className="w-6 h-6 spin-gear-claude" aria-label="Claude">
-                          <g transform="translate(12 12)" stroke="#D97757" strokeWidth="2.4" strokeLinecap="round">
-                            <line y1="-3" y2="-11" />
-                            <line y1="-3" y2="-9" transform="rotate(30)" />
-                            <line y1="-3" y2="-11" transform="rotate(60)" />
-                            <line y1="-3" y2="-9" transform="rotate(90)" />
-                            <line y1="-3" y2="-11" transform="rotate(120)" />
-                            <line y1="-3" y2="-9" transform="rotate(150)" />
-                            <line y1="-3" y2="-11" transform="rotate(180)" />
-                            <line y1="-3" y2="-9" transform="rotate(210)" />
-                            <line y1="-3" y2="-11" transform="rotate(240)" />
-                            <line y1="-3" y2="-9" transform="rotate(270)" />
-                            <line y1="-3" y2="-11" transform="rotate(300)" />
-                            <line y1="-3" y2="-9" transform="rotate(330)" />
-                          </g>
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">Claude</h3>
-                        <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">Anthropic</span>
-                      </div>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#d97706]/10 text-[#d97706] border border-[#d97706]/20">
-                      {lang === 'fa' ? 'پادشاه نگارش و کد' : 'Top Writing & Code'}
-                    </span>
-                  </div>
-
-                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    {lang === 'fa'
-                      ? 'بهترین کیفیت درک و تولید متن فارسی طبیعی، کدنویسی، تحلیل داکیومنت‌های بزرگ و شاهکار آرتیفکت‌ها (Artifacts) برای پیش‌نمایش زنده وب و اسناد.'
-                      : 'Unmatched nuance, superior coding, large document comprehension, and interactive Artifacts for side-by-side previews.'}
-                  </p>
-
-                  <div className="space-y-1.5 pt-2 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 text-xs">
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#d97706] shrink-0" />
-                      <span>{lang === 'fa' ? 'مدل‌های کلیدی: Claude 3.5 Sonnet, Haiku' : 'Key Models: Claude 3.5 Sonnet, Haiku'}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#d97706] shrink-0" />
-                      <span>{lang === 'fa' ? 'قابلیت شاخص: آرتیفکت‌های تعاملی و Projects' : 'Feature: Interactive Artifacts & Projects'}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#d97706] shrink-0" />
-                      <span>{lang === 'fa' ? 'پنجره ورودی ۲۰۰ هزار توکنی (یک کتاب کامل)' : '200K token context window'}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60">
-                  <button
-                    type="button"
-                    onClick={() => openCompanionWindow('https://claude.ai', 'claude_companion')}
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#b45309] hover:bg-[#92400e] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150 cursor-pointer"
-                  >
-                    <span>{lang === 'fa' ? 'ورود به Claude در پنجره کناری' : 'Open Claude in Side Window'}</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+          {/* 3 Levels of Prompting */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-2xl border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] shadow-xs space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                  {lang === 'fa' ? 'سطح ۱ · ساده' : 'Level 1 · Basic'}
+                </span>
+                <span className="font-mono text-[10px] text-[#5d6b73] dark:text-[#9aa8b0]">Zero-Shot</span>
               </div>
+              <h4 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+                {lang === 'fa' ? 'پرامپت مستقیم بدون نمونه' : 'Direct Zero-Shot Prompt'}
+              </h4>
+              <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                {lang === 'fa'
+                  ? 'یک درخواست کوتاه بدون مثال یا داده کمکی (مثلاً: «یک چک‌لیست ایمنی کارگاه بنویس»). برای پرسش‌های عمومی سریع است اما در کار سازمانی دقیق نیست.'
+                  : 'A direct ask without examples or background (e.g., "Write a site safety checklist"). Fast for trivia, too vague for enterprise work.'}
+              </p>
             </div>
 
-            {/* Gemini Card */}
-            <div className="group/card p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col">
-              <div className="h-full rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 flex flex-col justify-between shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-2xl bg-[#e8f0fe] dark:bg-[#1a73e8]/20 border border-[#1a73e8]/30 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
-                        <svg viewBox="0 0 24 24" className="w-6 h-6 spin-gear-gemini" aria-label="Gemini">
-                          <defs>
-                            <linearGradient id="gemGradPage0" x1="0" y1="0" x2="1" y2="1">
-                              <stop offset="0%" stopColor="#4285F4" />
-                              <stop offset="55%" stopColor="#9B72CB" />
-                              <stop offset="100%" stopColor="#D96570" />
-                            </linearGradient>
-                          </defs>
-                          <path fill="url(#gemGradPage0)" d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">Gemini</h3>
-                        <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">Google</span>
-                      </div>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#1a73e8]/10 text-[#1a73e8] border border-[#1a73e8]/20">
-                      {lang === 'fa' ? 'حافظه ۲ میلیونی و گوگل' : '2M Context & Google'}
-                    </span>
-                  </div>
-
-                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    {lang === 'fa'
-                      ? 'بزرگ‌ترین کانتکست جهان (۲ میلیون توکن)، اتصال مستقیم با تایپ @ به Google Drive و Gmail و YouTube، و ساخت دستیار اختصاصی با Gems.'
-                      : 'Massive 2M token context, seamless Google Workspace integration (@Drive, @Gmail, @YouTube), and custom Gems.'}
-                  </p>
-
-                  <div className="space-y-1.5 pt-2 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 text-xs">
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#1a73e8] shrink-0" />
-                      <span>{lang === 'fa' ? 'مدل‌های کلیدی: Gemini 1.5 Pro, 1.5 Flash' : 'Key Models: Gemini 1.5 Pro, Flash'}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#1a73e8] shrink-0" />
-                      <span>{lang === 'fa' ? 'قابلیت شاخص: واکشی ویدیو، صوت و گوگل‌درایو' : 'Feature: Multimodal & Workspace @mentions'}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#1a73e8] shrink-0" />
-                      <span>{lang === 'fa' ? 'ورود مستقیم با اکانت جیمیل' : 'Zero friction login with Google account'}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60">
-                  <button
-                    type="button"
-                    onClick={() => openCompanionWindow('https://gemini.google.com', 'gemini_companion')}
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#1a73e8] hover:bg-[#1557b0] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150 cursor-pointer"
-                  >
-                    <span>{lang === 'fa' ? 'ورود به Gemini در پنجره کناری' : 'Open Gemini in Side Window'}</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+            <div className="p-4 rounded-2xl border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] shadow-xs space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#c026d3]/10 text-[#c026d3] dark:text-[#e879f9]">
+                  {lang === 'fa' ? 'سطح ۲ · الگو محور' : 'Level 2 · Pattern'}
+                </span>
+                <span className="font-mono text-[10px] text-[#5d6b73] dark:text-[#9aa8b0]">Few-Shot</span>
               </div>
+              <h4 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+                {lang === 'fa' ? 'پرامپت همراه با ۱ تا ۳ نمونه واقعی' : 'Few-Shot Prompting'}
+              </h4>
+              <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                {lang === 'fa'
+                  ? 'در کنار دستور، ۱ یا ۲ نمونه از نامه، جدول یا گزارش استاندارد سازمان خود را می‌گذارید تا هوش مصنوعی دقیقاً لحن و ساختار شما را تقلید کند.'
+                  : 'Provide 1-3 real examples alongside your instruction so the model mirrors your exact corporate tone and schema.'}
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl border border-[#e0533c]/35 bg-[#fdeee9]/40 dark:bg-[#2a1522]/40 shadow-xs space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#e0533c] text-white">
+                  {lang === 'fa' ? 'سطح ۳ · استاندارد دوره' : 'Level 3 · Course Standard'}
+                </span>
+                <span className="font-mono text-[10px] text-[#e0533c] dark:text-[#fb7185]">Prompt Engineering</span>
+              </div>
+              <h4 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+                {lang === 'fa' ? 'مهندسی پرامپت ساختاریافته (RCTO)' : 'Structured Prompt Engineering'}
+              </h4>
+              <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                {lang === 'fa'
+                  ? 'ترکیب شفاف نقش، بافت واقعی، وظیفه دقیق، قیدهای عدم توهم («اگر نبود بنویس نامشخص») و فرمت خروجی؛ فرمولی که در بخش ۲-۲ یاد می‌گیرید.'
+                  : 'Combines Role, Context, Task, anti-hallucination guardrails, and exact Output schema—covered step-by-step in 2-2.'}
+              </p>
+            </div>
+          </div>
+
+          {/* Bridge Action Bar to RCTO (2-2) & Sandbox */}
+          <div className="p-4 rounded-2xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] flex flex-wrap items-center justify-between gap-3 shadow-xs">
+            <div className="text-xs text-[#1c2830] dark:text-[#e8ebe9] font-medium">
+              {lang === 'fa'
+                ? 'آماده‌اید فرمول ۴ مرحله‌ای نوشتن یک پرامپت بی‌نقص را یاد بگیرید؟'
+                : 'Ready to learn the 4-pillar formula for writing bulletproof prompts?'}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  loadPromptToSandbox(
+                    lang === 'fa'
+                      ? 'نقش: تو یک دستیار تحلیلگر حرفه‌ای هستی.\nزمینه: داده‌های خام جلسه یا گزارش زیر در اختیار توست.\nوظیفه: فقط بر اساس متن داده‌شده، ۳ نکته کلیدی و جدول اکشن‌آیتم‌ها را استخراج کن. اگر اطلاعاتی در متن نیست، حدس نزن و بنویس «نامشخص».\nقالب خروجی: جدول ۴ ستونه [موضوع | مسئول | مهلت | اولویت].'
+                      : 'Role: Senior analyst.\nContext: Raw meeting notes below.\nTask: Extract 3 takeaways and an action-item table strictly from the text; mark missing fields as "Unspecified".\nOutput: 4-column table [Topic | Owner | Due | Priority].'
+                  )
+                }
+                className="px-4 py-2 rounded-full bg-white dark:bg-[#201729] hover:bg-orange-50 border border-gray-300 dark:border-[#382645] text-xs font-bold text-[#0A101D] dark:text-[#faedf3] flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer active:scale-95"
+              >
+                <Play className="w-3.5 h-3.5 text-[#e0533c]" />
+                <span>{lang === 'fa' ? 'تست نمونه پرامپت در سندباکس' : 'Try Sample in Sandbox'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTabClick('prompting', undefined, true)}
+                className="px-5 py-2 rounded-full bg-gradient-to-r from-[#e0533c] to-[#c026d3] hover:from-[#c2410c] hover:to-[#9333ea] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-95"
+              >
+                <span>{lang === 'fa' ? 'گام بعدی ۲-۲: فرمول طلایی مهندسی پرامپت (RCTO)' : 'Next 2-2: Golden RCTO Formula'}</span>
+                {lang === 'fa' ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
+              </button>
             </div>
           </div>
         </section>
       )}
 
-      {/* SECTION 2: THE RCTO PROMPTING FRAMEWORK */}
+      {/* SECTION 2-2: THE RCTO PROMPTING FRAMEWORK */}
       {(activeTab === 'all' || activeTab === 'prompting') && (
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -2726,6 +2856,333 @@ Tasks:
         </section>
       )}
 
+      {/* SECTION 2-3: AI GIANTS & PROMINENT GLOBAL LLMs (WITH LOGOS & LINKS) */}
+      {(activeTab === 'all' || activeTab === 'tools') && (
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]">
+                <Bot className="w-5 h-5" />
+              </div>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#c026d3] text-white text-xs font-black">۲-۳</span>
+                  <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
+                    {lang === 'fa'
+                      ? 'غول‌های هوش مصنوعی و مدل‌های زبانی مطرح (لینک مستقیم و لوگو)'
+                      : 'AI Giants & Prominent LLM Platforms (Direct Links & Logos)'}
+                  </h2>
+                </div>
+                <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
+                  {lang === 'fa'
+                    ? 'سه غول اصلی (ChatGPT، Claude، Gemini) در کنار مدل‌های قدرتمند جهانی مثل DeepSeek، Qwen، Perplexity، Grok و Mistral برای انتخاب هوشمندانه ابزار.'
+                    : 'The Big 3 platforms (ChatGPT, Claude, Gemini) alongside DeepSeek, Qwen, Perplexity, Grok, Mistral, and Meta Llama.'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* ChatGPT Card */}
+            <div className="group/card p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col">
+              <div className="h-full rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 flex flex-col justify-between shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-2xl bg-[#e3f6f0] dark:bg-[#10a37f]/20 border border-[#10a37f]/30 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
+                        <svg viewBox="0 0 24 24" className="w-6 h-6 spin-gear-chatgpt" aria-label="ChatGPT">
+                          <g transform="translate(12 12)" fill="none" stroke="#10A37F" strokeWidth="1.9">
+                            <ellipse cy="-5.5" rx="3.6" ry="6.5" />
+                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(60)" />
+                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(120)" />
+                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(180)" />
+                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(240)" />
+                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(300)" />
+                          </g>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">ChatGPT</h3>
+                        <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">OpenAI</span>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#10a37f]/10 text-[#10a37f] border border-[#10a37f]/20">
+                      {lang === 'fa' ? 'همه‌فن‌حریف و جامع' : 'Most Versatile'}
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                    {lang === 'fa'
+                      ? 'بهترین ابزار عمومی با پشتیبانی از وب‌سرچ زنده، اجرای کدهای پایتون، تحلیل پیشرفته داده‌ها، ساخت عکس و اکوسیستم وسیع افزونه‌ها (Custom GPTs).'
+                      : 'The most popular all-rounder with live web browsing, Python code execution, advanced data analytics, image generation, and Custom GPTs.'}
+                  </p>
+
+                  <div className="space-y-1.5 pt-2 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 text-xs">
+                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#10a37f] shrink-0" />
+                      <span>{lang === 'fa' ? 'مدل‌های کلیدی: GPT-4o, GPT-4o mini, o1' : 'Key Models: GPT-4o, 4o-mini, o1'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#10a37f] shrink-0" />
+                      <span>{lang === 'fa' ? 'قابلیت شاخص: تحلیل فایل اکسل و پروژه‌ها' : 'Feature: Code Interpreter & Projects'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#10a37f] shrink-0" />
+                      <span>{lang === 'fa' ? 'ثبت‌نام ساده با جیمیل یا مایکروسافت' : 'Easy signup with Google/Microsoft'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => openCompanionWindow('https://chatgpt.com', 'chatgpt_companion')}
+                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#10a37f] hover:bg-[#0e8e6e] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150 cursor-pointer"
+                  >
+                    <span>{lang === 'fa' ? 'ورود به ChatGPT در پنجره کناری' : 'Open ChatGPT in Side Window'}</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                  <a
+                    href="https://chatgpt.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    dir="ltr"
+                    className="block text-center text-[11px] font-mono text-[#10a37f] hover:underline"
+                  >
+                    chatgpt.com ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Claude Card */}
+            <div className="group/card p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col">
+              <div className="h-full rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 flex flex-col justify-between shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-2xl bg-[#fdeee6] dark:bg-[#d97706]/20 border border-[#d97706]/30 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
+                        <svg viewBox="0 0 24 24" className="w-6 h-6 spin-gear-claude" aria-label="Claude">
+                          <g transform="translate(12 12)" stroke="#D97757" strokeWidth="2.4" strokeLinecap="round">
+                            <line y1="-3" y2="-11" />
+                            <line y1="-3" y2="-9" transform="rotate(30)" />
+                            <line y1="-3" y2="-11" transform="rotate(60)" />
+                            <line y1="-3" y2="-9" transform="rotate(90)" />
+                            <line y1="-3" y2="-11" transform="rotate(120)" />
+                            <line y1="-3" y2="-9" transform="rotate(150)" />
+                            <line y1="-3" y2="-11" transform="rotate(180)" />
+                            <line y1="-3" y2="-9" transform="rotate(210)" />
+                            <line y1="-3" y2="-11" transform="rotate(240)" />
+                            <line y1="-3" y2="-9" transform="rotate(270)" />
+                            <line y1="-3" y2="-11" transform="rotate(300)" />
+                            <line y1="-3" y2="-9" transform="rotate(330)" />
+                          </g>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">Claude</h3>
+                        <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">Anthropic</span>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#d97706]/10 text-[#d97706] border border-[#d97706]/20">
+                      {lang === 'fa' ? 'پادشاه نگارش و کد' : 'Top Writing & Code'}
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                    {lang === 'fa'
+                      ? 'بهترین کیفیت درک و تولید متن فارسی طبیعی، کدنویسی، تحلیل داکیومنت‌های بزرگ و شاهکار آرتیفکت‌ها (Artifacts) برای پیش‌نمایش زنده وب و اسناد.'
+                      : 'Unmatched nuance, superior coding, large document comprehension, and interactive Artifacts for side-by-side previews.'}
+                  </p>
+
+                  <div className="space-y-1.5 pt-2 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 text-xs">
+                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#d97706] shrink-0" />
+                      <span>{lang === 'fa' ? 'مدل‌های کلیدی: Claude 3.5 Sonnet, Haiku' : 'Key Models: Claude 3.5 Sonnet, Haiku'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#d97706] shrink-0" />
+                      <span>{lang === 'fa' ? 'قابلیت شاخص: آرتیفکت‌های تعاملی و Projects' : 'Feature: Interactive Artifacts & Projects'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#d97706] shrink-0" />
+                      <span>{lang === 'fa' ? 'پنجره ورودی ۲۰۰ هزار توکنی (یک کتاب کامل)' : '200K token context window'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => openCompanionWindow('https://claude.ai', 'claude_companion')}
+                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#b45309] hover:bg-[#92400e] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150 cursor-pointer"
+                  >
+                    <span>{lang === 'fa' ? 'ورود به Claude در پنجره کناری' : 'Open Claude in Side Window'}</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                  <a
+                    href="https://claude.ai"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    dir="ltr"
+                    className="block text-center text-[11px] font-mono text-[#b45309] dark:text-[#fbbf24] hover:underline"
+                  >
+                    claude.ai ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Gemini Card */}
+            <div className="group/card p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col">
+              <div className="h-full rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 flex flex-col justify-between shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-2xl bg-[#e8f0fe] dark:bg-[#1a73e8]/20 border border-[#1a73e8]/30 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
+                        <svg viewBox="0 0 24 24" className="w-6 h-6 spin-gear-gemini" aria-label="Gemini">
+                          <defs>
+                            <linearGradient id="gemGradPage0" x1="0" y1="0" x2="1" y2="1">
+                              <stop offset="0%" stopColor="#4285F4" />
+                              <stop offset="55%" stopColor="#9B72CB" />
+                              <stop offset="100%" stopColor="#D96570" />
+                            </linearGradient>
+                          </defs>
+                          <path fill="url(#gemGradPage0)" d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">Gemini</h3>
+                        <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">Google</span>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#1a73e8]/10 text-[#1a73e8] border border-[#1a73e8]/20">
+                      {lang === 'fa' ? 'حافظه ۲ میلیونی و گوگل' : '2M Context & Google'}
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                    {lang === 'fa'
+                      ? 'بزرگ‌ترین کانتکست جهان (۲ میلیون توکن)، اتصال مستقیم با تایپ @ به Google Drive و Gmail و YouTube، و ساخت دستیار اختصاصی با Gems.'
+                      : 'Massive 2M token context, seamless Google Workspace integration (@Drive, @Gmail, @YouTube), and custom Gems.'}
+                  </p>
+
+                  <div className="space-y-1.5 pt-2 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 text-xs">
+                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#1a73e8] shrink-0" />
+                      <span>{lang === 'fa' ? 'مدل‌های کلیدی: Gemini 1.5 Pro, 1.5 Flash' : 'Key Models: Gemini 1.5 Pro, Flash'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#1a73e8] shrink-0" />
+                      <span>{lang === 'fa' ? 'قابلیت شاخص: واکشی ویدیو، صوت و گوگل‌درایو' : 'Feature: Multimodal & Workspace @mentions'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#1a73e8] shrink-0" />
+                      <span>{lang === 'fa' ? 'ورود مستقیم با اکانت جیمیل' : 'Zero friction login with Google account'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => openCompanionWindow('https://gemini.google.com', 'gemini_companion')}
+                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#1a73e8] hover:bg-[#1557b0] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150 cursor-pointer"
+                  >
+                    <span>{lang === 'fa' ? 'ورود به Gemini در پنجره کناری' : 'Open Gemini in Side Window'}</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                  <a
+                    href="https://gemini.google.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    dir="ltr"
+                    className="block text-center text-[11px] font-mono text-[#1a73e8] dark:text-[#60a5fa] hover:underline"
+                  >
+                    gemini.google.com ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Other Prominent LLMs: DeepSeek, Qwen, Perplexity, Grok, Mistral, Meta Llama */}
+          <div className="space-y-3 pt-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-[#e0533c]" />
+                <h3 className="text-sm sm:text-base font-extrabold text-[#1c2830] dark:text-[#e8ebe9]">
+                  {lang === 'fa'
+                    ? 'سایر مدل‌های زبانی مطرح جهان (DeepSeek، Qwen و اکوسیستم LLM)'
+                    : 'Other Prominent Global LLMs (DeepSeek, Qwen & Open-Weight Leaders)'}
+                </h3>
+              </div>
+              <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                {lang === 'fa'
+                  ? 'کلیک روی لینک هر مدل برای ورود مستقیم یا باز کردن در پنجره کناری'
+                  : 'Click any official link or launch in the side companion window'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {OTHER_LLM_PLATFORMS.map((llm) => (
+                <div
+                  key={llm.id}
+                  className="p-4 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.07] dark:border-white/[0.09] shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between space-y-3.5"
+                >
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-10 h-10 rounded-2xl bg-[#f8f9fa] dark:bg-[#1f2933] border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-center shrink-0 shadow-2xs">
+                          {renderOtherLlmLogo(llm.id)}
+                        </div>
+                        <div>
+                          <h4 className="font-extrabold text-sm text-[#1c2830] dark:text-[#e8ebe9]">{llm.name}</h4>
+                          <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">{llm.company}</span>
+                        </div>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${llm.bgTintClass}`}>
+                        {lang === 'fa' ? llm.badgeFa : llm.badgeEn}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                      {lang === 'fa' ? llm.descFa : llm.descEn}
+                    </p>
+
+                    <div className="text-[11px] font-mono text-[#1c2830] dark:text-[#d1d7db] bg-[#f8f9fa] dark:bg-[#12171b] px-2.5 py-1.5 rounded-lg border border-black/[0.05] dark:border-white/[0.06]">
+                      {lang === 'fa' ? llm.modelsFa : llm.modelsEn}
+                    </div>
+                  </div>
+
+                  <div className="pt-2.5 border-t border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between gap-2">
+                    <a
+                      href={llm.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      dir="ltr"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f8f9fa] dark:bg-[#1f2933] hover:bg-orange-50 dark:hover:bg-[#2d1a33] border border-gray-200 dark:border-white/10 text-[11px] font-mono font-bold text-[#1c2830] dark:text-[#e8ebe9] hover:text-[#e0533c] transition-colors"
+                    >
+                      <span>{llm.domainLabel}</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={() => openCompanionWindow(llm.url, `${llm.id}_companion`)}
+                      className="px-3 py-1.5 rounded-full text-[11px] font-bold text-white shadow-2xs hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+                      style={{ backgroundColor: llm.accentHex }}
+                    >
+                      {lang === 'fa' ? 'پنجره کناری' : 'Side Window'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* SECTION 3: READY-TO-COPY PROMPT LIBRARY */}
       {(activeTab === 'all' || activeTab === 'prompts_library') && (
         <section className="space-y-4">
@@ -2736,7 +3193,7 @@ Tasks:
               </div>
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
-                  <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#b87333] text-white text-xs font-black">۲-۳</span>
+                  <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#b87333] text-white text-xs font-black">۲-۴</span>
                   <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
                     {lang === 'fa' ? 'کتابخانه پرامپت‌های آماده و کاربردی (کپی با یک کلیک)' : 'Battle-Tested Prompt Templates (One-Click Copy)'}
                   </h2>
@@ -2843,7 +3300,7 @@ Tasks:
               </div>
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
-                  <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#1b3a4b] text-white text-xs font-black">۲-۴</span>
+                  <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#1b3a4b] text-white text-xs font-black">۲-۵</span>
                   <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
                     {lang === 'fa'
                       ? 'سیستم‌های خبره سازمانی و مشاوران مدیریتی با Gems، Projects و Artifacts'
@@ -3275,7 +3732,7 @@ Tasks:
                 </div>
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#0284c7] text-white text-xs font-black">۲-۵</span>
+                    <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#0284c7] text-white text-xs font-black">۲-۶</span>
                     <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
                       {lang === 'fa'
                         ? industryTrack === 'PAYA_SAMAN_PARS'
