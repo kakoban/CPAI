@@ -19,12 +19,12 @@ export interface HrArtifactExercise {
 }
 
 export const HR_ARTIFACTS_WORKSHOP_HEADER = {
-  titleFa: 'کارگاه ساخت ابزارهای تعاملی منابع انسانی و اداری در Claude Artifacts و Gemini Canvas (پروژه مترو خط ایکس)',
-  titleEn: 'HR & Admin Interactive Tool-Building Workshop in Claude Artifacts & Gemini Canvas (Metro Line X)',
+  titleFa: 'کارگاه ساخت ابزارهای تعاملی منابع انسانی و اداری در Claude Artifacts و Gemini Canvas',
+  titleEn: 'HR & Admin Interactive Tool-Building Workshop in Claude Artifacts & Gemini Canvas',
   subtitleFa:
-    '۵ تمرین عملی برای تبدیل مفاد قرارداد پروژه مترو خط ایکس و ضوابط داخلی سازمان پیمانکار به داشبوردهای مدیریتی React، ماشین‌حساب‌های هوشمند مهلت قراردادی، چک‌لیست ممیزی کمپ و آزمون‌ساز تعاملی بدون نیاز به دانش برنامه‌نویسی.',
+    '۵ تمرین عملی برای تبدیل ضوابط منابع انسانی، مفاد قراردادهای کارگاهی و دستورالعمل‌های داخلی سازمان به داشبوردهای مدیریتی React، ماشین‌حساب‌های هوشمند مهلت قراردادی، چک‌لیست ممیزی کمپ و آزمون‌ساز تعاملی بدون نیاز به دانش برنامه‌نویسی.',
   subtitleEn:
-    '5 practical exercises transforming Metro Line X contract clauses and internal contractor rules into interactive React dashboards, deadline calculators, camp audit tools, and gamified quizzes without coding.',
+    '5 practical exercises transforming HR regulations, site contract clauses, and internal organizational directives into interactive React dashboards, deadline calculators, camp audit tools, and gamified quizzes without coding.',
   twoStepChainGuide: {
     titleFa: '💡 راهنمای اجرای کارگاه آموزشی (زنجیره دو مرحله‌ای: NotebookLM + Claude Artifacts / Gemini Canvas)',
     titleEn: '💡 2-Step Chained Workshop Playbook (NotebookLM + Claude Artifacts / Gemini Canvas)',
@@ -38,9 +38,9 @@ export const HR_ARTIFACTS_WORKSHOP_HEADER = {
         titleFa: 'گام اول در NotebookLM (تولید محتوا، تقاطع‌گیری و کشف قواعد)',
         titleEn: 'Step 1 in NotebookLM (Ground-Truth Discovery & Rule Extraction)',
         descriptionFa:
-          'کارشناسان ابتدا اسناد قرارداد پروژه مترو خط ایکس (منبع ۱) و بخشنامه داخلی اضافه‌کاری سازمان پیمانکار (منبع ۲) را در NotebookLM بارگذاری و جستجو می‌کنند و قوانین، سقف‌های مجاز، متراژهای الزامی صفحه ۵۴ و انحرافات کارگاهی را بدون خطای توهم استخراج می‌نمایند.',
+          'کارشناسان ابتدا اسناد قرارداد کارگاهی (منبع ۱) و بخشنامه داخلی اضافه‌کاری سازمان پیمانکار (منبع ۲) را در NotebookLM بارگذاری و جستجو می‌کنند و قوانین، سقف‌های مجاز، متراژهای الزامی صفحه ۵۴ و انحرافات کارگاهی را بدون خطای توهم استخراج می‌نمایند.',
         descriptionEn:
-          'Specialists query the Metro Line X contract clauses and internal overtime directive in NotebookLM to extract exact rules, caps, mandatory space tables, and site deviations with zero hallucination.'
+          'Specialists query the site contract clauses and internal overtime directive in NotebookLM to extract exact rules, caps, mandatory space tables, and site deviations with zero hallucination.'
       },
       {
         stepNumber: 2,
@@ -68,7 +68,7 @@ export const HR_ARTIFACT_EXERCISES: HrArtifactExercise[] = [
       'تبدیل داده‌های خام کارت‌زن کارگاه‌ها به یک داشبورد مدیریتی با قابلیت فیلتر، نمودارهای مقایسه‌ای و هشدارهای خودکار قراردادی و ایمنی.',
     objectiveEn:
       'Transform raw site time-card data into an interactive management dashboard with filters, comparative charts, and automated contractual/HSE alerts.',
-    promptFa: `یک داشبورد مدیریتی تعاملی و مدرن با استفاده از React، Tailwind CSS و کتابخانه Recharts به زبان فارسی (راست‌چین با فونت مناسب) برای "واحد منابع انسانی پروژه احداث مترو خط ایکس - سازمان پیمانکار" در قالب یک Artifact / Canvas بساز.
+    promptFa: `یک داشبورد مدیریتی تعاملی و مدرن با استفاده از React، Tailwind CSS و کتابخانه Recharts به زبان فارسی (راست‌چین با فونت مناسب) برای "واحد منابع انسانی و اداری سازمان پیمانکار" در قالب یک Artifact / Canvas بساز.
 
 منطق و قوانین داشبورد:
 ۱. سقف مجاز اضافه‌کاری داخلی: ستاد ۵۰ ساعت، دفتر فنی ۶۵ ساعت (با مجوز ۸۰)، کارگاه‌های ایستگاهی ۸۵ ساعت، و عملیات حفاری مکانیزه (TBM) به دلیل ماهیت شبانه‌روزی (ماده ۲۵ شرایط خصوصی) ۱۰۰ ساعت.
@@ -80,7 +80,7 @@ export const HR_ARTIFACT_EXERCISES: HrArtifactExercise[] = [
 - نمودار میله‌ای مقایسه اضافه‌کاری واقعی با سقف مجاز به تفکیک واحدها (ایستگاه مرکزی S-01 با مهندسین مشاور الف، ایستگاه غربی S-02 با مهندسین مشاور ب، TBM قطعه غربی با مهندسین مشاور ب، و دفتر فنی ستاد).
 - جدول وضعیت کارگاه‌ها با برچسب رنگی (سبز: منطبق، زرد: انحراف از سقف داخلی، قرمز: نقض بند ۴۲-۱ قرارداد یا خط قرمز HSE).
 - داده‌های اولیه مهرماه را به صورت پیش‌فرض در کد قرار بده و امکان فیلتر بر اساس نام ایستگاه/مشاور را فراهم کن.`,
-    promptEn: `Create a modern, interactive RTL Persian management dashboard using React, Tailwind CSS, and Recharts for the "HR & Admin Department of Metro Line X Project - Contractor Organization" inside a Claude Artifact / Gemini Canvas.
+    promptEn: `Create a modern, interactive RTL Persian management dashboard using React, Tailwind CSS, and Recharts for the "HR & Admin Department - Contractor Organization" inside a Claude Artifact / Gemini Canvas.
 
 Dashboard Logic & Rules:
 1. Internal Overtime Caps: HQ 50h, Technical Office 65h (80h with special permit), Station Sites 85h, and TBM Mechanized Tunneling 100h due to 24/7 continuous operations (Particular Conditions Article 25).
@@ -123,10 +123,10 @@ Dashboard Features:
       'جلوگیری از خطای سرپرستان کارگاه در ارسال دیرهنگام نامه‌های کار شبانه به مهندسین مشاور (الف، ب، ج) و حذف ریسک رد شدن کارکرد (موضوع بند ۴۲-۱ ضمیمه شرایط خصوصی).',
     objectiveEn:
       'Prevent site superintendents from submitting late night-shift notices to supervising consultants (A, B, C) and eliminate time-card rejection risks under Sub-Clause 42-1.',
-    promptFa: `یک ابزار وب تعاملی (Interactive Web App Artifact / Canvas) به زبان فارسی و راست‌چین برای واحد منابع انسانی و اداری سازمان پیمانکار در پروژه احداث مترو خط ایکس بساز که دو کار انجام دهد: "کنترل مهلت زمانی بند ۴۲-۱ قرارداد" و "تولید خودکار نامه رسمی".
+    promptFa: `یک ابزار وب تعاملی (Interactive Web App Artifact / Canvas) به زبان فارسی و راست‌چین برای واحد منابع انسانی و اداری سازمان پیمانکار بساز که دو کار انجام دهد: "کنترل مهلت زمانی بند ۴۲-۱ قرارداد" و "تولید خودکار نامه رسمی".
 
 فیلدهای ورودی کاربر:
-۱. انتخاب ایستگاه یا جبهه کاری از منوی کشویی (که به صورت خودکار نام مشاور ناظر را تشخیص دهد: مثلاً ایستگاه غربی کد S-02 -> مهندسین مشاور ب | ایستگاه مرکزی کد S-01 و ایستگاه شمالی کد S-03 -> مهندسین مشاور الف | ایستگاه شرقی کد S-04 -> مهندسین مشاور ج). مدیر طرح همیشه "مدیر طرح پروژه مترو خط ایکس" است.
+۱. انتخاب ایستگاه یا جبهه کاری از منوی کشویی (که به صورت خودکار نام مشاور ناظر را تشخیص دهد: مثلاً ایستگاه غربی کد S-02 -> مهندسین مشاور ب | ایستگاه مرکزی کد S-01 و ایستگاه شمالی کد S-03 -> مهندسین مشاور الف | ایستگاه شرقی کد S-04 -> مهندسین مشاور ج). مدیر طرح همیشه "مدیر طرح پروژه" است.
 ۲. نوع عملیات: (گزینه الف: اضافه‌کاری در ساعات روز / گزینه ب: کار شبانه در ایستگاه / گزینه ج: عملیات حفاری مکانیزه TBM).
 ۳. تاریخ شروع عملیات و تاریخ امروز (یا تعداد روزهای باقی‌مانده تا شروع عملیات).
 ۴. تعداد نفرات اجرایی، تعداد نفرات HSE مستقر (طبق بند ۹-۱۲ ضمیمه شرایط خصوصی) و شرح عملیات (مثلاً بتن‌ریزی یا آرماتوربندی).
@@ -136,10 +136,10 @@ Dashboard Features:
 - اگر "کار شبانه ایستگاه" انتخاب شد و فاصله زمانی کمتر از ۷ روز بود، هشدار قرمز نمایش دهد: "خطر رد شدن کارکرد! طبق بند ۴۲-۱ ضمیمه شرایط خصوصی، اطلاع‌رسانی کار شبانه باید حداقل ۱ هفته (۷ روز) قبل انجام شود."
 - اگر "اضافه‌کاری روز" انتخاب شد و فاصله کمتر از ۲۴ ساعت (۱ روز) بود، هشدار قرمز مشابه بدهد.
 - در پایین صفحه، بر اساس اطلاعات وارد شده، متن کامل و استاندارد نامه رسمی از سازمان پیمانکار به کارفرما (به اطلاع مدیر طرح پروژه و مهندسین مشاور ناظر مربوطه) را با استناد دقیق به ماده ۲۵ شرایط خصوصی (لزوم تطابق با لیست بیمه تأمین اجتماعی) و بند ۴۲-۱ تولید کند همراه با دکمه "کپی متن نامه".`,
-    promptEn: `Build an interactive RTL Persian web application in Claude Artifacts / Gemini Canvas for the HR & Admin Department of the Contractor Organization on the Metro Line X Project that performs two core tasks: "Sub-Clause 42-1 Notice Deadline Verification" and "Automated Official Letter Generation".
+    promptEn: `Build an interactive RTL Persian web application in Claude Artifacts / Gemini Canvas for the HR & Admin Department of the Contractor Organization that performs two core tasks: "Sub-Clause 42-1 Notice Deadline Verification" and "Automated Official Letter Generation".
 
 User Input Fields:
-1. Station / Sector dropdown (auto-detecting the assigned supervising consultant: West Station S-02 -> Consultant B | Central Station S-01 & North Station S-03 -> Consultant A | East Station S-04 -> Consultant C). Project Manager is always "Metro Line X Project Management Consultant (PMC)".
+1. Station / Sector dropdown (auto-detecting the assigned supervising consultant: West Station S-02 -> Consultant B | Central Station S-01 & North Station S-03 -> Consultant A | East Station S-04 -> Consultant C). Project Manager is always "Project Management Consultant (PMC)".
 2. Operation Type: (Option A: Daytime Overtime / Option B: Station Night Work / Option C: Mechanized TBM Tunneling).
 3. Target start date and current date (or days remaining until operation start).
 4. Number of execution personnel, stationed HSE officers (per Sub-Clause 12-9), and operation description (e.g., slab concreting or rebar installation).
@@ -180,7 +180,7 @@ Application Logic:
       'کنترل تعهدات پشتیبانی، اداری و رفاهی پیمانکار در هر سایت کارگاهی و محاسبه درصد تکمیل الزامات قراردادی.',
     objectiveEn:
       'Audit contractor administrative, accommodation, and welfare obligations across project sites and calculate a quantitative contractual compliance score.',
-    promptFa: `یک اپلیکیشن چک‌لیست و ممیزی هوشمند کارگاهی (Audit Tool Artifact / Canvas) با React و Tailwind CSS برای مدیر منابع انسانی و پشتیبانی پروژه احداث مترو خط ایکس بساز.
+    promptFa: `یک اپلیکیشن چک‌لیست و ممیزی هوشمند کارگاهی (Audit Tool Artifact / Canvas) با React و Tailwind CSS برای مدیر منابع انسانی و پشتیبانی سازمان پیمانکار بساز.
 این ابزار باید بر اساس ماده ۲۰-ح شرایط خصوصی و جدول حداقل متراژ فضاهای صفحه ۵۴ قرارداد، وضعیت هر کارگاه را ممیزی کند.
 
 بخش‌های اپلیکیشن:
@@ -200,7 +200,7 @@ Application Logic:
 - تأمین غذای ۳ وعده برای حداقل ۱۰ نفر عوامل کارفرما و مشاور مقیم.
 
 در انتها یک "نمره انطباق کارگاه (از ۱۰۰)" محاسبه شود و لیست نواقص برای ارسال به سرپرست کارگاه قابل خروجی گرفتن باشد.`,
-    promptEn: `Create a smart site mobilization and welfare audit application (Audit Tool Artifact / Canvas) using React and Tailwind CSS for the HR & Support Manager of the Metro Line X Project.
+    promptEn: `Create a smart site mobilization and welfare audit application (Audit Tool Artifact / Canvas) using React and Tailwind CSS for the HR & Support Manager.
 The tool must audit each construction site against Particular Conditions Article 20-H and the Mandatory Minimum Space Table on Contract Page 54.
 
 Application Sections:
@@ -254,13 +254,13 @@ Calculate an overall "Site Compliance Score (out of 100)" and generate an export
     promptFa: `یک ابزار تحت وب در قالب Artifact / Canvas بساز که داده‌های حضور و غیاب ماهانه پرسنل (بازه ۱۶ ماه قبل تا ۱۵ ماه جاری طبق ماده ۱۸-۶ شرایط خصوصی پیمان) را مدیریت کند.
 
 این برنامه باید:
-۱. یک دکمه برای "بارگذاری فایل CSV" یا "استفاده از داده‌های نمونه پروژه مترو خط ایکس" داشته باشد.
+۱. یک دکمه برای "بارگذاری فایل CSV" یا "استفاده از داده‌های نمونه کارگاهی" داشته باشد.
 ۲. جداول و نمودارهای توزیع نیروی انسانی مستقر در کارگاه (موضوع ماده ۱۸-ح ردیف ۲ شرایط خصوصی) را به تفکیک "ستاد"، "ایستگاه‌های زیرزمینی"، "ایستگاه‌های روباز" و "تونل مکانیزه TBM" و به تفکیک تخصص (مهندس، تکنسین، کارگر ماهر، HSE، خدماتی) به صورت نمودار دایره‌ای (Pie Chart) و ستونی انباشته (Stacked Bar) رسم کند.
 ۳. یک نمای چاپی (Print-friendly Report) استاندارد با سربرگ سازمان پیمانکار تولید کند که آماده پیوست شدن به گزارش ماهانه پیشرفت کار برای ارسال به مهندسین مشاور و مدیر طرح پروژه در تاریخ ۲۰ هر ماه باشد.`,
     promptEn: `Build a web utility in Claude Artifacts / Gemini Canvas that processes monthly personnel attendance data (covering the 16th of the previous month through the 15th of the current month per Particular Conditions Article 18-6).
 
 The application must:
-1. Provide buttons to "Upload Time-Card CSV" or "Load Metro Line X Sample Attendance Data".
+1. Provide buttons to "Upload Time-Card CSV" or "Load Sample Site Attendance Data".
 2. Render site manpower distribution tables and charts (mandated by Article 18-H Item 2) broken down by location ("HQ", "Underground Stations", "Cut-and-Cover Stations", "Mechanized TBM Tunnel") and by role ("Engineer", "Technician", "Skilled Worker", "HSE Officer", "Support Staff") using Pie Charts and Stacked Bar Charts.
 3. Generate a standardized Print-Friendly Official Report with the Contractor Organization's letterhead, ready to attach to the Monthly Progress Report submitted to the Supervising Consultants and PMC by the 20th of each month.`,
     expectedOutputFa:
@@ -291,10 +291,10 @@ The application must:
     badgeEn: 'Interactive Gamified Quiz',
     targetTools: ['Claude Artifacts (Interactive Quiz)', 'Gemini Canvas (Gamified App)'],
     objectiveFa:
-      'آموزش تعاملی مفاد قرارداد پروژه مترو خط ایکس به کارشناسان جدیدالورود منابع انسانی و اداری.',
+      'آموزش تعاملی مفاد قراردادهای کارگاهی و ضوابط منابع انسانی به کارشناسان جدیدالورود منابع انسانی و اداری.',
     objectiveEn:
-      'Interactive onboarding and mastery assessment of Metro Line X contractual HR clauses for new HR & Admin specialists.',
-    promptFa: `یک اپلیکیشن آزمون تعاملی (Interactive Quiz Artifact / Canvas) با طراحی گرافیکی جذاب برای آموزش کارشناسان منابع انسانی سازمان پیمانکار در پروژه احداث مترو خط ایکس بساز.
+      'Interactive onboarding and mastery assessment of contractual HR & Admin clauses for new HR specialists.',
+    promptFa: `یک اپلیکیشن آزمون تعاملی (Interactive Quiz Artifact / Canvas) با طراحی گرافیکی جذاب برای آموزش کارشناسان منابع انسانی و اداری سازمان پیمانکار بساز.
 
 ۱۰ سوال چهارگزینه‌ای کاربردی و سناریومحور بر اساس مفاد زیر در آن قرار بده:
 - تبصره ۴ ماده ۳ موافقتنامه و بند ۵۹-۱ ضمیمه شرایط خصوصی (محاسبه بیمه و کسورات بر اساس پروژه‌های غیرعمرانی)
@@ -306,7 +306,7 @@ The application must:
 - بند ۴-۱۲ ضمیمه شرایط خصوصی (تایید چارت سازمانی و تغییر نفرات کلیدی توسط مشاور، مدیر طرح و کارفرما).
 
 پس از انتخاب هر گزینه توسط کاربر، بلافاصله مشخص کن پاسخ درست است یا غلط و ماده و بند دقیق قرارداد را به عنوان توضیح نمایش بده. در پایان، کارنامه و سطح تسلط کارشناس را نمایش بده.`,
-    promptEn: `Create an engaging, gamified Interactive Quiz Web App in Claude Artifacts / Gemini Canvas to train HR & Admin specialists of the Contractor Organization on the Metro Line X Project contract.
+    promptEn: `Create an engaging, gamified Interactive Quiz Web App in Claude Artifacts / Gemini Canvas to train HR & Admin specialists of the Contractor Organization on contractual HR clauses.
 
 Include 10 scenario-based multiple-choice questions covering:
 - Agreement Article 3 Note 4 & Particular Conditions Sub-Clause 59-1 (Social Security & statutory deductions calculated under non-civil/non-development project rates)
@@ -327,7 +327,7 @@ Immediately after each answer selection, reveal whether it is correct or incorre
     educationalTakeawayEn:
       'Transforming dense legal contract clauses into an engaging onboarding simulator for new HR & Admin personnel.',
     keyHighlightsFa: [
-      'پوشش کامل ۷ محور کلیدی منابع انسانی و اداری قرارداد پروژه مترو خط ایکس در قالب ۱۰ سناریو',
+      'پوشش کامل ۷ محور کلیدی منابع انسانی و اداری قراردادهای پیمانکاری در قالب ۱۰ سناریو',
       'بازخورد آنی همراه با ذکر دقیق شماره ماده و بند قانونی پس از هر پاسخ',
       'صدور کارنامه تحلیلی و تعیین سطح تسلط کارشناس در پایان آزمون'
     ],

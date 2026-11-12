@@ -78,8 +78,8 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
                 <Users className="w-3 h-3" />
                 <span>
                   {lang === 'fa'
-                    ? 'ویژه واحد منابع انسانی، اداری و رفاهی (پروژه مترو خط ایکس)'
-                    : 'HR, Admin & Welfare Track (Metro Line X)'}
+                    ? 'ویژه واحد منابع انسانی، اداری و رفاهی'
+                    : 'HR, Admin & Welfare Track'}
                 </span>
               </span>
             </div>
