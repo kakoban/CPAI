@@ -51,6 +51,9 @@ import { DisciplineSelectorModal } from './components/industry/DisciplineSelecto
 import { DisciplineBadge } from './components/industry/DisciplineBadge';
 import { WorkspaceSidebar } from './components/navigation/WorkspaceSidebar';
 import { ContextualAiTutorSidebar } from './components/tutor/ContextualAiTutorSidebar';
+import { PresenterNotesPanel } from './components/presentation/PresenterNotesPanel';
+import { ProjectorSlideModal } from './components/ProjectorSlideModal';
+import { getCpmaiPageProjectorDeck } from './data/projectorDecks';
 import { getDisciplineMetadata } from './data/disciplineExamplesRegistry';
 import { authApi, isAuthorizedAdminUser } from './services/authApi';
 import { lmsApi } from './services/lmsApi';
@@ -58,9 +61,34 @@ import { UserProfile } from './types/auth';
 import { SessionLockEntity } from './types/lms';
 import { Footer } from './components/Footer';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from './data/logo';
-import { Clock, Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud, Calculator, Bot, Server, Sparkles, Trophy, Lock, Unlock, GraduationCap, Menu, PanelLeftClose, Home, FileCode2 } from 'lucide-react';
+import { Clock, Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud, Calculator, Bot, Server, Sparkles, Trophy, Lock, Unlock, GraduationCap, Menu, PanelLeftClose, Home, FileCode2, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, StickyNote, Monitor } from 'lucide-react';
 
 export type AppPage = 'landing' | 'quiz' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21;
+
+const WORKBOOK_SESSION_META: Record<number, { titleFa: string; titleEn: string; groupFa: string; groupEn: string }> = {
+  0: { titleFa: 'ماژول ۰: مبانی LLM، پرامپت و کارگاه ۵ جلسه‌ای', titleEn: 'Module 0: LLM & Prompting Workshop', groupFa: 'آماده‌سازی فنی', groupEn: 'Technical Foundation' },
+  1: { titleFa: 'جلسه ۱: درک کسب‌وکار و اهداف تجاری', titleEn: 'Session 1: Business Understanding', groupFa: 'گروه ۱ · اهداف کسب‌وکار', groupEn: 'Task Group 1 · Objectives' },
+  2: { titleFa: 'جلسه ۲: تعریف مسئله در این تکرار', titleEn: 'Session 2: Problem Iteration', groupFa: 'گروه ۱ · اهداف کسب‌وکار', groupEn: 'Task Group 1 · Objectives' },
+  3: { titleFa: 'جلسه ۳: معیارهای عینی موفقیت', titleEn: 'Session 3: Success Criteria', groupFa: 'گروه ۱ · اهداف کسب‌وکار', groupEn: 'Task Group 1 · Objectives' },
+  4: { titleFa: 'جلسه ۴: تحلیل هزینه-فایده و بودجه', titleEn: 'Session 4: Cost-Benefit Analysis', groupFa: 'گروه ۱ · اهداف کسب‌وکار', groupEn: 'Task Group 1 · Objectives' },
+  5: { titleFa: 'جلسه ۵: برآورد نرخ بازگشت سرمایه (ROI)', titleEn: 'Session 5: Expected ROI', groupFa: 'گروه ۱ · اهداف کسب‌وکار', groupEn: 'Task Group 1 · Objectives' },
+  6: { titleFa: 'جلسه ۶: نیازمندی‌های شناختی پروژه', titleEn: 'Session 6: Cognitive Requirements', groupFa: 'گروه ۲ · الزامات شناختی', groupEn: 'Task Group 2 · Cognitive Needs' },
+  7: { titleFa: 'جلسه ۷: ضرورت راهکار شناختی (چرا AI؟)', titleEn: 'Session 7: Why AI Solution', groupFa: 'گروه ۲ · الزامات شناختی', groupEn: 'Task Group 2 · Cognitive Needs' },
+  8: { titleFa: 'جلسه ۸: بخش‌های سنتی و غیرشناختی', titleEn: 'Session 8: Noncognitive Alternatives', groupFa: 'گروه ۲ · الزامات شناختی', groupEn: 'Task Group 2 · Cognitive Needs' },
+  9: { titleFa: 'جلسه ۹: اهداف اختصاصی شناختی', titleEn: 'Session 9: Cognitive Objectives', groupFa: 'گروه ۲ · الزامات شناختی', groupEn: 'Task Group 2 · Cognitive Needs' },
+  10: { titleFa: 'جلسه ۱۰: خروجی‌های مورد انتظار شناختی', titleEn: 'Session 10: Cognitive Outcomes', groupFa: 'گروه ۲ · الزامات شناختی', groupEn: 'Task Group 2 · Cognitive Needs' },
+  11: { titleFa: 'جلسه ۱۱: معیارهای موفقیت پروژه AI', titleEn: 'Session 11: AI Success Criteria', groupFa: 'گروه ۳ · الگوهای AI', groupEn: 'Task Group 3 · AI Patterns' },
+  12: { titleFa: 'جلسه ۱۲: الگوهای هفت‌گانه شناختی', titleEn: 'Session 12: 7 AI Patterns', groupFa: 'گروه ۳ · الگوهای AI', groupEn: 'Task Group 3 · AI Patterns' },
+  13: { titleFa: 'جلسه ۱۳: انتخاب و توجیه الگوهای AI', titleEn: 'Session 13: Patterns Selection', groupFa: 'گروه ۳ · الگوهای AI', groupEn: 'Task Group 3 · AI Patterns' },
+  14: { titleFa: 'جلسه ۱۴: ارزیابی وضعیت و نیازمندی‌ها', titleEn: 'Session 14: Assess Situation', groupFa: 'گروه ۴ · ارزیابی و منابع', groupEn: 'Task Group 4 · Assess Situation' },
+  15: { titleFa: 'جلسه ۱۵: فناوری‌ها و مهارت‌های لازم', titleEn: 'Session 15: Technology & Skills', groupFa: 'گروه ۴ · ارزیابی و منابع', groupEn: 'Task Group 4 · Assess Situation' },
+  16: { titleFa: 'جلسه ۱۶: مایل‌استون‌ها و زمان‌بندی', titleEn: 'Session 16: Schedule Requirements', groupFa: 'گروه ۴ · ارزیابی و منابع', groupEn: 'Task Group 4 · Assess Situation' },
+  17: { titleFa: 'جلسه ۱۷: محدودیت‌ها و مرزهای عملکرد', titleEn: 'Session 17: Boundaries & Constraints', groupFa: 'گروه ۵ · سنجه‌های مدل', groupEn: 'Task Group 5 · Model Metrics' },
+  18: { titleFa: 'جلسه ۱۸: سنجه‌ها و متریک‌های ارزیابی', titleEn: 'Session 18: Performance Metrics', groupFa: 'گروه ۵ · سنجه‌های مدل', groupEn: 'Task Group 5 · Model Metrics' },
+  19: { titleFa: 'جلسه ۱۹: الزامات عملکرد در برابر خط مبنا', titleEn: 'Session 19: Requirements vs Baseline', groupFa: 'گروه ۵ · سنجه‌های مدل', groupEn: 'Task Group 5 · Model Metrics' },
+  20: { titleFa: 'جلسه ۲۰: مقادیر قابل‌قبول KPI مدل', titleEn: 'Session 20: Acceptable KPI Values', groupFa: 'گروه ۶ · KPIهای نهایی', groupEn: 'Task Group 6 · Target KPIs' },
+  21: { titleFa: 'جلسه ۲۱: شاخص‌های زیرساخت و فناوری', titleEn: 'Session 21: Required Technology KPIs', groupFa: 'گروه ۶ · KPIهای نهایی', groupEn: 'Task Group 6 · Target KPIs' },
+};
 
 const STORAGE_KEY = 'cpmai-workbook-21pages-with-page0-v1';
 const LEGACY_KEY_21 = 'cpmai-workbook-21pages-v1';
@@ -95,6 +123,9 @@ export default function App() {
         if (urlPage !== null) {
           const num = parseInt(urlPage, 10);
           if (!isNaN(num) && num >= 0 && num <= 21) return num as AppPage;
+        }
+        if (searchParams.get('autostart') === '1') {
+          return 0;
         }
       }
     } catch {}
@@ -131,6 +162,29 @@ export default function App() {
   const [isDisciplineModalOpen, setIsDisciplineModalOpen] = useState<boolean>(false);
   // Foldable & Collapsible sidebar state (default closed per user requirement)
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  // Collapsible persistent bottom navigation panel (default collapsed on v2)
+  const [isBottomNavOpen, setIsBottomNavOpen] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('cpmai_bottom_nav_open_v2');
+      if (saved !== null) return saved === 'true';
+    } catch {}
+    return false;
+  });
+
+  const toggleBottomNav = () => {
+    setIsBottomNavOpen((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('cpmai_bottom_nav_open_v2', next.toString());
+      } catch {}
+      return next;
+    });
+  };
+
+  const navigateToPage = (target: AppPage) => {
+    setPage(target);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => {
@@ -145,14 +199,8 @@ export default function App() {
     });
   };
 
-  // Contextual AI Tutor Sidebar state (persisted across sessions)
-  const [isTutorOpen, setIsTutorOpen] = useState<boolean>(() => {
-    try {
-      const saved = localStorage.getItem('cpmai_tutor_sidebar_open');
-      if (saved !== null) return saved === 'true';
-    } catch {}
-    return false;
-  });
+  // Contextual AI Tutor Sidebar state (always closed on initial entry)
+  const [isTutorOpen, setIsTutorOpen] = useState<boolean>(false);
 
   const toggleTutor = () => {
     setIsTutorOpen((prev) => {
@@ -160,12 +208,96 @@ export default function App() {
       if (nextVal && typeof window !== 'undefined' && window.innerWidth < 1440) {
         setIsSidebarOpen(false);
       }
-      try {
-        localStorage.setItem('cpmai_tutor_sidebar_open', nextVal.toString());
-      } catch {}
       return nextVal;
     });
   };
+
+  // Projector Presentation Mode state (hides navigation chrome and scales main content full-screen)
+  const [isPresentationMode, setIsPresentationMode] = useState<boolean>(false);
+  const [isPresenterNotesOpen, setIsPresenterNotesOpen] = useState<boolean>(false);
+  const [cpmaiProjectorPage, setCpmaiProjectorPage] = useState<number | null>(null);
+  const [cpmaiSlideIndex, setCpmaiSlideIndex] = useState<number>(0);
+  const wasNativeFullscreenRef = React.useRef<boolean>(false);
+
+  const openCpmaiProjector = (targetPageNum: number) => {
+    setCpmaiSlideIndex(0);
+    setCpmaiProjectorPage(targetPageNum);
+  };
+
+  const togglePresentationMode = () => {
+    setIsPresentationMode((prev) => {
+      const next = !prev;
+      if (next) {
+        setIsSidebarOpen(false);
+        setIsTutorOpen(false);
+        setIsBottomNavOpen(false);
+        try {
+          if (typeof document !== 'undefined' && document.documentElement.requestFullscreen && !document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+          }
+        } catch {}
+      } else {
+        try {
+          if (typeof document !== 'undefined' && document.fullscreenElement && document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+          }
+        } catch {}
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    setCpmaiProjectorPage(null);
+  }, [page]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.documentElement.setAttribute('data-presentation', isPresentationMode ? 'true' : 'false');
+    if (!isPresentationMode) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (document.querySelector('[data-projector-modal="true"]')) {
+          return;
+        }
+        setIsPresentationMode(false);
+        return;
+      }
+      const target = e.target as HTMLElement | null;
+      const isTyping =
+        !!target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable);
+      if (!isTyping && (e.key === 'n' || e.key === 'N')) {
+        setIsPresenterNotesOpen((prev) => !prev);
+      }
+    };
+    const handleFullscreenChange = () => {
+      if (document.fullscreenElement) {
+        wasNativeFullscreenRef.current = true;
+      } else if (wasNativeFullscreenRef.current) {
+        wasNativeFullscreenRef.current = false;
+        setIsPresentationMode(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [isPresentationMode]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof document !== 'undefined') {
+        document.documentElement.removeAttribute('data-presentation');
+      }
+    };
+  }, []);
 
   const handleSelectIndustryTrack = (track: IndustryTrackId) => {
     setIndustryTrack(track);
@@ -404,8 +536,6 @@ export default function App() {
 
       if (stored) {
         const d = JSON.parse(stored);
-        const hasUrlPage = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('page');
-        if (hasUrlPage && d.page !== undefined) setPage(d.page);
         if (d.lang) setLang(d.lang);
         if (d.theme) setTheme(d.theme);
         if (d.page0Content) setPage0Content(d.page0Content);
@@ -950,29 +1080,150 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-transparent text-[#1c2830] dark:text-[#e8ebe9] transition-colors flex flex-col selection:bg-[#e0533c]/20 selection:text-[#e0533c] dark:selection:bg-[#fb7185]/20 dark:selection:text-[#fb7185]">
+    <div className="min-h-[100dvh] bg-transparent text-slate-900 dark:text-slate-100 transition-colors flex flex-col selection:bg-[#1f5163]/20 selection:text-[#1f5163] dark:selection:bg-[#6fb3c6]/20 dark:selection:text-[#6fb3c6]">
       {/* OWJ Content Protection Shield (Anti-Copy, Anti-Print, Anti-Snipping with Smart Prompt Whitelist) */}
       <ContentProtectionShield lang={lang} isAdmin={isUserAdmin(currentUser)} />
 
       {/* Top Header Bar */}
-      <header className="sticky top-0 z-40 w-full bg-[#ffffff]/95 dark:bg-[#161e24]/95 backdrop-blur-xl border-b border-[#d9dad5]/80 dark:border-[#26333c]/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-        <div className="w-full max-w-[1750px] mx-auto px-2 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4 flex-nowrap overflow-x-hidden">
+      <header className={`sticky top-0 z-40 w-full backdrop-blur-xl border-b transition-colors ${
+        isPresentationMode
+          ? 'bg-white/95 dark:bg-[#0b1117]/95 border-slate-200/70 dark:border-slate-800/80 shadow-xs'
+          : 'bg-white/90 dark:bg-[#0f1720]/90 border-slate-200/80 dark:border-slate-800/80 shadow-[0_1px_3px_rgba(0,0,0,0.02)]'
+      }`}>
+        {isPresentationMode ? (
+          <div className="w-full px-4 sm:px-8 h-14 flex items-center justify-between gap-3 flex-nowrap overflow-x-hidden">
+            {/* Brand + Active Session Slide Label */}
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="bg-[#ffffff] p-1 rounded-xl border border-black/[0.08] dark:border-white/[0.12] shadow-2xs shrink-0 flex items-center justify-center">
+                <img
+                  src={OWJ_LOGO}
+                  alt="OWJ"
+                  className="h-6 w-auto min-w-[32px] max-w-[64px] object-contain shrink-0"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    e.currentTarget.src = OWJ_LOGO_FALLBACK;
+                  }}
+                />
+              </div>
+              <div className="min-w-0 flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-md bg-[#1f5163]/10 dark:bg-[#6fb3c6]/15 text-[#1f5163] dark:text-[#6fb3c6] text-[11px] font-bold shrink-0">
+                  {lang === 'fa' ? 'حالت ارائه پرژکتور' : 'Presentation Mode'}
+                </span>
+                <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 truncate">
+                  {page === 'quiz'
+                    ? (lang === 'fa' ? 'آزمون سطح‌سنجی هوش مصنوعی' : 'AI Readiness Placement Quiz')
+                    : typeof page === 'number'
+                    ? (lang === 'fa' ? WORKBOOK_SESSION_META[page]?.titleFa : WORKBOOK_SESSION_META[page]?.titleEn)
+                    : ''}
+                </span>
+              </div>
+            </div>
+
+            {/* Streamlined Presenter Controls */}
+            <div className="flex items-center gap-2 shrink-0">
+              {typeof page === 'number' && (
+                <div className="hidden sm:flex items-center gap-1.5">
+                  {page >= 1 && page <= 21 && (
+                    <button
+                      type="button"
+                      onClick={() => openCpmaiProjector(page)}
+                      data-testid="cpmai-projector-btn"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 border border-amber-700/60 text-xs font-black cursor-pointer transition-colors shadow-2xs"
+                      title={lang === 'fa' ? 'نمایش اسلایدهای پرژکتور این جلسه' : 'Launch Session Projector Slides'}
+                    >
+                      <Monitor className="w-3.5 h-3.5 shrink-0" />
+                      <span>{lang === 'fa' ? 'اسلاید پروژکتور' : 'Slides'}</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    disabled={page <= 0}
+                    onClick={() => page > 0 && navigateToPage((page - 1) as AppPage)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#18232e] text-xs font-semibold text-slate-700 dark:text-slate-200 hover:border-[#1f5163] disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                    title={lang === 'fa' ? 'جلسه قبل' : 'Previous Session'}
+                  >
+                    {lang === 'fa' ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+                    <span>{lang === 'fa' ? 'قبلی' : 'Prev'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={page >= 21}
+                    onClick={() => page < 21 && navigateToPage((page + 1) as AppPage)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#18232e] text-xs font-semibold text-slate-700 dark:text-slate-200 hover:border-[#1f5163] disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                    title={lang === 'fa' ? 'جلسه بعد' : 'Next Session'}
+                  >
+                    <span>{lang === 'fa' ? 'بعدی' : 'Next'}</span>
+                    {lang === 'fa' ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setIsPresenterNotesOpen((prev) => !prev)}
+                data-testid="presenter-notes-toggle"
+                aria-pressed={isPresenterNotesOpen}
+                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer shrink-0 whitespace-nowrap ${
+                  isPresenterNotesOpen
+                    ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/40'
+                    : 'bg-slate-50 dark:bg-[#18232e] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-[#1f5163]'
+                }`}
+                title={lang === 'fa' ? 'نمایش / مخفی‌سازی یادداشت محرمانه مدرس (کلید N)' : 'Toggle Private Presenter Notes (N)'}
+              >
+                <StickyNote className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden md:inline">{lang === 'fa' ? 'یادداشت مدرس' : 'Presenter Notes'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setLang((prev) => (prev === 'fa' ? 'en' : 'fa'))}
+                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#18232e] text-slate-800 dark:text-slate-100 hover:border-[#1f5163] transition-colors shrink-0 cursor-pointer"
+                title={lang === 'fa' ? 'تغییر زبان' : 'Switch Language'}
+              >
+                <Globe className="w-3.5 h-3.5 shrink-0" />
+                <span>{lang === 'fa' ? 'EN' : 'فا'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+                title="Theme"
+                className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#18232e] text-slate-800 dark:text-slate-100 hover:border-[#1f5163] shrink-0 cursor-pointer"
+              >
+                {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+              </button>
+
+              <button
+                type="button"
+                onClick={togglePresentationMode}
+                data-testid="presentation-mode-toggle"
+                aria-pressed={true}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border bg-[#1f5163] hover:bg-[#163d4b] dark:bg-[#6fb3c6] dark:hover:bg-[#5ca3b8] text-white dark:text-[#0b1117] border-[#1f5163] dark:border-[#6fb3c6] shadow-xs cursor-pointer shrink-0 whitespace-nowrap"
+                title={lang === 'fa' ? 'خروج از حالت ارائه (Esc)' : 'Exit Presentation Mode (Esc)'}
+              >
+                <Minimize2 className="w-3.5 h-3.5 shrink-0" />
+                <span>{lang === 'fa' ? 'خروج از حالت ارائه (Esc)' : 'Exit Presentation (Esc)'}</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+        <div className="w-full max-w-[1750px] mx-auto px-2 sm:px-4 h-15 flex items-center justify-between gap-1.5 sm:gap-2 flex-nowrap overflow-x-auto">
           {/* Section 1: Hamburger Menu + Brand */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             {/* Sidebar Toggle Button */}
             <button
               type="button"
               onClick={toggleSidebar}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border transition-all cursor-pointer shrink-0 shadow-2xs ${
+              className={`flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl border transition-all cursor-pointer shrink-0 shadow-2xs ${
                 isSidebarOpen
-                  ? 'border-[#e0533c]/30 bg-[#e0533c]/10 text-[#e0533c] dark:text-[#fb7185]'
-                  : 'border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.05] hover:bg-[#e0533c]/10 text-[#e0533c] dark:text-[#fb7185]'
+                  ? 'border-[#1f5163]/40 bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] dark:bg-[#6fb3c6]/15'
+                  : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#18232e] hover:border-[#1f5163]/50 text-[#1f5163] dark:text-[#6fb3c6]'
               }`}
               title={lang === 'fa' ? 'نمایش / پنهان‌سازی سایدبار سرفصل‌ها' : 'Toggle Curriculum Sidebar'}
             >
               <Menu className="w-4 h-4 shrink-0" />
-              <span className="text-xs font-bold whitespace-nowrap hidden sm:inline">
-                {lang === 'fa' ? (isSidebarOpen ? 'بستن سایدبار' : 'سرفصل‌ها ☰') : (isSidebarOpen ? 'Hide Sidebar' : 'Curriculum ☰')}
+              <span className="text-[11px] font-bold whitespace-nowrap hidden sm:inline">
+                {lang === 'fa' ? (isSidebarOpen ? 'بستن سایدبار' : 'سرفصل‌ها') : (isSidebarOpen ? 'Hide' : 'Curriculum')}
               </span>
             </button>
 
@@ -983,21 +1234,21 @@ export default function App() {
                 setPage('landing');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="flex items-center gap-2 group shrink-0 select-none cursor-pointer text-right bg-transparent border-none p-0"
+              className="flex items-center gap-1.5 group shrink-0 select-none cursor-pointer text-right bg-transparent border-none p-0"
               title={lang === 'fa' ? 'بازگشت به لندینگ پیج اولیه' : 'Back to Landing Page'}
             >
               <div className="bg-[#ffffff] p-1 rounded-xl border border-black/[0.08] dark:border-white/[0.12] shadow-xs group-hover:scale-105 transition-all shrink-0 flex items-center justify-center">
                 <img
                   src={OWJ_LOGO}
                   alt="OWJ"
-                  className="h-7 w-auto min-w-[36px] max-w-[70px] object-contain shrink-0"
+                  className="h-6 w-auto min-w-[32px] max-w-[58px] object-contain shrink-0"
                   referrerPolicy="no-referrer"
                   onError={(e) => {
                     e.currentTarget.src = OWJ_LOGO_FALLBACK;
                   }}
                 />
               </div>
-              <div className="hidden lg:flex flex-col shrink-0">
+              <div className="hidden 2xl:flex flex-col shrink-0">
                 <span className="font-extrabold text-xs text-[#1c2830] dark:text-[#e8ebe9] whitespace-nowrap group-hover:text-[#e0533c] transition-colors">
                   {lang === 'fa' ? 'کتاب کار CPMAI' : 'CPMAI Workbook'}
                 </span>
@@ -1014,16 +1265,16 @@ export default function App() {
                 setPage('landing');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] hover:bg-[#e0533c]/10 hover:text-[#e0533c] dark:hover:text-[#fb7185] text-xs font-bold transition-all cursor-pointer shrink-0"
+              className="flex items-center gap-1 px-2 py-1.5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] hover:bg-[#e0533c]/10 hover:text-[#e0533c] dark:hover:text-[#fb7185] text-[11px] font-bold transition-all cursor-pointer shrink-0"
               title={lang === 'fa' ? 'بازگشت به لندینگ پیج اولیه' : 'Back to Landing Page'}
             >
               <Home className="w-3.5 h-3.5 text-[#e0533c]" />
-              <span className="hidden xl:inline text-[11px]">{lang === 'fa' ? 'لندینگ پیج' : 'Landing'}</span>
+              <span className="hidden 2xl:inline text-[11px]">{lang === 'fa' ? 'لندینگ' : 'Landing'}</span>
             </button>
           </div>
 
           {/* Section 2: Active Track & Discipline Center Pill */}
-          <div className="flex items-center gap-1.5 shrink-0 min-w-0">
+          <div className="flex items-center gap-1 shrink-0 min-w-0">
             <IndustryTrackSwitcher
               currentTrack={industryTrack}
               onSelectTrack={handleSelectIndustryTrack}
@@ -1041,29 +1292,30 @@ export default function App() {
           </div>
 
           {/* Section 3: Tools & Utilities */}
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             {/* OWJ Markdown Studio Pro Trigger Button */}
             <button
               type="button"
               onClick={() => setIsMarkdownStudioOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30 hover:bg-indigo-500/20 active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
+              className="flex items-center gap-1 px-2 py-1.5 rounded-xl text-[11px] font-bold transition-all border bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30 hover:bg-indigo-500/20 active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
               title={lang === 'fa' ? 'استودیو مارک‌دان اوج: آپلود، مرور، هایلایت ۶ رنگ و ویرایش زنده فایل‌های .md' : 'OWJ Markdown Studio Pro: Upload, Browse & Edit Markdown'}
             >
               <FileCode2 className="w-3.5 h-3.5 shrink-0 text-indigo-500" />
-              <span className="hidden md:inline whitespace-nowrap">{lang === 'fa' ? 'استودیو مارک‌دان' : 'Markdown'}</span>
+              <span className="hidden lg:inline whitespace-nowrap">{lang === 'fa' ? 'مارک‌دان' : 'Markdown'}</span>
             </button>
             <button
               type="button"
               onClick={toggleTutor}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer shrink-0 whitespace-nowrap shadow-2xs ${
+              data-testid="ai-tutor-toggle-btn"
+              className={`flex items-center gap-1 px-2 py-1.5 rounded-xl text-[11px] font-bold transition-all border cursor-pointer shrink-0 whitespace-nowrap shadow-2xs ${
                 isTutorOpen
                   ? 'bg-[#1e8f6b] text-white border-[#1e8f6b]'
                   : 'bg-[#1e8f6b]/10 text-[#1e8f6b] dark:text-[#63c496] border-[#1e8f6b]/30 hover:bg-[#1e8f6b]/20'
               }`}
               title={lang === 'fa' ? 'مربی هوشمند CPMAI (پاسخگویی بر اساس محتوای همین صفحه)' : 'Contextual CPMAI AI Tutor'}
             >
-              <Bot className="w-4 h-4 shrink-0" />
-              <span className="hidden md:inline whitespace-nowrap">
+              <Bot className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden lg:inline whitespace-nowrap">
                 {lang === 'fa' ? 'مربی هوشمند AI' : 'AI Tutor'}
               </span>
             </button>
@@ -1071,30 +1323,43 @@ export default function App() {
             {/* Class Leaderboard Button */}
             <button
               onClick={() => setIsLeaderboardModalOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20 active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
+              className="flex items-center gap-1 px-2 py-1.5 rounded-xl text-[11px] font-bold transition-all border bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20 active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
               title={lang === 'fa' ? 'جدول رتبه‌بندی رقابتی هم‌دوره‌ای‌ها (Class Leaderboard)' : 'Class Leaderboard'}
             >
               <Trophy className="w-3.5 h-3.5 shrink-0 text-amber-500" />
-              <span className="hidden lg:inline whitespace-nowrap">{lang === 'fa' ? 'رتبه‌بندی' : 'Leaderboard'}</span>
+              <span className="hidden xl:inline whitespace-nowrap">{lang === 'fa' ? 'رتبه‌بندی' : 'Leaderboard'}</span>
             </button>
 
             {/* Admin Control Center Button */}
             {isUserAdmin(currentUser) && (
               <button
                 onClick={() => setIsAdminModalOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all border bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30 hover:bg-purple-500/25 active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-xl text-[11px] font-bold transition-all border bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30 hover:bg-purple-500/25 active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
                 title={lang === 'fa' ? 'مرکز فرماندهی مدیریت دوره (Admin Control Center)' : 'Admin Control Center'}
               >
                 <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden lg:inline whitespace-nowrap">{lang === 'fa' ? 'پنل مدیریت' : 'Admin'}</span>
+                <span className="hidden xl:inline whitespace-nowrap">{lang === 'fa' ? 'مدیریت' : 'Admin'}</span>
               </button>
             )}
+
+            {/* Projector Presentation Mode Toggle */}
+            <button
+              type="button"
+              onClick={togglePresentationMode}
+              data-testid="presentation-mode-toggle"
+              aria-pressed={false}
+              className="flex items-center gap-1 px-2 py-1.5 rounded-xl text-[11px] font-bold transition-all border border-[#1f5163]/30 bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] dark:border-[#6fb3c6]/30 dark:bg-[#6fb3c6]/10 hover:bg-[#1f5163]/20 active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
+              title={lang === 'fa' ? 'حالت ارائه پرژکتور (تمام‌صفحه و پنهان‌سازی نوارهای ناوبری)' : 'Presentation Mode (Full-Screen Projector View)'}
+            >
+              <Maximize2 className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden md:inline whitespace-nowrap">{lang === 'fa' ? 'حالت ارائه' : 'Present'}</span>
+            </button>
 
             {/* User Profile / Google Sign-In Button */}
             {currentUser ? (
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-1.5 p-1 pe-2 rounded-xl border border-[#2f7d5b]/30 bg-[#2f7d5b]/10 hover:bg-[#2f7d5b]/20 transition-all text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] cursor-pointer shrink-0 whitespace-nowrap"
+                className="flex items-center gap-1 p-1 pe-1.5 rounded-xl border border-[#2f7d5b]/30 bg-[#2f7d5b]/10 hover:bg-[#2f7d5b]/20 transition-all text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] cursor-pointer shrink-0 whitespace-nowrap"
                 title={lang === 'fa' ? 'حساب کاربری' : 'User Account'}
               >
                 {currentUser.avatarUrl ? (
@@ -1108,14 +1373,14 @@ export default function App() {
                     {currentUser.displayName.charAt(0)}
                   </div>
                 )}
-                <span className="hidden xl:inline max-w-24 truncate text-[11px]">
+                <span className="hidden 2xl:inline max-w-24 truncate text-[11px]">
                   {currentUser.displayName}
                 </span>
               </button>
             ) : (
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-gradient-to-r from-[#e0533c] to-[#c026d3] hover:from-[#c2410c] hover:to-[#9333ea] text-white shadow-xs transition-all active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
+                className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-bold rounded-xl bg-[#1f5163] hover:bg-[#163d4b] dark:bg-[#6fb3c6] dark:hover:bg-[#5ca3b8] text-white dark:text-[#0b1117] shadow-xs transition-all active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
               >
                 <span>{lang === 'fa' ? 'ورود' : 'Sign In'}</span>
               </button>
@@ -1124,7 +1389,7 @@ export default function App() {
             {/* Language Switch */}
             <button
               onClick={() => setLang((prev) => (prev === 'fa' ? 'en' : 'fa'))}
-              className="flex items-center gap-1 px-2 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#e0533c] transition-colors shrink-0 whitespace-nowrap"
+              className="flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#18232e] text-slate-800 dark:text-slate-100 hover:border-[#1f5163] transition-colors shrink-0 whitespace-nowrap cursor-pointer"
             >
               <Globe className="w-3.5 h-3.5 shrink-0" />
               <span>{lang === 'fa' ? 'EN' : 'فا'}</span>
@@ -1134,32 +1399,45 @@ export default function App() {
             <button
               onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
               title="Theme"
-              className="p-1.5 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] hover:bg-[#f4f4f1] dark:hover:bg-[#12171b] shrink-0"
+              className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#18232e] text-slate-800 dark:text-slate-100 hover:border-[#1f5163] shrink-0 cursor-pointer"
             >
               {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
             </button>
           </div>
         </div>
+        )}
       </header>
 
       {/* Workspace Body Layout (Sidebar + Main Workspace Area) */}
-      <div className="flex-1 flex w-full max-w-[1750px] mx-auto relative">
+      <div className={`flex-1 flex w-full mx-auto relative ${isPresentationMode ? 'max-w-none' : 'max-w-[1750px]'}`}>
         {/* Responsive Workspace Sidebar */}
-        <WorkspaceSidebar
-          page={page}
-          onSelectPage={setPage}
-          lang={lang}
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          isSessionLocked={isSessionLocked}
-          onOpenBookModal={() => setIsBookModalOpen(true)}
-          onOpenMarkdownStudio={() => setIsMarkdownStudioOpen(true)}
-          industryTrack={industryTrack}
-          disciplineId={activeDiscipline}
-        />
+        {!isPresentationMode && (
+          <WorkspaceSidebar
+            page={page}
+            onSelectPage={setPage}
+            lang={lang}
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+            isSessionLocked={isSessionLocked}
+            onOpenBookModal={() => setIsBookModalOpen(true)}
+            onOpenMarkdownStudio={() => setIsMarkdownStudioOpen(true)}
+            industryTrack={industryTrack}
+            disciplineId={activeDiscipline}
+          />
+        )}
 
         {/* Main Content Area */}
-        <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-7 lg:p-10 min-w-0">
+        <main className={`flex-1 w-full mx-auto min-w-0 transition-all duration-300 ${
+          typeof page === 'number' && page >= 1 && page <= 21 ? 'cpmai-workbook-stage ' : ''
+        }${
+          isPresentationMode
+            ? page === 0
+              ? 'max-w-none px-4 sm:px-6 lg:px-8 py-3 presentation-main'
+              : 'max-w-6xl px-4 sm:px-8 lg:px-12 py-4 presentation-main'
+            : page === 0
+            ? 'max-w-[1720px] p-3 sm:p-5 lg:px-7 lg:py-4'
+            : 'max-w-5xl p-4 sm:p-7 lg:p-10'
+        }`}>
           {toastMsg && (
             <div className="mb-4 p-3 rounded-lg bg-[#e3f2ea] text-[#2f7d5b] dark:bg-[#173025] dark:text-[#63c496] text-xs sm:text-sm font-medium flex items-center gap-2 animate-fade-in">
               <Check className="w-4 h-4 shrink-0" />
@@ -1203,7 +1481,67 @@ export default function App() {
             industryTrack={industryTrack}
             disciplineId={activeDiscipline}
             isAdmin={isUserAdmin(currentUser)}
+            isPresentationMode={isPresentationMode}
           />
+        )}
+
+        {/* Sleek Top CPMAI Workbook Step & Progress Bar (Pages 1 to 21) */}
+        {!isPresentationMode && typeof page === 'number' && page >= 1 && page <= 21 && (
+          <div className="mb-6 rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 px-4 sm:px-5 py-3.5 shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="px-2.5 py-1 rounded-lg bg-[#1f5163] dark:bg-[#6fb3c6] text-white dark:text-[#0b1117] text-[11px] font-mono font-bold shrink-0">
+                  {lang === 'fa' ? `${page} از ۲۱` : `${page} / 21`}
+                </span>
+                <div className="min-w-0">
+                  <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">
+                    {lang === 'fa' ? WORKBOOK_SESSION_META[page]?.groupFa : WORKBOOK_SESSION_META[page]?.groupEn}
+                  </div>
+                  <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                    {lang === 'fa' ? WORKBOOK_SESSION_META[page]?.titleFa : WORKBOOK_SESSION_META[page]?.titleEn}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => openCpmaiProjector(page)}
+                  data-testid="cpmai-projector-btn"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 border border-amber-700/60 text-xs font-black transition-colors cursor-pointer shadow-2xs"
+                  title={lang === 'fa' ? 'پخش اسلایدهای پرژکتور این صفحه کتاب‌کار' : 'Launch Projector Slides for Session'}
+                >
+                  <Monitor className="w-3.5 h-3.5 shrink-0" />
+                  <span>{lang === 'fa' ? 'اسلاید پروژکتور' : 'Projector Slides'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigateToPage((page - 1) as AppPage)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#18232e] text-xs font-semibold text-slate-700 dark:text-slate-200 hover:border-[#1f5163] transition-colors cursor-pointer"
+                >
+                  {lang === 'fa' ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+                  <span>{lang === 'fa' ? 'صفحه قبل' : 'Prev'}</span>
+                </button>
+                {page < 21 && (
+                  <button
+                    type="button"
+                    onClick={() => navigateToPage((page + 1) as AppPage)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#1f5163] hover:bg-[#163d4b] dark:bg-[#6fb3c6] dark:hover:bg-[#5ca3b8] text-white dark:text-[#0b1117] text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    <span>{lang === 'fa' ? 'صفحه بعد' : 'Next'}</span>
+                    {lang === 'fa' ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-3 h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-[#1f5163] dark:bg-[#6fb3c6] transition-all duration-300"
+                style={{ width: `${Math.round((page / 21) * 100)}%` }}
+              />
+            </div>
+          </div>
         )}
 
         {/* Page 1 (Matching Image 1) */}
@@ -1238,27 +1576,26 @@ export default function App() {
 
         {/* Curriculum Drip Gating for Locked Sessions */}
         {typeof page === 'number' && page >= 2 && isSessionLocked(page) ? (
-          <div className="max-w-3xl mx-auto py-12 px-4 animate-fadeIn">
-            <div className="p-1.5 rounded-3xl bg-black/[0.04] dark:bg-white/[0.05] border border-black/[0.08] dark:border-white/[0.1] shadow-2xl">
-              <div className="rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-8 text-center space-y-6">
-                <div className="w-16 h-16 mx-auto rounded-3xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shadow-inner">
-                  <Lock className="w-8 h-8 animate-pulse" />
-                </div>
-                <div className="space-y-2">
-                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
-                    محتوای آموزشی قطره‌ای (Curriculum Drip Gating)
-                  </span>
-                  <h3 className="text-lg font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                    دسترسی به جلسه {page} در حال حاضر قفل است
-                  </h3>
-                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] max-w-md mx-auto leading-relaxed">
-                    جهت همگامی یادگیری در کارگاه و طبق متدولوژی استقرار CPMAI، این جلسه پس از تدریس استاد در کلاس باز خواهد شد.
-                  </p>
-                </div>
+          <div className="max-w-2xl mx-auto py-10 px-2 animate-fadeIn">
+            <div className="rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 p-7 sm:p-8 text-center space-y-6 shadow-sm">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center">
+                <Lock className="w-7 h-7" />
+              </div>
+              <div className="space-y-2">
+                <span className="inline-block px-3 py-1 rounded-md text-xs font-mono font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                  محتوای آموزشی قطره‌ای (Curriculum Drip Gating)
+                </span>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                  دسترسی به جلسه {page} در حال حاضر قفل است
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                  جهت همگامی یادگیری در کارگاه و طبق متدولوژی استقرار CPMAI، این جلسه پس از تدریس استاد در کلاس باز خواهد شد.
+                </p>
+              </div>
 
-                {/* Admin Guidance & Bypass Button */}
-                {isUserAdmin(currentUser) && (
-                  <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/25 text-right space-y-2 max-w-lg mx-auto">
+              {/* Admin Guidance & Bypass Button */}
+              {isUserAdmin(currentUser) && (
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#18232e] border border-slate-200 dark:border-slate-700 text-right space-y-2 max-w-lg mx-auto">
                     <div className="flex items-center gap-2 text-xs font-bold text-purple-700 dark:text-purple-300">
                       <ShieldCheck className="w-4 h-4" />
                       <span>پیام برای مدیر ارشد (شما):</span>
@@ -1281,35 +1618,28 @@ export default function App() {
                         تنظیمات قفل‌ها در پنل
                       </button>
                     </div>
-                  </div>
-                )}
-
-                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-                  <button
-                    onClick={() => {
-                      setPage(1);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    className="px-5 py-2.5 rounded-xl bg-[#2f7d5b] hover:bg-[#256347] text-white font-bold text-xs transition-all shadow-xs cursor-pointer"
-                  >
-                    بازگشت به جلسه ۱ (درک کسب‌وکار)
-                  </button>
-                  <button
-                    onClick={() => {
-                      setPage('quiz');
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-all shadow-xs cursor-pointer"
-                  >
-                    شرکت در آزمون سطح‌سنجی
-                  </button>
-                  <button
-                    onClick={() => setIsLeaderboardModalOpen(true)}
-                    className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition-all shadow-xs cursor-pointer"
-                  >
-                    مشاهده جدول رتبه‌بندی کلاس 🏆
-                  </button>
                 </div>
+              )}
+
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button
+                  onClick={() => navigateToPage(1)}
+                  className="px-5 py-2.5 rounded-xl bg-[#1f5163] hover:bg-[#163d4b] dark:bg-[#6fb3c6] dark:text-[#0b1117] text-white font-bold text-xs transition-all shadow-xs cursor-pointer"
+                >
+                  بازگشت به جلسه ۱ (درک کسب‌وکار)
+                </button>
+                <button
+                  onClick={() => navigateToPage('quiz')}
+                  className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#18232e] hover:border-[#1f5163] text-slate-800 dark:text-slate-100 font-bold text-xs transition-all cursor-pointer"
+                >
+                  شرکت در آزمون سطح‌سنجی
+                </button>
+                <button
+                  onClick={() => setIsLeaderboardModalOpen(true)}
+                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition-all shadow-xs cursor-pointer"
+                >
+                  مشاهده جدول رتبه‌بندی کلاس 🏆
+                </button>
               </div>
             </div>
           </div>
@@ -1661,8 +1991,120 @@ export default function App() {
           </>
         )}
 
+        {/* Persistent, Collapsible Bottom Quick Navigation Panel (Default Collapsed) */}
+        {!isPresentationMode && (
+        <>
+        <section
+          aria-label={lang === 'fa' ? 'ناوبری سریع پایین صفحه' : 'Bottom Quick Navigation'}
+          className="mt-8 rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden"
+        >
+          <div className="px-4 py-3 flex flex-wrap items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={typeof page !== 'number' || page <= 0}
+                onClick={() => typeof page === 'number' && page > 0 && navigateToPage((page - 1) as AppPage)}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#18232e] text-xs font-semibold text-slate-700 dark:text-slate-200 hover:border-[#1f5163] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+              >
+                {lang === 'fa' ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+                <span>{lang === 'fa' ? 'قبلی' : 'Prev'}</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={typeof page !== 'number' || page >= 21}
+                onClick={() => typeof page === 'number' && page < 21 && navigateToPage((page + 1) as AppPage)}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#1f5163] hover:bg-[#163d4b] dark:bg-[#6fb3c6] dark:hover:bg-[#5ca3b8] text-white dark:text-[#0b1117] text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+              >
+                <span>{lang === 'fa' ? 'بعدی' : 'Next'}</span>
+                {lang === 'fa' ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+
+            <div className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate max-w-md">
+              {page === 'quiz'
+                ? (lang === 'fa' ? 'آزمون سطح‌سنجی هوش مصنوعی' : 'AI Readiness Placement Quiz')
+                : typeof page === 'number'
+                ? (lang === 'fa' ? WORKBOOK_SESSION_META[page]?.titleFa : WORKBOOK_SESSION_META[page]?.titleEn)
+                : ''}
+            </div>
+
+            <button
+              type="button"
+              onClick={toggleBottomNav}
+              aria-expanded={isBottomNavOpen}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#18232e] hover:border-[#1f5163] text-xs font-bold text-[#1f5163] dark:text-[#6fb3c6] cursor-pointer transition-colors"
+            >
+              <span>{lang === 'fa' ? 'فهرست سریع مباحث و جلسات' : 'Quick Jump to All Sessions'}</span>
+              {isBottomNavOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+          </div>
+
+          {isBottomNavOpen && (
+            <div className="p-4 pt-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-[#0f1720]/70 space-y-4 animate-fade-in">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => navigateToPage(0)}
+                  className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                    page === 0
+                      ? 'bg-[#1f5163] text-white border-[#1f5163] dark:bg-[#6fb3c6] dark:text-[#0b1117]'
+                      : 'bg-white dark:bg-[#131c24] text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-[#1f5163]'
+                  }`}
+                >
+                  {lang === 'fa' ? '۰ · مبانی LLM و کارگاه ۵ جلسه‌ای' : '0 · LLM Fundamentals & Prompting'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigateToPage('quiz')}
+                  className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                    page === 'quiz'
+                      ? 'bg-[#1f5163] text-white border-[#1f5163] dark:bg-[#6fb3c6] dark:text-[#0b1117]'
+                      : 'bg-white dark:bg-[#131c24] text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-[#1f5163]'
+                  }`}
+                >
+                  {lang === 'fa' ? 'آزمون تعیین سطح و گواهینامه' : 'Placement Quiz'}
+                </button>
+              </div>
+
+              <div>
+                <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-2">
+                  {lang === 'fa' ? 'جلسات ۱ تا ۲۱ (فاز اول CPMAI: درک کسب‌وکار)' : 'CPMAI Phase I Sessions (1–21)'}
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2">
+                  {Array.from({ length: 21 }, (_, idx) => idx + 1).map((sessionNum) => {
+                    const locked = isSessionLocked(sessionNum);
+                    const isActive = page === sessionNum;
+                    const meta = WORKBOOK_SESSION_META[sessionNum];
+                    return (
+                      <button
+                        key={sessionNum}
+                        type="button"
+                        onClick={() => navigateToPage(sessionNum as AppPage)}
+                        className={`p-2 rounded-xl border text-start transition-all cursor-pointer flex items-center justify-between gap-1.5 ${
+                          isActive
+                            ? 'bg-[#1f5163] text-white border-[#1f5163] dark:bg-[#6fb3c6] dark:text-[#0b1117] shadow-xs'
+                            : locked
+                            ? 'bg-slate-100/70 dark:bg-[#131c24]/60 text-slate-400 dark:text-slate-500 border-slate-200/70 dark:border-slate-800 hover:border-slate-300'
+                            : 'bg-white dark:bg-[#131c24] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-[#1f5163]'
+                        }`}
+                        title={lang === 'fa' ? meta?.titleFa : meta?.titleEn}
+                      >
+                        <span className="text-[11px] font-bold truncate">
+                          {lang === 'fa' ? `جلسه ${sessionNum}` : `S${sessionNum}`}
+                        </span>
+                        {locked && !isActive && <Lock className="w-3 h-3 shrink-0 opacity-70" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+
         {/* Reset Option and Auto-save indicator */}
-        <div className="mt-8 pt-4 border-t border-[#d9dad5] dark:border-[#2d3942] flex flex-wrap items-center justify-between gap-3 text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
+        <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-4 flex-wrap">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-[#2f7d5b]" />
@@ -1697,6 +2139,8 @@ export default function App() {
 
         {/* Footer with OWJ Council & PMI Copyright */}
         <Footer lang={lang} />
+        </>
+        )}
 
         {/* Google OAuth & User Authentication Modal */}
         <AuthModal
@@ -1782,18 +2226,59 @@ export default function App() {
         />
         </main>
 
-        {/* Contextual CPMAI AI Tutor Sidebar */}
-        <ContextualAiTutorSidebar
-          isOpen={isTutorOpen}
-          onClose={() => setIsTutorOpen(false)}
-          page={page}
-          lang={lang}
-          industryTrack={industryTrack}
-          disciplineId={activeDiscipline}
-          roleId={activeRole}
-          activePageDraft={getActivePageDraft()}
-        />
+        {/* Contextual CPMAI AI Tutor Sidebar (Only mounted when explicitly opened) */}
+        {!isPresentationMode && isTutorOpen && (
+          <ContextualAiTutorSidebar
+            isOpen={isTutorOpen}
+            onClose={() => setIsTutorOpen(false)}
+            page={page}
+            lang={lang}
+            industryTrack={industryTrack}
+            disciplineId={activeDiscipline}
+            roleId={activeRole}
+            activePageDraft={getActivePageDraft()}
+          />
+        )}
       </div>
+
+      {/* Universal CPMAI Workbook Pages 1..21 Projector Modal */}
+      {cpmaiProjectorPage !== null && (() => {
+        const meta = WORKBOOK_SESSION_META[cpmaiProjectorPage];
+        const deck = getCpmaiPageProjectorDeck(
+          cpmaiProjectorPage,
+          meta?.titleFa || `جلسه ${cpmaiProjectorPage}`,
+          meta?.groupFa || 'کتاب‌کار CPMAI',
+          meta?.titleEn || `Session ${cpmaiProjectorPage}`
+        );
+        return (
+          <ProjectorSlideModal
+            isOpen={true}
+            onClose={() => setCpmaiProjectorPage(null)}
+            deckTitleFa={deck.deckTitleFa}
+            deckSubtitleFa={deck.deckSubtitleFa}
+            accentColor={deck.accentColor}
+            slides={deck.slides}
+            activeIndex={cpmaiSlideIndex}
+            onChangeIndex={setCpmaiSlideIndex}
+          />
+        );
+      })()}
+
+      {/* Private Presenter Notes Floating Panel (Presentation Mode Only) */}
+      {isPresentationMode && isPresenterNotesOpen && (
+        <PresenterNotesPanel
+          page={page}
+          sessionTitle={
+            page === 'quiz'
+              ? (lang === 'fa' ? 'آزمون سطح‌سنجی هوش مصنوعی' : 'AI Readiness Placement Quiz')
+              : typeof page === 'number'
+              ? (lang === 'fa' ? WORKBOOK_SESSION_META[page]?.titleFa : WORKBOOK_SESSION_META[page]?.titleEn) || ''
+              : ''
+          }
+          lang={lang}
+          onClose={() => setIsPresenterNotesOpen(false)}
+        />
+      )}
     </div>
   );
 }

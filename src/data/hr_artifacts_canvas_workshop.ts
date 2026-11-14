@@ -19,37 +19,49 @@ export interface HrArtifactExercise {
 }
 
 export const HR_ARTIFACTS_WORKSHOP_HEADER = {
-  titleFa: 'کارگاه ساخت ابزارهای تعاملی منابع انسانی و اداری در Claude Artifacts و Gemini Canvas',
-  titleEn: 'HR & Admin Interactive Tool-Building Workshop in Claude Artifacts & Gemini Canvas',
+  titleFa: 'ابزار تعاملی منابع انسانی و اداری با استفاده از Gemini، Claude و NotebookLM',
+  titleEn: 'Interactive HR & Admin Tooling Workflow with NotebookLM, Gemini & Claude',
   subtitleFa:
-    '۵ تمرین عملی برای تبدیل ضوابط منابع انسانی، مفاد قراردادهای کارگاهی و دستورالعمل‌های داخلی سازمان به داشبوردهای مدیریتی React، ماشین‌حساب‌های هوشمند مهلت قراردادی، چک‌لیست ممیزی کمپ و آزمون‌ساز تعاملی بدون نیاز به دانش برنامه‌نویسی.',
+    'پس از استخراج قواعد بدون توهم در NotebookLM، از منطق تحلیلی Gemini (Canvas) و قدرت رابط کاربری Claude (Artifacts) استفاده کنید تا ضوابط منابع انسانی، قراردادهای کارگاهی و بخشنامه‌های داخلی سازمان به داشبوردها و ابزارهای تعاملی تبدیل شوند.',
   subtitleEn:
-    '5 practical exercises transforming HR regulations, site contract clauses, and internal organizational directives into interactive React dashboards, deadline calculators, camp audit tools, and gamified quizzes without coding.',
+    'Combine NotebookLM ground-truth extraction, Gemini Canvas analytical structuring, and Claude Artifacts UI engineering to turn HR policies and site contract clauses into interactive live apps without coding.',
   twoStepChainGuide: {
-    titleFa: '💡 راهنمای اجرای کارگاه آموزشی (زنجیره دو مرحله‌ای: NotebookLM + Claude Artifacts / Gemini Canvas)',
-    titleEn: '💡 2-Step Chained Workshop Playbook (NotebookLM + Claude Artifacts / Gemini Canvas)',
+    titleFa: '🔄 ورک‌فلو ۳ مرحله‌ای پیشنهادی: NotebookLM ← Gemini ← Claude',
+    titleEn: '🔄 3-Stage Integrated Workflow: NotebookLM → Gemini → Claude',
     descriptionFa:
-      'برای دستیابی به بالاترین بازدهی در کارگاه آموزشی، فرآیند کار کارشناسان منابع انسانی و اداری را در قالب یک زنجیره دو مرحله‌ای مکمل اجرا کنید:',
+      'بهترین مسیر حرفه‌ای برای کارشناسان منابع انسانی و اداری پس از یادگیری NotebookLM، ترکیب هدفمند این سه ابزار در یک خط تولید پیوسته است:',
     descriptionEn:
-      'For maximum training ROI, run the HR & Admin curriculum as a two-stage cognitive workflow:',
+      'Execute HR and administrative automation as a clean three-stage cognitive pipeline right after mastering NotebookLM:',
     steps: [
       {
         stepNumber: 1,
-        titleFa: 'گام اول در NotebookLM (تولید محتوا، تقاطع‌گیری و کشف قواعد)',
-        titleEn: 'Step 1 in NotebookLM (Ground-Truth Discovery & Rule Extraction)',
+        toolBadge: 'NotebookLM',
+        titleFa: 'گام ۱ · NotebookLM (کشف قواعد و تقاطع‌گیری بدون توهم)',
+        titleEn: 'Step 1 · NotebookLM (Grounded Discovery & Cross-Audit)',
         descriptionFa:
-          'کارشناسان ابتدا اسناد قرارداد کارگاهی (منبع ۱) و بخشنامه داخلی اضافه‌کاری سازمان پیمانکار (منبع ۲) را در NotebookLM بارگذاری و جستجو می‌کنند و قوانین، سقف‌های مجاز، متراژهای الزامی صفحه ۵۴ و انحرافات کارگاهی را بدون خطای توهم استخراج می‌نمایند.',
+          'ابتدا قرارداد کارگاهی (ماده ۲۵، بند ۴۲-۱ و متراژ صفحه ۵۴) و بخشنامه داخلی اضافه‌کاری را هم‌زمان در NotebookLM بارگذاری کنید تا قواعد قطعی، تضادها و انحرافات کارگاهی با ارجاع دقیق استخراج شوند.',
         descriptionEn:
-          'Specialists query the site contract clauses and internal overtime directive in NotebookLM to extract exact rules, caps, mandatory space tables, and site deviations with zero hallucination.'
+          'Upload the site contract clauses and internal overtime directive into NotebookLM to extract exact rules, space tables, and deviations with cited page groundings.'
       },
       {
         stepNumber: 2,
-        titleFa: 'گام دوم در Claude Artifacts یا Gemini Canvas (تبدیل قواعد متنی به نرم‌افزار تعاملی)',
-        titleEn: 'Step 2 in Claude Artifacts or Gemini Canvas (Turning Rules into Interactive Apps)',
+        toolBadge: 'Gemini / Canvas',
+        titleFa: 'گام ۲ · Gemini / Canvas (مدل‌سازی منطق، محاسبه و پیش‌نمونه)',
+        titleEn: 'Step 2 · Gemini / Canvas (Rule Structuring & Prototype)',
         descriptionFa:
-          'کارشناسان خروجی متنی و قواعد استخراج‌شده از NotebookLM را کپی کرده و به همراه یکی از ۵ پرامپت مهندسی‌شده زیر به Claude (قابلیت Artifacts) یا Gemini (قابلیت Canvas) می‌دهند تا در چند ثانیه داشبورد گرافیکی، ماشین‌حساب مهلت زمانی یا فرم ممیزی هوشمند تحویل بگیرند.',
+          'خروجی مستند NotebookLM و جدول کارکرد CSV را به Gemini بدهید تا فرمول‌های هشدار (خط قرمز HSE، فرجه ۷ روزه و ۲۴ ساعته)، تحلیل آماری و پیش‌نمونه اولیه فرم را در Gemini Canvas بسازد.',
         descriptionEn:
-          'Specialists paste the extracted rules alongside one of the 5 structured prompts below into Claude Artifacts or Gemini Canvas to generate live interactive dashboards, calculators, and audit apps in seconds.'
+          'Feed NotebookLM verified rules and attendance CSV logs into Gemini Canvas to formalize thresholds, edge cases, and rapid interactive prototypes.'
+      },
+      {
+        stepNumber: 3,
+        toolBadge: 'Claude Artifacts',
+        titleFa: 'گام ۳ · Claude Artifacts (ساخت نرم‌افزار و داشبورد نهایی HR)',
+        titleEn: 'Step 3 · Claude Artifacts (Production Interactive App)',
+        descriptionFa:
+          'در پایان، یکی از ۵ پرامپت مهندسی‌شده زیر را به همراه خروجی گام‌های قبل در Claude Artifacts اجرا کنید تا داشبورد گرافیکی، ماشین‌حساب مهلت نامه یا چک‌لیست ممیزی کمپ آماده استفاده تیم تحویل بگیرید.',
+        descriptionEn:
+          'Run one of the 5 engineered prompts below inside Claude Artifacts to generate a polished React dashboard, notice deadline calculator, or camp audit application.'
       }
     ]
   }

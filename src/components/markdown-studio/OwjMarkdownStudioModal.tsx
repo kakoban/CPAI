@@ -526,13 +526,13 @@ export const OwjMarkdownStudioModal: React.FC<OwjMarkdownStudioModalProps> = ({
   // Word goal celebration
   const goalProgress = Math.min(100, Math.round((stats.words / Math.max(1, wordGoal)) * 100));
   useEffect(() => {
-    if (goalProgress >= 100 && !goalCelebrated && stats.words > 0) {
+    if (isOpen && goalProgress >= 100 && !goalCelebrated && stats.words > 0) {
       setGoalCelebrated(true);
       triggerCelebration();
     } else if (goalProgress < 100 && goalCelebrated) {
       setGoalCelebrated(false);
     }
-  }, [goalProgress, goalCelebrated, stats.words]);
+  }, [isOpen, goalProgress, goalCelebrated, stats.words]);
 
   // Categories & Filtered documents for Workspace Library & Sidebar
   const categories = useMemo(() => {

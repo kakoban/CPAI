@@ -25,12 +25,13 @@ import {
   FileBarChart,
   Sliders,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   ArrowRight,
   Eye,
   EyeOff,
   FileCode,
   Users,
-  Code,
   Monitor,
   Zap,
   Home
@@ -55,14 +56,15 @@ import {
   NOTEBOOKLM_MASTERY_MODULES,
   NOTEBOOKLM_STUDIO_TOOLS
 } from '../data/notebooklm_mastery_curriculum';
-import { HrArtifactsCanvasWorkshop } from './HrArtifactsCanvasWorkshop';
-
 interface NotebookLmWorkshopProps {
   lang: Language;
   industryTrack?: IndustryTrackId;
   onLoadToSandbox: (promptText: string) => void;
   copyToClipboard: (text: string, id: string) => void;
   copiedId: string | null;
+  onOpenHrToolsWorkshop?: () => void;
+  isPresentationMode?: boolean;
+  externalOpenProjectorNonce?: number;
 }
 
 export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
@@ -70,7 +72,10 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
   industryTrack = 'CIVIL_INFRA',
   onLoadToSandbox,
   copyToClipboard,
-  copiedId
+  copiedId,
+  onOpenHrToolsWorkshop,
+  isPresentationMode = false,
+  externalOpenProjectorNonce = 0
 }) => {
   const {
     overview: NOTEBOOKLM_OVERVIEW,
@@ -84,7 +89,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
     exerciseDocs: SAMPLE_EXERCISE_DOCS
   } = getNotebookLmSampleDocsForTrack(industryTrack);
 
-  const [activeSubTab, setActiveSubTab] = useState<'mastery_guide' | 'departments' | 'blueprints' | 'exercises' | 'artifacts_canvas'>('mastery_guide');
+  const [activeSubTab, setActiveSubTab] = useState<'mastery_guide' | 'departments' | 'blueprints' | 'exercises'>('mastery_guide');
   const [activeMasteryIdx, setActiveMasteryIdx] = useState<number>(0);
   const [activeStudioToolId, setActiveStudioToolId] = useState<string>(NOTEBOOKLM_STUDIO_TOOLS[0].id);
   const [projectorDeck, setProjectorDeck] = useState<'mastery' | 'studio' | null>(null);
@@ -94,7 +99,20 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
   const [previewDocId, setPreviewDocId] = useState<string | null>(null);
   const [docCopiedId, setDocCopiedId] = useState<string | null>(null);
   const [activeScenarioIdx, setActiveScenarioIdx] = useState<number>(0);
+  const [isOverviewExpanded, setIsOverviewExpanded] = useState<boolean>(() => !isPresentationMode);
   const subTabNavRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isPresentationMode) {
+      setIsOverviewExpanded(false);
+    }
+  }, [isPresentationMode]);
+
+  useEffect(() => {
+    if (externalOpenProjectorNonce > 0) {
+      setProjectorDeck('mastery');
+    }
+  }, [externalOpenProjectorNonce]);
 
   useEffect(() => {
     setSelectedDeptId(UNIT_MANAGERS_MATRIX[0]?.id || 'tech_office');
@@ -105,7 +123,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
   }, [industryTrack]);
 
   const SUB_TAB_ITEMS: Array<{
-    id: 'mastery_guide' | 'departments' | 'blueprints' | 'exercises' | 'artifacts_canvas';
+    id: 'mastery_guide' | 'departments' | 'blueprints' | 'exercises';
     keyHint: string;
     titleFa: string;
     titleEn: string;
@@ -163,20 +181,10 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
       activeClass: 'bg-gradient-to-b from-[#2f7d5b] to-[#236146] text-white border-[#1a4934] border-b-[#113123] ring-2 ring-[#2f7d5b]/30',
       icon: <BookmarkCheck className="w-4 h-4 shrink-0 mt-0.5" />,
     },
-    {
-      id: 'artifacts_canvas',
-      keyHint: 'N5',
-      titleFa: '۴. ساخت ابزار (Artifacts/Canvas)',
-      titleEn: '4. Build HR Tools (Artifacts)',
-      subtitleFa: '۵ تمرین ساخت داشبورد و ماشین‌حساب HR',
-      subtitleEn: '5 Interactive HR Dashboard Exercises',
-      activeClass: 'bg-gradient-to-b from-[#b45309] to-[#92400e] text-white border-[#78350f] border-b-[#451a03] ring-2 ring-[#b45309]/30',
-      icon: <Code className="w-4 h-4 shrink-0 mt-0.5" />,
-    },
   ];
 
   const renderSubTabKeycaps = (scrollToTopOnSelect: boolean) => (
-    <div className="p-2.5 rounded-2xl bg-[#eef1f0] dark:bg-[#131b20] border border-black/[0.08] dark:border-white/[0.1] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 text-xs shadow-inner">
+    <div className="p-2.5 rounded-2xl bg-[#eef1f0] dark:bg-[#131b20] border border-black/[0.08] dark:border-white/[0.1] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs shadow-inner">
       {SUB_TAB_ITEMS.map((tab) => {
         const isSelected = activeSubTab === tab.id;
         return (
@@ -566,79 +574,137 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
 
   return (
     <section className="space-y-6">
-      {/* SECTION HEADER & HERO CARD (Double-Bezel Taste-Skill Architecture) */}
-      <div className="p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
-        <div className="rounded-[calc(1.5rem-0.375rem)] bg-gradient-to-br from-white via-[#fcfdfe] to-[#f4f7f6] dark:from-[#161e24] dark:via-[#131b20] dark:to-[#0f1519] p-5 sm:p-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-            <div className="space-y-2 max-w-3xl">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="px-3 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185] border border-[#c026d3]/20 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Google AI Studio & NotebookLM
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#2f7d5b]/10 text-[#2f7d5b] dark:text-[#52b788] border border-[#2f7d5b]/20">
-                  {lang === 'fa' ? 'بدون خطا و توهم (Zero Hallucination)' : '100% Grounded Intelligence'}
-                </span>
-              </div>
-
-              <h2 className="text-xl sm:text-2xl font-black text-[#1c2830] dark:text-[#e8ebe9] tracking-tight text-balance">
-                {lang === 'fa' ? NOTEBOOKLM_OVERVIEW.titleFa : NOTEBOOKLM_OVERVIEW.titleEn}
-              </h2>
-
-              <p className="text-xs sm:text-sm text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed text-pretty">
-                {lang === 'fa' ? NOTEBOOKLM_OVERVIEW.taglineFa : NOTEBOOKLM_OVERVIEW.taglineEn}
-              </p>
-            </div>
-
-            <div className="shrink-0 flex items-center gap-3">
-              <a
-                href={NOTEBOOKLM_OVERVIEW.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-[#c026d3] to-[#9333ea] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.96] border border-white/20"
-              >
-                <span>{lang === 'fa' ? 'ورود به Google NotebookLM' : 'Open NotebookLM'}</span>
-                <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-              </a>
-            </div>
+      {/* COLLAPSIBLE SECTION HEADER & OVERVIEW BANNER */}
+      {!isOverviewExpanded ? (
+        <div
+          data-testid="notebooklm-overview-collapsed"
+          className="rounded-2xl bg-gradient-to-l from-[#c026d3]/[0.06] via-white to-[#f4f7f6] dark:from-[#c026d3]/[0.14] dark:via-[#161e24] dark:to-[#131b20] border border-[#c026d3]/25 px-4 py-2.5 sm:px-5 flex flex-wrap items-center justify-between gap-2.5 shadow-2xs"
+        >
+          <div className="flex items-center gap-2.5 min-w-0 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9] truncate">
+              <Sparkles className="w-4 h-4 text-[#c026d3] dark:text-[#fb7185] shrink-0" />
+              <span>{lang === 'fa' ? 'Google NotebookLM · هوش مستند بدون توهم' : 'Google NotebookLM · Grounded Intelligence'}</span>
+            </span>
+            <span className="text-[11px] font-semibold text-[#5d6b73] dark:text-[#9aa8b0] hidden sm:inline">
+              {lang === 'fa' ? '۵۰ سند · ۵۰۰ هزار واژه · پادکست و نقشه ذهنی' : '50 Docs · 500k Words · Zero Hallucination'}
+            </span>
           </div>
 
-          {/* 4 Stats Chips */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
-            {NOTEBOOKLM_OVERVIEW.keyStats.map((stat, sIdx) => (
-              <div
-                key={sIdx}
-                className="p-3.5 rounded-2xl bg-white/80 dark:bg-[#1a232a]/80 border border-black/[0.04] dark:border-white/[0.06] shadow-2xs backdrop-blur-sm"
-              >
-                <div className="text-[10px] sm:text-[11px] font-semibold text-[#5d6b73] dark:text-[#9aa8b0]">
-                  {lang === 'fa' ? stat.labelFa : stat.labelEn}
-                </div>
-                <div className="text-sm sm:text-base font-black text-[#c026d3] dark:text-[#fb7185] mt-0.5 tabular-nums">
-                  {stat.value}
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center gap-2 shrink-0">
+            <a
+              href={NOTEBOOKLM_OVERVIEW.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#c026d3] to-[#9333ea] text-white text-xs font-bold shadow-2xs hover:shadow-md transition-all"
+            >
+              <span>{lang === 'fa' ? 'ورود به NotebookLM' : 'Open NotebookLM'}</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+            <button
+              type="button"
+              onClick={() => {
+                playTactileSound('switch');
+                setIsOverviewExpanded(true);
+              }}
+              data-testid="notebooklm-overview-toggle"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1a232a] text-[11px] font-bold text-slate-700 dark:text-slate-200 hover:border-[#c026d3]/50 cursor-pointer transition-colors"
+            >
+              <ChevronDown className="w-3.5 h-3.5" />
+              <span>{lang === 'fa' ? 'معرفی و قابلیت‌ها' : 'Overview'}</span>
+            </button>
           </div>
+        </div>
+      ) : (
+        <div
+          data-testid="notebooklm-overview-expanded"
+          className="p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]"
+        >
+          <div className="rounded-[calc(1.5rem-0.375rem)] bg-gradient-to-br from-white via-[#fcfdfe] to-[#f4f7f6] dark:from-[#161e24] dark:via-[#131b20] dark:to-[#0f1519] p-5 sm:p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] space-y-5">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div className="space-y-1.5 max-w-3xl">
+                <div className="flex items-center gap-2 text-[11px] font-semibold text-[#5d6b73] dark:text-[#9aa8b0] flex-wrap">
+                  <span className="inline-flex items-center gap-1 font-bold text-[#c026d3] dark:text-[#fb7185]">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Google AI Studio &amp; NotebookLM</span>
+                  </span>
+                  <span aria-hidden="true">·</span>
+                  <span className="text-[#2f7d5b] dark:text-[#52b788] font-bold">
+                    {lang === 'fa' ? 'بدون خطا و توهم (Zero Hallucination)' : '100% Grounded Intelligence'}
+                  </span>
+                </div>
 
-          {/* Why Engineers Love It */}
-          <div className="p-4 rounded-2xl bg-[#c026d3]/[0.04] dark:bg-[#c026d3]/[0.08] border border-[#c026d3]/15 space-y-2.5">
-            <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185] font-bold text-xs">
-              <CheckSquare className="w-4 h-4" />
-              <span>{lang === 'fa' ? 'چرا نوت‌بوک ال‌ام بازی را برای مدیران پروژه عوض می‌کند؟' : 'Why NotebookLM is a Game Changer for Mega-Projects:'}</span>
+                <h2 className="text-xl sm:text-2xl font-black text-[#1c2830] dark:text-[#e8ebe9] tracking-tight text-balance">
+                  {lang === 'fa' ? NOTEBOOKLM_OVERVIEW.titleFa : NOTEBOOKLM_OVERVIEW.titleEn}
+                </h2>
+
+                <p className="text-xs sm:text-sm text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed text-pretty">
+                  {lang === 'fa' ? NOTEBOOKLM_OVERVIEW.taglineFa : NOTEBOOKLM_OVERVIEW.taglineEn}
+                </p>
+              </div>
+
+              <div className="shrink-0 flex items-center gap-2.5 flex-wrap">
+                <a
+                  href={NOTEBOOKLM_OVERVIEW.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#c026d3] to-[#9333ea] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.96] border border-white/20"
+                >
+                  <span>{lang === 'fa' ? 'ورود به Google NotebookLM' : 'Open NotebookLM'}</span>
+                  <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    playTactileSound('switch');
+                    setIsOverviewExpanded(false);
+                  }}
+                  data-testid="notebooklm-overview-toggle"
+                  className="inline-flex items-center gap-1 px-3 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1a232a] text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-[#c026d3]/50 cursor-pointer transition-colors"
+                  title={lang === 'fa' ? 'جمع‌کردن کادر معرفی برای تمرکز بیشتر روی آموزش' : 'Collapse overview banner'}
+                >
+                  <ChevronUp className="w-4 h-4" />
+                  <span>{lang === 'fa' ? 'جمع‌کردن معرفی' : 'Collapse'}</span>
+                </button>
+              </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] sm:text-xs text-[#1c2830] dark:text-[#d1d7db] leading-relaxed">
-              {(lang === 'fa' ? NOTEBOOKLM_OVERVIEW.whyEngineersLoveItFa : NOTEBOOKLM_OVERVIEW.whyEngineersLoveItEn).map(
-                (item, idx) => (
-                  <div key={idx} className="flex items-start gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#c026d3] dark:bg-[#fb7185] mt-1.5 shrink-0" />
-                    <span>{item}</span>
+
+            {/* 4 Stats Chips */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-1">
+              {NOTEBOOKLM_OVERVIEW.keyStats.map((stat, sIdx) => (
+                <div
+                  key={sIdx}
+                  className="p-3 rounded-2xl bg-white/80 dark:bg-[#1a232a]/80 border border-black/[0.04] dark:border-white/[0.06] shadow-2xs backdrop-blur-sm"
+                >
+                  <div className="text-[10px] sm:text-[11px] font-semibold text-[#5d6b73] dark:text-[#9aa8b0]">
+                    {lang === 'fa' ? stat.labelFa : stat.labelEn}
                   </div>
-                )
-              )}
+                  <div className="text-sm sm:text-base font-black text-[#c026d3] dark:text-[#fb7185] mt-0.5 tabular-nums">
+                    {stat.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Why Engineers Love It */}
+            <div className="p-3.5 rounded-2xl bg-[#c026d3]/[0.04] dark:bg-[#c026d3]/[0.08] border border-[#c026d3]/15 space-y-2">
+              <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185] font-bold text-xs">
+                <CheckSquare className="w-4 h-4" />
+                <span>{lang === 'fa' ? 'چرا نوت‌بوک ال‌ام بازی را برای مدیران پروژه عوض می‌کند؟' : 'Why NotebookLM is a Game Changer for Mega-Projects:'}</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] sm:text-xs text-[#1c2830] dark:text-[#d1d7db] leading-relaxed">
+                {(lang === 'fa' ? NOTEBOOKLM_OVERVIEW.whyEngineersLoveItFa : NOTEBOOKLM_OVERVIEW.whyEngineersLoveItEn).map(
+                  (item, idx) => (
+                    <div key={idx} className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#c026d3] dark:bg-[#fb7185] mt-1.5 shrink-0" />
+                      <span>{item}</span>
+                    </div>
+                  )
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* SUB-TAB NAVIGATOR: 5-COLUMN TACTILE MECHANICAL KEYCAP GRID */}
       <div ref={subTabNavRef} className="scroll-mt-4">
@@ -2185,26 +2251,37 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
             </div>
           </div>
 
-          {/* When HR Exercise 5 is selected, also display the 5 Claude Artifacts & Gemini Canvas Exercises below */}
-          {selectedExercise.id === 'ex5_hr_metro_line10_compliance' && (
-            <HrArtifactsCanvasWorkshop
-              lang={lang}
-              onLoadToSandbox={onLoadToSandbox}
-              copyToClipboard={copyToClipboard}
-              copiedId={copiedId}
-            />
+          {/* Next-stage workflow CTA after finishing NotebookLM HR analysis */}
+          {selectedExercise.id === 'ex5_hr_metro_line10_compliance' && onOpenHrToolsWorkshop && (
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-l from-[#1a73e8]/[0.08] via-[#c026d3]/[0.07] to-[#b45309]/[0.08] border border-[#c026d3]/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-1">
+                <span className="text-[11px] font-black text-[#c026d3] dark:text-[#fb7185] block">
+                  {lang === 'fa'
+                    ? 'مرحله بعد از اتمام تحلیل مستندات در NotebookLM:'
+                    : 'Next Stage After Grounded Discovery in NotebookLM:'}
+                </span>
+                <h4 className="text-xs sm:text-sm font-extrabold text-[#1c2830] dark:text-[#e8ebe9]">
+                  {lang === 'fa'
+                    ? 'ابزار تعاملی منابع انسانی و اداری با استفاده از Gemini، Claude و NotebookLM'
+                    : 'Interactive HR & Admin Tools Using Gemini, Claude & NotebookLM'}
+                </h4>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenHrToolsWorkshop}
+                data-testid="open-hr-tools-from-nlm-btn"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#1f5163] hover:bg-[#163c4a] text-white text-xs font-extrabold shadow-xs transition-all cursor-pointer shrink-0 whitespace-nowrap"
+              >
+                <span>
+                  {lang === 'fa'
+                    ? 'ورود به کارگاه ابزارهای تعاملی HR'
+                    : 'Open Interactive HR Tools'}
+                </span>
+                <ArrowRight className="w-4 h-4 rtl:rotate-180 shrink-0" />
+              </button>
+            </div>
           )}
         </div>
-      )}
-
-      {/* SUB-TAB 4: CLAUDE ARTIFACTS & GEMINI CANVAS HR TOOL-BUILDING WORKSHOP */}
-      {activeSubTab === 'artifacts_canvas' && (
-        <HrArtifactsCanvasWorkshop
-          lang={lang}
-          onLoadToSandbox={onLoadToSandbox}
-          copyToClipboard={copyToClipboard}
-          copiedId={copiedId}
-        />
       )}
 
       {/* ===================================================================== */}
@@ -2216,8 +2293,8 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
             <span className="w-2 h-2 rounded-full bg-[#c026d3] animate-pulse" />
             <span className="text-xs font-black text-[#1c2830] dark:text-[#e8ebe9]">
               {lang === 'fa'
-                ? 'پنل پایین کارگاه NotebookLM: جابه‌جایی سریع بین ۵ بخش این کارگاه (بدون اسکرول به بالا):'
-                : 'NotebookLM Bottom Deck: Quick Switch Between All 5 Sections:'}
+                ? 'پنل پایین کارگاه NotebookLM: جابه‌جایی سریع بین ۴ بخش این کارگاه (بدون اسکرول به بالا):'
+                : 'NotebookLM Bottom Deck: Quick Switch Between All 4 Sections:'}
             </span>
           </div>
           <button

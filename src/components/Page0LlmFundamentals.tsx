@@ -55,10 +55,20 @@ import {
   Landmark,
   X as CloseIcon,
   Compass,
-  List as ListIcon
+  List as ListIcon,
+  Maximize2,
+  PanelRightClose,
+  PanelRightOpen,
+  ClipboardCheck
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { getDatasetsForTrack } from '../data/engineering_sample_datasets';
+import {
+  computeOrbitNodePosition,
+  computeOrbitStepDeg,
+  getTopOrbitIndex,
+  normalizeOrbitDeg
+} from '../utils/orbitLayout';
 import { getContractsForTrack } from '../data/engineering_sample_contracts';
 import { Page0EngineeringMasterclass } from './Page0EngineeringMasterclass';
 import { NotebookLmWorkshop } from './NotebookLmWorkshop';
@@ -67,6 +77,13 @@ import { HrArtifactsCanvasWorkshop } from './HrArtifactsCanvasWorkshop';
 import { ClaudeEnterpriseConnectors } from './connectors/ClaudeEnterpriseConnectors';
 import { ObsidianBrainSkillsWorkshop } from './obsidian/ObsidianBrainSkillsWorkshop';
 import { ProjectorSlideModal } from './ProjectorSlideModal';
+import { getPage0ModuleProjectorDeck, type Page0ModuleDeckBundle } from '../data/projectorDecks';
+import { ModuleExercisesView } from './ModuleExercisesView';
+import {
+  getModuleExerciseDeck,
+  getTotalModuleExercisesCount,
+  getCompletedExercisesCountForModule
+} from '../data/moduleExercises';
 import {
   DiagramWrapper,
   PipelineArchitectureDiagram,
@@ -98,6 +115,7 @@ interface Page0Props {
   industryTrack?: IndustryTrackId;
   disciplineId?: DisciplineId;
   isAdmin?: boolean;
+  isPresentationMode?: boolean;
 }
 
 interface PromptItem {
@@ -354,8 +372,11 @@ const renderOtherLlmLogo = (id: OtherLlmPlatform['id']) => {
   }
 };
 
+type OrbitSessionId = 's1' | 's2' | 's_nlm' | 's3' | 's4' | 's5';
+
 interface OrbitSessionNode {
-  id: 's1' | 's2' | 's3' | 's4' | 's5';
+  id: OrbitSessionId;
+  numFa: string;
   hoursFa: string;
   titleFa: string;
   titleEn: string;
@@ -365,35 +386,36 @@ interface OrbitSessionNode {
 interface OrbitRoadmapHubProps {
   lang: Language;
   sessions: OrbitSessionNode[];
-  activeSessionId: OrbitSessionNode['id'];
+  activeSessionId: OrbitSessionId;
   completedSessions: Record<string, boolean>;
+  progressPct?: number;
+  compactSplit?: boolean;
   isAdmin: boolean;
-  onSelectSession: (id: OrbitSessionNode['id']) => void;
-  onOpenSession: (id: OrbitSessionNode['id']) => void;
+  onSelectSession: (id: OrbitSessionId) => void;
+  onOpenSession: (id: OrbitSessionId) => void;
   onToggleComplete: (id: string, e: React.MouseEvent) => void;
   widgetHidden?: boolean;
   onRestoreWidget?: () => void;
 }
 
-const ORBIT_W = 760;
-const ORBIT_H = 640;
-const ORBIT_R = 230;
-const ORBIT_STEP = 72;
+const ORBIT_W = 800;
+const ORBIT_H = 660;
+const ORBIT_R = 246;
 const ORBIT_RING_R = 94;
 const ORBIT_RING_C = 2 * Math.PI * ORBIT_RING_R;
 
-const normalizeDeg = (deg: number) => ((((deg + 180) % 360) + 360) % 360) - 180;
-
 /**
- * Rotatable radial/orbital roadmap: 5 sessions on a pentagon around the OWJ hub.
- * Works like a dial — the session at 12 o'clock is the active one. Users can drag
- * the orbit, use the rotate buttons, or click a card to open that session's content.
+ * Rotatable radial/orbital roadmap around the OWJ hub (6 nodes × 60°).
+ * Works like a dial — the section at 12 o'clock is the active one. Users can drag
+ * the orbit, use the rotate buttons, or click a card to open that section's content.
  */
 const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
   lang,
   sessions,
   activeSessionId,
   completedSessions,
+  progressPct,
+  compactSplit = false,
   isAdmin,
   onSelectSession,
   onOpenSession,
@@ -402,7 +424,8 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
   onRestoreWidget
 }) => {
   const count = sessions.length;
-  const baseAngles = sessions.map((_, i) => i * ORBIT_STEP);
+  const stepDeg = computeOrbitStepDeg(count);
+  const baseAngles = sessions.map((_, i) => i * stepDeg);
   const CX = ORBIT_W / 2;
   const CY = ORBIT_H / 2;
 
@@ -453,10 +476,7 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
 
   useEffect(() => () => stopAnimation(), []);
 
-  const indexAtTop = (rot: number) => {
-    const steps = Math.round(-rot / ORBIT_STEP);
-    return ((steps % count) + count) % count;
-  };
+  const indexAtTop = (rot: number) => getTopOrbitIndex(rot, count);
 
   // Keep the active session spun to 12 o'clock (also when it changes from elsewhere, e.g. the pager).
   useEffect(() => {
@@ -464,7 +484,7 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
     if (idx < 0) return;
     const desired = -baseAngles[idx];
     const cur = rotationRef.current;
-    animateTo(cur + normalizeDeg(desired - cur));
+    animateTo(cur + normalizeOrbitDeg(desired - cur));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSessionId]);
 
@@ -478,8 +498,8 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
   };
 
   const rotateByStep = (dir: 1 | -1) => {
-    const snapped = Math.round(rotationRef.current / ORBIT_STEP) * ORBIT_STEP;
-    settleAt(snapped + dir * ORBIT_STEP);
+    const snapped = Math.round(rotationRef.current / stepDeg) * stepDeg;
+    settleAt(snapped + dir * stepDeg);
   };
 
   const pointerAngle = (clientX: number, clientY: number) => {
@@ -506,7 +526,7 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== e.pointerId) return;
     const a = pointerAngle(e.clientX, e.clientY);
-    drag.accum += normalizeDeg(a - drag.lastAngle);
+    drag.accum += normalizeOrbitDeg(a - drag.lastAngle);
     drag.lastAngle = a;
     if (!drag.moved && Math.abs(drag.accum) > 4) {
       drag.moved = true;
@@ -535,15 +555,26 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
     } catch {
       // ignore release errors
     }
-    settleAt(Math.round(rotationRef.current / ORBIT_STEP) * ORBIT_STEP);
+    settleAt(Math.round(rotationRef.current / stepDeg) * stepDeg);
   };
 
   const completedCount = sessions.filter((s) => !!completedSessions[s.id]).length;
   const totalModules = sessions.reduce((acc, s) => acc + s.modules.length, 0);
-  const progress = count ? completedCount / count : 0;
+  const resolvedPct =
+    typeof progressPct === 'number'
+      ? progressPct
+      : count > 0
+      ? Math.round((completedCount / count) * 100)
+      : 0;
+  const progress = Math.max(0, Math.min(1, resolvedPct / 100));
 
-  const renderHub = (small: boolean) => (
-    <div className={`relative flex items-center justify-center shrink-0 ${small ? 'w-48 h-48' : 'w-[200px] h-[200px]'}`}>
+  const renderHub = (size: 'default' | 'small' | 'compact') => (
+    <div
+      dir={lang === 'fa' ? 'rtl' : 'ltr'}
+      className={`relative flex items-center justify-center shrink-0 ${
+        size === 'compact' ? 'w-[120px] h-[120px]' : size === 'small' ? 'w-48 h-48' : 'w-[200px] h-[200px]'
+      }`}
+    >
       <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full -rotate-90" aria-hidden="true">
         <circle cx="100" cy="100" r={ORBIT_RING_R} fill="none" stroke="#f1d9d4" strokeWidth="6" />
         <circle
@@ -559,22 +590,39 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
           style={{ transition: 'stroke-dashoffset 600ms ease' }}
         />
       </svg>
-      <div className="w-44 h-44 rounded-full bg-white/90 dark:bg-[#201729] backdrop-blur-md shadow-xl border border-white/70 dark:border-[#382645] flex flex-col items-center justify-center gap-2 relative z-10 pointer-events-none">
+      <div
+        className={`rounded-full bg-white/90 dark:bg-[#201729] backdrop-blur-md shadow-xl border border-white/70 dark:border-[#382645] flex flex-col items-center justify-center relative z-10 pointer-events-none ${
+          size === 'compact' ? 'w-[102px] h-[102px] gap-1' : 'w-44 h-44 gap-2'
+        }`}
+      >
         <img
           src={OWJ_LOGO}
           alt="OWJ Business Council"
           draggable={false}
-          className="w-28 h-auto object-contain"
+          className={`h-auto object-contain ${size === 'compact' ? 'w-16' : 'w-28'}`}
           referrerPolicy="no-referrer"
           onError={(e) => {
             e.currentTarget.src = OWJ_LOGO_FALLBACK;
           }}
         />
-        <span className="px-2.5 py-0.5 rounded-full bg-[#1d4f69]/10 text-[#1d4f69] dark:text-[#9cc9e0] text-[10px] font-black">
-          {lang === 'fa' ? `۲۰ ساعت • ${totalModules.toLocaleString('fa-IR')} ماژول` : `20h • ${totalModules} modules`}
+        <span
+          dir={lang === 'fa' ? 'rtl' : 'ltr'}
+          className={`rounded-full bg-[#1d4f69]/10 text-[#1d4f69] dark:text-[#9cc9e0] font-black inline-flex items-center gap-1 whitespace-nowrap ${
+            size === 'compact' ? 'px-1.5 py-0.5 text-[8.5px]' : 'px-2 py-0.5 text-[10px]'
+          }`}
+        >
+          {lang === 'fa' ? (
+            <>
+              <span style={{ unicodeBidi: 'isolate' }}>۲۰ ساعت</span>
+              <span aria-hidden="true" className="opacity-60">·</span>
+              <span style={{ unicodeBidi: 'isolate' }}>{totalModules.toLocaleString('fa-IR')} ماژول</span>
+            </>
+          ) : (
+            <span>20h · {totalModules} modules</span>
+          )}
         </span>
-        <span dir="ltr" className="text-[10px] font-mono font-bold text-emerald-600">
-          {completedCount * 20}%
+        <span dir="ltr" className={`font-mono font-bold text-emerald-600 tabular-nums ${size === 'compact' ? 'text-[9px]' : 'text-[10px]'}`}>
+          {resolvedPct}%
         </span>
       </div>
     </div>
@@ -583,8 +631,6 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
   const renderCard = (sess: OrbitSessionNode) => {
     const isSessActive = activeSessionId === sess.id;
     const isCompleted = !!completedSessions[sess.id];
-    const metaFa = `${sess.hoursFa} • ${sess.modules.length.toLocaleString('fa-IR')} ماژول`;
-    const metaEn = `4h • ${sess.modules.length} modules`;
     return (
       <div
         role="button"
@@ -600,24 +646,43 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
           }
         }}
         dir="rtl"
-        className={`p-3 rounded-2xl border text-right transition-[background,box-shadow,transform,border-color] duration-200 cursor-pointer flex flex-col gap-2 select-none w-full ${
+        className={`rounded-2xl border text-right transition-[background,box-shadow,transform,border-color] duration-200 cursor-pointer flex flex-col select-none w-full overflow-hidden ${
+          compactSplit ? 'p-2 gap-1' : 'p-3 gap-2'
+        } ${
           isSessActive
-            ? 'bg-gradient-to-br from-purple-600 via-fuchsia-600 to-orange-500 text-white scale-105 ring-4 ring-purple-200 dark:ring-purple-900 border-transparent shadow-xl'
+            ? `bg-gradient-to-br from-purple-600 via-fuchsia-600 to-orange-500 text-white ${
+                compactSplit ? 'scale-[1.01] ring-2' : 'scale-105 ring-4'
+              } ring-purple-200 dark:ring-purple-900 border-transparent shadow-xl`
             : isCompleted
             ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-950 dark:text-emerald-100 border-emerald-400/60 shadow-xs hover:shadow-md'
             : 'bg-white dark:bg-[#201729] text-[#261a1d] dark:text-[#faedf3] border-[#ecdcd8] dark:border-[#382645] shadow-xs hover:shadow-md hover:border-[#e0533c]/50'
         }`}
       >
-        <div className="flex items-center justify-between gap-1.5">
-          <span className={`text-[10px] font-bold ${isSessActive ? 'text-white/90' : 'text-[#755e66] dark:text-[#ad99ab]'}`}>
-            {lang === 'fa' ? metaFa : metaEn}
+        <div className="flex flex-wrap items-center justify-between gap-1 min-w-0">
+          <span
+            dir={lang === 'fa' ? 'rtl' : 'ltr'}
+            className={`font-bold inline-flex items-center gap-0.5 whitespace-nowrap shrink-0 ${
+              compactSplit ? 'text-[9px]' : 'text-[10px] gap-1'
+            } ${isSessActive ? 'text-white/90' : 'text-[#755e66] dark:text-[#ad99ab]'}`}
+          >
+            {lang === 'fa' ? (
+              <>
+                <span style={{ unicodeBidi: 'isolate' }}>{sess.hoursFa}</span>
+                <span aria-hidden="true" className="opacity-65">·</span>
+                <span style={{ unicodeBidi: 'isolate' }}>{sess.modules.length.toLocaleString('fa-IR')} ماژول</span>
+              </>
+            ) : (
+              <span>4h · {sess.modules.length} mod</span>
+            )}
           </span>
           {isAdmin ? (
             <button
               type="button"
               onClick={(e) => onToggleComplete(sess.id, e)}
               title={isCompleted ? 'لغو وضعیت تکمیل (ویژه ادمین)' : 'ثبت به عنوان تکمیل‌شده / سبز کردن (ویژه ادمین)'}
-              className={`px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 transition-all cursor-pointer ${
+              className={`rounded-full font-black flex items-center gap-0.5 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                compactSplit ? 'px-1.5 py-0.5 text-[8.5px]' : 'px-2 py-0.5 text-[10px] gap-1'
+              } ${
                 isCompleted
                   ? 'bg-emerald-500 text-white shadow-2xs'
                   : isSessActive
@@ -625,19 +690,25 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
                   : 'bg-black/[0.05] dark:bg-white/[0.08] text-[#755e66] dark:text-[#ad99ab] hover:bg-emerald-500/20 hover:text-emerald-700'
               }`}
             >
-              <CheckCircle2 className="w-3 h-3 shrink-0" />
+              <CheckCircle2 className={compactSplit ? 'w-2.5 h-2.5 shrink-0' : 'w-3 h-3 shrink-0'} />
               <span>
-                {isCompleted ? (lang === 'fa' ? 'تکمیل شد' : 'Done') : lang === 'fa' ? '✓ سبز کردن' : '✓ Mark done'}
+                {isCompleted
+                  ? lang === 'fa' ? 'تکمیل شد' : 'Done'
+                  : compactSplit
+                  ? lang === 'fa' ? 'تکمیل' : 'Done'
+                  : lang === 'fa' ? '✓ سبز کردن' : '✓ Done'}
               </span>
             </button>
           ) : isCompleted ? (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 bg-emerald-500 text-white">
-              <CheckCircle2 className="w-3 h-3 shrink-0" />
+            <span className={`rounded-full font-black flex items-center gap-1 bg-emerald-500 text-white whitespace-nowrap shrink-0 ${
+              compactSplit ? 'px-1.5 py-0.5 text-[8.5px]' : 'px-2 py-0.5 text-[10px]'
+            }`}>
+              <CheckCircle2 className={compactSplit ? 'w-2.5 h-2.5 shrink-0' : 'w-3 h-3 shrink-0'} />
               <span>{lang === 'fa' ? 'تکمیل‌شده' : 'Done'}</span>
             </span>
           ) : null}
         </div>
-        <div className="font-extrabold text-xs leading-snug">{lang === 'fa' ? sess.titleFa : sess.titleEn}</div>
+        <div className={`font-extrabold leading-snug ${compactSplit ? 'text-[10.5px]' : 'text-xs'}`}>{lang === 'fa' ? sess.titleFa : sess.titleEn}</div>
       </div>
     );
   };
@@ -645,7 +716,9 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
   return (
     <div
       dir="rtl"
-      className="rounded-3xl bg-gradient-to-br from-[#fff7f5] to-[#fdf2f8] dark:from-[#1a1222] dark:to-[#221629] border border-[#f3e1e4] dark:border-[#382645] p-3 sm:p-4"
+      className={`rounded-3xl bg-gradient-to-br from-[#fff7f5] to-[#fdf2f8] dark:from-[#1a1222] dark:to-[#221629] border border-[#f3e1e4] dark:border-[#382645] ${
+        compactSplit ? 'p-1.5 sm:p-2' : 'p-3 sm:p-4'
+      }`}
     >
       {/* Desktop / tablet: rotatable radial pentagon orbit */}
       <div className="hidden md:block">
@@ -663,7 +736,7 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
               suppressClickRef.current = false;
             }
           }}
-          className={`relative mx-auto w-full max-w-[760px] select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          className={`relative mx-auto w-full select-none ${compactSplit ? 'max-w-[500px]' : 'max-w-[800px]'} ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
           style={{ aspectRatio: `${ORBIT_W} / ${ORBIT_H}`, touchAction: 'pan-y' }}
         >
           <svg viewBox={`0 0 ${ORBIT_W} ${ORBIT_H}`} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
@@ -679,9 +752,7 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
               transform={`rotate(${rotation} ${CX} ${CY})`}
             />
             {sessions.map((sess, i) => {
-              const rad = ((baseAngles[i] + rotation) * Math.PI) / 180;
-              const x = CX + ORBIT_R * Math.sin(rad);
-              const y = CY - ORBIT_R * Math.cos(rad);
+              const { x, y } = computeOrbitNodePosition(i, count, rotation, CX, CY, ORBIT_R);
               const isActive = activeSessionId === sess.id;
               const isDone = !!completedSessions[sess.id];
               const stroke = isActive ? '#c026d3' : isDone ? '#10b981' : '#e5cfcb';
@@ -706,13 +777,11 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
           </svg>
 
           <div className="absolute z-10" style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
-            {renderHub(false)}
+            {renderHub(compactSplit ? 'compact' : 'default')}
           </div>
 
           {sessions.map((sess, i) => {
-            const rad = ((baseAngles[i] + rotation) * Math.PI) / 180;
-            const x = CX + ORBIT_R * Math.sin(rad);
-            const y = CY - ORBIT_R * Math.cos(rad);
+            const { x, y } = computeOrbitNodePosition(i, count, rotation, CX, CY, ORBIT_R);
             return (
               <div
                 key={sess.id}
@@ -720,7 +789,7 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
                 style={{
                   left: `${(x / ORBIT_W) * 100}%`,
                   top: `${(y / ORBIT_H) * 100}%`,
-                  width: '27%',
+                  width: compactSplit ? '28.5%' : '25.5%',
                   transform: 'translate(-50%, -50%)'
                 }}
               >
@@ -770,7 +839,7 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
 
       {/* Mobile: hub on top, then vertical timeline */}
       <div className="md:hidden flex flex-col items-center gap-5">
-        {renderHub(true)}
+        {renderHub('small')}
         <div className="w-full relative pr-5 space-y-3">
           <span
             className="absolute right-1.5 top-2 bottom-2 w-0.5 bg-gradient-to-b from-[#e0533c]/60 to-[#c026d3]/30 rounded-full"
@@ -815,8 +884,14 @@ interface FloatingOrbitWidgetProps {
   activeSessionId: OrbitSessionNode['id'];
   activeTab: string | null;
   completedSessions: Record<string, boolean>;
+  showModules: boolean;
+  onToggleShowModules: (next: boolean) => void;
+  isBigOrbitCollapsed?: boolean;
+  onRestoreBigOrbit?: () => void;
   onOpenSession: (id: OrbitSessionNode['id']) => void;
   onOpenModule: (moduleId: string) => void;
+  onOpenModuleExercise?: (moduleId: string) => void;
+  activePaneMode?: 'lesson' | 'exercise';
   onBackToMap: () => void;
   onClose: () => void;
 }
@@ -845,8 +920,14 @@ const FloatingOrbitWidget: React.FC<FloatingOrbitWidgetProps> = ({
   activeSessionId,
   activeTab,
   completedSessions,
+  showModules,
+  onToggleShowModules,
+  isBigOrbitCollapsed = false,
+  onRestoreBigOrbit,
   onOpenSession,
   onOpenModule,
+  onOpenModuleExercise,
+  activePaneMode = 'lesson',
   onBackToMap,
   onClose
 }) => {
@@ -862,9 +943,8 @@ const FloatingOrbitWidget: React.FC<FloatingOrbitWidgetProps> = ({
     } catch {
       // ignore storage error
     }
-    return clampWidgetPos(20, window.innerHeight - WIDGET_SIZE - 96);
+    return clampWidgetPos(20, Math.max(100, window.innerHeight - WIDGET_SIZE - 28));
   });
-  const [showModules, setShowModules] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [rotation, setRotation] = useState(0);
   const rotationRef = useRef(0);
@@ -884,16 +964,18 @@ const FloatingOrbitWidget: React.FC<FloatingOrbitWidgetProps> = ({
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  const stepDeg = computeOrbitStepDeg(sessions.length);
+
   // Spin the active session to 12 o'clock (shortest path).
   useEffect(() => {
     const idx = sessions.findIndex((s) => s.id === activeSessionId);
     if (idx < 0) return;
-    const desired = -idx * ORBIT_STEP;
-    const next = rotationRef.current + normalizeDeg(desired - rotationRef.current);
+    const desired = -idx * stepDeg;
+    const next = rotationRef.current + normalizeOrbitDeg(desired - rotationRef.current);
     rotationRef.current = next;
     setRotation(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeSessionId]);
+  }, [activeSessionId, sessions.length]);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -1024,17 +1106,22 @@ const FloatingOrbitWidget: React.FC<FloatingOrbitWidgetProps> = ({
           />
         </button>
 
-        {/* Session nodes (rotating pentagon, labels kept upright) */}
+        {/* Session nodes (rotating orbit, labels kept upright) */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 550ms cubic-bezier(0.22, 1, 0.36, 1)' }}
         >
           {sessions.map((sess, i) => {
-            const rad = (i * ORBIT_STEP * Math.PI) / 180;
-            const x = WIDGET_SIZE / 2 + WIDGET_NODE_R * Math.sin(rad);
-            const y = WIDGET_SIZE / 2 - WIDGET_NODE_R * Math.cos(rad);
+            const { x, y } = computeOrbitNodePosition(i, sessions.length, 0, WIDGET_SIZE / 2, WIDGET_SIZE / 2, WIDGET_NODE_R);
             const isActive = sess.id === activeSessionId;
             const isDone = !!completedSessions[sess.id];
+            const nodeGlyph =
+              sess.id === 's_nlm'
+                ? 'N'
+                : (() => {
+                    const num = Number(sess.id.replace('s', ''));
+                    return Number.isFinite(num) && num > 0 ? digit(num - 1) : digit(i);
+                  })();
             return (
               <button
                 key={sess.id}
@@ -1055,7 +1142,7 @@ const FloatingOrbitWidget: React.FC<FloatingOrbitWidgetProps> = ({
                   transition: 'transform 550ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms'
                 }}
               >
-                {digit(i)}
+                {nodeGlyph}
               </button>
             );
           })}
@@ -1074,7 +1161,8 @@ const FloatingOrbitWidget: React.FC<FloatingOrbitWidgetProps> = ({
         {/* Module list toggle */}
         <button
           type="button"
-          onClick={() => setShowModules((v) => !v)}
+          onClick={() => onToggleShowModules(!showModules)}
+          data-testid="floating-orbit-modules-toggle"
           className={`absolute -bottom-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 whitespace-nowrap shadow-md border cursor-pointer transition-colors ${
             showModules
               ? 'bg-gradient-to-r from-[#e0533c] to-[#c026d3] text-white border-transparent'
@@ -1082,45 +1170,81 @@ const FloatingOrbitWidget: React.FC<FloatingOrbitWidgetProps> = ({
           }`}
         >
           <ListIcon className="w-3 h-3" />
-          <span>{lang === 'fa' ? `ماژول‌های جلسه ${digit(activeIdx)}` : `Session ${activeIdx + 1}`}</span>
+          <span>
+            {lang === 'fa'
+              ? activeSess?.id === 's_nlm'
+                ? 'ماژول‌های NotebookLM'
+                : `ماژول‌های ${activeSess?.numFa || digit(activeIdx)}`
+              : activeSess?.id === 's_nlm'
+              ? 'NotebookLM'
+              : `Session ${activeSess?.id.replace('s', '') || activeIdx + 1}`}
+          </span>
         </button>
       </div>
 
       {showModules && activeSess && (
         <div
+          data-testid="floating-orbit-modules-dropdown"
           className={`absolute w-64 p-3 rounded-2xl bg-white/95 dark:bg-[#1a1222]/95 backdrop-blur-md border border-[#f3e1e4] dark:border-[#382645] shadow-2xl space-y-2 cursor-default ${
             openUp ? 'bottom-full mb-3' : 'top-full mt-5'
           } ${onLeftHalf ? 'left-0' : 'right-0'}`}
           style={{ touchAction: 'pan-y' }}
           onPointerDown={(e) => e.stopPropagation()}
         >
-          <div className="text-[11px] font-extrabold leading-snug text-[#261a1d] dark:text-[#faedf3]">
-            {lang === 'fa' ? activeSess.titleFa : activeSess.titleEn}
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[11px] font-extrabold leading-snug text-[#261a1d] dark:text-[#faedf3]">
+              {lang === 'fa' ? activeSess.titleFa : activeSess.titleEn}
+            </div>
+            {isBigOrbitCollapsed && onRestoreBigOrbit && (
+              <button
+                type="button"
+                onClick={onRestoreBigOrbit}
+                className="px-2 py-0.5 rounded-lg bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] text-[10px] font-bold whitespace-nowrap cursor-pointer hover:bg-[#1f5163]/20"
+              >
+                {lang === 'fa' ? 'مدار بزرگ' : 'Full Orbit'}
+              </button>
+            )}
           </div>
-          <div className="flex flex-col gap-1.5 max-h-64 overflow-y-auto">
+          <div className="flex flex-col gap-1.5 max-h-56 overflow-y-auto">
             {activeSess.modules.map((m) => {
               const isCurrent = activeTab === m.id;
               return (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => onOpenModule(m.id)}
-                  className={`w-full px-2.5 py-1.5 rounded-xl text-right text-[11px] flex items-center gap-2 border transition-colors cursor-pointer ${
-                    isCurrent
-                      ? 'bg-gradient-to-r from-[#e0533c] to-[#c026d3] text-white border-transparent shadow-xs'
-                      : 'bg-white dark:bg-[#201729] text-[#0A101D] dark:text-[#faedf3] border-gray-200 dark:border-[#382645] hover:bg-orange-50 hover:border-orange-200'
-                  }`}
-                >
-                  <span
-                    dir="ltr"
-                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-black font-mono shrink-0 ${
-                      isCurrent ? 'bg-white/20 text-white' : 'bg-[#e0533c] text-white'
+                <div key={m.id} className="flex items-stretch gap-1">
+                  <button
+                    type="button"
+                    onClick={() => onOpenModule(m.id)}
+                    className={`flex-1 min-w-0 px-2.5 py-1.5 rounded-xl text-right text-[11px] flex items-center gap-2 border transition-colors cursor-pointer ${
+                      isCurrent && activePaneMode !== 'exercise'
+                        ? 'bg-gradient-to-r from-[#e0533c] to-[#c026d3] text-white border-transparent shadow-xs'
+                        : 'bg-white dark:bg-[#201729] text-[#0A101D] dark:text-[#faedf3] border-gray-200 dark:border-[#382645] hover:bg-orange-50 hover:border-orange-200'
                     }`}
                   >
-                    {m.num}
-                  </span>
-                  <span className="font-bold leading-tight">{lang === 'fa' ? m.titleFa : m.titleEn}</span>
-                </button>
+                    <span
+                      dir="ltr"
+                      className={`px-1.5 py-0.5 rounded-full text-[10px] font-black font-mono shrink-0 ${
+                        isCurrent && activePaneMode !== 'exercise' ? 'bg-white/20 text-white' : 'bg-[#e0533c] text-white'
+                      }`}
+                    >
+                      {m.num}
+                    </span>
+                    <span className="font-bold leading-tight truncate">{lang === 'fa' ? m.titleFa : m.titleEn}</span>
+                  </button>
+                  {onOpenModuleExercise && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenModuleExercise(m.id)}
+                      data-testid={`floating-mod-ex-btn-${m.id}`}
+                      title={lang === 'fa' ? `تمرین عملی ماژول ${m.num}` : `Practice Module ${m.num}`}
+                      className={`px-2 py-1.5 rounded-xl border text-[10px] font-extrabold shrink-0 cursor-pointer transition-colors ${
+                        isCurrent && activePaneMode === 'exercise'
+                          ? 'bg-[#1f5163] text-white border-[#1f5163]'
+                          : 'bg-slate-50 dark:bg-[#201729] text-[#1f5163] dark:text-[#6fb3c6] border-gray-200 dark:border-[#382645] hover:border-[#1f5163]/50'
+                      }`}
+                    >
+                      {lang === 'fa' ? 'تمرین' : 'Lab'}
+                    </button>
+                  )}
+                </div>
               );
             })}
           </div>
@@ -1139,7 +1263,8 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   onOpenQuiz,
   industryTrack = 'CIVIL_INFRA',
   disciplineId,
-  isAdmin = false
+  isAdmin = false,
+  isPresentationMode = false
 }) => {
   const effectiveDiscipline: DisciplineId =
     disciplineId ||
@@ -1157,7 +1282,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
 
   const discMeta = getDisciplineMetadata(effectiveDiscipline);
   const disciplinePromptPair = getDisciplinePromptShowcase(effectiveDiscipline);
-  const [activeSessionId, setActiveSessionId] = useState<'s1' | 's2' | 's3' | 's4' | 's5'>('s1');
+  const [activeSessionId, setActiveSessionId] = useState<OrbitSessionId>('s1');
   const [activeTab, setActiveTab] = useState<
     | null
     | 'all'
@@ -1172,6 +1297,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     | 'advanced_features'
     | 'engineering_dashboards'
     | 'notebooklm'
+    | 'hr_interactive_tools'
     | 'contracts_and_gems'
     | 'skills_lab'
     | 'mcp_lab'
@@ -1183,6 +1309,70 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     | 's5_vibecoding'
   >('s1_demo');
   const [isSandboxOpen, setIsSandboxOpen] = useState<boolean>(false);
+  const [paneViewMode, setPaneViewMode] = useState<'lesson' | 'exercise'>('lesson');
+  const [moduleExDoneMap, setModuleExDoneMap] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('cpmai_page0_module_ex_done_v1');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+  const [moduleExChecksMap, setModuleExChecksMap] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('cpmai_page0_module_ex_checks_v1');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+  const [moduleExNotesMap, setModuleExNotesMap] = useState<Record<string, string>>(() => {
+    try {
+      const saved = localStorage.getItem('cpmai_page0_module_ex_notes_v1');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const toggleModuleExDone = (exId: string) => {
+    playTactileSound('success');
+    setModuleExDoneMap((prev) => {
+      const next = { ...prev, [exId]: !prev[exId] };
+      try {
+        localStorage.setItem('cpmai_page0_module_ex_done_v1', JSON.stringify(next));
+      } catch {
+        // ignore storage error
+      }
+      return next;
+    });
+  };
+
+  const toggleModuleExCheck = (checkKey: string) => {
+    playTactileSound('switch');
+    setModuleExChecksMap((prev) => {
+      const next = { ...prev, [checkKey]: !prev[checkKey] };
+      try {
+        localStorage.setItem('cpmai_page0_module_ex_checks_v1', JSON.stringify(next));
+      } catch {
+        // ignore storage error
+      }
+      return next;
+    });
+  };
+
+  const updateModuleExNote = (exId: string, val: string) => {
+    setModuleExNotesMap((prev) => {
+      const next = { ...prev, [exId]: val };
+      try {
+        localStorage.setItem('cpmai_page0_module_ex_notes_v1', JSON.stringify(next));
+      } catch {
+        // ignore storage error
+      }
+      return next;
+    });
+  };
+
   const [completedSessions, setCompletedSessions] = useState<Record<string, boolean>>(() => {
     try {
       const saved = localStorage.getItem('cpmai_page0_completed_sessions_v1');
@@ -1191,13 +1381,66 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
       return {};
     }
   });
+  const [completedModules, setCompletedModules] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('cpmai_page0_completed_modules_v1');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const isModuleCompleted = (moduleId: string, sessionId?: string) => {
+    if (completedModules[moduleId]) return true;
+    if (sessionId && completedSessions[sessionId]) return true;
+    return false;
+  };
+
+  const toggleModuleCompletion = (moduleId: string, sessionId: string) => {
+    playTactileSound('success');
+    const currentlyDone = isModuleCompleted(moduleId, sessionId);
+    const nextVal = !currentlyDone;
+    const sess = FIVE_SESSIONS.find((s) => s.id === sessionId);
+
+    setCompletedModules((prev) => {
+      const next = { ...prev };
+      if (!nextVal && completedSessions[sessionId] && sess) {
+        // Preserve other modules in that session before clearing session-wide flag
+        sess.modules.forEach((m) => {
+          if (m.id !== moduleId) next[m.id] = true;
+        });
+      }
+      next[moduleId] = nextVal;
+      try {
+        localStorage.setItem('cpmai_page0_completed_modules_v1', JSON.stringify(next));
+      } catch {
+        // ignore storage error
+      }
+
+      if (sess) {
+        const allDone = sess.modules.every((m) => !!next[m.id]);
+        setCompletedSessions((prevSess) => {
+          if (!!prevSess[sessionId] === allDone) return prevSess;
+          const nextSess = { ...prevSess, [sessionId]: allDone };
+          try {
+            localStorage.setItem('cpmai_page0_completed_sessions_v1', JSON.stringify(nextSess));
+          } catch {
+            // ignore storage error
+          }
+          return nextSess;
+        });
+      }
+      return next;
+    });
+  };
 
   const toggleSessionCompletion = (sessionId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isAdmin) return;
     playTactileSound('success');
+    const nextSessVal = !completedSessions[sessionId];
     setCompletedSessions((prev) => {
-      const next = { ...prev, [sessionId]: !prev[sessionId] };
+      const next = { ...prev, [sessionId]: nextSessVal };
       try {
         localStorage.setItem('cpmai_page0_completed_sessions_v1', JSON.stringify(next));
       } catch {
@@ -1205,11 +1448,30 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
       }
       return next;
     });
+    const sess = FIVE_SESSIONS.find((s) => s.id === sessionId);
+    if (sess) {
+      setCompletedModules((prevMods) => {
+        const nextMods = { ...prevMods };
+        sess.modules.forEach((m) => {
+          nextMods[m.id] = nextSessVal;
+        });
+        try {
+          localStorage.setItem('cpmai_page0_completed_modules_v1', JSON.stringify(nextMods));
+        } catch {
+          // ignore storage error
+        }
+        return nextMods;
+      });
+    }
   };
+
   const [s1ProjectorDeck, setS1ProjectorDeck] = useState<
     null | 's1_demo' | 's1_drive' | 's1_markdown' | 's1_github' | 's5_capstone'
   >(null);
   const [s1SlideIndex, setS1SlideIndex] = useState<number>(0);
+  const [universalProjectorDeck, setUniversalProjectorDeck] = useState<Page0ModuleDeckBundle | null>(null);
+  const [universalSlideIdx, setUniversalSlideIdx] = useState<number>(0);
+  const [nlmProjectorNonce, setNlmProjectorNonce] = useState<number>(0);
 
   const openS1Projector = (
     deck: 's1_demo' | 's1_drive' | 's1_markdown' | 's1_github' | 's5_capstone',
@@ -1218,6 +1480,34 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     playTactileSound('thock');
     setS1SlideIndex(startIndex);
     setS1ProjectorDeck(deck);
+  };
+
+  const handleOpenActiveModuleProjector = () => {
+    if (!activeTab || activeTab === 'all') return;
+    if (
+      activeTab === 's1_demo' ||
+      activeTab === 's1_drive' ||
+      activeTab === 's1_markdown' ||
+      activeTab === 's1_github'
+    ) {
+      openS1Projector(activeTab, 0);
+      return;
+    }
+    if (activeTab === 's5_orchestration' || activeTab === 's5_vibecoding') {
+      openS1Projector('s5_capstone', 0);
+      return;
+    }
+    if (activeTab === 'notebooklm') {
+      playTactileSound('thock');
+      setNlmProjectorNonce((n) => n + 1);
+      return;
+    }
+    const bundle = getPage0ModuleProjectorDeck(activeTab, activeTrackMetaphor.trackLabelFa);
+    if (bundle) {
+      playTactileSound('thock');
+      setUniversalSlideIdx(0);
+      setUniversalProjectorDeck(bundle);
+    }
   };
 
   const downloadTextFile = (fileName: string, textContent: string, mime = 'text/plain;charset=utf-8;') => {
@@ -1245,7 +1535,10 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
 
   const navPillsRef = useRef<HTMLDivElement | null>(null);
   const chapterStartRef = useRef<HTMLDivElement | null>(null);
+  const contentPaneRef = useRef<HTMLDivElement | null>(null);
   const [isOrbitWidgetHidden, setIsOrbitWidgetHidden] = useState<boolean>(false);
+  const [isWidgetModulesOpen, setIsWidgetModulesOpen] = useState<boolean>(false);
+  const [isOrbitPaneCollapsed, setIsOrbitPaneCollapsed] = useState<boolean>(false);
 
   const TRACK_METAPHORS = {
     CIVIL_INFRA: {
@@ -1287,7 +1580,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   type ModuleTabId = Exclude<typeof activeTab, null | 'all'>;
   interface SessionModuleMeta {
     id: ModuleTabId;
-    sessionId: 's1' | 's2' | 's3' | 's4' | 's5';
+    sessionId: OrbitSessionId;
     num: string;
     titleFa: string;
     subFa: string;
@@ -1295,7 +1588,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     subEn: string;
   }
   interface CurriculumSessionGroup {
-    id: 's1' | 's2' | 's3' | 's4' | 's5';
+    id: OrbitSessionId;
     numFa: string;
     hoursFa: string;
     titleFa: string;
@@ -1416,26 +1709,45 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
       ]
     },
     {
-      id: 's3' as const,
-      numFa: 'جلسه ۳',
-      hoursFa: '۴ ساعت',
-      titleFa: 'سنتز دانش و معماری مهارت‌ها (Skills)',
-      titleEn: 'Session 3: NotebookLM, Contract Audit & AI Skills (SKILL.md)',
-      metaphorFa: `${activeTrackMetaphor.skillFa} · اتصال دانش پایه به دستورالعمل گام‌به‌گام و مخزن GitHub`,
+      id: 's_nlm' as const,
+      numFa: 'بخش NotebookLM',
+      hoursFa: 'کارگاه مجزا',
+      titleFa: 'کارگاه تخصصی و مجزای Google NotebookLM',
+      titleEn: 'Dedicated Google NotebookLM & HR Workflow',
+      metaphorFa: 'تحلیل اسناد بدون توهم در NotebookLM و ساخت ابزارهای تعاملی منابع انسانی با ترکیب Gemini و Claude',
       modules: [
         {
           id: 'notebooklm' as const,
-          sessionId: 's3' as const,
-          num: '۳-۱',
+          sessionId: 's_nlm' as const,
+          num: 'NLM',
           titleFa: 'کارگاه جامع Google NotebookLM',
-          subFa: 'تحلیل اسناد سنگین، نقشه ذهنی و پادکست',
-          titleEn: 'Google NotebookLM Lab',
+          subFa: 'قابلیت‌های Studio، ماتریس ۷ دپارتمان، پادکست و تمرینات عملی',
+          titleEn: 'Google NotebookLM Complete Lab',
           subEn: 'Zero-Hallucination Document Synthesis'
         },
         {
+          id: 'hr_interactive_tools' as const,
+          sessionId: 's_nlm' as const,
+          num: 'HR',
+          titleFa: 'ابزار تعاملی منابع انسانی و اداری (NotebookLM + Gemini + Claude)',
+          subFa: 'ورک‌فلو ۳ مرحله‌ای از تحلیل مستندات تا ساخت ۵ اپلیکیشن تعاملی HR',
+          titleEn: 'Interactive HR & Admin Tools (NotebookLM + Gemini + Claude)',
+          subEn: '3-Stage Workflow: NotebookLM → Gemini Canvas → Claude Artifacts'
+        }
+      ]
+    },
+    {
+      id: 's3' as const,
+      numFa: 'جلسه ۳',
+      hoursFa: '۴ ساعت',
+      titleFa: 'ممیزی قراردادها و معماری مهارت‌ها (AI Skills)',
+      titleEn: 'Session 3: Contract Claims Audit & AI Skills (SKILL.md)',
+      metaphorFa: `${activeTrackMetaphor.skillFa} · اتصال دانش قراردادی به دستورالعمل گام‌به‌گام و مخزن GitHub`,
+      modules: [
+        {
           id: 'contracts_and_gems' as const,
           sessionId: 's3' as const,
-          num: '۳-۲',
+          num: '۳-۱',
           titleFa: 'کارگاه ممیزی قراردادها و ادعاها',
           subFa: 'نشریه ۴۳۱۱، فیدیک و سیستم‌های خبره',
           titleEn: 'Contracts & Claims Lab',
@@ -1444,7 +1756,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
         {
           id: 'skills_lab' as const,
           sessionId: 's3' as const,
-          num: '۳-۳',
+          num: '۳-۲',
           titleFa: 'معماری AI Skills (استاندارد SKILL.md)',
           subFa: 'ساخت مهارت دائمی در Claude و اتصال در Gemini',
           titleEn: 'AI Skills (SKILL.md) Lab',
@@ -1539,6 +1851,13 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
 
   const MODULE_NAV_ITEMS = FIVE_SESSIONS.flatMap((s) => s.modules);
 
+  const completedModulesCount = MODULE_NAV_ITEMS.filter((m) =>
+    isModuleCompleted(m.id, m.sessionId)
+  ).length;
+  const page0ProgressPct = MODULE_NAV_ITEMS.length
+    ? Math.round((completedModulesCount / MODULE_NAV_ITEMS.length) * 100)
+    : 0;
+
   const handleToggleSound = () => {
     const next = !soundEnabled;
     setSoundEnabled(next);
@@ -1548,6 +1867,15 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     }
   };
 
+  const scrollContentPaneToTop = () => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 1280 && contentPaneRef.current) {
+      contentPaneRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    const targetEl = contentPaneRef.current || chapterStartRef.current || navPillsRef.current;
+    targetEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const handleTabClick = (
     tab: typeof activeTab,
     e?: React.MouseEvent<HTMLButtonElement>,
@@ -1555,23 +1883,46 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   ) => {
     playTactileSound('thock');
     setActiveTab(tab);
-    if (tab && tab !== 'all') {
+    if (tab === 'all') {
+      setPaneViewMode('lesson');
+    } else if (tab) {
       const found = MODULE_NAV_ITEMS.find((m) => m.id === tab);
       if (found) setActiveSessionId(found.sessionId);
+      // Ensure the draggable mini dial + its submodule list open when picking a module
+      setIsOrbitWidgetHidden(false);
+      setIsWidgetModulesOpen(true);
     }
     setIsQuickDrawerOpen(false);
-    if (scrollToTop) {
-      const targetEl = chapterStartRef.current || navPillsRef.current;
-      if (targetEl) {
-        setTimeout(() => {
-          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 60);
-      }
+    if (scrollToTop || (tab !== 'all' && typeof window !== 'undefined' && window.innerWidth >= 1280)) {
+      setTimeout(() => {
+        scrollContentPaneToTop();
+      }, 60);
     }
   };
 
+  const openModuleExercise = (targetModuleId?: typeof activeTab) => {
+    playTactileSound('thock');
+    const currentSessObj = FIVE_SESSIONS.find((s) => s.id === activeSessionId) || FIVE_SESSIONS[0];
+    const resolvedModuleId =
+      targetModuleId && targetModuleId !== 'all'
+        ? targetModuleId
+        : activeTab && activeTab !== 'all'
+        ? activeTab
+        : currentSessObj.modules[0].id;
+    const found = MODULE_NAV_ITEMS.find((m) => m.id === resolvedModuleId);
+    if (found) setActiveSessionId(found.sessionId);
+    setActiveTab(resolvedModuleId);
+    setPaneViewMode('exercise');
+    setIsOrbitWidgetHidden(false);
+    setIsWidgetModulesOpen(false);
+    setIsQuickDrawerOpen(false);
+    setTimeout(() => {
+      scrollContentPaneToTop();
+    }, 60);
+  };
+
   const handleOpenSession = (
-    sessionId: 's1' | 's2' | 's3' | 's4' | 's5',
+    sessionId: OrbitSessionId,
     scrollToChapter = true
   ) => {
     playTactileSound('thock');
@@ -1581,11 +1932,11 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
       setActiveTab(targetSession.modules[0].id);
     }
     setIsQuickDrawerOpen(false);
+    setIsOrbitWidgetHidden(false);
+    setIsWidgetModulesOpen(true);
     if (scrollToChapter) {
-      setIsOrbitWidgetHidden(false);
       setTimeout(() => {
-        const targetEl = chapterStartRef.current || navPillsRef.current;
-        targetEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        scrollContentPaneToTop();
       }, 140);
     }
   };
@@ -1648,12 +1999,16 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     playTactileSound('switch');
     onChangeContent(promptText);
     setIsSandboxOpen(true);
-    setTimeout(() => {
-      const sandboxEl = document.getElementById('prompt-sandbox');
-      if (sandboxEl) {
-        sandboxEl.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 60);
+    const isDesktopSplit =
+      typeof window !== 'undefined' && window.innerWidth >= 1280 && activeTab !== 'all';
+    if (!isDesktopSplit) {
+      setTimeout(() => {
+        const sandboxEl = document.getElementById('prompt-sandbox');
+        if (sandboxEl) {
+          sandboxEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, 60);
+    }
   };
 
   const openCompanionWindow = (url: string, targetName = 'ai_companion') => {
@@ -2119,90 +2474,426 @@ Tasks:
   ];
 
 
-  const renderCurriculumNav = () => (
-    <div className="space-y-3">
-      <OrbitRoadmapHub
-        lang={lang}
-        sessions={FIVE_SESSIONS}
-        activeSessionId={activeSessionId}
-        completedSessions={completedSessions}
-        isAdmin={!!isAdmin}
-        onSelectSession={(id) => handleOpenSession(id, false)}
-        onOpenSession={(id) => handleOpenSession(id, true)}
-        onToggleComplete={toggleSessionCompletion}
-        widgetHidden={isOrbitWidgetHidden}
-        onRestoreWidget={() => setIsOrbitWidgetHidden(false)}
-      />
+  const isSplitCockpit = activeTab !== 'all';
 
-      {/* Track-Adaptive Metaphor Strip for Active Session (Scroll Target when opening a session) */}
-      <div
-        ref={chapterStartRef}
-        className="scroll-mt-4 px-3.5 py-2.5 rounded-xl bg-[#fdeee9]/70 dark:bg-[#341528]/50 border border-[#e0533c]/25 flex flex-wrap items-center justify-between gap-2 text-xs"
+  const renderPromptSandbox = (docked: boolean) => (
+    <div
+      id="prompt-sandbox"
+      data-testid={docked ? 'prompt-sandbox-drawer' : 'prompt-sandbox-inline'}
+      className={
+        docked
+          ? 'shrink-0 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131c24]'
+          : 'rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131c24] shadow-xs overflow-hidden transition-all'
+      }
+    >
+      <button
+        type="button"
+        onClick={() => {
+          playTactileSound('switch');
+          setIsSandboxOpen((prev) => !prev);
+        }}
+        aria-expanded={isSandboxOpen}
+        className={`w-full text-right flex items-center justify-between gap-3 select-none hover:bg-slate-50 dark:hover:bg-[#18232e] transition-colors cursor-pointer ${
+          docked ? 'px-4 sm:px-5 py-2.5' : 'p-4 sm:p-5'
+        }`}
       >
-        <div className="flex flex-wrap items-center gap-2 min-w-0">
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-[#e0533c] text-white shrink-0">
-            استعاره مسیر {activeTrackMetaphor.trackLabelFa}
-          </span>
-          <span className="font-semibold text-[#261a1d] dark:text-[#faedf3] leading-relaxed">
-            {activeSessionObj.metaphorFa}
-          </span>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className={`rounded-xl bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] shrink-0 ${docked ? 'p-1.5' : 'p-2'}`}>
+            <Terminal className={docked ? 'w-4 h-4' : 'w-5 h-5'} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h2 className={`font-extrabold text-slate-900 dark:text-white truncate ${docked ? 'text-xs sm:text-sm' : 'text-sm sm:text-base'}`}>
+                {lang === 'fa' ? 'سندباکس شخصی‌سازی و تست پرامپت' : 'Interactive Prompt Customization Sandbox'}
+              </h2>
+              {content.trim().length > 0 && (
+                <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold shrink-0 tabular-nums">
+                  {lang === 'fa'
+                    ? `${content.trim().split(/\s+/).length.toLocaleString('fa-IR')} واژه`
+                    : `${content.trim().split(/\s+/).length}w`}
+                </span>
+              )}
+            </div>
+            {!docked && (
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                {lang === 'fa'
+                  ? 'پرامپت‌های هر جلسه را اینجا ویرایش و شخصی‌سازی کنید و با یک کلیک در ChatGPT، Claude یا Gemini اجرا نمایید.'
+                  : 'Edit and customize prompts from any session here, then copy and launch in ChatGPT, Claude, or Gemini.'}
+              </p>
+            )}
+          </div>
         </div>
-        <span className="text-[10px] font-mono text-[#755e66] dark:text-[#ad99ab] shrink-0" dir="ltr">
-          Drive → GitHub → LLMs → Skills &amp; MCP → Vibe Coding
+        <span className="text-xs font-bold text-[#1f5163] dark:text-[#6fb3c6] flex items-center gap-1 shrink-0">
+          <span>{isSandboxOpen ? (lang === 'fa' ? 'بستن سندباکس' : 'Close') : (lang === 'fa' ? 'باز کردن سندباکس' : 'Open Sandbox')}</span>
+          <ChevronDown className={`w-4 h-4 transition-transform ${isSandboxOpen ? 'rotate-180' : ''}`} />
         </span>
-      </div>
+      </button>
 
-      {/* Level 2: Modules Inside Active Session (Pill CSS modeled after Hero CTAs) */}
-      <div className="flex flex-wrap items-center gap-2.5 text-xs">
-        {activeSessionObj.modules.map((item) => {
-          const isSelected = activeTab === item.id;
-          return (
+      {isSandboxOpen && (
+        <div
+          className={`border-t border-slate-200/70 dark:border-slate-800 space-y-2.5 ${
+            docked ? 'px-4 sm:px-5 py-2.5 max-h-[30vh] overflow-y-auto bg-slate-50/60 dark:bg-[#0f171e]' : 'p-5 pt-3 space-y-4'
+          }`}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+              {lang === 'fa' ? 'پیش‌نویس پرامپت اختصاصی شما:' : 'Your Custom Prompt Draft:'}
+            </span>
+
+            <div className="flex items-center gap-2 text-xs flex-wrap">
+              <button
+                type="button"
+                onClick={() =>
+                  onChangeContent(
+                    lang === 'fa'
+                      ? disciplinePromptPair.engineeredPromptFa
+                      : disciplinePromptPair.engineeredPromptEn
+                  )
+                }
+                className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#1f5163]/10 hover:bg-[#1f5163]/20 text-[#1f5163] dark:text-[#6fb3c6] transition-colors flex items-center gap-1 cursor-pointer"
+              >
+                <Sparkles className="w-3 h-3" />
+                <span>
+                  {lang === 'fa'
+                    ? `بارگذاری الگوی دیسیپلین ${discMeta.shortTitleFa}`
+                    : `Load ${discMeta.shortTitleEn} Template`}
+                </span>
+              </button>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 tabular-nums">
+                {lang === 'fa'
+                  ? `${content.trim().length ? content.trim().split(/\s+/).length : 0} واژه · ${content.length} کاراکتر`
+                  : `${content.trim().length ? content.trim().split(/\s+/).length : 0} words · ${content.length} chars`}
+              </span>
+              {content && (
+                <button
+                  type="button"
+                  onClick={() => onChangeContent('')}
+                  className="flex items-center gap-1 text-[11px] text-rose-700 dark:text-rose-400 hover:underline cursor-pointer"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>{lang === 'fa' ? 'پاک کردن' : 'Clear'}</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          <textarea
+            rows={docked ? 3 : 7}
+            value={content}
+            onChange={(e) => onChangeContent(e.target.value)}
+            placeholder={
+              lang === 'fa'
+                ? 'پرامپت خود را اینجا بنویسید، یا از بخش کتابخانه پرامپت‌های بالا یکی را انتخاب کنید تا اینجا بارگذاری شود...\nفرمول RCTO را فراموش نکنید:\n[Role] تو مشاور ارشد...\n[Context] شرکت ما...\n[Task] این ۵ کار را انجام بده...\n[Output] در قالب جدول...'
+                : 'Type your prompt here, or pick one from the library above...\nRemember the RCTO formula:\n[Role] You are a lead...\n[Context] Our organization...\n[Task] Perform these 5 steps...\n[Output] In a structured table...'
+            }
+            className="w-full p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0b1117] text-xs sm:text-sm font-mono text-slate-900 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-[#1f5163] dark:focus:ring-[#6fb3c6] transition-all resize-y"
+          />
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-0.5">
             <button
-              key={item.id}
               type="button"
-              onClick={(e) => handleTabClick(item.id, e, false)}
-              data-active={isSelected}
-              className={`group relative px-4 py-2.5 rounded-full text-right transition-all duration-300 cursor-pointer flex items-center gap-2.5 select-none active:scale-95 ${
-                isSelected
-                  ? 'bg-gradient-to-r from-[#e0533c] to-[#c026d3] hover:from-[#c2410c] hover:to-[#9333ea] text-white border border-transparent shadow-lg hover:shadow-xl font-semibold'
-                  : 'bg-white dark:bg-[#201729] hover:bg-orange-50 dark:hover:bg-[#2d1a33] border border-gray-300 dark:border-[#382645] hover:border-orange-200 dark:hover:border-[#e0533c]/50 text-[#0A101D] dark:text-[#faedf3] hover:text-orange-800 dark:hover:text-white font-medium shadow-xs hover:shadow-md'
+              onClick={copySandboxToClipboard}
+              disabled={!content.trim()}
+              className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer ${
+                sandboxCopied
+                  ? 'bg-[#15803d] text-white'
+                  : content.trim()
+                  ? 'bg-[#1f5163] hover:bg-[#163c4a] text-white'
+                  : 'bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 cursor-not-allowed'
               }`}
             >
-              <span
-                dir="ltr"
-                className={`px-2.5 py-1 rounded-full font-mono text-[11px] font-black flex items-center justify-center shrink-0 transition-colors ${
-                  isSelected
-                    ? 'bg-white/20 text-white shadow-2xs'
-                    : 'bg-[#e0533c] text-white shadow-xs group-hover:bg-[#c2410c]'
-                }`}
-              >
-                {item.num}
+              {sandboxCopied ? (
+                <>
+                  <Check className="w-4 h-4 text-white" />
+                  <span>{lang === 'fa' ? 'پرامپت با موفقیت کپی شد!' : 'Copied to Clipboard!'}</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  <span>{lang === 'fa' ? 'کپی پرامپت آماده' : 'Copy Prompt'}</span>
+                </>
+              )}
+            </button>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden md:inline">
+                {lang === 'fa' ? 'تست فوری در:' : 'Test in:'}
               </span>
 
-              <div className="min-w-0 text-right">
-                <span className="font-bold text-xs leading-tight block">
-                  {lang === 'fa' ? item.titleFa : item.titleEn}
-                </span>
-                <span
-                  className={`text-[10px] leading-tight block ${
-                    isSelected
-                      ? 'text-white/85'
-                      : 'text-[#5d6b73] dark:text-[#ad99ab] group-hover:text-orange-700/85 dark:group-hover:text-white/80'
-                  }`}
-                >
-                  {lang === 'fa' ? item.subFa : item.subEn}
-                </span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
+              <button
+                type="button"
+                onClick={() => openCompanionWindow('https://chatgpt.com', 'chatgpt_companion')}
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-[#10a37f]/10 hover:bg-[#10a37f]/20 text-[#10a37f] border border-[#10a37f]/30 text-xs font-semibold transition-colors cursor-pointer"
+                title={lang === 'fa' ? 'تست در پنجره کناری پلتفرم' : 'Test in side window'}
+              >
+                <span>ChatGPT</span>
+                <ExternalLink className="w-3 h-3" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => openCompanionWindow('https://claude.ai', 'claude_companion')}
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-[#d97706]/10 hover:bg-[#d97706]/20 text-[#d97706] border border-[#d97706]/30 text-xs font-semibold transition-colors cursor-pointer"
+                title={lang === 'fa' ? 'تست در پنجره کناری پلتفرم' : 'Test in side window'}
+              >
+                <span>Claude</span>
+                <ExternalLink className="w-3 h-3" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => openCompanionWindow('https://gemini.google.com', 'gemini_companion')}
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-[#1a73e8]/10 hover:bg-[#1a73e8]/20 text-[#1a73e8] border border-[#1a73e8]/30 text-xs font-semibold transition-colors cursor-pointer"
+                title={lang === 'fa' ? 'تست در پنجره کناری پلتفرم' : 'Test in side window'}
+              >
+                <span>Gemini</span>
+                <ExternalLink className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
+  const renderCurriculumNav = () => {
+    const focusedModId =
+      activeTab && activeTab !== 'all' ? activeTab : activeSessionObj.modules[0]?.id;
+    const focusedModExDone = focusedModId
+      ? getCompletedExercisesCountForModule(focusedModId, moduleExDoneMap)
+      : 0;
+    const focusedModExTotal = focusedModId
+      ? getTotalModuleExercisesCount(focusedModId)
+      : 0;
+
+    return (
+      <div className={isSplitCockpit ? 'space-y-2' : 'space-y-3'}>
+        {/* Level 2: Active Session Modules + Small "تمرین ماژول" Tab Always Visible Right Above/Beside Orbit */}
+        <div ref={chapterStartRef} className="scroll-mt-4 space-y-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+            <span className="text-[11px] font-extrabold text-slate-600 dark:text-slate-300">
+              {lang === 'fa'
+                ? `ماژول‌های ${activeSessionObj.numFa} (${activeSessionObj.modules.length.toLocaleString('fa-IR')} ماژول)`
+                : `Modules (${activeSessionObj.modules.length})`}
+            </span>
+            <div
+              role="tablist"
+              aria-label={lang === 'fa' ? 'حالت نمایش ماژول' : 'Module view tab'}
+              className="inline-flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={isSplitCockpit && paneViewMode === 'lesson'}
+                data-testid="orbit-side-lesson-tab"
+                onClick={() => {
+                  playTactileSound('switch');
+                  if (activeTab === 'all' || !activeTab) {
+                    setActiveTab(activeSessionObj.modules[0].id);
+                  }
+                  setPaneViewMode('lesson');
+                }}
+                className={`px-2 py-0.5 rounded-md text-[11px] font-bold flex items-center gap-1 transition-colors cursor-pointer ${
+                  isSplitCockpit && paneViewMode === 'lesson'
+                    ? 'bg-white dark:bg-[#131c24] text-[#1f5163] dark:text-[#6fb3c6] shadow-2xs'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <BookOpen className="w-3 h-3 shrink-0" />
+                <span>{lang === 'fa' ? 'درس ماژول' : 'Lesson'}</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={isSplitCockpit && paneViewMode === 'exercise'}
+                data-testid="orbit-side-exercise-tab"
+                onClick={() => openModuleExercise(focusedModId)}
+                className={`px-2 py-0.5 rounded-md text-[11px] font-extrabold flex items-center gap-1 transition-colors cursor-pointer ${
+                  isSplitCockpit && paneViewMode === 'exercise'
+                    ? 'bg-[#1f5163] text-white shadow-2xs'
+                    : 'text-[#1f5163] dark:text-[#6fb3c6] hover:bg-white/70 dark:hover:bg-[#131c24]/70'
+                }`}
+              >
+                <ClipboardCheck className="w-3 h-3 shrink-0" />
+                <span>{lang === 'fa' ? 'تمرین ماژول' : 'Module Exercises'}</span>
+                {focusedModExTotal > 0 && (
+                  <span
+                    dir="ltr"
+                    className={`text-[10px] font-mono px-1 rounded tabular-nums ${
+                      isSplitCockpit && paneViewMode === 'exercise'
+                        ? 'bg-white/20 text-white'
+                        : 'bg-[#1f5163]/10 dark:bg-[#6fb3c6]/15 text-[#1f5163] dark:text-[#6fb3c6]'
+                    }`}
+                  >
+                    {focusedModExDone}/{focusedModExTotal}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className={`grid gap-1.5 text-xs ${
+            activeTab === 'all'
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2'
+              : activeSessionObj.modules.length === 4 || activeSessionObj.modules.length === 2
+              ? 'grid-cols-1 sm:grid-cols-2'
+              : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3'
+          }`}>
+            {activeSessionObj.modules.map((item) => {
+              const isSelected = activeTab === item.id;
+              const isDone = isModuleCompleted(item.id, activeSessionObj.id);
+              const modExTotal = getTotalModuleExercisesCount(item.id);
+              const modExDone = getCompletedExercisesCountForModule(item.id, moduleExDoneMap);
+              const modAllExDone = modExTotal > 0 && modExDone === modExTotal;
+
+              return (
+                <div key={item.id} className="flex items-stretch gap-1 min-w-0">
+                  <button
+                    type="button"
+                    onClick={(e) => handleTabClick(item.id, e, false)}
+                    data-active={isSelected && paneViewMode === 'lesson'}
+                    title={lang === 'fa' ? `${item.titleFa} — ${item.subFa}` : `${item.titleEn} — ${item.subEn}`}
+                    className={`flex-1 min-w-0 group relative rounded-xl text-right transition-all duration-150 cursor-pointer flex items-center gap-1.5 select-none border ${
+                      isSplitCockpit ? 'px-2 py-1.5' : 'px-3 py-2 gap-2.5'
+                    } ${
+                      isSelected && paneViewMode === 'lesson'
+                        ? 'bg-[#1f5163] text-white border-[#1f5163] shadow-sm font-semibold'
+                        : isSelected
+                        ? 'bg-[#1f5163]/10 dark:bg-[#6fb3c6]/15 border-[#1f5163]/50 text-[#1f5163] dark:text-[#6fb3c6] font-semibold'
+                        : isDone
+                        ? 'bg-emerald-50/70 dark:bg-emerald-950/20 hover:bg-emerald-50 dark:hover:bg-emerald-950/35 border-emerald-200 dark:border-emerald-800/70 text-slate-800 dark:text-slate-100'
+                        : 'bg-white dark:bg-[#131c24] hover:bg-slate-50 dark:hover:bg-[#18232e] border-slate-200 dark:border-slate-800 hover:border-[#1f5163]/50 text-slate-800 dark:text-slate-100'
+                    }`}
+                  >
+                    <span
+                      dir="ltr"
+                      className={`px-1.5 py-0.5 rounded-md font-mono text-[10.5px] font-bold tabular-nums shrink-0 transition-colors ${
+                        isSelected && paneViewMode === 'lesson'
+                          ? 'bg-white/20 text-white'
+                          : isDone
+                          ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                          : 'bg-slate-100 dark:bg-slate-800 text-[#1f5163] dark:text-[#6fb3c6] group-hover:bg-[#1f5163]/10'
+                      }`}
+                    >
+                      {item.num}
+                    </span>
+
+                    <div className="min-w-0 flex-1 text-right">
+                      <span className="font-bold text-[11px] leading-tight block truncate">
+                        {lang === 'fa' ? item.titleFa : item.titleEn}
+                      </span>
+                      {!isSplitCockpit && (
+                        <span
+                          className={`text-[10px] leading-tight block mt-0.5 truncate ${
+                            isSelected && paneViewMode === 'lesson'
+                              ? 'text-white/80'
+                              : 'text-slate-500 dark:text-slate-400'
+                          }`}
+                        >
+                          {lang === 'fa' ? item.subFa : item.subEn}
+                        </span>
+                      )}
+                    </div>
+
+                    {isDone && (
+                      <CheckCircle2
+                        className={`w-3.5 h-3.5 shrink-0 ${
+                          isSelected && paneViewMode === 'lesson'
+                            ? 'text-emerald-300'
+                            : 'text-emerald-600 dark:text-emerald-400'
+                        }`}
+                      />
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openModuleExercise(item.id)}
+                    data-testid={`mod-ex-btn-${item.id}`}
+                    data-active={isSelected && paneViewMode === 'exercise'}
+                    title={
+                      lang === 'fa'
+                        ? `تمرین عملی ماژول ${item.num}: ${item.titleFa}`
+                        : `Exercises for ${item.titleEn}`
+                    }
+                    className={`px-2 py-1 rounded-xl border text-[10.5px] font-extrabold flex items-center gap-1 shrink-0 cursor-pointer transition-colors whitespace-nowrap ${
+                      isSelected && paneViewMode === 'exercise'
+                        ? 'bg-[#1f5163] text-white border-[#1f5163] shadow-sm'
+                        : modAllExDone
+                        ? 'bg-emerald-50 dark:bg-emerald-950/25 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100'
+                        : 'bg-slate-50 dark:bg-[#131c24] border-slate-200 dark:border-slate-800 text-[#1f5163] dark:text-[#6fb3c6] hover:border-[#1f5163]/50 hover:bg-[#1f5163]/5'
+                    }`}
+                  >
+                    <span>{lang === 'fa' ? 'تمرین' : 'Lab'}</span>
+                    {modAllExDone && <CheckCircle2 className="w-3 h-3 shrink-0" />}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Circular 5-Session Orbit Hub */}
+        <OrbitRoadmapHub
+          lang={lang}
+          sessions={FIVE_SESSIONS}
+          activeSessionId={activeSessionId}
+          completedSessions={completedSessions}
+          progressPct={page0ProgressPct}
+          compactSplit={isSplitCockpit}
+          isAdmin={!!isAdmin}
+          onSelectSession={(id) => handleOpenSession(id, false)}
+          onOpenSession={(id) => handleOpenSession(id, true)}
+          onToggleComplete={toggleSessionCompletion}
+          widgetHidden={isOrbitWidgetHidden}
+          onRestoreWidget={() => setIsOrbitWidgetHidden(false)}
+        />
+
+        {/* Track-Adaptive Metaphor Strip for Active Session */}
+        <div
+          className={`rounded-xl bg-slate-50 dark:bg-[#18232e] border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 ${
+            isSplitCockpit ? 'px-3 py-1.5 text-[11px]' : 'px-4 py-2.5 text-xs'
+          }`}
+        >
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <span className="font-extrabold text-[#1f5163] dark:text-[#6fb3c6] shrink-0">
+              {lang === 'fa' ? `مسیر ${activeTrackMetaphor.trackLabelFa}:` : `${activeTrackMetaphor.trackLabelFa}:`}
+            </span>
+            <span className={`font-medium text-slate-700 dark:text-slate-200 ${isSplitCockpit ? 'truncate' : 'leading-relaxed'}`}>
+              {activeSessionObj.metaphorFa}
+            </span>
+          </div>
+          {!isSplitCockpit && (
+            <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 shrink-0" dir="ltr">
+              Drive → GitHub → LLMs → Skills &amp; MCP → Vibe Coding
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.documentElement.setAttribute('data-page0-split', isSplitCockpit ? 'true' : 'false');
+    document.documentElement.setAttribute(
+      'data-page0-fullwidth',
+      !isSplitCockpit || isOrbitPaneCollapsed ? 'true' : 'false'
+    );
+    return () => {
+      document.documentElement.removeAttribute('data-page0-split');
+      document.documentElement.removeAttribute('data-page0-fullwidth');
+    };
+  }, [isSplitCockpit, isOrbitPaneCollapsed]);
+
+  const currentSessionModuleIdx = activeSessionObj.modules.findIndex((m) => m.id === activeTab);
+  const currentModuleDone = currentModuleMeta
+    ? isModuleCompleted(currentModuleMeta.id, currentModuleMeta.sessionId)
+    : false;
+
   return (
     <div
-      className="space-y-8 animate-fadeIn text-[#1c2830] dark:text-[#e8ebe9] pb-16"
+      className="space-y-4 animate-fadeIn text-[#1c2830] dark:text-[#e8ebe9] pb-6"
       onClickCapture={(e) => {
         const target = e.target as HTMLElement | null;
         const btn = target?.closest('button');
@@ -2211,255 +2902,410 @@ Tasks:
         }
       }}
     >
-      {/* Top Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#e0533c] via-[#9333ea] to-[#4a044e] text-white p-6 sm:p-8 shadow-md border border-[#e0533c]/40">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-3 max-w-3xl">
-            <div className="flex flex-wrap items-center gap-3">
-              <a
-                href="https://owjbc.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white p-1 rounded-lg border border-white/40 shadow-xs hover:scale-105 transition-transform shrink-0"
-                title="OWJ Business Council"
+      {/* Unified Compact Studio Entry Header (Hidden in Presentation Stage to Maximize Teaching Canvas) */}
+      {!isPresentationMode && (
+        <header
+          data-testid="page0-entry-header"
+          className={`rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 shadow-xs ${
+            isOrbitPaneCollapsed ? 'px-4 py-2 sm:px-5' : 'px-4 py-2.5 sm:px-5 sm:py-3'
+          }`}
+        >
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2">
+            <div className="space-y-0.5 max-w-4xl min-w-0">
+              {!isOrbitPaneCollapsed && (
+                <div className="flex flex-wrap items-center gap-2 text-[11.5px] text-slate-500 dark:text-slate-400">
+                  <a
+                    href="https://owjbc.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-white p-0.5 rounded-lg border border-slate-200 shadow-2xs hover:scale-105 transition-transform shrink-0"
+                    title="OWJ Business Council"
+                  >
+                    <img
+                      src={OWJ_LOGO}
+                      alt="OWJ Business Council"
+                      className="h-4 w-auto object-contain"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.src = OWJ_LOGO_FALLBACK;
+                      }}
+                    />
+                  </a>
+                  <span className="font-semibold text-[#1f5163] dark:text-[#6fb3c6]">
+                    {lang === 'fa' ? 'ماژول پیش‌نیاز · کارگاه مهندسی AI' : 'Prerequisite Studio · Applied AI Engineering'}
+                  </span>
+                  <span aria-hidden="true">·</span>
+                  <span>{lang === 'fa' ? '۲۰ ساعت (۵ جلسه ۴ ساعته)' : '20 Hours (5 × 4h Sessions)'}</span>
+                  <span aria-hidden="true">·</span>
+                  <span>{lang === 'fa' ? `مسیر فعال: ${activeTrackMetaphor.trackLabelFa}` : activeTrackMetaphor.trackLabelFa}</span>
+                </div>
+              )}
+
+              <h1 className="text-sm sm:text-base font-extrabold tracking-tight text-slate-900 dark:text-white leading-snug truncate">
+                {lang === 'fa'
+                  ? 'پرامپت‌نویسی، کالبدشکافی LLMها، Skills، MCP و Vibe Coding'
+                  : 'Applied AI Engineering: Prompting, LLMs, Skills, MCP & Vibe Coding'}
+              </h1>
+              {!isSplitCockpit && (
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-1">
+                  {lang === 'fa'
+                    ? 'از زیرساخت Drive و GitHub و فرمول پرامپت‌نویسی RCTO تا ساخت مشاوران مقیم، NotebookLM، استاندارد SKILL.md و اتصال زنده با MCP پیش از ورود به کتاب‌کار CPMAI.'
+                    : 'A calm, structured path from Drive & GitHub and RCTO prompting to NotebookLM, SKILL.md, MCP pipelines, and CPMAI.'}
+                </p>
+              )}
+            </div>
+
+            {/* Streamlined Page-0 Actions (No Duplicates of Global Top Nav) */}
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => handleTabClick('s1_demo', undefined, true)}
+                className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1f5163] hover:bg-[#163c4a] text-white font-bold text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap"
               >
-                <img
-                  src={OWJ_LOGO}
-                  alt="OWJ Business Council"
-                  className="h-7 w-auto object-contain"
-                  referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    e.currentTarget.src = OWJ_LOGO_FALLBACK;
-                  }}
-                />
-              </a>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs text-[#99e2b4] text-xs font-semibold tracking-wide border border-white/15">
-                <Sparkles className="w-3.5 h-3.5 text-[#fbbf24]" />
-                <span>{lang === 'fa' ? 'نقشه راه ۲۰ ساعته (۵ جلسه ۴ ساعته) · گروه مشاوران مدیریت اوج (OWJ)' : '20-Hour Curriculum (5 x 4h Sessions) · OWJ Business Council'}</span>
-              </div>
-            </div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-white leading-snug">
-              {lang === 'fa'
-                ? 'مهندسی هوش مصنوعی: از زیرساخت Drive و GitHub تا Skills، MCP و Vibe Coding'
-                : 'Applied AI Engineering: Drive & GitHub to Skills, MCP & Vibe Coding'}
-            </h1>
-            <p className="text-xs sm:text-sm text-[#d0e5ec] leading-relaxed">
-              {lang === 'fa'
-                ? 'چیدمان استاندارد ۵ جلسه‌ای پیش از ورود به Vibe Coding و فاز اول CPMAI: ۱) زیرساخت درایو و گیت‌هاب · ۲) LLMها، Gems، Projects و Artifacts · ۳) NotebookLM، قراردادها و معماری Skills · ۴) پایپ‌لاین MCP، امنیت و مغز دوم Obsidian · ۵) ارکستراسیون نهایی.'
-                : '5-Session structured engineering curriculum: 1) Drive, Markdown & GitHub DCC · 2) LLMs, RCTO, Gems, Projects & Artifacts · 3) NotebookLM, Contracts & SKILL.md · 4) MCP Piping, Security & Obsidian · 5) Full Orchestration & Vibe Coding Bridge.'}
-            </p>
-          </div>
+                <Play className="w-3.5 h-3.5 fill-white shrink-0" />
+                <span>{lang === 'fa' ? 'شروع از جلسه ۱' : 'Start Session 1'}</span>
+              </button>
 
-          <div className="flex flex-col sm:flex-row md:flex-col items-stretch gap-2.5 shrink-0">
-            <button
-              onClick={() => handleTabClick('s1_demo', undefined, true)}
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs sm:text-sm shadow-md transition-all hover:scale-[1.02] cursor-pointer"
-            >
-              <Play className="w-4 h-4 fill-white" />
-              <span>{lang === 'fa' ? 'شروع جلسه ۱ کارگاه مهندسی (ماژول ۱-۱)' : 'Start Workshop Session 1 (Module 1-1)'}</span>
-            </button>
-            <button
-              onClick={onGoToPage1}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#2f7d5b] hover:bg-[#25664a] text-white font-semibold text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer"
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'ورود به جلسه ۱ کتاب‌کار CPMAI (اهداف تجاری)' : 'Go to CPMAI Page 1 (Business Goals)'}</span>
-              {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setIsSandboxOpen(true);
-                setTimeout(() => {
-                  document.getElementById('prompt-sandbox')?.scrollIntoView({ behavior: 'smooth' });
-                }, 60);
-              }}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-medium border border-white/20 transition-colors cursor-pointer"
-            >
-              <Terminal className="w-3.5 h-3.5 text-[#99e2b4]" />
-              <span>{lang === 'fa' ? 'باز کردن سندباکس تمرین پرامپت' : 'Open Prompt Sandbox'}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Start Guidance Banner: شروع جلسه اول */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-blue-500/15 border-2 border-emerald-500/30 dark:border-emerald-500/20 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-start sm:items-center gap-3.5">
-          <div className="p-3 rounded-2xl bg-emerald-500 text-white shadow-xs shrink-0 mt-0.5 sm:mt-0 flex items-center justify-center">
-            <Rocket className="w-5 h-5" />
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
-                {lang === 'fa' ? 'راهنمای شروع دوره' : 'Getting Started Guide'}
-              </span>
-              <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] font-mono">
-                {lang === 'fa' ? 'گام اول شما: انتخاب مسیر شروع' : 'Step 1: Choose your path'}
-              </span>
-            </div>
-            <h3 className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9]">
-              {lang === 'fa'
-                ? 'خوش آمدید! برای شروع یادگیری یکی از دو مسیر زیر را انتخاب کنید:'
-                : 'Welcome! Choose one of the paths below to begin:'}
-            </h3>
-            <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] max-w-2xl leading-relaxed">
-              {lang === 'fa'
-                ? '۱) مسیر کارگاه مهندسی هوش مصنوعی: از «جلسه ۱: زیرساخت داده، درایو و گیت‌هاب» شروع کنید. ۲) مسیر متدولوژی رسمی CPMAI: مستقیماً وارد «جلسه ۱ کتاب‌کار (درک کسب‌وکار)» شوید.'
-                : '1) Engineering Workshop: Start from Session 1 (Drive, Markdown & GitHub DCC). 2) Official CPMAI Workbook: Proceed to Session 1 (Business Understanding).'}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2.5 shrink-0 w-full md:w-auto">
-          <button
-            type="button"
-            onClick={(e) => handleTabClick('s1_demo', e, true)}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-black shadow-xs transition-all active:scale-95 cursor-pointer"
-          >
-            <Play className="w-3.5 h-3.5 fill-white" />
-            <span>{lang === 'fa' ? 'شروع جلسه ۱ کارگاه مهندسی (ماژول ۱-۱)' : 'Start Workshop Session 1'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={onGoToPage1}
-            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#161e24] hover:bg-gray-50 dark:hover:bg-[#1f2933] border border-emerald-500/40 text-emerald-800 dark:text-emerald-300 text-xs font-bold shadow-2xs transition-all active:scale-95 cursor-pointer"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>{lang === 'fa' ? 'جلسه ۱ کتاب‌کار CPMAI' : 'CPMAI Workbook Session 1'}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Interactive Placement Quiz Banner for New Entrants */}
-      <div className="p-1 rounded-2xl bg-gradient-to-r from-[#2f7d5b]/25 via-[#c026d3]/25 to-[#b87333]/25 border border-[#2f7d5b]/30 shadow-2xs">
-        <div className="rounded-[calc(1rem-0.25rem)] bg-white dark:bg-[#161e24] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-start sm:items-center gap-3.5">
-            <div className="p-3 rounded-2xl bg-[#2f7d5b]/15 text-[#2f7d5b] dark:text-[#52b788] shrink-0 mt-0.5 sm:mt-0">
-              <Target className="w-5 h-5" />
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-[#2f7d5b]/15 text-[#2f7d5b] dark:text-[#52b788] border border-[#2f7d5b]/30">
-                  {lang === 'fa' ? 'پیش‌نیاز پیشنهادی اعضای جدید پلتفرم' : 'Recommended Newcomer Entry Gate'}
-                </span>
-                <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] font-mono">
-                  {lang === 'fa' ? '⏱️ ۱۲ سوال تعاملی · ۷ دقیقه' : '⏱️ 12 Questions · 7 Min'}
-                </span>
-              </div>
-              <h3 className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                {lang === 'fa'
-                  ? 'آزمون تعاملی سنجش سطح هوش مصنوعی، گیت‌هاب و اصطلاحات مهندسی'
-                  : 'Interactive AI & Software Engineering Readiness Assessment'}
-              </h3>
-              <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] max-w-2xl leading-relaxed">
-                {lang === 'fa'
-                  ? 'پیش از شروع کتاب‌کار CPMAI، میزان تسلط خود را بر اصطلاحات دنیای واقعی (Git, GitHub, PRs, Tokens, RAG, NotebookLM, APIs) محک بزنید و کارنامه و نقشه راه شخصی‌سازی‌شده دریافت کنید.'
-                  : 'Assess your practical fluency across Git, PRs, Tokens, RAG architectures, and AI safety to receive a tailored roadmap.'}
-              </p>
+              <button
+                type="button"
+                onClick={onOpenQuiz}
+                className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap"
+              >
+                <Target className="w-3.5 h-3.5 text-[#15803d] dark:text-[#4ade80] shrink-0" />
+                <span>{lang === 'fa' ? 'آزمون سطح‌سنجی' : 'Quiz'}</span>
+              </button>
             </div>
           </div>
+        </header>
+      )}
 
-          <button
-            onClick={onOpenQuiz}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#2f7d5b] border-b-4 border-[#1b4d36] hover:bg-[#256347] text-white text-xs font-black shadow-xs transition-all active:translate-y-[2px] active:border-b shrink-0 cursor-pointer"
-          >
-            <span>{lang === 'fa' ? 'شرکت در آزمون سطح‌سنجی 🚀' : 'Take Readiness Quiz 🚀'}</span>
-            {lang === 'fa' ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
-          </button>
-        </div>
-      </div>
-
-      {/* 5-SESSION TWO-LEVEL EXECUTIVE NAVIGATOR */}
+      {/* SIDE-BY-SIDE SPLIT COCKPIT (Single Module) OR FULL-WIDTH FLOW ("Show All" or Collapsed Orbit) */}
       <div
-        ref={navPillsRef}
-        className="p-4 sm:p-5 rounded-2xl bg-white/90 dark:bg-[#1a1222]/90 backdrop-blur-md border border-[#ecdcd8] dark:border-[#382645] shadow-xs space-y-3.5"
+        data-testid="page0-split-cockpit"
+        className={
+          isSplitCockpit
+            ? isOrbitPaneCollapsed
+              ? isPresentationMode
+                ? 'grid grid-cols-1 gap-3 items-stretch xl:h-[calc(100dvh-6.25rem)] xl:min-h-[540px]'
+                : 'grid grid-cols-1 gap-4 items-stretch xl:h-[calc(100dvh-10rem)] xl:min-h-[540px]'
+              : isPresentationMode
+                ? 'grid grid-cols-1 xl:grid-cols-[minmax(580px,45%)_1fr] gap-4 items-stretch xl:h-[calc(100dvh-6.25rem)] xl:min-h-[540px]'
+                : 'grid grid-cols-1 xl:grid-cols-[minmax(580px,45%)_1fr] gap-4 items-stretch xl:h-[calc(100dvh-11.25rem)] xl:min-h-[540px]'
+            : 'space-y-6'
+        }
       >
-        {/* Top Control Bar */}
-        <div dir="rtl" className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#ecdcd8]/80 dark:border-[#382645]/80">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#e0533c] animate-pulse" />
-            <h3 className="text-xs sm:text-sm font-extrabold text-[#261a1d] dark:text-[#faedf3]">
+        {/* PANE 1 (Start / Right in RTL): Fixed Circular Orbit Hub + Active Session Module Picker (User-friendly Hideable) */}
+        {(!isSplitCockpit || !isOrbitPaneCollapsed) && (
+        <div
+          ref={navPillsRef}
+          data-testid="page0-orbit-pane"
+          className={`p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 shadow-xs space-y-2 ${
+            isSplitCockpit ? 'xl:h-full xl:overflow-y-auto flex flex-col' : ''
+          }`}
+        >
+          {/* Top Control Bar (Map Controls Only) */}
+          <div dir="rtl" className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-200/80 dark:border-slate-800">
+            <h2 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">
               {lang === 'fa'
-                ? 'نقشه راه ۵ جلسه‌ای (۲۰ ساعت) — جلسه و ماژول مدنظر را انتخاب کنید:'
-                : '5-Session Engineering Curriculum (20 Hours) — Select Session & Module:'}
-            </h3>
+                ? 'نقشه راه دوره و کارگاه NotebookLM'
+                : 'Course Roadmap & NotebookLM'}
+            </h2>
+
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <button
+                type="button"
+                onClick={(e) => handleTabClick('s1_demo', e, false)}
+                className={`px-2.5 py-1 rounded-lg border text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-colors whitespace-nowrap ${
+                  activeTab === 's1_demo'
+                    ? 'bg-[#1f5163]/10 dark:bg-[#6fb3c6]/15 border-[#1f5163]/40 text-[#1f5163] dark:text-[#6fb3c6]'
+                    : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-[#1f5163]/40'
+                }`}
+              >
+                <span>{lang === 'fa' ? 'دموی ۱۵ دقیقه‌ای' : '15m Demo'}</span>
+              </button>
+
+              {!isSplitCockpit && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSandboxOpen(true);
+                    setTimeout(() => {
+                      document.getElementById('prompt-sandbox')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 60);
+                  }}
+                  className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 hover:border-[#1f5163]/50 text-[11px] text-slate-700 dark:text-slate-200 font-semibold flex items-center gap-1 cursor-pointer transition-colors whitespace-nowrap"
+                >
+                  <Terminal className="w-3.5 h-3.5 text-[#1f5163] dark:text-[#6fb3c6]" />
+                  <span>{lang === 'fa' ? 'سندباکس پرامپت' : 'Sandbox'}</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={(e) => handleTabClick(activeTab === 'all' ? 's1_demo' : 'all', e, false)}
+                className={`px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+                  activeTab === 'all'
+                    ? 'bg-[#1f5163] text-white border-[#1f5163]'
+                    : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-[#1f5163]/50'
+                }`}
+              >
+                {activeTab === 'all'
+                  ? lang === 'fa' ? '✓ بازگشت به نمای دوتایی' : '✓ Back to Split View'
+                  : lang === 'fa' ? 'نمایش یکجای تمام جلسه‌ها' : 'Show All Sessions'}
+              </button>
+
+              {isSplitCockpit && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    playTactileSound('switch');
+                    setIsOrbitPaneCollapsed(true);
+                    setIsOrbitWidgetHidden(false);
+                    setIsWidgetModulesOpen(false);
+                  }}
+                  data-testid="collapse-orbit-pane-btn"
+                  title={lang === 'fa' ? 'مخفی کردن مدار دایره‌ای و تمام‌عرض کردن بخش تدریس' : 'Collapse circular map for full-width teaching'}
+                  className="px-2.5 py-1 rounded-lg border border-[#1f5163]/30 bg-[#1f5163]/10 dark:bg-[#6fb3c6]/15 hover:bg-[#1f5163]/20 text-[11px] font-bold text-[#1f5163] dark:text-[#6fb3c6] flex items-center gap-1 cursor-pointer transition-colors whitespace-nowrap"
+                >
+                  <PanelRightClose className="w-3.5 h-3.5 shrink-0" />
+                  <span>{lang === 'fa' ? 'تمام‌عرض کردن درس' : 'Full Width'}</span>
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={(e) => handleTabClick('s1_demo', e, false)}
-              className="px-3.5 py-1.5 rounded-full border border-orange-200 dark:border-[#e0533c]/40 text-xs bg-orange-50 dark:bg-[#e0533c]/15 text-orange-800 dark:text-orange-200 hover:bg-orange-100 font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
-            >
-              <span dir="ltr" className="px-1.5 py-0.5 rounded-full bg-[#e0533c] text-white text-[10px] font-black font-mono">۰-۱</span>
-              <span>{lang === 'fa' ? 'دموی ۱۵ دقیقه‌ای خروجی نهایی دوره' : '15-min Final Output Demo'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setIsSandboxOpen((prev) => !prev);
-                setTimeout(() => {
-                  document.getElementById('prompt-sandbox')?.scrollIntoView({ behavior: 'smooth' });
-                }, 60);
-              }}
-              className="px-3.5 py-1.5 rounded-full border border-purple-200 dark:border-[#c026d3]/40 text-xs bg-purple-50 dark:bg-[#c026d3]/15 text-purple-800 dark:text-purple-200 hover:bg-purple-100 font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
-            >
-              <Terminal className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'سندباکس تمرین پرامپت' : 'Prompt Sandbox'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onOpenQuiz}
-              className="px-3.5 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-500/40 text-xs bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
-            >
-              <Target className="w-3.5 h-3.5" />
-              <span>{lang === 'fa' ? 'آزمون تعیین سطح' : 'Readiness Quiz'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={(e) => handleTabClick(activeTab === 'all' ? 's1_demo' : 'all', e, false)}
-              className={`px-3.5 py-1.5 rounded-full border text-xs font-bold transition-all cursor-pointer active:scale-95 ${
-                activeTab === 'all'
-                  ? 'bg-gradient-to-r from-[#e0533c] to-[#c026d3] text-white border-transparent shadow-xs'
-                  : 'bg-slate-50 dark:bg-white/[0.05] border-slate-200 dark:border-white/10 text-slate-700 dark:text-[#faedf3] hover:bg-slate-100'
-              }`}
-            >
-              {activeTab === 'all'
-                ? lang === 'fa' ? '✓ حالت نمایش یکجا' : '✓ Showing All'
-                : lang === 'fa' ? 'نمایش یکجای تمام جلسه‌ها' : 'Show All Sessions'}
-            </button>
-          </div>
+          {/* 5-Session Circular Orbit (Untouched) + Clean Module Stepper */}
+          {renderCurriculumNav()}
         </div>
+        )}
 
-        {/* 5-Session + Module Stepper Grid */}
-        {renderCurriculumNav()}
-      </div>
+        {/* PANE 2 (End / Left in RTL): Fixed Module Context Header + Independently Scrollable Module Content + Docked Sandbox */}
+        <div
+          data-testid="page0-content-pane"
+          className={
+            isSplitCockpit
+              ? 'rounded-2xl bg-white/80 dark:bg-[#131c24]/85 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden flex flex-col xl:h-full'
+              : 'space-y-6'
+          }
+        >
+          {/* Pinned Top Module Context Strip (Non-scrolling Toolbar in Split View) */}
+          {isSplitCockpit && currentModuleMeta && (
+            <div
+              data-testid="page0-pane-header"
+              className="shrink-0 z-20 px-2.5 sm:px-3 py-1.5 bg-white/95 dark:bg-[#131c24]/95 border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap xl:flex-nowrap items-center justify-between gap-1.5"
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                {isOrbitPaneCollapsed ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playTactileSound('switch');
+                      setIsOrbitPaneCollapsed(false);
+                    }}
+                    data-testid="restore-orbit-pane-btn"
+                    className="px-2 py-1 rounded-lg bg-[#1f5163] hover:bg-[#163c4a] text-white text-[11px] font-bold flex items-center gap-1 shadow-xs transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                    title={lang === 'fa' ? 'ظاهر کردن دوباره نقشه راه دایره‌ای' : 'Restore circular roadmap'}
+                  >
+                    <PanelRightOpen className="w-3 h-3 shrink-0" />
+                    <span>{lang === 'fa' ? 'مدار' : 'Orbit'}</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playTactileSound('switch');
+                      setIsOrbitPaneCollapsed(true);
+                      setIsOrbitWidgetHidden(false);
+                      setIsWidgetModulesOpen(false);
+                    }}
+                    data-testid="pane2-collapse-orbit-btn"
+                    className="hidden xl:flex px-1.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-[#1f5163] text-[10.5px] font-semibold text-[#1f5163] dark:text-[#6fb3c6] items-center gap-1 transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                    title={lang === 'fa' ? 'مخفی کردن مدار و تمام‌عرض کردن تدریس' : 'Focus full width on lesson'}
+                  >
+                    <Maximize2 className="w-3 h-3 shrink-0" />
+                    <span>{lang === 'fa' ? 'تمام‌عرض' : 'Focus'}</span>
+                  </button>
+                )}
 
-      {/* Empty State / Prompt to Pick a Module */}
-      {activeTab === null && (
-        <div className="p-8 sm:p-10 rounded-3xl border-2 border-dashed border-[#e0533c]/30 dark:border-[#fb7185]/30 bg-gradient-to-b from-[#fdeee9]/50 via-transparent to-[#c026d3]/5 dark:from-[#341528]/30 dark:via-transparent dark:to-purple-950/10 text-center space-y-4 shadow-2xs">
-          <div className="w-14 h-14 rounded-2xl bg-[#e0533c]/10 text-[#e0533c] dark:text-[#fb7185] flex items-center justify-center mx-auto shadow-2xs">
-            <Layers className="w-7 h-7" />
+                <span
+                  dir="ltr"
+                  className="px-1.5 py-0.5 rounded-md bg-[#1f5163] dark:bg-[#6fb3c6] text-white dark:text-[#0b1117] font-mono text-[10.5px] font-bold tabular-nums shrink-0"
+                >
+                  {currentModuleMeta.num}
+                </span>
+                <div className="min-w-0 max-w-[140px] 2xl:max-w-[230px]">
+                  <div className="text-[11px] font-extrabold text-slate-800 dark:text-slate-100 truncate">
+                    {lang === 'fa' ? currentModuleMeta.titleFa : currentModuleMeta.titleEn}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1 shrink-0 flex-wrap xl:flex-nowrap">
+                {activeTab && (
+                  <div
+                    role="tablist"
+                    aria-label={lang === 'fa' ? 'درس یا تمرین ماژول' : 'Lesson or Exercise'}
+                    className="inline-flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                  >
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={paneViewMode === 'lesson'}
+                      data-testid="pane2-lesson-tab"
+                      onClick={() => {
+                        playTactileSound('switch');
+                        setPaneViewMode('lesson');
+                      }}
+                      className={`px-1.5 py-0.5 rounded-md text-[10.5px] font-bold flex items-center gap-1 transition-colors cursor-pointer whitespace-nowrap ${
+                        paneViewMode === 'lesson'
+                          ? 'bg-white dark:bg-[#131c24] text-[#1f5163] dark:text-[#6fb3c6] shadow-2xs'
+                          : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      <BookOpen className="w-3 h-3 shrink-0" />
+                      <span>{lang === 'fa' ? 'درس' : 'Lesson'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={paneViewMode === 'exercise'}
+                      data-testid="pane2-exercise-tab"
+                      onClick={() => openModuleExercise(currentModuleMeta.id)}
+                      className={`px-1.5 py-0.5 rounded-md text-[10.5px] font-extrabold flex items-center gap-1 transition-colors cursor-pointer whitespace-nowrap ${
+                        paneViewMode === 'exercise'
+                          ? 'bg-[#1f5163] text-white shadow-2xs'
+                          : 'text-[#1f5163] dark:text-[#6fb3c6] hover:bg-white/70 dark:hover:bg-[#131c24]/70'
+                      }`}
+                    >
+                      <ClipboardCheck className="w-3 h-3 shrink-0" />
+                      <span>{lang === 'fa' ? 'تمرین' : 'Lab'}</span>
+                      <span
+                        dir="ltr"
+                        className={`text-[9.5px] font-mono px-1 rounded tabular-nums ${
+                          paneViewMode === 'exercise'
+                            ? 'bg-white/20 text-white'
+                            : 'bg-[#1f5163]/10 dark:bg-[#6fb3c6]/15 text-[#1f5163] dark:text-[#6fb3c6]'
+                        }`}
+                      >
+                        {getCompletedExercisesCountForModule(currentModuleMeta.id, moduleExDoneMap)}/
+                        {getTotalModuleExercisesCount(currentModuleMeta.id)}
+                      </span>
+                    </button>
+                  </div>
+                )}
+
+                {activeTab && (
+                  <button
+                    type="button"
+                    onClick={handleOpenActiveModuleProjector}
+                    data-testid="page0-projector-btn"
+                    className="px-2 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 border border-amber-700/60 text-[10.5px] font-black flex items-center gap-1 shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
+                    title={lang === 'fa' ? 'پخش اسلایدهای پرژکتور برای ماژول فعلی' : 'Launch Projector Slides for Active Module'}
+                  >
+                    <Monitor className="w-3 h-3 shrink-0" />
+                    <span>{lang === 'fa' ? 'اسلایدها' : 'Slides'}</span>
+                  </button>
+                )}
+
+                {!isPresentationMode && (
+                  <button
+                    type="button"
+                    onClick={() => toggleModuleCompletion(currentModuleMeta.id, currentModuleMeta.sessionId)}
+                    data-testid="toggle-module-complete-btn"
+                    className={`px-2 py-1 rounded-lg border text-[10.5px] font-bold flex items-center gap-1 transition-colors cursor-pointer whitespace-nowrap ${
+                      currentModuleDone
+                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs'
+                        : 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
+                    }`}
+                    title={lang === 'fa' ? 'ثبت پیشرفت این ماژول در مدار دایره‌ای' : 'Mark module complete'}
+                  >
+                    <CheckCircle2 className="w-3 h-3 shrink-0" />
+                    <span>{currentModuleDone ? (lang === 'fa' ? 'تکمیل' : 'Done') : (lang === 'fa' ? 'ثبت' : 'Done')}</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    playTactileSound('switch');
+                    setIsSandboxOpen((prev) => !prev);
+                  }}
+                  data-testid="pane2-sandbox-toggle"
+                  className={`px-2 py-1 rounded-lg border text-[10.5px] font-semibold flex items-center gap-1 transition-colors cursor-pointer whitespace-nowrap ${
+                    isSandboxOpen
+                      ? 'bg-[#1f5163]/10 dark:bg-[#6fb3c6]/15 border-[#1f5163]/40 text-[#1f5163] dark:text-[#6fb3c6]'
+                      : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-[#1f5163]/50'
+                  }`}
+                >
+                  <Terminal className="w-3 h-3 text-[#1f5163] dark:text-[#6fb3c6]" />
+                  <span>{lang === 'fa' ? 'سندباکس' : 'Sandbox'}</span>
+                </button>
+
+                <span dir="ltr" className="hidden 2xl:inline text-[10.5px] font-mono font-bold text-slate-500 dark:text-slate-400 tabular-nums px-0.5">
+                  {currentModuleIdx + 1}/{MODULE_NAV_ITEMS.length}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={scrollContentPaneToTop}
+                  className="px-1.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-[#1f5163] text-[10.5px] font-bold text-[#1f5163] dark:text-[#6fb3c6] transition-colors cursor-pointer"
+                  title={lang === 'fa' ? 'بازگشت به بالای درس' : 'Scroll to top'}
+                >
+                  ↑
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handlePrevModule}
+                  className="px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-[#1f5163] text-[10.5px] font-bold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer whitespace-nowrap"
+                  title={lang === 'fa' ? 'ماژول قبلی' : 'Previous Module'}
+                >
+                  {lang === 'fa' ? 'قبلی' : 'Prev'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextModule}
+                  className="px-2 py-1 rounded-lg bg-[#1f5163] hover:bg-[#163c4a] text-white text-[10.5px] font-bold transition-colors cursor-pointer whitespace-nowrap"
+                  title={lang === 'fa' ? 'ماژول بعدی' : 'Next Module'}
+                >
+                  {lang === 'fa' ? 'بعدی' : 'Next'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Independently Scrollable Module Reading Body */}
+          <div
+            ref={contentPaneRef}
+            data-testid="page0-content-scroll"
+            className={
+              isSplitCockpit
+                ? 'flex-1 min-h-0 xl:overflow-y-auto p-4 sm:p-5 scroll-smooth space-y-5'
+                : 'space-y-6'
+            }
+          >
+
+          {/* Empty State / Prompt to Pick a Module */}
+          {activeTab === null && (
+        <div className="p-8 sm:p-10 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-[#131c24] text-center space-y-4">
+          <div className="w-12 h-12 rounded-xl bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] flex items-center justify-center mx-auto">
+            <Layers className="w-6 h-6" />
           </div>
           <div className="space-y-1.5 max-w-lg mx-auto">
-            <h3 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9]">
+            <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
               {lang === 'fa' ? activeSessionObj.titleFa : activeSessionObj.titleEn}
             </h3>
-            <p className="text-xs sm:text-sm text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
               {lang === 'fa'
-                ? 'برای جلوگیری از شلوغی صفحه، ابتدا یکی از ماژول‌های این بخش را از نوار بالا انتخاب کنید تا محتوای همان بخش باز شود.'
-                : 'Select one of the modules from the bar above to open its focused content.'}
+                ? 'یکی از ماژول‌های این جلسه را از فهرست بالا انتخاب کنید تا محتوای متمرکز آن باز شود.'
+                : 'Select one of the modules above to open its focused content.'}
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
             <button
               type="button"
               onClick={(e) => handleTabClick(activeSessionObj.modules[0].id, e, true)}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#e0533c] to-[#c026d3] text-white text-xs font-bold shadow-sm hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-[#1f5163] hover:bg-[#163c4a] text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
             >
               {lang === 'fa'
                 ? `شروع (${activeSessionObj.modules[0].titleFa})`
@@ -2468,7 +3314,7 @@ Tasks:
             <button
               type="button"
               onClick={(e) => handleTabClick('all', e, true)}
-              className="px-4 py-2.5 rounded-xl bg-white dark:bg-[#1a232b] border border-black/10 dark:border-white/10 text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] hover:bg-black/[0.04] transition-all cursor-pointer active:scale-95"
+              className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer"
             >
               {lang === 'fa' ? 'نمایش یکجای تمام جلسه‌ها' : 'Show All Sessions'}
             </button>
@@ -2476,6 +3322,34 @@ Tasks:
         </div>
       )}
 
+      {/* MODULE PRACTICAL EXERCISES TAB VIEW OR MODULE LESSON CONTENT */}
+      {isSplitCockpit && paneViewMode === 'exercise' && currentModuleMeta && getModuleExerciseDeck(currentModuleMeta.id) ? (
+        <ModuleExercisesView
+          lang={lang}
+          deck={getModuleExerciseDeck(currentModuleMeta.id)!}
+          completedMap={moduleExDoneMap}
+          checksMap={moduleExChecksMap}
+          notesMap={moduleExNotesMap}
+          onToggleComplete={toggleModuleExDone}
+          onToggleCheck={toggleModuleExCheck}
+          onChangeNote={updateModuleExNote}
+          onLoadToSandbox={(promptText) => loadPromptToSandbox(promptText)}
+          copyToClipboard={copyToClipboard}
+          copiedId={copiedId}
+          onSwitchToLesson={() => setPaneViewMode('lesson')}
+          onNextModuleExercises={
+            currentModuleIdx >= 0 && currentModuleIdx < MODULE_NAV_ITEMS.length - 1
+              ? () => openModuleExercise(MODULE_NAV_ITEMS[currentModuleIdx + 1].id)
+              : undefined
+          }
+          nextModuleLabelFa={
+            currentModuleIdx >= 0 && currentModuleIdx < MODULE_NAV_ITEMS.length - 1
+              ? `${MODULE_NAV_ITEMS[currentModuleIdx + 1].num} · ${MODULE_NAV_ITEMS[currentModuleIdx + 1].titleFa}`
+              : undefined
+          }
+        />
+      ) : (
+        <>
       {/* ===================================================================== */}
       {/* SESSION 1 MODULES: DATA INFRASTRUCTURE (DRIVE, MARKDOWN, GITHUB DCC)  */}
       {/* ===================================================================== */}
@@ -2495,18 +3369,20 @@ Tasks:
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => openS1Projector('s1_demo', 0)}
-              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
-            >
-              <Monitor className="w-4 h-4" />
-              <span>حالت اسلاید پروژکتور (۶ اسلاید)</span>
-            </button>
+            {!isSplitCockpit && (
+              <button
+                type="button"
+                onClick={() => openS1Projector('s1_demo', 0)}
+                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
+              >
+                <Monitor className="w-4 h-4" />
+                <span>حالت اسلاید پروژکتور (۶ اسلاید)</span>
+              </button>
+            )}
           </div>
 
           {/* Layer 1: Zero-Assumption Intro Box (Always Visible) */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-l from-[#fdeee9]/80 via-white to-[#f3e8ff]/50 dark:from-[#341528]/60 dark:via-[#1a1222] dark:to-purple-950/30 border border-[#e0533c]/30 space-y-3 text-xs">
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-l from-slate-50 via-white to-slate-50 dark:from-[#131c24] dark:via-[#131c24] dark:to-[#18232e] border border-slate-200 dark:border-slate-800 space-y-3 text-xs">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="px-2.5 py-0.5 rounded-md bg-[#e0533c] text-white font-black text-[11px]">
                 مقدمه از صفر مطلق · داستان این دوره ۲۰ ساعته چیست؟
@@ -2527,7 +3403,7 @@ Tasks:
                 </p>
               </div>
               <div className="p-3.5 rounded-xl bg-white/90 dark:bg-[#16101c] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
-                <b className="text-[#c026d3] dark:text-[#e879f9] block">۲. دو ستون ذخیره‌سازی در جلسه ۱</b>
+                <b className="text-[#1f5163] dark:text-[#6fb3c6] block">۲. دو ستون ذخیره‌سازی در جلسه ۱</b>
                 <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
                   • <b>{activeTrackMetaphor.driveFa}</b><br />
                   • <b>{activeTrackMetaphor.githubFa}</b>
@@ -2554,7 +3430,7 @@ Tasks:
 
           {/* Layer 2: Optional Deep-Dive Accordion */}
           <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-[#fdf8f5] dark:bg-[#16101c] overflow-hidden transition-all">
-            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 transition-colors">
+            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-slate-50 dark:hover:bg-[#18232e] transition-colors">
               <div className="flex items-center gap-2 text-[#261a1d] dark:text-[#faedf3]">
                 <Sparkles className="w-4 h-4 text-[#e0533c] shrink-0" />
                 <span>بسط اختیاری موضوع: جدول کامل نقشه راه ۵ جلسه و چرایی تقدم گیت‌هاب بر پرامپت‌نویسی</span>
@@ -2584,7 +3460,7 @@ Tasks:
                       <td className="p-3">ثبت اولین فایل دستورالعمل <code>README.md</code> در گیت‌هاب</td>
                     </tr>
                     <tr>
-                      <td className="p-3 font-bold text-[#c026d3]">جلسه ۲ (۴ ساعت)</td>
+                      <td className="p-3 font-bold text-[#1f5163]">جلسه ۲ (۴ ساعت)</td>
                       <td className="p-3 font-bold">LLMها، پرامپت‌نویسی RCTO، Gems/Projects و Artifacts</td>
                       <td className="p-3">تغذیه فایل‌های استاندارد جلسه ۱ به Projects و ذخیره کد داشبورد Artifact در GitHub</td>
                       <td className="p-3">ساخت مشاور مقیم و داشبورد تعاملی React/HTML</td>
@@ -2631,14 +3507,16 @@ Tasks:
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => openS1Projector('s1_drive', 0)}
-              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
-            >
-              <Monitor className="w-4 h-4" />
-              <span>حالت اسلاید پروژکتور (۸ اسلاید)</span>
-            </button>
+            {!isSplitCockpit && (
+              <button
+                type="button"
+                onClick={() => openS1Projector('s1_drive', 0)}
+                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
+              >
+                <Monitor className="w-4 h-4" />
+                <span>حالت اسلاید پروژکتور (۸ اسلاید)</span>
+              </button>
+            )}
           </div>
 
           {/* Layer 1: Zero-to-One Definition of Google Drive & Sheets */}
@@ -2715,7 +3593,7 @@ Tasks:
 
           {/* Layer 2: Optional Deep-Dive Accordions */}
           <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-[#fdf8f5] dark:bg-[#16101c] overflow-hidden transition-all">
-            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 transition-colors">
+            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-slate-50 dark:hover:bg-[#18232e] transition-colors">
               <div className="flex items-center gap-2 text-[#261a1d] dark:text-[#faedf3]">
                 <Table className="w-4 h-4 text-[#e0533c] shrink-0" />
                 <span>بسط اختیاری ۱: مقایسه چشمی «جدول خراب انسانی ❌» در برابر «جدول استاندارد ماشین‌خوان ✅»</span>
@@ -2745,7 +3623,7 @@ Tasks:
           </details>
 
           <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-[#fdf8f5] dark:bg-[#16101c] overflow-hidden transition-all">
-            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 transition-colors">
+            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-slate-50 dark:hover:bg-[#18232e] transition-colors">
               <div className="flex items-center gap-2 text-[#261a1d] dark:text-[#faedf3]">
                 <ListChecks className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>بسط اختیاری ۲: تمرین عملی ۱۵ دقیقه‌ای کلاسی + پرامپت تمیزکننده خودکار جداول</span>
@@ -2798,14 +3676,16 @@ Tasks:
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => openS1Projector('s1_markdown', 0)}
-              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
-            >
-              <Monitor className="w-4 h-4" />
-              <span>حالت اسلاید پروژکتور (۷ اسلاید)</span>
-            </button>
+            {!isSplitCockpit && (
+              <button
+                type="button"
+                onClick={() => openS1Projector('s1_markdown', 0)}
+                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
+              >
+                <Monitor className="w-4 h-4" />
+                <span>حالت اسلاید پروژکتور (۷ اسلاید)</span>
+              </button>
+            )}
           </div>
 
           {/* Layer 1: Zero-to-One Definition of Markdown */}
@@ -2869,7 +3749,7 @@ Tasks:
 
           {/* Layer 2: Optional Deep-Dive Accordion */}
           <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-[#fdf8f5] dark:bg-[#16101c] overflow-hidden transition-all">
-            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 transition-colors">
+            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-slate-50 dark:hover:bg-[#18232e] transition-colors">
               <div className="flex items-center gap-2 text-[#261a1d] dark:text-[#faedf3]">
                 <FileText className="w-4 h-4 text-purple-600 shrink-0" />
                 <span>بسط اختیاری: چطور فایل‌های Word و PDF قدیمی را ۱۰۰٪ خودکار به Markdown تبدیل کنیم؟ + مفهوم YAML</span>
@@ -2914,14 +3794,16 @@ Tasks:
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => openS1Projector('s1_github', 0)}
-              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
-            >
-              <Monitor className="w-4 h-4" />
-              <span>حالت اسلاید پروژکتور (۹ اسلاید)</span>
-            </button>
+            {!isSplitCockpit && (
+              <button
+                type="button"
+                onClick={() => openS1Projector('s1_github', 0)}
+                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
+              >
+                <Monitor className="w-4 h-4" />
+                <span>حالت اسلاید پروژکتور (۹ اسلاید)</span>
+              </button>
+            )}
           </div>
 
           {/* Layer 1: Zero-to-One Definition of Git & GitHub */}
@@ -2955,7 +3837,7 @@ Tasks:
                 </p>
               </div>
               <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
-                <span className="font-mono font-black text-[#c026d3] dark:text-[#e879f9] block">2. Commit (ثبت ریویژن)</span>
+                <span className="font-mono font-black text-[#1f5163] dark:text-[#6fb3c6] block">2. Commit (ثبت ریویژن)</span>
                 <b className="block text-[#261a1d] dark:text-[#faedf3]">معادل: صدور ریویژن جدید (Rev.01 → Rev.02)</b>
                 <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
                   ذخیره رسمی تغییر به همراه یک جمله توضیح (Commit Message) که مشخص می‌کند دقیقاً چه چیزی و به چه دلیلی اصلاح شد.
@@ -3014,7 +3896,7 @@ Tasks:
 
           {/* Layer 2: Optional Step-by-Step Hands-On Guide Accordion */}
           <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-[#fdf8f5] dark:bg-[#16101c] overflow-hidden transition-all">
-            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 transition-colors">
+            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-slate-50 dark:hover:bg-[#18232e] transition-colors">
               <div className="flex items-center gap-2 text-[#261a1d] dark:text-[#faedf3]">
                 <GitBranch className="w-4 h-4 text-[#e0533c] shrink-0" />
                 <span>بسط اختیاری: راهنمای گام‌به‌گام کارگاه عملی جلسه ۱ (ساخت اکانت، اولین Repo و ثبت اولین Commit در ۲۰ دقیقه)</span>
@@ -3034,7 +3916,7 @@ Tasks:
                   </p>
                 </div>
                 <div className="p-3.5 rounded-xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
-                  <b className="text-[#c026d3] block">گام ۲: نام‌گذاری مخزن و تیک Add a README file</b>
+                  <b className="text-[#1f5163] block">گام ۲: نام‌گذاری مخزن و تیک Add a README file</b>
                   <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
                     در کادر Repository name عبارت <code>ai-engineering-hub</code> را بنویسید، حالت را روی <b>Private</b> (یا Public) بگذارید، حتماً تیک <b>Add a README file</b> را بزنید و دکمه سبز <b>Create repository</b> را بفشارید.
                   </p>
@@ -3236,91 +4118,82 @@ Tasks:
             </div>
           </div>
 
-          {/* Core Definition Hero Card */}
-          <div className="p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
-            <div className="rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
-              <div className="lg:col-span-7 space-y-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#e0533c]/10 text-[#e0533c] dark:text-[#fb7185] border border-[#e0533c]/20">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>{lang === 'fa' ? 'تعریف بنیادین پرامپت (Prompt)' : 'Core Definition of a Prompt'}</span>
-                </span>
-                <h3 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9] leading-snug">
-                  {lang === 'fa'
-                    ? 'پرامپت یعنی «دستورالعمل، مسئله، داده و چارچوبی که به هوش مصنوعی می‌دهید» تا دقیقاً پاسخ مطلوب شما را تولید کند.'
-                    : 'A Prompt is the instruction, context, data, and constraints you give an AI model to shape its exact response.'}
-                </h3>
-                <p className="text-xs sm:text-[13px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                  {lang === 'fa'
-                    ? 'برخلاف جستجوی گوگل که فقط دنبال کلمات کلیدی می‌گردد، مدل زبانی بزرگ (LLM) کل نیت، نقش، داده‌های زمینه‌ای و قالب مورد انتظار شما را تحلیل می‌کند. هوش مصنوعی ذهن‌خوان نیست؛ هر جزئیاتی که در پرامپت ننویسید را خودش حدس می‌زند (و همین ریشه کلی‌گویی یا خطاست).'
-                    : 'Unlike traditional keyword search, an LLM reads intent, persona, situational background, and output rules. AI cannot read your mind—any context omitted from the prompt gets guessed.'}
-                </p>
+          {/* Core Definition Hero Card (Single-Elevation Studio Card) */}
+          <div className="rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 shadow-xs p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+            <div className="lg:col-span-7 space-y-2.5">
+              <div className="text-xs font-bold text-[#1f5163] dark:text-[#6fb3c6]">
+                {lang === 'fa' ? 'تعریف بنیادین پرامپت (Prompt)' : 'Core Definition of a Prompt'}
               </div>
+              <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-snug">
+                {lang === 'fa'
+                  ? 'پرامپت یعنی «دستورالعمل، مسئله، داده و چارچوبی که به هوش مصنوعی می‌دهید» تا دقیقاً پاسخ مطلوب شما را تولید کند.'
+                  : 'A Prompt is the instruction, context, data, and constraints you give an AI model to shape its exact response.'}
+              </h3>
+              <p className="text-xs sm:text-[13px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                {lang === 'fa'
+                  ? 'برخلاف جستجوی گوگل که فقط دنبال کلمات کلیدی می‌گردد، مدل زبانی بزرگ (LLM) کل نیت، نقش، داده‌های زمینه‌ای و قالب مورد انتظار شما را تحلیل می‌کند. هر جزئیاتی که ننویسید، مدل حدس می‌زند.'
+                  : 'Unlike keyword search, an LLM reads intent, persona, background, and output rules. Anything omitted gets guessed.'}
+              </p>
+            </div>
 
-              <div className="lg:col-span-5 p-4 rounded-2xl bg-gradient-to-br from-[#fdeee9] via-[#fff7f3] to-[#f8f0fc] dark:from-[#2c1523] dark:via-[#221629] dark:to-[#1a1626] border border-[#e0533c]/25 space-y-2.5">
-                <div className="text-xs font-black text-[#e0533c] dark:text-[#fb7185]">
-                  {lang === 'fa' ? 'معادله طلایی کیفیت پاسخ AI:' : 'The AI Output Quality Equation:'}
-                </div>
-                <div className="p-3 rounded-xl bg-white/90 dark:bg-[#12171b] border border-black/[0.06] dark:border-white/[0.08] text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed">
-                  {lang === 'fa'
-                    ? 'پرامپت مبهم (۱ خطی) ← پاسخ عمومی، تکراری یا همراه با حدس و خطا'
-                    : 'Vague 1-line prompt -> Generic, guesswork-heavy output'}
-                </div>
-                <div className="p-3 rounded-xl bg-[#ecfdf5] dark:bg-[#10241b] border border-[#34d399]/40 text-xs font-bold text-[#047857] dark:text-[#34d399] leading-relaxed">
-                  {lang === 'fa'
-                    ? 'پرامپت مهندسی‌شده (دستور + زمینه + قید + قالب) ← خروجی دقیق، قابل ممیزی و آماده اجرا'
-                    : 'Structured prompt (Instruction + Context + Constraints + Format) -> Actionable, auditable output'}
-                </div>
+            <div className="lg:col-span-5 p-4 rounded-xl bg-slate-50 dark:bg-[#18232e] border border-slate-200 dark:border-slate-800 space-y-2.5">
+              <div className="text-xs font-extrabold text-slate-800 dark:text-slate-100">
+                {lang === 'fa' ? 'تفاوت ورودی خام با پرامپت مهندسی‌شده:' : 'Raw Input vs. Engineered Prompt:'}
+              </div>
+              <div className="p-3 rounded-lg bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                {lang === 'fa'
+                  ? 'پرامپت مبهم (۱ خطی) ← پاسخ عمومی، تکراری یا همراه با حدس و خطا'
+                  : 'Vague 1-line prompt -> Generic, guesswork-heavy output'}
+              </div>
+              <div className="p-3 rounded-lg bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-300/60 dark:border-emerald-800/50 text-xs font-bold text-emerald-800 dark:text-emerald-300 leading-relaxed">
+                {lang === 'fa'
+                  ? 'پرامپت مهندسی‌شده (دستور + زمینه + قید + قالب) ← خروجی دقیق و قابل ممیزی'
+                  : 'Structured prompt (Role + Context + Task + Format) -> Actionable, auditable output'}
               </div>
             </div>
           </div>
 
           {/* 3 Levels of Prompting */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-2xl border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] shadow-xs space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                  {lang === 'fa' ? 'سطح ۱ · ساده' : 'Level 1 · Basic'}
-                </span>
-                <span className="font-mono text-[10px] text-[#5d6b73] dark:text-[#9aa8b0]">Zero-Shot</span>
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131c24] shadow-xs space-y-2">
+              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <span className="font-bold">{lang === 'fa' ? 'سطح ۱ · ساده' : 'Level 1 · Basic'}</span>
+                <span className="font-mono">Zero-Shot</span>
               </div>
-              <h4 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+              <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
                 {lang === 'fa' ? 'پرامپت مستقیم بدون نمونه' : 'Direct Zero-Shot Prompt'}
               </h4>
-              <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 {lang === 'fa'
                   ? 'یک درخواست کوتاه بدون مثال یا داده کمکی (مثلاً: «یک چک‌لیست ایمنی کارگاه بنویس»). برای پرسش‌های عمومی سریع است اما در کار سازمانی دقیق نیست.'
                   : 'A direct ask without examples or background (e.g., "Write a site safety checklist"). Fast for trivia, too vague for enterprise work.'}
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl border border-[#d9dad5] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] shadow-xs space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#c026d3]/10 text-[#c026d3] dark:text-[#e879f9]">
-                  {lang === 'fa' ? 'سطح ۲ · الگو محور' : 'Level 2 · Pattern'}
-                </span>
-                <span className="font-mono text-[10px] text-[#5d6b73] dark:text-[#9aa8b0]">Few-Shot</span>
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131c24] shadow-xs space-y-2">
+              <div className="flex items-center justify-between text-[11px] text-[#1f5163] dark:text-[#6fb3c6]">
+                <span className="font-bold">{lang === 'fa' ? 'سطح ۲ · الگو محور' : 'Level 2 · Pattern'}</span>
+                <span className="font-mono">Few-Shot</span>
               </div>
-              <h4 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+              <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
                 {lang === 'fa' ? 'پرامپت همراه با ۱ تا ۳ نمونه واقعی' : 'Few-Shot Prompting'}
               </h4>
-              <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 {lang === 'fa'
                   ? 'در کنار دستور، ۱ یا ۲ نمونه از نامه، جدول یا گزارش استاندارد سازمان خود را می‌گذارید تا هوش مصنوعی دقیقاً لحن و ساختار شما را تقلید کند.'
                   : 'Provide 1-3 real examples alongside your instruction so the model mirrors your exact corporate tone and schema.'}
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl border border-[#e0533c]/35 bg-[#fdeee9]/40 dark:bg-[#2a1522]/40 shadow-xs space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#e0533c] text-white">
-                  {lang === 'fa' ? 'سطح ۳ · استاندارد دوره' : 'Level 3 · Course Standard'}
-                </span>
-                <span className="font-mono text-[10px] text-[#e0533c] dark:text-[#fb7185]">Prompt Engineering</span>
+            <div className="p-4 rounded-xl border border-[#1f5163]/40 bg-[#1f5163]/[0.04] dark:bg-[#1f5163]/15 shadow-xs space-y-2">
+              <div className="flex items-center justify-between text-[11px] text-[#1f5163] dark:text-[#6fb3c6]">
+                <span className="font-bold">{lang === 'fa' ? 'سطح ۳ · استاندارد دوره' : 'Level 3 · Course Standard'}</span>
+                <span className="font-mono">Prompt Engineering</span>
               </div>
-              <h4 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+              <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
                 {lang === 'fa' ? 'مهندسی پرامپت ساختاریافته (RCTO)' : 'Structured Prompt Engineering'}
               </h4>
-              <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 {lang === 'fa'
                   ? 'ترکیب شفاف نقش، بافت واقعی، وظیفه دقیق، قیدهای عدم توهم («اگر نبود بنویس نامشخص») و فرمت خروجی؛ فرمولی که در بخش ۲-۲ یاد می‌گیرید.'
                   : 'Combines Role, Context, Task, anti-hallucination guardrails, and exact Output schema—covered step-by-step in 2-2.'}
@@ -3329,8 +4202,8 @@ Tasks:
           </div>
 
           {/* Bridge Action Bar to RCTO (2-2) & Sandbox */}
-          <div className="p-4 rounded-2xl bg-white dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] flex flex-wrap items-center justify-between gap-3 shadow-xs">
-            <div className="text-xs text-[#1c2830] dark:text-[#e8ebe9] font-medium">
+          <div className="p-4 rounded-xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+            <div className="text-xs text-slate-800 dark:text-slate-100 font-medium">
               {lang === 'fa'
                 ? 'آماده‌اید فرمول ۴ مرحله‌ای نوشتن یک پرامپت بی‌نقص را یاد بگیرید؟'
                 : 'Ready to learn the 4-pillar formula for writing bulletproof prompts?'}
@@ -3345,17 +4218,17 @@ Tasks:
                       : 'Role: Senior analyst.\nContext: Raw meeting notes below.\nTask: Extract 3 takeaways and an action-item table strictly from the text; mark missing fields as "Unspecified".\nOutput: 4-column table [Topic | Owner | Due | Priority].'
                   )
                 }
-                className="px-4 py-2 rounded-full bg-white dark:bg-[#201729] hover:bg-orange-50 border border-gray-300 dark:border-[#382645] text-xs font-bold text-[#0A101D] dark:text-[#faedf3] flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer active:scale-95"
+                className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-1.5 transition-colors cursor-pointer"
               >
-                <Play className="w-3.5 h-3.5 text-[#e0533c]" />
+                <Play className="w-3.5 h-3.5 text-[#1f5163] dark:text-[#6fb3c6]" />
                 <span>{lang === 'fa' ? 'تست نمونه پرامپت در سندباکس' : 'Try Sample in Sandbox'}</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleTabClick('prompting', undefined, true)}
-                className="px-5 py-2 rounded-full bg-gradient-to-r from-[#e0533c] to-[#c026d3] hover:from-[#c2410c] hover:to-[#9333ea] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-95"
+                className="px-4 py-2 rounded-xl bg-[#1f5163] hover:bg-[#163c4a] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
               >
-                <span>{lang === 'fa' ? 'گام بعدی ۲-۲: فرمول طلایی مهندسی پرامپت (RCTO)' : 'Next 2-2: Golden RCTO Formula'}</span>
+                <span>{lang === 'fa' ? 'گام بعدی ۲-۲: فرمول طلایی RCTO' : 'Next 2-2: Golden RCTO Formula'}</span>
                 {lang === 'fa' ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
               </button>
             </div>
@@ -3425,26 +4298,26 @@ Tasks:
             </div>
 
             {/* C - Context */}
-            <div className="p-4 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs">
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131c24] shadow-xs">
               <div className="flex items-center gap-2 mb-2">
-                <span className="w-7 h-7 rounded-lg bg-[#c026d3] text-white font-extrabold text-sm flex items-center justify-center">
+                <span className="w-7 h-7 rounded-lg bg-[#1f5163] text-white font-extrabold text-sm flex items-center justify-center">
                   C
                 </span>
                 <div>
-                  <h3 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
+                  <h3 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">
                     {lang === 'fa' ? 'زمینه (Context)' : 'Context'}
                   </h3>
-                  <span className="text-[10px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">
                     {lang === 'fa' ? 'وضع موجود و پیش‌نیازها' : 'Background & Situation'}
                   </span>
                 </div>
               </div>
-              <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 {lang === 'fa'
                   ? 'توصیف شرکت، بازار هدف، محدودیت‌های زمانی و داده‌های ورودی. هوش مصنوعی ذهن‌خوانی بلد نیست.'
                   : 'Describe organizational background, audience, and constraints. Never assume the AI knows.'}
               </p>
-              <div className="mt-3 p-2 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] text-[11px] font-mono text-[#c026d3] dark:text-[#6ee7b7]">
+              <div className="mt-3 p-2 rounded-lg bg-slate-50 dark:bg-[#18232e] text-[11px] font-mono text-[#1f5163] dark:text-[#6fb3c6]">
                 {lang === 'fa' ? activeRctoPillars.contextFa : activeRctoPillars.contextEn}
               </div>
             </div>
@@ -3569,7 +4442,7 @@ Tasks:
                     <span>{lang === "fa" ? disciplinePromptPair.engineeredBreakdownFa.role : disciplinePromptPair.engineeredBreakdownEn.role}</span>
                   </div>
                   <div>
-                    <span className="font-bold text-[#c026d3] dark:text-[#6ee7b7] font-mono">[Context] </span>
+                    <span className="font-bold text-[#1f5163] dark:text-[#6ee7b7] font-mono">[Context] </span>
                     <span>{lang === "fa" ? disciplinePromptPair.engineeredBreakdownFa.context : disciplinePromptPair.engineeredBreakdownEn.context}</span>
                   </div>
                   <div>
@@ -3596,20 +4469,20 @@ Tasks:
       {(activeTab === 'all' || activeTab === 'tools') && (
         <section className="space-y-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6]">
                 <Bot className="w-5 h-5" />
               </div>
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
-                  <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#c026d3] text-white text-xs font-black">۲-۳</span>
-                  <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
+                  <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#1f5163] text-white text-xs font-bold tabular-nums">۲-۳</span>
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
                     {lang === 'fa'
                       ? 'غول‌های هوش مصنوعی و مدل‌های زبانی مطرح (لینک مستقیم و لوگو)'
                       : 'AI Giants & Prominent LLM Platforms (Direct Links & Logos)'}
                   </h2>
                 </div>
-                <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
+                <p className="text-xs text-slate-600 dark:text-slate-300">
                   {lang === 'fa'
                     ? 'سه غول اصلی (ChatGPT، Claude، Gemini) در کنار مدل‌های قدرتمند جهانی مثل DeepSeek، Qwen، Perplexity، Grok و Mistral برای انتخاب هوشمندانه ابزار.'
                     : 'The Big 3 platforms (ChatGPT, Claude, Gemini) alongside DeepSeek, Qwen, Perplexity, Grok, Mistral, and Meta Llama.'}
@@ -3620,224 +4493,215 @@ Tasks:
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* ChatGPT Card */}
-            <div className="group/card p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col">
-              <div className="h-full rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 flex flex-col justify-between shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-2xl bg-[#e3f6f0] dark:bg-[#10a37f]/20 border border-[#10a37f]/30 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
-                        <svg viewBox="0 0 24 24" className="w-6 h-6 spin-gear-chatgpt" aria-label="ChatGPT">
-                          <g transform="translate(12 12)" fill="none" stroke="#10A37F" strokeWidth="1.9">
-                            <ellipse cy="-5.5" rx="3.6" ry="6.5" />
-                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(60)" />
-                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(120)" />
-                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(180)" />
-                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(240)" />
-                            <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(300)" />
-                          </g>
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">ChatGPT</h3>
-                        <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">OpenAI</span>
-                      </div>
+            <div className="rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 p-5 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-xl bg-[#e3f6f0] dark:bg-[#10a37f]/20 border border-[#10a37f]/25 flex items-center justify-center shrink-0 overflow-hidden">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 spin-gear-chatgpt" aria-label="ChatGPT">
+                        <g transform="translate(12 12)" fill="none" stroke="#10A37F" strokeWidth="1.9">
+                          <ellipse cy="-5.5" rx="3.6" ry="6.5" />
+                          <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(60)" />
+                          <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(120)" />
+                          <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(180)" />
+                          <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(240)" />
+                          <ellipse cy="-5.5" rx="3.6" ry="6.5" transform="rotate(300)" />
+                        </g>
+                      </svg>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#10a37f]/10 text-[#10a37f] border border-[#10a37f]/20">
-                      {lang === 'fa' ? 'همه‌فن‌حریف و جامع' : 'Most Versatile'}
-                    </span>
-                  </div>
-
-                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    {lang === 'fa'
-                      ? 'بهترین ابزار عمومی با پشتیبانی از وب‌سرچ زنده، اجرای کدهای پایتون، تحلیل پیشرفته داده‌ها، ساخت عکس و اکوسیستم وسیع افزونه‌ها (Custom GPTs).'
-                      : 'The most popular all-rounder with live web browsing, Python code execution, advanced data analytics, image generation, and Custom GPTs.'}
-                  </p>
-
-                  <div className="space-y-1.5 pt-2 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 text-xs">
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#10a37f] shrink-0" />
-                      <span>{lang === 'fa' ? 'مدل‌های کلیدی: GPT-4o, GPT-4o mini, o1' : 'Key Models: GPT-4o, 4o-mini, o1'}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#10a37f] shrink-0" />
-                      <span>{lang === 'fa' ? 'قابلیت شاخص: تحلیل فایل اکسل و پروژه‌ها' : 'Feature: Code Interpreter & Projects'}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#10a37f] shrink-0" />
-                      <span>{lang === 'fa' ? 'ثبت‌نام ساده با جیمیل یا مایکروسافت' : 'Easy signup with Google/Microsoft'}</span>
+                    <div>
+                      <h3 className="font-bold text-sm text-slate-900 dark:text-white">ChatGPT</h3>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                        OpenAI · {lang === 'fa' ? 'همه‌فن‌حریف' : 'Versatile'}
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => openCompanionWindow('https://chatgpt.com', 'chatgpt_companion')}
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#10a37f] hover:bg-[#0e8e6e] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150 cursor-pointer"
-                  >
-                    <span>{lang === 'fa' ? 'ورود به ChatGPT در پنجره کناری' : 'Open ChatGPT in Side Window'}</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </button>
-                  <a
-                    href="https://chatgpt.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    dir="ltr"
-                    className="block text-center text-[11px] font-mono text-[#10a37f] hover:underline"
-                  >
-                    chatgpt.com ↗
-                  </a>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {lang === 'fa'
+                    ? 'بهترین ابزار عمومی با پشتیبانی از وب‌سرچ زنده، اجرای کدهای پایتون، تحلیل پیشرفته داده‌ها، ساخت عکس و اکوسیستم وسیع افزونه‌ها (Custom GPTs).'
+                    : 'The most popular all-rounder with live web browsing, Python code execution, advanced data analytics, image generation, and Custom GPTs.'}
+                </p>
+
+                <div className="space-y-1.5 pt-2 border-t border-slate-200/70 dark:border-slate-800 text-xs">
+                  <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#10a37f] shrink-0" />
+                    <span>{lang === 'fa' ? 'مدل‌های کلیدی: GPT-4o, GPT-4o mini, o1' : 'Key Models: GPT-4o, 4o-mini, o1'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#10a37f] shrink-0" />
+                    <span>{lang === 'fa' ? 'قابلیت شاخص: تحلیل فایل اکسل و پروژه‌ها' : 'Feature: Code Interpreter & Projects'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#10a37f] shrink-0" />
+                    <span>{lang === 'fa' ? 'ثبت‌نام ساده با جیمیل یا مایکروسافت' : 'Easy signup with Google/Microsoft'}</span>
+                  </div>
                 </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-200/70 dark:border-slate-800 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => openCompanionWindow('https://chatgpt.com', 'chatgpt_companion')}
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#10a37f] hover:bg-[#0e8e6e] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150 cursor-pointer"
+                >
+                  <span>{lang === 'fa' ? 'ورود به ChatGPT در پنجره کناری' : 'Open ChatGPT in Side Window'}</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </button>
+                <a
+                  href="https://chatgpt.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  dir="ltr"
+                  className="block text-center text-[11px] font-mono text-[#10a37f] hover:underline"
+                >
+                  chatgpt.com ↗
+                </a>
               </div>
             </div>
 
             {/* Claude Card */}
-            <div className="group/card p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col">
-              <div className="h-full rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 flex flex-col justify-between shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-2xl bg-[#fdeee6] dark:bg-[#d97706]/20 border border-[#d97706]/30 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
-                        <svg viewBox="0 0 24 24" className="w-6 h-6 spin-gear-claude" aria-label="Claude">
-                          <g transform="translate(12 12)" stroke="#D97757" strokeWidth="2.4" strokeLinecap="round">
-                            <line y1="-3" y2="-11" />
-                            <line y1="-3" y2="-9" transform="rotate(30)" />
-                            <line y1="-3" y2="-11" transform="rotate(60)" />
-                            <line y1="-3" y2="-9" transform="rotate(90)" />
-                            <line y1="-3" y2="-11" transform="rotate(120)" />
-                            <line y1="-3" y2="-9" transform="rotate(150)" />
-                            <line y1="-3" y2="-11" transform="rotate(180)" />
-                            <line y1="-3" y2="-9" transform="rotate(210)" />
-                            <line y1="-3" y2="-11" transform="rotate(240)" />
-                            <line y1="-3" y2="-9" transform="rotate(270)" />
-                            <line y1="-3" y2="-11" transform="rotate(300)" />
-                            <line y1="-3" y2="-9" transform="rotate(330)" />
-                          </g>
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">Claude</h3>
-                        <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">Anthropic</span>
-                      </div>
+            <div className="rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 p-5 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-xl bg-[#fdeee6] dark:bg-[#d97706]/20 border border-[#d97706]/25 flex items-center justify-center shrink-0 overflow-hidden">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 spin-gear-claude" aria-label="Claude">
+                        <g transform="translate(12 12)" stroke="#D97757" strokeWidth="2.4" strokeLinecap="round">
+                          <line y1="-3" y2="-11" />
+                          <line y1="-3" y2="-9" transform="rotate(30)" />
+                          <line y1="-3" y2="-11" transform="rotate(60)" />
+                          <line y1="-3" y2="-9" transform="rotate(90)" />
+                          <line y1="-3" y2="-11" transform="rotate(120)" />
+                          <line y1="-3" y2="-9" transform="rotate(150)" />
+                          <line y1="-3" y2="-11" transform="rotate(180)" />
+                          <line y1="-3" y2="-9" transform="rotate(210)" />
+                          <line y1="-3" y2="-11" transform="rotate(240)" />
+                          <line y1="-3" y2="-9" transform="rotate(270)" />
+                          <line y1="-3" y2="-11" transform="rotate(300)" />
+                          <line y1="-3" y2="-9" transform="rotate(330)" />
+                        </g>
+                      </svg>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#d97706]/10 text-[#d97706] border border-[#d97706]/20">
-                      {lang === 'fa' ? 'پادشاه نگارش و کد' : 'Top Writing & Code'}
-                    </span>
-                  </div>
-
-                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    {lang === 'fa'
-                      ? 'بهترین کیفیت درک و تولید متن فارسی طبیعی، کدنویسی، تحلیل داکیومنت‌های بزرگ و شاهکار آرتیفکت‌ها (Artifacts) برای پیش‌نمایش زنده وب و اسناد.'
-                      : 'Unmatched nuance, superior coding, large document comprehension, and interactive Artifacts for side-by-side previews.'}
-                  </p>
-
-                  <div className="space-y-1.5 pt-2 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 text-xs">
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#d97706] shrink-0" />
-                      <span>{lang === 'fa' ? 'مدل‌های کلیدی: Claude 3.5 Sonnet, Haiku' : 'Key Models: Claude 3.5 Sonnet, Haiku'}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#d97706] shrink-0" />
-                      <span>{lang === 'fa' ? 'قابلیت شاخص: آرتیفکت‌های تعاملی و Projects' : 'Feature: Interactive Artifacts & Projects'}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#d97706] shrink-0" />
-                      <span>{lang === 'fa' ? 'پنجره ورودی ۲۰۰ هزار توکنی (یک کتاب کامل)' : '200K token context window'}</span>
+                    <div>
+                      <h3 className="font-bold text-sm text-slate-900 dark:text-white">Claude</h3>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Anthropic · {lang === 'fa' ? 'نگارش و کد' : 'Writing & Code'}
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => openCompanionWindow('https://claude.ai', 'claude_companion')}
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#b45309] hover:bg-[#92400e] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150 cursor-pointer"
-                  >
-                    <span>{lang === 'fa' ? 'ورود به Claude در پنجره کناری' : 'Open Claude in Side Window'}</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </button>
-                  <a
-                    href="https://claude.ai"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    dir="ltr"
-                    className="block text-center text-[11px] font-mono text-[#b45309] dark:text-[#fbbf24] hover:underline"
-                  >
-                    claude.ai ↗
-                  </a>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {lang === 'fa'
+                    ? 'بهترین کیفیت درک و تولید متن فارسی طبیعی، کدنویسی، تحلیل داکیومنت‌های بزرگ و شاهکار آرتیفکت‌ها (Artifacts) برای پیش‌نمایش زنده وب و اسناد.'
+                    : 'Unmatched nuance, superior coding, large document comprehension, and interactive Artifacts for side-by-side previews.'}
+                </p>
+
+                <div className="space-y-1.5 pt-2 border-t border-slate-200/70 dark:border-slate-800 text-xs">
+                  <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#d97706] shrink-0" />
+                    <span>{lang === 'fa' ? 'مدل‌های کلیدی: Claude 3.5 Sonnet, Haiku' : 'Key Models: Claude 3.5 Sonnet, Haiku'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#d97706] shrink-0" />
+                    <span>{lang === 'fa' ? 'قابلیت شاخص: آرتیفکت‌های تعاملی و Projects' : 'Feature: Interactive Artifacts & Projects'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#d97706] shrink-0" />
+                    <span>{lang === 'fa' ? 'پنجره ورودی ۲۰۰ هزار توکنی (یک کتاب کامل)' : '200K token context window'}</span>
+                  </div>
                 </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-200/70 dark:border-slate-800 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => openCompanionWindow('https://claude.ai', 'claude_companion')}
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#b45309] hover:bg-[#92400e] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150 cursor-pointer"
+                >
+                  <span>{lang === 'fa' ? 'ورود به Claude در پنجره کناری' : 'Open Claude in Side Window'}</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </button>
+                <a
+                  href="https://claude.ai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  dir="ltr"
+                  className="block text-center text-[11px] font-mono text-[#b45309] dark:text-[#fbbf24] hover:underline"
+                >
+                  claude.ai ↗
+                </a>
               </div>
             </div>
 
             {/* Gemini Card */}
-            <div className="group/card p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col">
-              <div className="h-full rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 flex flex-col justify-between shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-2xl bg-[#e8f0fe] dark:bg-[#1a73e8]/20 border border-[#1a73e8]/30 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
-                        <svg viewBox="0 0 24 24" className="w-6 h-6 spin-gear-gemini" aria-label="Gemini">
-                          <defs>
-                            <linearGradient id="gemGradPage0" x1="0" y1="0" x2="1" y2="1">
-                              <stop offset="0%" stopColor="#4285F4" />
-                              <stop offset="55%" stopColor="#9B72CB" />
-                              <stop offset="100%" stopColor="#D96570" />
-                            </linearGradient>
-                          </defs>
-                          <path fill="url(#gemGradPage0)" d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">Gemini</h3>
-                        <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">Google</span>
-                      </div>
+            <div className="rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 p-5 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-xl bg-[#e8f0fe] dark:bg-[#1a73e8]/20 border border-[#1a73e8]/25 flex items-center justify-center shrink-0 overflow-hidden">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6 spin-gear-gemini" aria-label="Gemini">
+                        <defs>
+                          <linearGradient id="gemGradPage0" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="#4285F4" />
+                            <stop offset="55%" stopColor="#9B72CB" />
+                            <stop offset="100%" stopColor="#D96570" />
+                          </linearGradient>
+                        </defs>
+                        <path fill="url(#gemGradPage0)" d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z" />
+                      </svg>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#1a73e8]/10 text-[#1a73e8] border border-[#1a73e8]/20">
-                      {lang === 'fa' ? 'حافظه ۲ میلیونی و گوگل' : '2M Context & Google'}
-                    </span>
-                  </div>
-
-                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    {lang === 'fa'
-                      ? 'بزرگ‌ترین کانتکست جهان (۲ میلیون توکن)، اتصال مستقیم با تایپ @ به Google Drive و Gmail و YouTube، و ساخت دستیار اختصاصی با Gems.'
-                      : 'Massive 2M token context, seamless Google Workspace integration (@Drive, @Gmail, @YouTube), and custom Gems.'}
-                  </p>
-
-                  <div className="space-y-1.5 pt-2 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 text-xs">
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#1a73e8] shrink-0" />
-                      <span>{lang === 'fa' ? 'مدل‌های کلیدی: Gemini 1.5 Pro, 1.5 Flash' : 'Key Models: Gemini 1.5 Pro, Flash'}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#1a73e8] shrink-0" />
-                      <span>{lang === 'fa' ? 'قابلیت شاخص: واکشی ویدیو، صوت و گوگل‌درایو' : 'Feature: Multimodal & Workspace @mentions'}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#1c2830] dark:text-[#e8ebe9]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#1a73e8] shrink-0" />
-                      <span>{lang === 'fa' ? 'ورود مستقیم با اکانت جیمیل' : 'Zero friction login with Google account'}</span>
+                    <div>
+                      <h3 className="font-bold text-sm text-slate-900 dark:text-white">Gemini</h3>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Google · {lang === 'fa' ? 'حافظه ۲ میلیونی' : '2M Context'}
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60 space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => openCompanionWindow('https://gemini.google.com', 'gemini_companion')}
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#1a73e8] hover:bg-[#1557b0] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150 cursor-pointer"
-                  >
-                    <span>{lang === 'fa' ? 'ورود به Gemini در پنجره کناری' : 'Open Gemini in Side Window'}</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </button>
-                  <a
-                    href="https://gemini.google.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    dir="ltr"
-                    className="block text-center text-[11px] font-mono text-[#1a73e8] dark:text-[#60a5fa] hover:underline"
-                  >
-                    gemini.google.com ↗
-                  </a>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {lang === 'fa'
+                    ? 'بزرگ‌ترین کانتکست جهان (۲ میلیون توکن)، اتصال مستقیم با تایپ @ به Google Drive و Gmail و YouTube، و ساخت دستیار اختصاصی با Gems.'
+                    : 'Massive 2M token context, seamless Google Workspace integration (@Drive, @Gmail, @YouTube), and custom Gems.'}
+                </p>
+
+                <div className="space-y-1.5 pt-2 border-t border-slate-200/70 dark:border-slate-800 text-xs">
+                  <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#1a73e8] shrink-0" />
+                    <span>{lang === 'fa' ? 'مدل‌های کلیدی: Gemini 1.5 Pro, 1.5 Flash' : 'Key Models: Gemini 1.5 Pro, Flash'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#1a73e8] shrink-0" />
+                    <span>{lang === 'fa' ? 'قابلیت شاخص: واکشی ویدیو، صوت و گوگل‌درایو' : 'Feature: Multimodal & Workspace @mentions'}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#1a73e8] shrink-0" />
+                    <span>{lang === 'fa' ? 'ورود مستقیم با اکانت جیمیل' : 'Zero friction login with Google account'}</span>
+                  </div>
                 </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-200/70 dark:border-slate-800 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => openCompanionWindow('https://gemini.google.com', 'gemini_companion')}
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#1a73e8] hover:bg-[#1557b0] active:scale-[0.97] text-white text-xs font-semibold shadow-xs transition-all duration-150 cursor-pointer"
+                >
+                  <span>{lang === 'fa' ? 'ورود به Gemini در پنجره کناری' : 'Open Gemini in Side Window'}</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </button>
+                <a
+                  href="https://gemini.google.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  dir="ltr"
+                  className="block text-center text-[11px] font-mono text-[#1a73e8] dark:text-[#60a5fa] hover:underline"
+                >
+                  gemini.google.com ↗
+                </a>
               </div>
             </div>
           </div>
@@ -3956,7 +4820,7 @@ Tasks:
                   <div className="space-y-2.5">
                     <div className="space-y-2">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#fdeee9] dark:bg-[#1e2a30] text-[#e0533c] dark:text-[#fb7185]">
+                        <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#1f5163]/10 dark:bg-[#6fb3c6]/15 text-[#1f5163] dark:text-[#6fb3c6]">
                           {lang === 'fa' ? item.categoryFa : item.categoryEn}
                         </span>
 
@@ -4095,7 +4959,7 @@ Tasks:
 
               {/* Gems / Projects */}
               <div className="p-4 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs space-y-2">
-                <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#6ee7b7]">
+                <div className="flex items-center gap-2 text-[#1f5163] dark:text-[#6ee7b7]">
                   <FolderKanban className="w-4 h-4" />
                   <h4 className="font-bold text-xs sm:text-sm">
                     {lang === 'fa' ? 'جم‌ها و پروژه‌ها (Gems / Projects)' : 'Gems & Projects (Knowledge Base)'}
@@ -4127,7 +4991,7 @@ Tasks:
 
           {/* Part 2: Complex Contract & Claims Methodology (Collapsible Accordion) */}
           <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all">
-            <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
+            <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-slate-50 dark:hover:bg-[#18232e] transition-colors">
               <div className="flex items-center gap-2 text-[#8c3b2d] dark:text-[#f87171]">
                 <Scale className="w-5 h-5 shrink-0" />
                 <h3 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
@@ -4179,7 +5043,7 @@ Tasks:
                   </div>
 
                   <div className="p-3 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5]/50 dark:border-[#2d3942]/50 space-y-1">
-                    <span className="font-bold text-[#c026d3] dark:text-[#6ee7b7] flex items-center gap-1">
+                    <span className="font-bold text-[#1f5163] dark:text-[#6ee7b7] flex items-center gap-1">
                       <span>۲.</span>
                       <span>{lang === 'fa' ? 'ارزیابی دعاوی تاخیرات و مالی' : 'Delay & Financial Claims'}</span>
                     </span>
@@ -4208,8 +5072,8 @@ Tasks:
 
           {/* Part 3: Industrial & Engineering Expert Assistants Table (Collapsible Accordion) */}
           <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all">
-            <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
-              <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185]">
+            <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-slate-50 dark:hover:bg-[#18232e] transition-colors">
+              <div className="flex items-center gap-2 text-[#1f5163] dark:text-[#6fb3c6]">
                 <Factory className="w-5 h-5 shrink-0" />
                 <h3 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
                   {lang === 'fa'
@@ -4250,7 +5114,7 @@ Tasks:
                     <tr className="hover:bg-[#f8f9fa] dark:hover:bg-[#162026] transition-colors">
                       <td className="p-3 align-top font-bold text-[#e0533c] dark:text-[#fb7185]">
                         <div className="flex items-center gap-2">
-                          <Train className="w-4 h-4 text-[#c026d3] shrink-0" />
+                          <Train className="w-4 h-4 text-[#1f5163] shrink-0" />
                           <span>{lang === 'fa' ? 'مدیر پروژه و مدیر فنی مترو' : 'Metro Project & Technical Director'}</span>
                         </div>
                       </td>
@@ -4333,7 +5197,7 @@ Tasks:
 
           {/* Part 4 & 5: Operational Steps & Pre-deployment Checklist (Collapsible Accordion) */}
           <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all">
-            <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
+            <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-slate-50 dark:hover:bg-[#18232e] transition-colors">
               <div className="flex items-center gap-2 text-[#2f7d5b] dark:text-[#52b788]">
                 <ListChecks className="w-5 h-5 shrink-0" />
                 <h4 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
@@ -4369,7 +5233,7 @@ Tasks:
                   </div>
 
                   <div className="p-2.5 rounded-lg bg-white dark:bg-[#201729] border border-[#d9dad5]/40 dark:border-[#2d3942]/40 space-y-1">
-                    <span className="font-bold text-[#c026d3] dark:text-[#6ee7b7] block">
+                    <span className="font-bold text-[#1f5163] dark:text-[#6ee7b7] block">
                       {lang === 'fa' ? 'گام ۲: تغذیه اسناد مرجع' : 'Step 2: Upload Ground-Truth Docs'}
                     </span>
                     <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
@@ -4463,13 +5327,13 @@ Tasks:
             {/* Section Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]">
+                <div className="p-2 rounded-lg bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6]">
                   <FileSpreadsheet className="w-5 h-5" />
                 </div>
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#0284c7] text-white text-xs font-black">۲-۶</span>
-                    <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
+                    <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#1f5163] text-white text-xs font-bold">۲-۶</span>
+                    <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
                       {lang === 'fa'
                         ? industryTrack === 'PAYA_SAMAN_PARS'
                           ? 'کارگاه تحلیل پورتفو و داشبوردسازی دو بال هلدینگ پایا سامان پارس (۳ دیتاست تخصصی)'
@@ -4477,7 +5341,7 @@ Tasks:
                         : 'Engineering Data & Dashboard Workshop with Claude & Gemini'}
                     </h2>
                   </div>
-                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
+                  <p className="text-xs text-slate-600 dark:text-slate-300">
                     {lang === 'fa'
                       ? 'دانلود فایل‌های CSV واقعی، پیش‌نمایش جداول داده، و پرامپت‌های آماده جهت تولید فوری داشبورد React در Claude Artifacts و تحلیل‌های پیش‌بینانه پایتون در Gemini.'
                       : 'Download real-world CSV engineering datasets, preview data matrices, and use one-click prompts for interactive React dashboards or Python analytics.'}
@@ -4500,25 +5364,24 @@ Tasks:
                   <button
                     key={ds.id}
                     onClick={() => setSelectedDatasetId(ds.id)}
-                    className={`p-3.5 rounded-xl border text-right transition-all flex flex-col justify-between gap-2 ${
+                    className={`p-3.5 rounded-xl border text-right transition-all flex flex-col justify-between gap-2 cursor-pointer ${
                       isSelected
-                        ? 'border-[#c026d3] bg-[#fdeee9]/60 dark:bg-[#341528] shadow-xs'
-                        : 'border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] hover:border-[#c026d3]/50'
+                        ? 'border-[#1f5163] bg-[#1f5163]/8 dark:bg-[#6fb3c6]/15 shadow-xs'
+                        : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131c24] hover:border-[#1f5163]/40'
                     }`}
                   >
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-2">
-                        {ds.id === 'metro_station_tbm' && <Train className={`w-4 h-4 ${isSelected ? 'text-[#c026d3]' : 'text-[#5d6b73]'}`} />}
-                        {ds.id === 'oil_gas_pipeline_epc' && <Factory className={`w-4 h-4 ${isSelected ? 'text-[#c026d3]' : 'text-[#5d6b73]'}`} />}
-                        {ds.id === 'refinery_equipment_qa' && <Building2 className={`w-4 h-4 ${isSelected ? 'text-[#c026d3]' : 'text-[#5d6b73]'}`} />}
-                        {ds.id.startsWith('paya_') && <Landmark className={`w-4 h-4 ${isSelected ? 'text-[#c026d3]' : 'text-violet-500'}`} />}
-                        <span className="font-bold text-xs text-[#1c2830] dark:text-[#e8ebe9]">
+                        {ds.id === 'metro_station_tbm' && <Train className={`w-4 h-4 ${isSelected ? 'text-[#1f5163] dark:text-[#6fb3c6]' : 'text-slate-500'}`} />}
+                        {ds.id === 'oil_gas_pipeline_epc' && <Factory className={`w-4 h-4 ${isSelected ? 'text-[#1f5163] dark:text-[#6fb3c6]' : 'text-slate-500'}`} />}
+                        {ds.id === 'refinery_equipment_qa' && <Building2 className={`w-4 h-4 ${isSelected ? 'text-[#1f5163] dark:text-[#6fb3c6]' : 'text-slate-500'}`} />}
+                        {ds.id.startsWith('paya_') && <Landmark className={`w-4 h-4 ${isSelected ? 'text-[#1f5163] dark:text-[#6fb3c6]' : 'text-slate-500'}`} />}
+                        <span className="font-bold text-xs text-slate-900 dark:text-white">
                           {lang === 'fa' ? ds.titleFa : ds.titleEn}
                         </span>
                       </div>
-                      {isSelected && <span className="w-2 h-2 rounded-full bg-[#c026d3] shrink-0" />}
                     </div>
-                    <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
                       {lang === 'fa' ? ds.domainFa : ds.domainEn}
                     </span>
                   </button>
@@ -4527,14 +5390,15 @@ Tasks:
             </div>
 
             {/* Active Dataset Inspection Card */}
-            <div className="p-5 rounded-2xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#d9dad5]/60 dark:border-[#2d3942]/60">
+            <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#131c24] shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/70 dark:border-slate-800">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185]">
+                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <span className="font-semibold text-[#1f5163] dark:text-[#6fb3c6]">
                       {lang === 'fa' ? currentDataset.domainFa : currentDataset.domainEn}
                     </span>
-                    <span className="text-xs font-mono text-[#5d6b73] dark:text-[#9aa8b0]">
+                    <span aria-hidden="true">·</span>
+                    <span className="font-mono">
                       {currentDataset.fileName} ({currentDataset.rowCount} {lang === 'fa' ? 'ردیف' : 'rows'} · {currentDataset.columnCount} {lang === 'fa' ? 'ستون' : 'cols'})
                     </span>
                   </div>
@@ -4569,7 +5433,7 @@ Tasks:
                       setCsvCopied(true);
                       setTimeout(() => setCsvCopied(false), 2500);
                     }}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f8f9fa] dark:bg-[#12171b] hover:border-[#c026d3] text-xs font-semibold text-[#1c2830] dark:text-[#e8ebe9] transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f8f9fa] dark:bg-[#12171b] hover:border-[#1f5163] text-xs font-semibold text-[#1c2830] dark:text-[#e8ebe9] transition-colors"
                   >
                     {csvCopied ? (
                       <>
@@ -4589,7 +5453,7 @@ Tasks:
               {/* Data Table Preview */}
               <div className="space-y-2">
                 <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-                  <Eye className="w-3.5 h-3.5 text-[#c026d3]" />
+                  <Eye className="w-3.5 h-3.5 text-[#1f5163]" />
                   <span>{lang === 'fa' ? 'پیش‌نمایش داده‌های نمونه (نمونه ۵ ردیف اول):' : 'Data Matrix Preview (First 5 Rows):'}</span>
                 </span>
 
@@ -4787,38 +5651,12 @@ Tasks:
                 </ol>
               </div>
 
-              {/* Collapsible Supplementary HR & Admin Interactive Workshop */}
-              <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] p-4 sm:p-5 shadow-xs overflow-hidden transition-all">
-                <summary className="cursor-pointer list-none flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
-                  <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185]">
-                    <Users className="w-5 h-5 shrink-0" />
-                    <span>
-                      {lang === 'fa'
-                        ? 'کارگاه تکمیلی: ۵ ابزار تعاملی منابع انسانی و اداری در Gemini Canvas و Claude Artifacts'
-                        : 'Supplementary Lab: 5 Interactive HR & Admin Tools in Canvas/Artifacts'}
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-normal text-[#755e66] dark:text-[#ad99ab] flex items-center gap-1 group-open:text-[#e0533c]">
-                    <span>{lang === 'fa' ? 'مشاهده تمرین‌های ۵گانه HR' : 'View 5 HR Exercises'}</span>
-                    <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180 shrink-0" />
-                  </span>
-                </summary>
-
-                <div className="pt-4 border-t border-[#ecdcd8]/50 dark:border-[#382645]/50 mt-3">
-                  <HrArtifactsCanvasWorkshop
-                    lang={lang}
-                    onLoadToSandbox={loadPromptToSandbox}
-                    copyToClipboard={copyToClipboard}
-                    copiedId={copiedId}
-                  />
-                </div>
-              </details>
             </div>
           </section>
         );
       })()}
 
-      {/* SESSION 3 - MODULE 3-1: GOOGLE NOTEBOOKLM MEGA-WORKSHOP */}
+      {/* STANDALONE SECTION: GOOGLE NOTEBOOKLM MEGA-WORKSHOP */}
       {(activeTab === 'all' || activeTab === 'notebooklm') && (
         <NotebookLmWorkshop
           lang={lang}
@@ -4826,10 +5664,25 @@ Tasks:
           onLoadToSandbox={loadPromptToSandbox}
           copyToClipboard={copyToClipboard}
           copiedId={copiedId}
+          onOpenHrToolsWorkshop={() => handleTabClick('hr_interactive_tools', undefined, true)}
+          isPresentationMode={isPresentationMode}
+          externalOpenProjectorNonce={nlmProjectorNonce}
         />
       )}
 
-      {/* SESSION 3 - MODULE 3-2: CONTRACTS & ASSISTANTS WORKSHOP (GEMS & PROJECTS) */}
+      {/* POST-NOTEBOOKLM SECTION: INTERACTIVE HR & ADMIN TOOLS (NOTEBOOKLM + GEMINI + CLAUDE) */}
+      {(activeTab === 'all' || activeTab === 'hr_interactive_tools') && (
+        <section className="space-y-4">
+          <HrArtifactsCanvasWorkshop
+            lang={lang}
+            onLoadToSandbox={loadPromptToSandbox}
+            copyToClipboard={copyToClipboard}
+            copiedId={copiedId}
+          />
+        </section>
+      )}
+
+      {/* SESSION 3 - MODULE 3-1: CONTRACTS & ASSISTANTS WORKSHOP (GEMS & PROJECTS) */}
       {(activeTab === 'all' || activeTab === 'contracts_and_gems') && (() => {
         const currentContract = trackContracts.find(c => c.id === selectedContractId) || trackContracts[0];
         const geminiInst = lang === 'fa' ? currentContract.geminiSystemInstructionFa : currentContract.geminiSystemInstructionEn;
@@ -4845,7 +5698,7 @@ Tasks:
                 </div>
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#b87333] text-white text-xs font-black">۳-۲</span>
+                    <span dir="ltr" className="px-2 py-0.5 rounded-md bg-[#b87333] text-white text-xs font-black">۳-۱</span>
                     <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
                       {lang === 'fa'
                         ? industryTrack === 'PAYA_SAMAN_PARS'
@@ -5311,7 +6164,7 @@ Tasks:
 
             {/* Rule 3: Hallucination Mitigation */}
             <div className="p-5 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] shadow-xs space-y-3">
-              <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185]">
+              <div className="flex items-center gap-2 text-[#1f5163] dark:text-[#6fb3c6]">
                 <Info className="w-5 h-5" />
                 <h3 className="font-bold text-sm text-[#1c2830] dark:text-[#e8ebe9]">
                   {lang === 'fa' ? 'مهار خطای توهم در اعداد و استانداردها' : 'Tactics to Squash Hallucinations'}
@@ -5362,14 +6215,16 @@ Tasks:
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => openS1Projector('s5_capstone', 0)}
-              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
-            >
-              <Monitor className="w-4 h-4" />
-              <span>حالت اسلاید پروژکتور جلسه ۵</span>
-            </button>
+            {!isSplitCockpit && (
+              <button
+                type="button"
+                onClick={() => openS1Projector('s5_capstone', 0)}
+                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
+              >
+                <Monitor className="w-4 h-4" />
+                <span>حالت اسلاید پروژکتور جلسه ۵</span>
+              </button>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
@@ -5381,7 +6236,7 @@ Tasks:
               </p>
             </div>
             <div className="p-3.5 rounded-xl bg-[#fdf8f5] dark:bg-[#16101c] border border-[#ecdcd8] dark:border-[#382645] space-y-1">
-              <span className="font-mono font-black text-[#c026d3]">گام ۲ · پایپ‌لاین داده</span>
+              <span className="font-mono font-black text-[#1f5163]">گام ۲ · پایپ‌لاین داده</span>
               <b className="block text-[#261a1d] dark:text-[#faedf3]">خوانش خودکار با MCP</b>
               <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
                 کلاود بدون کپی-پیست، فایل‌ها را از طریق Filesystem / Drive MCP می‌خواند.
@@ -5411,7 +6266,7 @@ Tasks:
           </div>
 
           <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-[#fdf8f5] dark:bg-[#16101c] overflow-hidden transition-all">
-            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 transition-colors">
+            <summary className="cursor-pointer list-none p-4 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-slate-50 dark:hover:bg-[#18232e] transition-colors">
               <div className="flex items-center gap-2 text-[#261a1d] dark:text-[#faedf3]">
                 <Zap className="w-4 h-4 text-[#e0533c] shrink-0" />
                 <span>بسط اختیاری: پرامپت جامع ارکستراسیون (اجرای کل زنجیره ۵ مرحله‌ای بالا با یک دستور واحد)</span>
@@ -5453,7 +6308,7 @@ Tasks:
 
       {/* SESSION 5 - MODULE 5-3: BRIDGE TO VIBE CODING */}
       {(activeTab === 'all' || activeTab === 's5_vibecoding') && (
-        <section className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#261a1d] via-[#341528] to-[#16101c] text-white border border-[#e0533c]/40 shadow-md space-y-4">
+        <section className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#173642] via-[#1f5163] to-[#132933] text-white border border-[#e0533c]/40 shadow-md space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/15">
             <div className="flex items-center gap-2.5">
               <span className="px-2.5 py-1 rounded-lg bg-[#e0533c] text-white text-xs font-black shrink-0">۵-۳</span>
@@ -5466,14 +6321,16 @@ Tasks:
                 </p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => openS1Projector('s5_capstone', 2)}
-              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
-            >
-              <Monitor className="w-4 h-4" />
-              <span>اسلاید پروژکتور Vibe Coding</span>
-            </button>
+            {!isSplitCockpit && (
+              <button
+                type="button"
+                onClick={() => openS1Projector('s5_capstone', 2)}
+                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
+              >
+                <Monitor className="w-4 h-4" />
+                <span>اسلاید پروژکتور Vibe Coding</span>
+              </button>
+            )}
           </div>
 
           <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
@@ -5502,178 +6359,32 @@ Tasks:
           </div>
         </section>
       )}
+        </>
+      )}
 
-      {/* ===================================================================== */}
-      {/* PERSISTENT PROMPT SANDBOX TOOL (ALWAYS AVAILABLE ACROSS ALL SESSIONS) */}
-      {/* ===================================================================== */}
-      <details
-        id="prompt-sandbox"
-        open={isSandboxOpen}
-        onToggle={(e) => setIsSandboxOpen((e.currentTarget as HTMLDetailsElement).open)}
-        className="group rounded-2xl border-2 border-[#e0533c]/35 dark:border-[#fb7185]/35 bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all"
-      >
-        <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between gap-3 select-none hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 transition-colors">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-[#e0533c]/10 text-[#e0533c] dark:text-[#fb7185]">
-              <Terminal className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-sm sm:text-base font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                {lang === 'fa' ? 'ابزار سراسری: سندباکس شخصی‌سازی و تست پرامپت (همیشه در دسترس)' : 'Global Tool: Interactive Prompt Customization Sandbox'}
-              </h2>
-              <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-                {lang === 'fa'
-                  ? 'پرامپت‌های هر جلسه را اینجا ویرایش و شخصی‌سازی کنید و با یک کلیک در ChatGPT، Claude یا Gemini اجرا نمایید.'
-                  : 'Edit and customize prompts from any session here, then copy and launch in ChatGPT, Claude, or Gemini.'}
-              </p>
-            </div>
-          </div>
-          <span className="text-xs font-bold text-[#e0533c] dark:text-[#fb7185] flex items-center gap-1 shrink-0">
-            <span>{isSandboxOpen ? (lang === 'fa' ? 'بستن سندباکس' : 'Close') : (lang === 'fa' ? 'باز کردن سندباکس' : 'Open Sandbox')}</span>
-            <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" />
-          </span>
-        </summary>
+      {/* Inline Prompt Sandbox in Full-Width / Show-All Flow */}
+      {!isSplitCockpit && renderPromptSandbox(false)}
 
-        <div className="p-5 pt-3 border-t border-[#ecdcd8]/60 dark:border-[#382645]/60 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-[#1c2830] dark:text-[#e8ebe9]">
-              {lang === 'fa' ? 'پیش‌نویس پرامپت اختصاصی شما:' : 'Your Custom Prompt Draft:'}
-            </span>
-
-            <div className="flex items-center gap-2 text-xs flex-wrap">
-              <button
-                type="button"
-                onClick={() =>
-                  onChangeContent(
-                    lang === 'fa'
-                      ? disciplinePromptPair.engineeredPromptFa
-                      : disciplinePromptPair.engineeredPromptEn
-                  )
-                }
-                className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#e0533c]/10 hover:bg-[#e0533c]/20 text-[#e0533c] dark:text-[#fb7185] transition-colors flex items-center gap-1 cursor-pointer"
-              >
-                <Sparkles className="w-3 h-3 text-amber-500" />
-                <span>
-                  {lang === 'fa'
-                    ? `بارگذاری الگوی دیسیپلین ${discMeta.shortTitleFa}`
-                    : `Load ${discMeta.shortTitleEn} Template`}
-                </span>
-              </button>
-              <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0]">
-                {lang === 'fa'
-                  ? `${content.trim().length ? content.trim().split(/\s+/).length : 0} واژه · ${content.length} کاراکتر`
-                  : `${content.trim().length ? content.trim().split(/\s+/).length : 0} words · ${content.length} chars`}
-              </span>
-              {content && (
-                <button
-                  onClick={() => onChangeContent('')}
-                  className="flex items-center gap-1 text-[11px] text-[#b91c1c] dark:text-[#f87171] hover:underline"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>{lang === 'fa' ? 'پاک کردن' : 'Clear'}</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          <textarea
-            rows={7}
-            value={content}
-            onChange={(e) => onChangeContent(e.target.value)}
-            placeholder={
-              lang === 'fa'
-                ? 'پرامپت خود را اینجا بنویسید، یا از بخش کتابخانه پرامپت‌های بالا یکی را انتخاب کنید تا اینجا بارگذاری شود...\nفرمول RCTO را فراموش نکنید:\n[Role] تو مشاور ارشد...\n[Context] شرکت ما...\n[Task] این ۵ کار را انجام بده...\n[Output] در قالب جدول...'
-                : 'Type your prompt here, or pick one from the library above...\nRemember the RCTO formula:\n[Role] You are a lead...\n[Context] Our organization...\n[Task] Perform these 5 steps...\n[Output] In a structured table...'
-            }
-            className="w-full p-4 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#fdfdfd] dark:bg-[#12171b] text-xs sm:text-sm font-mono text-[#1c2830] dark:text-[#e8ebe9] focus:outline-hidden focus:ring-2 focus:ring-[#e0533c] dark:focus:ring-[#fb7185] transition-all resize-y"
-          />
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-            <button
-              onClick={copySandboxToClipboard}
-              disabled={!content.trim()}
-              className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-semibold shadow-xs transition-all ${
-                sandboxCopied
-                  ? 'bg-[#2f7d5b] text-white'
-                  : content.trim()
-                  ? 'bg-[#e0533c] hover:bg-[#c2410c] text-white'
-                  : 'bg-[#d9dad5] dark:bg-[#2d3942] text-[#5d6b73] dark:text-[#9aa8b0] cursor-not-allowed'
-              }`}
-            >
-              {sandboxCopied ? (
-                <>
-                  <Check className="w-4 h-4 text-white" />
-                  <span>{lang === 'fa' ? 'پرامپت با موفقیت کپی شد!' : 'Copied to Clipboard!'}</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4" />
-                  <span>{lang === 'fa' ? 'کپی پرامپت آماده' : 'Copy Prompt'}</span>
-                </>
-              )}
-            </button>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] font-medium hidden md:inline">
-                {lang === 'fa' ? 'تست فوری در:' : 'Test in:'}
-              </span>
-
-              <button
-                type="button"
-                onClick={() => openCompanionWindow('https://chatgpt.com', 'chatgpt_companion')}
-                className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-[#10a37f]/10 hover:bg-[#10a37f]/20 text-[#10a37f] border border-[#10a37f]/30 text-xs font-semibold transition-colors cursor-pointer"
-                title={lang === 'fa' ? 'تست در پنجره کناری پلتفرم' : 'Test in side window'}
-              >
-                <span>ChatGPT</span>
-                <ExternalLink className="w-3 h-3" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => openCompanionWindow('https://claude.ai', 'claude_companion')}
-                className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-[#d97706]/10 hover:bg-[#d97706]/20 text-[#d97706] border border-[#d97706]/30 text-xs font-semibold transition-colors cursor-pointer"
-                title={lang === 'fa' ? 'تست در پنجره کناری پلتفرم' : 'Test in side window'}
-              >
-                <span>Claude</span>
-                <ExternalLink className="w-3 h-3" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => openCompanionWindow('https://gemini.google.com', 'gemini_companion')}
-                className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-[#1a73e8]/10 hover:bg-[#1a73e8]/20 text-[#1a73e8] border border-[#1a73e8]/30 text-xs font-semibold transition-colors cursor-pointer"
-                title={lang === 'fa' ? 'تست در پنجره کناری پلتفرم' : 'Test in side window'}
-              >
-                <span>Gemini</span>
-                <ExternalLink className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </details>
-
-      {/* ===================================================================== */}
-      {/* WORKSHOP LINEAR PAGER CONTROLS (CLEAN, NO REDUNDANT KEYCAPS)          */}
-      {/* ===================================================================== */}
+      {/* Mobile Linear Pager Controls (Hidden on xl Desktop Split Cockpit since top bar is pinned) */}
       {activeTab && activeTab !== 'all' && (
-        <div className="p-4 rounded-2xl bg-white/90 dark:bg-[#1a1222]/90 backdrop-blur-md border border-[#ecdcd8] dark:border-[#382645] flex items-center justify-between gap-3 shadow-xs">
+        <div className="xl:hidden p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-xs">
           <button
             type="button"
             onClick={handlePrevModule}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-[#ecdcd8] dark:border-[#382645] bg-black/[0.02] dark:bg-white/[0.04] hover:bg-[#e0533c]/10 text-[#261a1d] dark:text-[#faedf3] transition-all cursor-pointer active:scale-95"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 transition-all cursor-pointer"
           >
             <span>{lang === 'fa' ? '← ماژول قبلی' : '← Previous'}</span>
           </button>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono font-bold text-[#755e66] dark:text-[#ad99ab]">
+            <span dir="ltr" className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 tabular-nums">
               {currentModuleIdx >= 0 ? `${currentModuleIdx + 1} / ${MODULE_NAV_ITEMS.length}` : ''}
             </span>
             <button
               type="button"
-              onClick={() => navPillsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-              className="p-1.5 rounded-lg text-xs font-bold text-[#e0533c] dark:text-[#fb7185] hover:bg-[#e0533c]/10 transition-colors cursor-pointer"
-              title={lang === 'fa' ? 'بازگشت به بالای سرفصل‌ها' : 'Scroll to top'}
+              onClick={scrollContentPaneToTop}
+              className="p-1.5 rounded-lg text-xs font-bold text-[#1f5163] dark:text-[#6fb3c6] hover:bg-[#1f5163]/10 transition-colors cursor-pointer"
+              title={lang === 'fa' ? 'بازگشت به بالای مطلب' : 'Scroll to top'}
             >
               ↑
             </button>
@@ -5682,39 +6393,47 @@ Tasks:
           <button
             type="button"
             onClick={handleNextModule}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#e0533c] to-[#c026d3] text-white hover:brightness-110 shadow-xs transition-all cursor-pointer active:scale-95"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#1f5163] hover:bg-[#163c4a] text-white shadow-xs transition-all cursor-pointer"
           >
             <span>{lang === 'fa' ? 'ماژول بعدی →' : 'Next Module →'}</span>
           </button>
         </div>
       )}
 
-      {/* Prominent Footer Call to Action: Proceed to Page 1 */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-[#fdeee9] via-[#fbdcd5] to-[#f9cac1] dark:from-[#341528] dark:via-[#2a1220] dark:to-[#1d0c16] border border-[#e0533c]/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-        <div className="space-y-1 text-center sm:text-right">
-          <span className="text-xs font-bold text-[#e0533c] dark:text-[#fb7185] block">
-            {lang === 'fa' ? 'پایان پیش‌نیاز · ورود به متدولوژی استاندارد پروژه' : 'Prerequisite Complete · Enter Official CPMAI Standard'}
-          </span>
-          <h4 className="text-sm sm:text-base font-extrabold text-[#1c2830] dark:text-[#e8ebe9]">
-            {lang === 'fa'
-              ? 'ورود به فاز اول CPMAI: درک کسب‌وکار (صفحه ۱ از ۵)'
-              : 'Proceed to CPMAI Phase I: Business Understanding (Page 1)'}
-          </h4>
-          <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-            {lang === 'fa'
-              ? 'اکنون که جعبه‌ابزار LLM را در اختیار دارید، تعریف نیازمندی‌ها، اهداف و داستان کاربر پروژه هوش مصنوعی را آغاز کنید.'
-              : 'Armed with the LLM toolkit, define business goals, constraints, and sprint user stories.'}
-          </p>
-        </div>
+      {/* Prominent Footer Call to Action: Proceed to Page 1 (Shown in Show-All or Session 5) */}
+      {(!isSplitCockpit || activeSessionId === 's5') && (
+        <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
+          <div className="space-y-1 text-center sm:text-right">
+            <span className="text-xs font-bold text-[#1f5163] dark:text-[#6fb3c6] block">
+              {lang === 'fa' ? 'پایان پیش‌نیاز · ورود به متدولوژی استاندارد پروژه' : 'Prerequisite Complete · Enter Official CPMAI Standard'}
+            </span>
+            <h4 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
+              {lang === 'fa'
+                ? 'ورود به فاز اول CPMAI: درک کسب‌وکار (صفحه ۱ از ۲۱)'
+                : 'Proceed to CPMAI Phase I: Business Understanding (Page 1)'}
+            </h4>
+            <p className="text-xs text-slate-600 dark:text-slate-300">
+              {lang === 'fa'
+                ? 'اکنون که جعبه‌ابزار LLM را در اختیار دارید، تعریف نیازمندی‌ها، اهداف و داستان کاربر پروژه هوش مصنوعی را آغاز کنید.'
+                : 'Armed with the LLM toolkit, define business goals, constraints, and sprint user stories.'}
+            </p>
+          </div>
 
-        <button
-          type="button"
-          onClick={onGoToPage1}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 text-xs sm:text-sm font-bold rounded-xl bg-[#e0533c] hover:bg-[#c2410c] active:scale-[0.98] text-white transition-all shadow-sm hover:scale-[1.02] shrink-0"
-        >
-          <span>{lang === 'fa' ? 'شروع فاز اول CPMAI (صفحه ۱)' : 'Start CPMAI Phase I (Page 1)'}</span>
-          {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-        </button>
+          <button
+            type="button"
+            onClick={onGoToPage1}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 text-xs sm:text-sm font-bold rounded-xl bg-[#1f5163] hover:bg-[#163c4a] text-white transition-all shadow-xs shrink-0 cursor-pointer"
+          >
+            <span>{lang === 'fa' ? 'شروع فاز اول CPMAI (صفحه ۱)' : 'Start CPMAI Phase I (Page 1)'}</span>
+            {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+          </button>
+        </div>
+      )}
+          </div>
+
+          {/* Docked Collapsible Prompt Sandbox Drawer (Split View Only) */}
+          {isSplitCockpit && renderPromptSandbox(true)}
+        </div>
       </div>
 
       {/* FULL-SCREEN PROJECTOR SLIDE MODALS FOR SESSION 1 & SESSION 5 */}
@@ -5801,18 +6520,51 @@ Tasks:
         />
       )}
 
-      {!isOrbitWidgetHidden && (
+      {universalProjectorDeck && (
+        <ProjectorSlideModal
+          isOpen={true}
+          onClose={() => setUniversalProjectorDeck(null)}
+          deckTitleFa={universalProjectorDeck.deckTitleFa}
+          deckSubtitleFa={universalProjectorDeck.deckSubtitleFa}
+          accentColor={universalProjectorDeck.accentColor}
+          slides={universalProjectorDeck.slides}
+          activeIndex={universalSlideIdx}
+          onChangeIndex={setUniversalSlideIdx}
+          copyToClipboard={copyToClipboard}
+          copiedId={copiedId}
+        />
+      )}
+
+      {!isPresentationMode && !isOrbitWidgetHidden && (!isSplitCockpit || isOrbitPaneCollapsed) && (
         <FloatingOrbitWidget
           lang={lang}
           sessions={FIVE_SESSIONS}
           activeSessionId={activeSessionId}
           activeTab={activeTab}
           completedSessions={completedSessions}
+          showModules={isWidgetModulesOpen}
+          onToggleShowModules={setIsWidgetModulesOpen}
+          isBigOrbitCollapsed={isOrbitPaneCollapsed}
+          onRestoreBigOrbit={() => {
+            playTactileSound('thock');
+            setIsOrbitPaneCollapsed(false);
+            setTimeout(() => {
+              navPillsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 60);
+          }}
           onOpenSession={(id) => handleOpenSession(id, true)}
-          onOpenModule={(modId) => handleTabClick(modId as typeof activeTab, undefined, true)}
+          onOpenModule={(modId) => {
+            setPaneViewMode('lesson');
+            handleTabClick(modId as typeof activeTab, undefined, true);
+          }}
+          onOpenModuleExercise={(modId) => openModuleExercise(modId as typeof activeTab)}
+          activePaneMode={paneViewMode}
           onBackToMap={() => {
             playTactileSound('thock');
-            navPillsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setIsOrbitPaneCollapsed(false);
+            setTimeout(() => {
+              navPillsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 60);
           }}
           onClose={() => setIsOrbitWidgetHidden(true)}
         />

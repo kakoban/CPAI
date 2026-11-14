@@ -347,9 +347,9 @@ ${discContent.successCriteriaFa.map((sc, i) => `- معیار شماره ${i + 1}
       </div>
 
       {/* Slide Container (Authentic replica of Image 3) */}
-      <div className="rounded-xl border border-[#0a7b97] dark:border-[#0a7b97]/80 overflow-hidden shadow-sm bg-[#ffffff] dark:bg-[#16202a]">
+      <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm bg-[#ffffff] dark:bg-[#16202a]">
         {/* Teal Header Bar (Verbatim Image 3 Teal Header) */}
-        <div className="bg-[#c026d3] px-6 py-3.5 text-white flex items-center justify-between select-none">
+        <div className="bg-[#1f5163] px-6 py-3.5 text-white flex items-center justify-between select-none">
           <h2 className="font-semibold text-base sm:text-lg tracking-normal font-sans" dir="ltr">
             {t.slideTitle}
           </h2>
@@ -359,7 +359,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- معیار شماره ${i + 1}
         </div>
 
         {/* Large Lavender-Blue Workspace Canvas Box (Matching Image 3) */}
-        <div className="p-4 sm:p-6 bg-[#e6edfa] dark:bg-[#152335] min-h-[500px] sm:min-h-[580px] flex flex-col relative transition-colors">
+        <div className="p-4 sm:p-6 bg-slate-50 dark:bg-[#111922] min-h-[500px] sm:min-h-[580px] flex flex-col relative transition-colors">
           <textarea
             value={content}
             onChange={(e) => onChangeContent(e.target.value)}
@@ -368,7 +368,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- معیار شماره ${i + 1}
                 ? 'معیارهای عینی و سنجش‌پذیر موفقیت برای این تکرار پروژه را اینجا بنویسید...\n\nبرای شروع می‌توانید از دکمه‌های «درج قالب استاندارد معیارها» یا «پر کردن با نمونه موردی» در بالا استفاده کنید.'
                 : 'Write your objective measures of success for this project iteration here...\n\nYou can also click "Insert Criteria Template" or "Fill Retail Banking Churn Example" above to get started.'
             }
-            className="flex-1 w-full p-4 sm:p-5 rounded-lg bg-[#ffffff]/90 dark:bg-[#1a293d]/90 text-[#1c2830] dark:text-[#e8ebe9] border border-[#d2def2] dark:border-[#2d3f56] focus:border-[#c026d3] focus:outline-none resize-y text-sm sm:text-[15px] leading-relaxed font-sans shadow-inner min-h-[420px]"
+            className="flex-1 w-full p-4 sm:p-5 rounded-lg bg-white dark:bg-[#0f1720] text-[#1c2830] dark:text-[#e8ebe9] border border-slate-200 dark:border-slate-700 focus:border-[#1f5163] focus:outline-none resize-y text-sm sm:text-[15px] leading-relaxed font-sans shadow-inner min-h-[420px]"
           />
 
           {/* Footer Bar of Canvas */}
@@ -380,7 +380,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- معیار شماره ${i + 1}
             </div>
 
             {/* Corner Geometric Triangles (Watermark replica from bottom right of slide) */}
-            <div className="opacity-25 dark:opacity-15 pointer-events-none text-[#c026d3] dark:text-[#fb7185]">
+            <div className="opacity-25 dark:opacity-15 pointer-events-none text-[#1f5163] dark:text-[#6fb3c6]">
               <svg width="48" height="32" viewBox="0 0 48 32" fill="currentColor">
                 <polygon points="48,32 24,32 48,8" />
                 <polygon points="36,32 12,32 36,8" />
@@ -417,7 +417,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- معیار شماره ${i + 1}
       </div>
 
       {/* Navigation Return Button to Page 2 and Next Page to Page 4 */}
-      <div className="p-4 sm:p-5 rounded-xl bg-[#fdeee9] dark:bg-[#341528] border border-[#e0533c]/20 flex flex-wrap items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 rounded-xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
         <button
           type="button"
           onClick={onGoToPage2}
@@ -431,7 +431,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- معیار شماره ${i + 1}
           <button
             type="button"
             onClick={onGoToPage4}
-            className="flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#c026d3] text-white hover:bg-[#005f73] transition-colors shadow-xs"
+            className="flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#1f5163] text-white hover:bg-[#163d4b] transition-colors shadow-xs"
           >
             <span>{t.nextPageBtn}</span>
             {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}

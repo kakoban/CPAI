@@ -87,9 +87,9 @@ export const Page12AiPatterns: React.FC<Page12Props> = ({
       nameEn: 'Hyperpersonalization',
       nameFa: 'مشتری‌سازی بیش‌ازحد (شخصی‌سازی پیشرفته)',
       icon: 'sparkles',
-      color: '#c026d3',
+      color: '#1f5163',
       bgColor: 'bg-[#e3f4f7] dark:bg-[#122830]',
-      borderColor: 'border-[#c026d3]/30 dark:border-[#c026d3]/50',
+      borderColor: 'border-[#1f5163]/30 dark:border-[#1f5163]/50',
       commonGoalEn: 'Treat each individual human or customer uniquely as a "segment of one" based on behavioral signals, context, and preferences.',
       commonGoalFa: 'رفتار با هر مشتری یا کاربر به عنوان یک «بخش تک‌نفره» متمایز، بر مبنای سوابق رفتار، زمینه و ترجیحات فردی.',
       underlyingTechEn: 'Collaborative filtering, matrix factorization, two-tower embedding models, contextual bandits, behavioral sequence transformers.',
@@ -533,14 +533,14 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
 
   const getPatternIcon = (iconName: string) => {
     switch (iconName) {
-      case 'sparkles': return <Sparkles className="w-5 h-5 text-[#c026d3]" />;
+      case 'sparkles': return <Sparkles className="w-5 h-5 text-[#1f5163]" />;
       case 'message': return <MessageSquare className="w-5 h-5 text-[#e0533c]" />;
       case 'trending': return <TrendingUp className="w-5 h-5 text-[#b87333]" />;
       case 'eye': return <Eye className="w-5 h-5 text-[#2f7d5b]" />;
       case 'bot': return <Bot className="w-5 h-5 text-[#d97706]" />;
       case 'target': return <Target className="w-5 h-5 text-[#7c3aed]" />;
       case 'search': return <Search className="w-5 h-5 text-[#dc2626]" />;
-      default: return <Brain className="w-5 h-5 text-[#c026d3]" />;
+      default: return <Brain className="w-5 h-5 text-[#1f5163]" />;
     }
   };
 
@@ -553,7 +553,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
             <span className="px-2.5 py-1 rounded text-xs font-semibold uppercase tracking-wider bg-[#e0533c] text-white">
               {lang === 'fa' ? 'فاز اول: درک کسب‌وکار' : 'Phase I: Business Understanding'}
             </span>
-            <span className="px-2.5 py-1 rounded text-xs font-semibold bg-[#fdeee9] dark:bg-[#341528] text-[#e0533c] dark:text-[#fb7185]">
+            <span className="px-2.5 py-1 rounded text-xs font-semibold bg-slate-50 dark:bg-[#18232e] text-[#e0533c] dark:text-[#fb7185]">
               {lang === 'fa' ? 'اسلاید ۲۲ کتاب کار CPMAI' : 'CPMAI Workbook Slide 22'}
             </span>
             <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-[#f4f4f1] dark:bg-[#12171b] text-[#5d6b73] dark:text-[#9aa8b0]">
@@ -561,7 +561,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
             </span>
           </div>
           <div className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] flex items-center gap-1.5 font-medium">
-            <Network className="w-4 h-4 text-[#c026d3]" />
+            <Network className="w-4 h-4 text-[#1f5163]" />
             <span>Task Group: Cognitive Project Requirements</span>
           </div>
         </div>
@@ -586,7 +586,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
           </div>
           <ol className="list-decimal list-inside text-xs text-[#1c2830] dark:text-[#e8ebe9] space-y-1.5 leading-relaxed font-medium">
             <li>
-              <span className="font-semibold text-[#c026d3] dark:text-[#fb7185]">
+              <span className="font-semibold text-[#1f5163] dark:text-[#6fb3c6]">
                 {lang === 'fa' ? 'کدام‌یک از این الگوها در این پروژه استفاده می‌شوند؟' : 'Which of these patterns are used in this project?'}
               </span>{' '}
               <span className="text-[#5d6b73] dark:text-[#9aa8b0]">
@@ -631,7 +631,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
           onClick={() => setActiveTab('patterns')}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 ${
             activeTab === 'patterns'
-              ? 'bg-[#c026d3] text-white shadow-xs font-semibold'
+              ? 'bg-[#1f5163] text-white shadow-xs font-semibold'
               : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#f4f4f1] dark:hover:bg-[#1a2228]'
           }`}
         >
@@ -685,7 +685,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
           <div className="p-4 rounded-lg bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942]">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-                <Brain className="w-4 h-4 text-[#c026d3]" />
+                <Brain className="w-4 h-4 text-[#1f5163]" />
                 <span>{lang === 'fa' ? 'چرا الگوهای هوش مصنوعی شتاب‌دهنده پروژه هستند؟' : 'Why AI Patterns Accelerate Cognitive Projects'}</span>
               </h2>
               <span className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">CPMAI Core Concept</span>
@@ -708,7 +708,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
                   key={p.id}
                   className={`p-4 rounded-xl border transition-all flex flex-col justify-between ${
                     isPrimary
-                      ? 'border-[#c026d3] bg-[#e3f4f7]/40 dark:bg-[#122830]/60 ring-2 ring-[#c026d3]/30'
+                      ? 'border-[#1f5163] bg-[#e3f4f7]/40 dark:bg-[#122830]/60 ring-2 ring-[#1f5163]/30'
                       : isSecondary
                       ? 'border-[#b87333] bg-[#faeee5]/40 dark:bg-[#2b1e16]/60'
                       : 'border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228]'
@@ -731,7 +731,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
                         </div>
                       </div>
                       {isPrimary && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#c026d3] text-white">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#1f5163] text-white">
                           {lang === 'fa' ? 'الگوی اصلی' : 'Primary'}
                         </span>
                       )}
@@ -764,7 +764,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
                       onClick={() => setSelectedPrimaryPattern(p.id)}
                       className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
                         isPrimary
-                          ? 'bg-[#c026d3] text-white'
+                          ? 'bg-[#1f5163] text-white'
                           : 'border border-[#d9dad5] dark:border-[#2d3942] text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
                       }`}
                     >
@@ -793,7 +793,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
         <div className="space-y-5">
           <div className="p-5 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942]">
             <h2 className="text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2 mb-2">
-              <Compass className="w-4 h-4 text-[#c026d3]" />
+              <Compass className="w-4 h-4 text-[#1f5163]" />
               <span>{lang === 'fa' ? 'پرسش ۱ اسلاید ۲۲: کدام‌یک از این الگوها در این پروژه استفاده می‌شوند؟' : 'Question 1: Which of these patterns are used in this project?'}</span>
             </h2>
             <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed mb-4">
@@ -805,14 +805,14 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
             {/* Selection Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               {/* Primary Pattern Selector */}
-              <div className="p-4 rounded-lg bg-[#f8faf9] dark:bg-[#131b20] border border-[#c026d3]/40">
-                <label className="text-xs font-bold text-[#c026d3] dark:text-[#fb7185] block mb-2">
+              <div className="p-4 rounded-lg bg-[#f8faf9] dark:bg-[#131b20] border border-[#1f5163]/40">
+                <label className="text-xs font-bold text-[#1f5163] dark:text-[#6fb3c6] block mb-2">
                   {lang === 'fa' ? 'الگوی اصلی پروژه (Primary Pattern):' : 'Primary Project Pattern:'}
                 </label>
                 <select
                   value={selectedPrimaryPattern}
                   onChange={(e) => setSelectedPrimaryPattern(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] font-medium focus:outline-none focus:border-[#c026d3]"
+                  className="w-full text-xs p-2.5 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] font-medium focus:outline-none focus:border-[#1f5163]"
                 >
                   {SEVEN_PATTERNS.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -855,7 +855,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
             </div>
 
             {/* Quick Generator Button */}
-            <div className="p-3 rounded-lg bg-[#fdeee9] dark:bg-[#341528] flex items-center justify-between gap-3 flex-wrap">
+            <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#18232e] flex items-center justify-between gap-3 flex-wrap">
               <span className="text-xs text-[#e0533c] dark:text-[#fb7185] font-medium">
                 {lang === 'fa'
                   ? 'آیا می‌خواهید شرح الگوی انتخاب‌شده را مستقیماً به بوم پاسخ اضافه کنید؟'
@@ -880,7 +880,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
                         : `2. Supporting Pattern: Pure single-pattern execution for this iteration.\n`);
                   handleInsertTemplate(textToInsert);
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c026d3] text-white text-xs font-semibold hover:bg-[#005f73] transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1f5163] text-white text-xs font-semibold hover:bg-[#163d4b] transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{lang === 'fa' ? 'درج در بوم پاسخ (Canvas)' : 'Insert into Canvas'}</span>
@@ -908,7 +908,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div className="p-3.5 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#fcfcfb] dark:bg-[#12171b]">
                 <div className="flex items-center gap-2 text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] mb-1.5">
-                  <span className="w-5 h-5 rounded-full bg-[#c026d3] text-white flex items-center justify-center text-[10px]">۱</span>
+                  <span className="w-5 h-5 rounded-full bg-[#1f5163] text-white flex items-center justify-center text-[10px]">۱</span>
                   <span>{lang === 'fa' ? 'نوع و قالب داده‌های ورودی (Input Modality)' : 'Input Data Modality'}</span>
                 </div>
                 <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
@@ -1032,7 +1032,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
                             p.leverageableAssetsEn.map(a => `- ${a}`).join('\n');
                         handleInsertTemplate(textToInsert);
                       }}
-                      className="text-[11px] font-semibold text-[#c026d3] dark:text-[#fb7185] hover:underline flex items-center gap-1"
+                      className="text-[11px] font-semibold text-[#1f5163] dark:text-[#6fb3c6] hover:underline flex items-center gap-1"
                     >
                       <Plus className="w-3 h-3" />
                       <span>{lang === 'fa' ? 'درج دارایی‌ها در بوم' : 'Insert Assets'}</span>
@@ -1073,7 +1073,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div>
             <h2 className="text-sm font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-              <FileText className="w-4 h-4 text-[#c026d3]" />
+              <FileText className="w-4 h-4 text-[#1f5163]" />
               <span>{lang === 'fa' ? 'بوم ثبت پاسخ اسلاید ۲۲ (Worksheet Canvas)' : 'Slide 22 Worksheet Canvas'}</span>
             </h2>
             <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] mt-0.5">
@@ -1086,7 +1086,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-xs font-medium text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#c026d3] transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-xs font-medium text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#1f5163] transition-colors"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copied ? (lang === 'fa' ? 'کپی شد!' : 'Copied!') : (lang === 'fa' ? 'کپی متن' : 'Copy')}</span>
@@ -1106,7 +1106,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
         <div className="mb-4 p-3.5 rounded-lg bg-[#f8faf9] dark:bg-[#131b20] border border-[#d9dad5]/70 dark:border-[#2d3942]/70">
           <div className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] mb-2 flex items-center justify-between">
             <span>{lang === 'fa' ? 'چک‌لیست خودکار ارزیابی کیفیت پاسخ اسلاید ۲۲:' : 'Slide 22 Quality Audit Checklist:'}</span>
-            <span className="text-[11px] font-mono font-medium text-[#c026d3] dark:text-[#fb7185]">
+            <span className="text-[11px] font-mono font-medium text-[#1f5163] dark:text-[#6fb3c6]">
               {Number(q1Addressed) + Number(q2Addressed) + Number(q3Addressed)} / 3 {lang === 'fa' ? 'معیار' : 'criteria'}
             </span>
           </div>
@@ -1156,7 +1156,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
             <button
               key={idx}
               onClick={() => handleInsertTemplate(tmpl.text)}
-              className="px-2.5 py-1 rounded bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] hover:border-[#c026d3] text-[#1c2830] dark:text-[#e8ebe9] font-medium transition-colors shrink-0"
+              className="px-2.5 py-1 rounded bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] hover:border-[#1f5163] text-[#1c2830] dark:text-[#e8ebe9] font-medium transition-colors shrink-0"
             >
               + {tmpl.title}
             </button>
@@ -1173,7 +1173,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
               ? 'پاسخ کامل خود به پرسش‌های اسلاید ۲۲ کتاب کار CPMAI را اینجا بنویسید یا از دکمه‌های درج قالب‌های آماده بالا استفاده فرمایید:\n\n۱. کدام یک از این الگوهای هفت‌گانه در این پروژه استفاده می‌شوند؟\n۲. چگونه این تصمیم و انتخاب را اتخاذ کردید؟\n۳. چه پروژه‌های مشابه دیگری با این الگوها ساخته شده‌اند که می‌توانید از دارایی‌های آن‌ها استفاده کنید؟'
               : 'Write your comprehensive answers to Slide 22 of the CPMAI Workbook here, or click preset templates above:\n\n1. Which of these patterns are used in this project?\n2. How did you make this determination?\n3. What other similar projects have been built using these patterns from which you can leverage assets?'
           }
-          className="w-full font-mono text-xs p-4 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#c026d3] leading-relaxed transition-all resize-y"
+          className="w-full font-mono text-xs p-4 rounded-lg bg-[#fcfcfb] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] text-[#1c2830] dark:text-[#e8ebe9] focus:outline-none focus:border-[#1f5163] leading-relaxed transition-all resize-y"
         />
 
         {/* Word / Character Counter & Copyright */}
@@ -1193,7 +1193,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
 
           <div className="flex items-center gap-2">
             <span>CPMAI Methodology · OWJ Business Council</span>
-            <span className="font-semibold text-[#c026d3] dark:text-[#fb7185]">Slide 22</span>
+            <span className="font-semibold text-[#1f5163] dark:text-[#6fb3c6]">Slide 22</span>
           </div>
         </div>
       </div>
@@ -1225,7 +1225,7 @@ B) User Interface Paradigm: Subject matter experts require interactive conversat
           {onGoToPage13 && (
             <button
               onClick={onGoToPage13}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#c026d3] hover:bg-[#e0533c] text-white text-xs font-semibold shadow-xs transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1f5163] hover:bg-[#e0533c] text-white text-xs font-semibold shadow-xs transition-colors"
             >
               <span>
                 {lang === 'fa'

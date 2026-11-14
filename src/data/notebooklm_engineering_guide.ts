@@ -1312,7 +1312,7 @@ export const PAYA_NOTEBOOKLM_EXERCISES: NotebookLmExercise[] = [
     estimatedMinutes: 15,
     difficultyFa: 'متوسط',
     difficultyEn: 'Intermediate',
-    requiredSourceFa: 'قرارداد کنسرسیومی EPC+F پایا (قابل دانلود از همین بخش یا بخش ۳-۲)',
+    requiredSourceFa: 'قرارداد کنسرسیومی EPC+F پایا (قابل دانلود از همین بخش یا بخش ۳-۱)',
     requiredSourceEn: 'Paya EPC+F Consortium Specimen Contract (.md)',
     sourceDownloadNoteFa: 'فایل Markdown قرارداد را از کارت منبع زیر دانلود یا کپی کرده و در NotebookLM بارگذاری کنید.',
     sourceDownloadNoteEn: 'Download or copy the consortium contract below and add it to NotebookLM.',

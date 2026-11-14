@@ -127,6 +127,7 @@ export const ProjectorSlideModal: React.FC<ProjectorSlideModalProps> = ({
   return (
     <div
       dir="rtl"
+      data-projector-modal="true"
       className={`fixed inset-0 z-[100] flex flex-col justify-between overflow-hidden select-none ${
         isLight ? 'bg-[#f8fafc] text-[#0f172a]' : 'bg-[#090d11] text-[#f8fafc]'
       }`}

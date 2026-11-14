@@ -48,6 +48,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
 }) => {
   const [newQ, setNewQ] = useState('');
   const [showExample, setShowExample] = useState(false);
+  const [activeStep, setActiveStep] = useState<'overview' | 'worksheet' | 'quiz' | 'all'>('overview');
 
   const domainEx = getDomainPhaseExample(1, industryTrack);
   const isPetro = industryTrack === 'ENERGY_PETRO';
@@ -246,305 +247,420 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
     { q: t.q3, opts: t.q3Options, correct: 0, why: t.q3Why }
   ];
 
+  const answeredCount = Object.keys(ans).length;
+  const filledFieldsCount = [story.trim(), bg.trim(), obj.trim(), qs.length > 0 ? 'ok' : ''].filter(Boolean).length;
+
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* Page Header (Matching Image 1) */}
-      <div className="border-b border-[#d9dad5] dark:border-[#2d3942] pb-6">
-        <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-[#e0533c] dark:text-[#fb7185]">
-          <span>{t.badge}</span>
+    <div className="space-y-6 animate-fade-in">
+      {/* Studio Page Header */}
+      <div className="rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-[#1f5163]/10 text-[#1f5163] dark:bg-[#6fb3c6]/15 dark:text-[#6fb3c6]">
+            {t.badge}
+          </span>
+          <button
+            type="button"
+            onClick={() => setActiveStep((prev) => (prev === 'all' ? 'overview' : 'all'))}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
+              activeStep === 'all'
+                ? 'bg-[#1f5163] text-white border-[#1f5163] dark:bg-[#6fb3c6] dark:text-[#0b1117]'
+                : 'bg-slate-50 dark:bg-[#18232e] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#1f5163]'
+            }`}
+          >
+            {lang === 'fa'
+              ? activeStep === 'all'
+                ? 'بازگشت به حالت گام‌به‌گام'
+                : 'نمایش همه بخش‌ها یکجا'
+              : activeStep === 'all'
+              ? 'Step-by-Step View'
+              : 'Show All Sections'}
+          </button>
         </div>
-        <div className="flex items-center gap-3 mb-4">
-          <span className="w-1.5 h-8 bg-[#b87333] dark:bg-[#c98344] rounded-xs" />
-          <h1 className="text-2xl sm:text-3xl font-semibold text-[#1c2830] dark:text-[#e8ebe9] tracking-tight font-serif-heading">
+
+        <div className="flex items-center gap-3">
+          <span className="w-1.5 h-7 bg-[#1f5163] dark:bg-[#6fb3c6] rounded-xs shrink-0" />
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight font-serif-heading">
             {t.h1}
           </h1>
         </div>
 
-        {/* Introductory prose (verbatim from Image 1) */}
-        <div className="space-y-3.5 text-sm sm:text-[15px] leading-relaxed text-[#2c3840] dark:text-[#cfd6db]">
-          <p>{t.p1}</p>
-          <p>{t.p2}</p>
-        </div>
-      </div>
-
-      {/* Task Group & Subtask Section */}
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-lg sm:text-xl font-semibold text-[#1c2830] dark:text-[#e8ebe9]">
-            {t.tg}
-          </h2>
-          <p className="text-xs sm:text-sm text-[#5d6b73] dark:text-[#9aa8b0] mt-1">
-            {t.tgDesc}
-          </p>
-        </div>
-
-        <h3 className="text-base sm:text-lg font-semibold text-[#1c2830] dark:text-[#e8ebe9] pt-2">
-          {t.st}
-        </h3>
-
-        {/* Two-Box Cards (Description & Task Artifacts matching Image 1 layout) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-1">
-          {/* Box 1: Description */}
-          <div className="relative p-5 sm:p-6 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] border-t-3 border-t-[#e0533c] dark:border-t-[#fb7185] shadow-xs">
-            <h4 className="font-semibold text-sm sm:text-base text-[#1c2830] dark:text-[#e8ebe9] mb-3">
-              {t.descTitle}
-            </h4>
-            <p className="text-xs sm:text-sm leading-relaxed text-[#4d5b63] dark:text-[#a0afb8]">
-              {t.descBody}
-            </p>
-            {/* Subtle corner triangle matching slide art */}
-            <div className="absolute top-4 end-4 opacity-15 pointer-events-none text-[#e0533c] dark:text-[#fb7185]">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="12,2 22,22 2,22" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Box 2: Task Artifacts */}
-          <div className="relative p-5 sm:p-6 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] border-t-3 border-t-[#e0533c] dark:border-t-[#fb7185] shadow-xs">
-            <h4 className="font-semibold text-sm sm:text-base text-[#1c2830] dark:text-[#e8ebe9] mb-3">
-              {t.artTitle}
-            </h4>
-            <div className="space-y-3 text-xs sm:text-sm leading-relaxed text-[#4d5b63] dark:text-[#a0afb8]">
-              <p>
-                <b className="text-[#1c2830] dark:text-[#e8ebe9]">Background: </b>
-                {t.artBg.replace('Background: ', '')}
-              </p>
-              <p>
-                <b className="text-[#1c2830] dark:text-[#e8ebe9]">Business objectives: </b>
-                {t.artObj.replace('Business objectives: ', '')}
-              </p>
-              <p className="pt-1 text-[13px] border-t border-[#d9dad5]/60 dark:border-[#2d3942]/60">
-                {t.artEx}
-              </p>
-            </div>
-            {/* Subtle corner triangle matching slide art */}
-            <div className="absolute top-4 end-4 opacity-15 pointer-events-none text-[#e0533c] dark:text-[#fb7185]">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="12,2 22,22 2,22" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        {/* Read Checkbox */}
-        <label className="flex items-center gap-2.5 pt-2 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={read}
-            onChange={(e) => onToggleRead(e.target.checked)}
-            className="w-5 h-5 rounded border-[#d9dad5] dark:border-[#2d3942] text-[#e0533c] focus:ring-[#e0533c]"
-          />
-          <span className="text-xs sm:text-sm font-medium text-[#1c2830] dark:text-[#e8ebe9]">
-            {t.readChk}
-          </span>
-        </label>
-      </div>
-
-      {/* Interactive Worksheet (Participant Inputs) */}
-      <div className="p-5 sm:p-7 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] space-y-5 shadow-xs">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d9dad5] dark:border-[#2d3942] pb-3">
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold text-[#1c2830] dark:text-[#e8ebe9]">
-              {t.wsTitle}
-            </h3>
-            <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-              {t.wsDesc}
-            </p>
-          </div>
+        {/* 3-Step Guided Studio Switcher */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
           <button
             type="button"
-            onClick={() => setShowExample(!showExample)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[#d9dad5] dark:border-[#2d3942] text-[#e0533c] dark:text-[#fb7185] hover:bg-[#f4f4f1] dark:hover:bg-[#12171b]"
+            onClick={() => setActiveStep('overview')}
+            className={`p-3 rounded-xl border text-start transition-all cursor-pointer flex items-center justify-between gap-2 ${
+              activeStep === 'overview'
+                ? 'bg-[#1f5163] text-white border-[#1f5163] shadow-xs dark:bg-[#6fb3c6] dark:text-[#0b1117] dark:border-[#6fb3c6]'
+                : 'bg-slate-50 dark:bg-[#18232e] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#1f5163]/50'
+            }`}
           >
-            <Lightbulb className="w-3.5 h-3.5" />
-            <span>{showExample ? t.exBtnHide : t.exBtnShow}</span>
+            <div>
+              <div className={`text-[10px] font-bold ${activeStep === 'overview' ? 'text-white/80 dark:text-[#0b1117]/80' : 'text-slate-400'}`}>
+                {lang === 'fa' ? 'گام ۱ از ۳' : 'Step 1 of 3'}
+              </div>
+              <div className="text-xs sm:text-sm font-bold">
+                {lang === 'fa' ? 'مفاهیم و مستندات فاز' : 'Phase Overview'}
+              </div>
+            </div>
+            {read && (
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${activeStep === 'overview' ? 'bg-white/20 text-white dark:bg-[#0b1117]/20 dark:text-[#0b1117]' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'}`}>
+                <Check className="w-3 h-3" />
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveStep('worksheet')}
+            className={`p-3 rounded-xl border text-start transition-all cursor-pointer flex items-center justify-between gap-2 ${
+              activeStep === 'worksheet'
+                ? 'bg-[#1f5163] text-white border-[#1f5163] shadow-xs dark:bg-[#6fb3c6] dark:text-[#0b1117] dark:border-[#6fb3c6]'
+                : 'bg-slate-50 dark:bg-[#18232e] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#1f5163]/50'
+            }`}
+          >
+            <div>
+              <div className={`text-[10px] font-bold ${activeStep === 'worksheet' ? 'text-white/80 dark:text-[#0b1117]/80' : 'text-slate-400'}`}>
+                {lang === 'fa' ? 'گام ۲ از ۳' : 'Step 2 of 3'}
+              </div>
+              <div className="text-xs sm:text-sm font-bold">
+                {lang === 'fa' ? 'برگه تمرین پروژه شما' : 'Project Worksheet'}
+              </div>
+            </div>
+            <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold ${activeStep === 'worksheet' ? 'bg-white/20 text-white dark:bg-[#0b1117]/20 dark:text-[#0b1117]' : 'bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>
+              {filledFieldsCount}/4
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveStep('quiz')}
+            className={`p-3 rounded-xl border text-start transition-all cursor-pointer flex items-center justify-between gap-2 ${
+              activeStep === 'quiz'
+                ? 'bg-[#1f5163] text-white border-[#1f5163] shadow-xs dark:bg-[#6fb3c6] dark:text-[#0b1117] dark:border-[#6fb3c6]'
+                : 'bg-slate-50 dark:bg-[#18232e] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#1f5163]/50'
+            }`}
+          >
+            <div>
+              <div className={`text-[10px] font-bold ${activeStep === 'quiz' ? 'text-white/80 dark:text-[#0b1117]/80' : 'text-slate-400'}`}>
+                {lang === 'fa' ? 'گام ۳ از ۳' : 'Step 3 of 3'}
+              </div>
+              <div className="text-xs sm:text-sm font-bold">
+                {lang === 'fa' ? 'سنجش درک مطلب' : 'Understanding Quiz'}
+              </div>
+            </div>
+            <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold ${activeStep === 'quiz' ? 'bg-white/20 text-white dark:bg-[#0b1117]/20 dark:text-[#0b1117]' : 'bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>
+              {answeredCount}/3
+            </span>
           </button>
         </div>
+      </div>
 
-        {showExample && (
-          <div className="p-3.5 rounded-lg bg-[#fdeee9] dark:bg-[#341528] text-xs text-[#1c2830] dark:text-[#e8ebe9]">
-            <b className="text-[#e0533c] dark:text-[#fb7185]">{t.exTitle} </b>
-            <span>{t.exText}</span>
+      {/* STEP 1: PHASE OVERVIEW & CONCEPTS */}
+      {(activeStep === 'overview' || activeStep === 'all') && (
+        <div className="space-y-5 animate-fade-in">
+          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 space-y-3.5 text-sm sm:text-[15px] leading-relaxed text-slate-700 dark:text-slate-300 shadow-xs">
+            <p>{t.p1}</p>
+            <p className="pt-3 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300">
+              {t.p2}
+            </p>
           </div>
-        )}
 
-        {/* 1. Sprint User Story */}
-        <div>
-          <label className="block text-xs sm:text-sm font-semibold text-[#1c2830] dark:text-[#e8ebe9] mb-1">
-            {t.storyL}
-          </label>
-          <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] mb-2">
-            {t.storyHint}
-          </p>
-          <input
-            type="text"
-            value={story}
-            onChange={(e) => onChangeStory(e.target.value)}
-            placeholder={t.storyPh}
-            className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#e0533c]"
-          />
+          <div className="space-y-4">
+            <div className="px-1">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                {t.tg}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                {t.tgDesc}
+              </p>
+              <h3 className="text-sm sm:text-base font-semibold text-[#1f5163] dark:text-[#6fb3c6] mt-3">
+                {t.st}
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Box 1: Description */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 border-t-3 border-t-[#1f5163] dark:border-t-[#6fb3c6] shadow-xs">
+                <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 mb-3">
+                  {t.descTitle}
+                </h4>
+                <p className="text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                  {t.descBody}
+                </p>
+              </div>
+
+              {/* Box 2: Task Artifacts */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 border-t-3 border-t-[#e0533c] dark:border-t-[#f07b67] shadow-xs">
+                <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 mb-3">
+                  {t.artTitle}
+                </h4>
+                <div className="space-y-3 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                  <p>
+                    <b className="text-slate-900 dark:text-slate-100">Background: </b>
+                    {t.artBg.replace('Background: ', '')}
+                  </p>
+                  <p>
+                    <b className="text-slate-900 dark:text-slate-100">Business objectives: </b>
+                    {t.artObj.replace('Business objectives: ', '')}
+                  </p>
+                  <p className="pt-2 text-xs border-t border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400">
+                    {t.artEx}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800">
+              <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={read}
+                  onChange={(e) => onToggleRead(e.target.checked)}
+                  className="w-4.5 h-4.5 rounded border-slate-300 dark:border-slate-700 text-[#1f5163] focus:ring-[#1f5163]"
+                />
+                <span className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  {t.readChk}
+                </span>
+              </label>
+
+              {activeStep === 'overview' && (
+                <button
+                  type="button"
+                  onClick={() => setActiveStep('worksheet')}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1f5163] hover:bg-[#163d4b] dark:bg-[#6fb3c6] dark:hover:bg-[#5ca3b8] text-white dark:text-[#0b1117] text-xs font-bold transition-colors cursor-pointer"
+                >
+                  <span>{lang === 'fa' ? 'ادامه به گام ۲: تکمیل برگه تمرین' : 'Continue to Step 2: Worksheet'}</span>
+                  {lang === 'fa' ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
+      )}
 
-        {/* 2. Background */}
-        <div>
-          <label className="block text-xs sm:text-sm font-semibold text-[#1c2830] dark:text-[#e8ebe9] mb-1">
-            {t.bgL}
-          </label>
-          <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] mb-2">
-            {t.bgHint}
-          </p>
-          <textarea
-            rows={3}
-            value={bg}
-            onChange={(e) => onChangeBg(e.target.value)}
-            className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#e0533c]"
-          />
-        </div>
+      {/* STEP 2: INTERACTIVE WORKSHEET */}
+      {(activeStep === 'worksheet' || activeStep === 'all') && (
+        <div className="p-5 sm:p-7 rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 space-y-5 shadow-xs animate-fade-in">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3.5">
+            <div>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                {t.wsTitle}
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {t.wsDesc}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowExample(!showExample)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 text-[#1f5163] dark:text-[#6fb3c6] hover:bg-slate-50 dark:hover:bg-[#18232e] cursor-pointer"
+            >
+              <Lightbulb className="w-3.5 h-3.5" />
+              <span>{showExample ? t.exBtnHide : t.exBtnShow}</span>
+            </button>
+          </div>
 
-        {/* 3. Primary Business Objective */}
-        <div>
-          <label className="block text-xs sm:text-sm font-semibold text-[#1c2830] dark:text-[#e8ebe9] mb-1">
-            {t.objL}
-          </label>
-          <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] mb-2">
-            {t.objHint}
-          </p>
-          <input
-            type="text"
-            value={obj}
-            onChange={(e) => onChangeObj(e.target.value)}
-            className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] focus:border-[#e0533c]"
-          />
-        </div>
+          {showExample && (
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#18232e] border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
+              <b className="text-[#1f5163] dark:text-[#6fb3c6]">{t.exTitle} </b>
+              <span>{t.exText}</span>
+            </div>
+          )}
 
-        {/* 4. Related Business Questions */}
-        <div>
-          <label className="block text-xs sm:text-sm font-semibold text-[#1c2830] dark:text-[#e8ebe9] mb-1">
-            {t.rqL}
-          </label>
-          <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] mb-2">
-            {t.rqHint}
-          </p>
-
-          <div className="flex gap-2 mb-3">
+          {/* 1. Sprint User Story */}
+          <div>
+            <label className="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">
+              {t.storyL}
+            </label>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+              {t.storyHint}
+            </p>
             <input
               type="text"
-              value={newQ}
-              onChange={(e) => setNewQ(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
+              value={story}
+              onChange={(e) => onChangeStory(e.target.value)}
+              placeholder={t.storyPh}
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#0f1720] text-slate-900 dark:text-slate-100 focus:border-[#1f5163] focus:outline-hidden"
+            />
+          </div>
+
+          {/* 2. Background */}
+          <div>
+            <label className="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">
+              {t.bgL}
+            </label>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+              {t.bgHint}
+            </p>
+            <textarea
+              rows={3}
+              value={bg}
+              onChange={(e) => onChangeBg(e.target.value)}
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#0f1720] text-slate-900 dark:text-slate-100 focus:border-[#1f5163] focus:outline-hidden"
+            />
+          </div>
+
+          {/* 3. Primary Business Objective */}
+          <div>
+            <label className="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">
+              {t.objL}
+            </label>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+              {t.objHint}
+            </p>
+            <input
+              type="text"
+              value={obj}
+              onChange={(e) => onChangeObj(e.target.value)}
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#0f1720] text-slate-900 dark:text-slate-100 focus:border-[#1f5163] focus:outline-hidden"
+            />
+          </div>
+
+          {/* 4. Related Business Questions */}
+          <div>
+            <label className="block text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">
+              {t.rqL}
+            </label>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+              {t.rqHint}
+            </p>
+
+            <div className="flex gap-2 mb-3">
+              <input
+                type="text"
+                value={newQ}
+                onChange={(e) => setNewQ(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (newQ.trim()) {
+                      onAddQ(newQ.trim());
+                      setNewQ('');
+                    }
+                  }
+                }}
+                placeholder={lang === 'fa' ? 'یک پرسش بنویسید و افزودن را بزنید...' : 'Type a question and press Add...'}
+                className="flex-1 px-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#0f1720] text-slate-900 dark:text-slate-100 focus:border-[#1f5163] focus:outline-hidden"
+              />
+              <button
+                type="button"
+                onClick={() => {
                   if (newQ.trim()) {
                     onAddQ(newQ.trim());
                     setNewQ('');
                   }
-                }
-              }}
-              placeholder={lang === 'fa' ? 'یک پرسش بنویسید و افزودن را بزنید...' : 'Type a question and press Add...'}
-              className="flex-1 px-3.5 py-2 text-xs sm:text-sm rounded-lg border border-[#d9dad5] dark:border-[#2d3942] bg-[#f4f4f1] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9]"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                if (newQ.trim()) {
-                  onAddQ(newQ.trim());
-                  setNewQ('');
-                }
-              }}
-              className="px-4 py-2 text-xs font-medium rounded-lg bg-[#e0533c] text-white dark:bg-[#fb7185] dark:text-[#0f1a1e] hover:opacity-90"
-            >
-              {t.add}
-            </button>
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold rounded-xl bg-[#1f5163] text-white dark:bg-[#6fb3c6] dark:text-[#0b1117] hover:opacity-90 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{t.add}</span>
+              </button>
+            </div>
+
+            <ul className="space-y-2">
+              {qs.map((qItem, idx) => (
+                <li key={idx} className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 dark:bg-[#18232e] border border-slate-200/80 dark:border-slate-700/80 text-xs sm:text-sm">
+                  <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6] shrink-0">
+                    {idx + 1}.
+                  </span>
+                  <span className="flex-1 text-slate-800 dark:text-slate-200">{qItem}</span>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveQ(idx)}
+                    className="text-rose-600 dark:text-rose-400 p-1 hover:opacity-80 cursor-pointer"
+                    title={t.rm}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <ul className="space-y-2">
-            {qs.map((qItem, idx) => (
-              <li key={idx} className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] text-xs sm:text-sm">
-                <span className="font-semibold text-[#e0533c] dark:text-[#fb7185] shrink-0">
-                  {idx + 1}.
-                </span>
-                <span className="flex-1 text-[#1c2830] dark:text-[#e8ebe9]">{qItem}</span>
-                <button
-                  type="button"
-                  onClick={() => onRemoveQ(idx)}
-                  className="text-[#b3432f] p-1 hover:opacity-80"
-                  title={t.rm}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </li>
-            ))}
-          </ul>
+          {activeStep === 'worksheet' && (
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setActiveStep('quiz')}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1f5163] hover:bg-[#163d4b] dark:bg-[#6fb3c6] dark:hover:bg-[#5ca3b8] text-white dark:text-[#0b1117] text-xs font-bold transition-colors cursor-pointer"
+              >
+                <span>{lang === 'fa' ? 'ادامه به گام ۳: سنجش درک مطلب' : 'Continue to Step 3: Quiz'}</span>
+                {lang === 'fa' ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
-      {/* Understanding Quiz */}
-      <div className="p-5 sm:p-7 rounded-xl bg-[#ffffff] dark:bg-[#1a2228] border border-[#d9dad5] dark:border-[#2d3942] space-y-4">
-        <div>
-          <h3 className="text-base sm:text-lg font-semibold text-[#1c2830] dark:text-[#e8ebe9]">
-            {t.quizTitle}
-          </h3>
-          <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-            {t.quizDesc}
-          </p>
-        </div>
+      {/* STEP 3: UNDERSTANDING QUIZ */}
+      {(activeStep === 'quiz' || activeStep === 'all') && (
+        <div className="p-5 sm:p-7 rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 space-y-4 shadow-xs animate-fade-in">
+          <div>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+              {t.quizTitle}
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {t.quizDesc}
+            </p>
+          </div>
 
-        <div className="space-y-4">
-          {quizzes.map((quiz, qIdx) => {
-            const chosen = ans[qIdx];
-            const isAnswered = chosen !== undefined;
-            const isCorrect = chosen === quiz.correct;
+          <div className="space-y-4">
+            {quizzes.map((quiz, qIdx) => {
+              const chosen = ans[qIdx];
+              const isAnswered = chosen !== undefined;
+              const isCorrect = chosen === quiz.correct;
 
-            return (
-              <div key={qIdx} className="p-3.5 rounded-lg bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942] space-y-2">
-                <p className="font-semibold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
-                  {qIdx + 1}. {quiz.q}
-                </p>
-
-                <div className="space-y-1.5">
-                  {quiz.opts.map((opt, oIdx) => {
-                    let optStyle = 'border-[#d9dad5] dark:border-[#2d3942] bg-[#ffffff] dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] hover:border-[#e0533c]';
-                    if (isAnswered) {
-                      if (oIdx === quiz.correct) {
-                        optStyle = 'border-[#2f7d5b] bg-[#e3f2ea] text-[#2f7d5b] dark:bg-[#173025] dark:text-[#63c496] font-medium';
-                      } else if (chosen === oIdx) {
-                        optStyle = 'border-[#b3432f] bg-[#f9e6e1] text-[#b3432f] dark:bg-[#3a1f19] dark:text-[#ee8f7a]';
-                      }
-                    }
-
-                    return (
-                      <button
-                        key={oIdx}
-                        disabled={isAnswered}
-                        onClick={() => onSelectAns(qIdx, oIdx)}
-                        className={`w-full text-start p-2.5 rounded-lg border text-xs sm:text-sm transition-colors ${optStyle}`}
-                      >
-                        {opt}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {isAnswered && (
-                  <p className={`text-xs mt-2 ${isCorrect ? 'text-[#2f7d5b] dark:text-[#63c496]' : 'text-[#b3432f] dark:text-[#ee8f7a]'}`}>
-                    {isCorrect ? (lang === 'fa' ? '✓ درست است: ' : '✓ Correct: ') : (lang === 'fa' ? '✕ نادرست: ' : '✕ Not quite: ')}
-                    {quiz.why}
+              return (
+                <div key={qIdx} className="p-4 rounded-xl bg-slate-50 dark:bg-[#18232e] border border-slate-200 dark:border-slate-700 space-y-2.5">
+                  <p className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100">
+                    {qIdx + 1}. {quiz.q}
                   </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* Bottom Navigation Buttons */}
-      <div className="p-4 sm:p-5 rounded-xl bg-[#fdeee9] dark:bg-[#341528] border border-[#e0533c]/20 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                  <div className="space-y-2">
+                    {quiz.opts.map((opt, oIdx) => {
+                      let optStyle = 'border-slate-200 dark:border-slate-700 bg-white dark:bg-[#131c24] text-slate-800 dark:text-slate-200 hover:border-[#1f5163]';
+                      if (isAnswered) {
+                        if (oIdx === quiz.correct) {
+                          optStyle = 'border-emerald-600 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 font-semibold';
+                        } else if (chosen === oIdx) {
+                          optStyle = 'border-rose-600 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300';
+                        }
+                      }
+
+                      return (
+                        <button
+                          key={oIdx}
+                          disabled={isAnswered}
+                          onClick={() => onSelectAns(qIdx, oIdx)}
+                          className={`w-full text-start p-3 rounded-xl border text-xs sm:text-sm transition-colors cursor-pointer disabled:cursor-default ${optStyle}`}
+                        >
+                          {opt}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {isAnswered && (
+                    <p className={`text-xs mt-2 font-medium ${isCorrect ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'}`}>
+                      {isCorrect ? (lang === 'fa' ? '✓ درست است: ' : '✓ Correct: ') : (lang === 'fa' ? '✕ نادرست: ' : '✕ Not quite: ')}
+                      {quiz.why}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Calm Studio Bottom Navigation Card */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 shadow-xs">
         {onGoToPage0 ? (
           <button
             type="button"
             onClick={onGoToPage0}
-            className="flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg border border-[#e0533c]/30 bg-white dark:bg-[#2a1220] text-[#e0533c] dark:text-[#fb7185] hover:bg-[#e0533c]/10 transition-colors shadow-2xs"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#18232e] text-slate-700 dark:text-slate-200 hover:border-[#1f5163] hover:text-[#1f5163] transition-colors cursor-pointer"
           >
             {lang === 'fa' ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
             <span>{lang === 'fa' ? 'صفحه ۰ (جعبه‌ابزار و مبانی LLM)' : 'Page 0 (LLM Toolkit)'}</span>
@@ -552,11 +668,11 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
         ) : <div />}
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <div className="hidden md:block text-right">
-            <span className="text-[10px] font-semibold text-[#e0533c] dark:text-[#fb7185] block">
+          <div className="hidden md:block text-start">
+            <span className="text-[10px] font-bold text-[#1f5163] dark:text-[#6fb3c6] block">
               {lang === 'fa' ? 'گام بعدی' : 'Next Step'}
             </span>
-            <span className="text-xs text-[#1c2830] dark:text-[#e8ebe9] font-medium">
+            <span className="text-xs text-slate-700 dark:text-slate-200 font-semibold">
               {t.nextPageBtn}
             </span>
           </div>
@@ -564,7 +680,7 @@ export const Page1BusinessUnderstanding: React.FC<Page1Props> = ({
           <button
             type="button"
             onClick={onGoToPage2}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-[#0a7b97] text-white hover:bg-[#08677e] transition-colors shadow-xs"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-xl bg-[#1f5163] hover:bg-[#163d4b] dark:bg-[#6fb3c6] dark:hover:bg-[#5ca3b8] text-white dark:text-[#0b1117] transition-colors shadow-xs cursor-pointer"
           >
             <span>{lang === 'fa' ? 'ورود به صفحه ۲' : 'Go to Page 2'}</span>
             {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}

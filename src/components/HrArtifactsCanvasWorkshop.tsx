@@ -67,14 +67,14 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
     <div className="p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
       <div className="rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 sm:p-7 space-y-6">
         {/* Top Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-black/[0.06] dark:border-white/[0.08]">
-          <div className="space-y-2 max-w-3xl">
+        <div className="flex flex-col gap-4 pb-4 border-b border-black/[0.06] dark:border-white/[0.08]">
+          <div className="space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#d97706]/10 text-[#b45309] dark:text-[#fbbf24] border border-[#d97706]/25 flex items-center gap-1.5">
-                <Code className="w-3.5 h-3.5" />
-                <span>Claude Artifacts & Gemini Canvas</span>
+              <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185] border border-[#c026d3]/25 flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5" />
+                <span>NotebookLM + Gemini + Claude</span>
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185] border border-[#c026d3]/20 flex items-center gap-1">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#d97706]/10 text-[#b45309] dark:text-[#fbbf24] border border-[#d97706]/25 flex items-center gap-1">
                 <Users className="w-3 h-3" />
                 <span>
                   {lang === 'fa'
@@ -84,38 +84,47 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
               </span>
             </div>
 
-            <h3 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9] leading-snug">
+            <h2 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9] leading-snug">
               {lang === 'fa' ? HR_ARTIFACTS_WORKSHOP_HEADER.titleFa : HR_ARTIFACTS_WORKSHOP_HEADER.titleEn}
-            </h3>
+            </h2>
             <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
               {lang === 'fa' ? HR_ARTIFACTS_WORKSHOP_HEADER.subtitleFa : HR_ARTIFACTS_WORKSHOP_HEADER.subtitleEn}
             </p>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0 self-start lg:self-center">
+          <div className="flex flex-wrap items-center gap-2">
             <a
-              href="https://claude.ai"
+              href="https://notebooklm.google.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#b45309] hover:bg-[#92400e] text-white text-xs font-bold shadow-xs transition-all"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#9333ea] hover:bg-[#7e22ce] text-white text-xs font-bold shadow-xs transition-all whitespace-nowrap"
             >
-              <span>Claude Artifacts</span>
+              <span>1. NotebookLM</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
             <a
               href="https://gemini.google.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#1a73e8] hover:bg-[#1557b0] text-white text-xs font-bold shadow-xs transition-all"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#1a73e8] hover:bg-[#1557b0] text-white text-xs font-bold shadow-xs transition-all whitespace-nowrap"
             >
-              <span>Gemini Canvas</span>
+              <span>2. Gemini Canvas</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href="https://claude.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#b45309] hover:bg-[#92400e] text-white text-xs font-bold shadow-xs transition-all whitespace-nowrap"
+            >
+              <span>3. Claude Artifacts</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>
         </div>
 
-        {/* 2-Step Chained Workshop Playbook (NotebookLM -> Claude Artifacts / Gemini Canvas) */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#c026d3]/[0.06] via-[#2f7d5b]/[0.06] to-[#d97706]/[0.06] border border-[#c026d3]/20 space-y-3.5">
+        {/* 3-Step Integrated Workflow Playbook (NotebookLM -> Gemini Canvas -> Claude Artifacts) */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#c026d3]/[0.06] via-[#1a73e8]/[0.06] to-[#d97706]/[0.06] border border-[#c026d3]/20 space-y-3.5">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <span className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
               <Layers className="w-4 h-4 text-[#c026d3] dark:text-[#fb7185]" />
@@ -136,25 +145,29 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
               : HR_ARTIFACTS_WORKSHOP_HEADER.twoStepChainGuide.descriptionEn}
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(195px,1fr))] gap-3">
             {HR_ARTIFACTS_WORKSHOP_HEADER.twoStepChainGuide.steps.map((st) => (
               <div
                 key={st.stepNumber}
                 className="p-3.5 rounded-xl bg-white dark:bg-[#12171b] border border-black/[0.06] dark:border-white/[0.08] space-y-1.5 shadow-2xs"
               >
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 ${
-                      st.stepNumber === 1
-                        ? 'bg-[#c026d3] text-white'
-                        : 'bg-[#b45309] text-white'
-                    }`}
-                  >
-                    {st.stepNumber}
-                  </span>
-                  <h4 className="text-xs font-extrabold text-[#1c2830] dark:text-[#e8ebe9]">
-                    {lang === 'fa' ? st.titleFa : st.titleEn}
-                  </h4>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span
+                      className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 ${
+                        st.stepNumber === 1
+                          ? 'bg-[#9333ea] text-white'
+                          : st.stepNumber === 2
+                          ? 'bg-[#1a73e8] text-white'
+                          : 'bg-[#b45309] text-white'
+                      }`}
+                    >
+                      {st.stepNumber}
+                    </span>
+                    <h4 className="text-xs font-extrabold text-[#1c2830] dark:text-[#e8ebe9] leading-snug">
+                      {lang === 'fa' ? st.titleFa : st.titleEn}
+                    </h4>
+                  </div>
                 </div>
                 <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
                   {lang === 'fa' ? st.descriptionFa : st.descriptionEn}
@@ -172,7 +185,7 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
               : 'Select Interactive Artifact / Canvas Exercise (5 Applied HR & Admin Tools):'}
           </span>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(185px,1fr))] gap-2.5">
             {HR_ARTIFACT_EXERCISES.map((ex) => {
               const isSelected = ex.id === selectedExId;
               return (

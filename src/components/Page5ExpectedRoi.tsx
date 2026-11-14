@@ -365,7 +365,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- ${sc}`).join('\n')}`;
       {/* Top Breadcrumb & Page Badge */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d9dad5] dark:border-[#2d3942] pb-3">
         <div className="flex items-center gap-2">
-          <span className="px-2.5 py-1 text-xs font-semibold rounded-md bg-[#c026d3] text-white">
+          <span className="px-2.5 py-1 text-xs font-semibold rounded-md bg-[#1f5163] text-white">
             {t.badge}
           </span>
           <span className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
@@ -376,7 +376,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- ${sc}`).join('\n')}`;
         <button
           type="button"
           onClick={onGoToPage4}
-          className="flex items-center gap-1.5 text-xs font-medium text-[#c026d3] dark:text-[#fb7185] hover:underline"
+          className="flex items-center gap-1.5 text-xs font-medium text-[#1f5163] dark:text-[#6fb3c6] hover:underline"
         >
           {lang === 'fa' ? <ArrowRight className="w-3.5 h-3.5" /> : <ArrowLeft className="w-3.5 h-3.5" />}
           <span>{t.prevPageBtn}</span>
@@ -386,7 +386,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- ${sc}`).join('\n')}`;
       {/* Main Slide Card Container (1-to-1 visual fidelity with uploaded slide) */}
       <div className="bg-[#ffffff] dark:bg-[#1a2228] rounded-xl border border-[#d9dad5] dark:border-[#2d3942] overflow-hidden shadow-xs relative">
         {/* Question Header: Dark Cyan / Teal banner matching image */}
-        <div className="bg-[#c026d3] text-white px-5 py-3.5 font-bold text-sm sm:text-base flex items-center justify-between shadow-xs">
+        <div className="bg-[#1f5163] text-white px-5 py-3.5 font-bold text-sm sm:text-base flex items-center justify-between shadow-xs">
           <span dir="ltr" className="tracking-tight font-sans">
             {t.slideBanner}
           </span>
@@ -396,14 +396,14 @@ ${discContent.successCriteriaFa.map((sc, i) => `- ${sc}`).join('\n')}`;
         </div>
 
         {/* Interactive Workspace Canvas (Lavender/Periwinkle container with watermarked triangles) */}
-        <div className="bg-[#e8edf9] dark:bg-[#141f30] border-2 border-t-0 border-[#c026d3] p-4 sm:p-6 shadow-inner flex flex-col min-h-[520px] relative">
+        <div className="bg-[#e8edf9] dark:bg-[#141f30] border-2 border-t-0 border-[#1f5163] p-4 sm:p-6 shadow-inner flex flex-col min-h-[520px] relative">
           {/* Action Bar inside Canvas */}
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-3 border-b border-[#c8d4eb] dark:border-[#22334d]">
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={handleInsertTemplate}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-[#c026d3] text-white hover:bg-[#005f73] transition-colors shadow-2xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-[#1f5163] text-white hover:bg-[#163d4b] transition-colors shadow-2xs"
               >
                 <FileText className="w-3.5 h-3.5" />
                 <span>{t.templateBtn}</span>
@@ -412,7 +412,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- ${sc}`).join('\n')}`;
               <button
                 type="button"
                 onClick={handleInsertExample}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-[#c026d3] text-[#c026d3] dark:text-[#fb7185] dark:border-[#fb7185] bg-white/70 dark:bg-black/20 hover:bg-white transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-[#1f5163] text-[#1f5163] dark:text-[#6fb3c6] dark:border-[#fb7185] bg-white/70 dark:bg-black/20 hover:bg-white transition-colors"
               >
                 <Lightbulb className="w-3.5 h-3.5" />
                 <span>{t.exampleBtn}</span>
@@ -458,9 +458,9 @@ ${discContent.successCriteriaFa.map((sc, i) => `- ${sc}`).join('\n')}`;
 
           {/* Embedded Interactive ROI & Sensitivity Analysis Tool */}
           {showCalculator && (
-            <div className="mb-4 p-4 rounded-lg bg-[#ffffff] dark:bg-[#1a2536] border border-[#c026d3]/30 shadow-xs text-xs space-y-3">
+            <div className="mb-4 p-4 rounded-lg bg-[#ffffff] dark:bg-[#1a2536] border border-[#1f5163]/30 shadow-xs text-xs space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-[#d9dad5] dark:border-[#2d3942]">
-                <div className="flex items-center gap-2 font-semibold text-[#c026d3] dark:text-[#fb7185]">
+                <div className="flex items-center gap-2 font-semibold text-[#1f5163] dark:text-[#6fb3c6]">
                   <Calculator className="w-4 h-4" />
                   <span>{t.calcTitle}</span>
                 </div>
@@ -530,7 +530,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- ${sc}`).join('\n')}`;
                 </div>
                 <div className="p-2.5 rounded bg-[#f4f4f1] dark:bg-[#12171b] border border-[#d9dad5] dark:border-[#2d3942]">
                   <span className="text-[10px] text-[#5d6b73] dark:text-[#9aa8b0] block">{t.firstYearRoi}</span>
-                  <span className="font-bold text-sm text-[#c026d3] dark:text-[#fb7185]">
+                  <span className="font-bold text-sm text-[#1f5163] dark:text-[#6fb3c6]">
                     {firstYearRoiPercent}% Net ROI
                   </span>
                 </div>
@@ -553,7 +553,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- ${sc}`).join('\n')}`;
                 ? 'پاسخ و تحلیل نرخ بازگشت سرمایه (ROI) این پروژه را در این کادر بنویسید:\n۱. محاسبه عددی ROI سال اول و تجمعی (ارزش خالص منفعت تقسیم بر سرمایه‌گذاری)\n۲. دوره بازگشت سرمایه (چند ماه تا سر‌به‌سر شدن هزینه اسپرینت؟)\n۳. مزایای استراتژیک غیرپولی (مزیت رقابتی، داده‌های سازمانی، سواد شناختی)\n۴. تحلیل حساسیت (در صورت افت نرخ پذیرش یا خطای پیش‌بینی، توجیه مالی چگونه حفظ می‌شود؟)...'
                 : 'Write your Expected ROI justification here:\n1. Financial ROI calculation (Year 1 & 3-year cumulative net payoff)\n2. Payback period (months to break-even on sprint investment)\n3. Strategic non-monetary dividends (competitive advantage, feature store assets)\n4. Sensitivity & downside risk scenarios (accounting for operational adoption rate)...'
             }
-            className="flex-1 w-full p-4 sm:p-5 rounded-lg bg-[#ffffff]/90 dark:bg-[#1a293d]/90 text-[#1c2830] dark:text-[#e8ebe9] border border-[#c8d4eb] dark:border-[#2d3942] focus:border-[#c026d3] focus:outline-none resize-y text-sm sm:text-[15px] leading-relaxed font-sans shadow-inner min-h-[440px]"
+            className="flex-1 w-full p-4 sm:p-5 rounded-lg bg-white dark:bg-[#0f1720] text-[#1c2830] dark:text-[#e8ebe9] border border-[#c8d4eb] dark:border-[#2d3942] focus:border-[#1f5163] focus:outline-none resize-y text-sm sm:text-[15px] leading-relaxed font-sans shadow-inner min-h-[440px]"
           />
 
           {/* Canvas Footer Bar with Word Counts and Watermark */}
@@ -565,7 +565,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- ${sc}`).join('\n')}`;
             </div>
 
             {/* Geometric Triangles Watermark Accent matching the slide bottom right */}
-            <div className="opacity-25 dark:opacity-15 pointer-events-none text-[#c026d3] dark:text-[#fb7185]">
+            <div className="opacity-25 dark:opacity-15 pointer-events-none text-[#1f5163] dark:text-[#6fb3c6]">
               <svg width="48" height="32" viewBox="0 0 48 32" fill="currentColor">
                 <polygon points="48,32 24,32 48,8" />
                 <polygon points="36,32 12,32 36,8" />
@@ -593,26 +593,26 @@ ${discContent.successCriteriaFa.map((sc, i) => `- ${sc}`).join('\n')}`;
         </h3>
         <ul className="space-y-1.5 text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
           <li className="flex items-start gap-2">
-            <span className="text-[#c026d3] dark:text-[#fb7185] font-bold">•</span>
+            <span className="text-[#1f5163] dark:text-[#6fb3c6] font-bold">•</span>
             <span>{t.tip1}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#c026d3] dark:text-[#fb7185] font-bold">•</span>
+            <span className="text-[#1f5163] dark:text-[#6fb3c6] font-bold">•</span>
             <span>{t.tip2}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#c026d3] dark:text-[#fb7185] font-bold">•</span>
+            <span className="text-[#1f5163] dark:text-[#6fb3c6] font-bold">•</span>
             <span>{t.tip3}</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-[#c026d3] dark:text-[#fb7185] font-bold">•</span>
+            <span className="text-[#1f5163] dark:text-[#6fb3c6] font-bold">•</span>
             <span>{t.tip4}</span>
           </li>
         </ul>
       </div>
 
       {/* Navigation: Back to Page 4 and Forward to Page 6 */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-xl bg-[#fdeee9] dark:bg-[#341528] border border-[#e0533c]/20">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800">
         <button
           type="button"
           onClick={onGoToPage4}
@@ -626,7 +626,7 @@ ${discContent.successCriteriaFa.map((sc, i) => `- ${sc}`).join('\n')}`;
           <button
             type="button"
             onClick={onGoToPage6}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg bg-[#c026d3] text-white hover:bg-[#005f73] transition-colors shadow-md"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg bg-[#1f5163] text-white hover:bg-[#163d4b] transition-colors shadow-md"
           >
             <span>{lang === 'fa' ? 'صفحه بعدی: الزامات شناختی (ص ۶)' : 'Next: Cognitive Requirements (Page 6)'}</span>
             {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
