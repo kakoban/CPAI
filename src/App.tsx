@@ -52,8 +52,6 @@ import { DisciplineBadge } from './components/industry/DisciplineBadge';
 import { WorkspaceSidebar } from './components/navigation/WorkspaceSidebar';
 import { ContextualAiTutorSidebar } from './components/tutor/ContextualAiTutorSidebar';
 import { PresenterNotesPanel } from './components/presentation/PresenterNotesPanel';
-import { ProjectorSlideModal } from './components/ProjectorSlideModal';
-import { getCpmaiPageProjectorDeck } from './data/projectorDecks';
 import { getDisciplineMetadata } from './data/disciplineExamplesRegistry';
 import { authApi, isAuthorizedAdminUser } from './services/authApi';
 import { lmsApi } from './services/lmsApi';
@@ -61,7 +59,7 @@ import { UserProfile } from './types/auth';
 import { SessionLockEntity } from './types/lms';
 import { Footer } from './components/Footer';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from './data/logo';
-import { Clock, Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud, Calculator, Bot, Server, Sparkles, Trophy, Lock, Unlock, GraduationCap, Menu, PanelLeftClose, Home, FileCode2, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, StickyNote, Monitor } from 'lucide-react';
+import { Clock, Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud, Calculator, Bot, Server, Sparkles, Trophy, Lock, Unlock, GraduationCap, Menu, PanelLeftClose, Home, FileCode2, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, StickyNote } from 'lucide-react';
 
 export type AppPage = 'landing' | 'quiz' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21;
 
@@ -215,14 +213,7 @@ export default function App() {
   // Projector Presentation Mode state (hides navigation chrome and scales main content full-screen)
   const [isPresentationMode, setIsPresentationMode] = useState<boolean>(false);
   const [isPresenterNotesOpen, setIsPresenterNotesOpen] = useState<boolean>(false);
-  const [cpmaiProjectorPage, setCpmaiProjectorPage] = useState<number | null>(null);
-  const [cpmaiSlideIndex, setCpmaiSlideIndex] = useState<number>(0);
   const wasNativeFullscreenRef = React.useRef<boolean>(false);
-
-  const openCpmaiProjector = (targetPageNum: number) => {
-    setCpmaiSlideIndex(0);
-    setCpmaiProjectorPage(targetPageNum);
-  };
 
   const togglePresentationMode = () => {
     setIsPresentationMode((prev) => {
@@ -248,19 +239,12 @@ export default function App() {
   };
 
   useEffect(() => {
-    setCpmaiProjectorPage(null);
-  }, [page]);
-
-  useEffect(() => {
     if (typeof document === 'undefined') return;
     document.documentElement.setAttribute('data-presentation', isPresentationMode ? 'true' : 'false');
     if (!isPresentationMode) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (document.querySelector('[data-projector-modal="true"]')) {
-          return;
-        }
         setIsPresentationMode(false);
         return;
       }
@@ -1123,18 +1107,6 @@ export default function App() {
             <div className="flex items-center gap-2 shrink-0">
               {typeof page === 'number' && (
                 <div className="hidden sm:flex items-center gap-1.5">
-                  {page >= 1 && page <= 21 && (
-                    <button
-                      type="button"
-                      onClick={() => openCpmaiProjector(page)}
-                      data-testid="cpmai-projector-btn"
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 border border-amber-700/60 text-xs font-black cursor-pointer transition-colors shadow-2xs"
-                      title={lang === 'fa' ? 'نمایش اسلایدهای پرژکتور این جلسه' : 'Launch Session Projector Slides'}
-                    >
-                      <Monitor className="w-3.5 h-3.5 shrink-0" />
-                      <span>{lang === 'fa' ? 'اسلاید پروژکتور' : 'Slides'}</span>
-                    </button>
-                  )}
                   <button
                     type="button"
                     disabled={page <= 0}
@@ -1504,16 +1476,6 @@ export default function App() {
               </div>
 
               <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => openCpmaiProjector(page)}
-                  data-testid="cpmai-projector-btn"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 border border-amber-700/60 text-xs font-black transition-colors cursor-pointer shadow-2xs"
-                  title={lang === 'fa' ? 'پخش اسلایدهای پرژکتور این صفحه کتاب‌کار' : 'Launch Projector Slides for Session'}
-                >
-                  <Monitor className="w-3.5 h-3.5 shrink-0" />
-                  <span>{lang === 'fa' ? 'اسلاید پروژکتور' : 'Projector Slides'}</span>
-                </button>
                 <button
                   type="button"
                   onClick={() => navigateToPage((page - 1) as AppPage)}
@@ -2240,29 +2202,6 @@ export default function App() {
           />
         )}
       </div>
-
-      {/* Universal CPMAI Workbook Pages 1..21 Projector Modal */}
-      {cpmaiProjectorPage !== null && (() => {
-        const meta = WORKBOOK_SESSION_META[cpmaiProjectorPage];
-        const deck = getCpmaiPageProjectorDeck(
-          cpmaiProjectorPage,
-          meta?.titleFa || `جلسه ${cpmaiProjectorPage}`,
-          meta?.groupFa || 'کتاب‌کار CPMAI',
-          meta?.titleEn || `Session ${cpmaiProjectorPage}`
-        );
-        return (
-          <ProjectorSlideModal
-            isOpen={true}
-            onClose={() => setCpmaiProjectorPage(null)}
-            deckTitleFa={deck.deckTitleFa}
-            deckSubtitleFa={deck.deckSubtitleFa}
-            accentColor={deck.accentColor}
-            slides={deck.slides}
-            activeIndex={cpmaiSlideIndex}
-            onChangeIndex={setCpmaiSlideIndex}
-          />
-        );
-      })()}
 
       {/* Private Presenter Notes Floating Panel (Presentation Mode Only) */}
       {isPresentationMode && isPresenterNotesOpen && (

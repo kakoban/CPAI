@@ -1,4 +1,4 @@
-import { ProjectorSlideItem } from '../components/ProjectorSlideModal';
+import { ProjectorSlideItem } from '../utils/lessonText';
 import { IndustryTrackId } from '../types/industryTrack';
 
 // ============================================================================

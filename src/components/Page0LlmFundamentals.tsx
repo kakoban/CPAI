@@ -45,7 +45,6 @@ import {
   ChevronUp,
   ChevronDown,
   LayoutGrid,
-  Monitor,
   GitBranch,
   FolderTree,
   Rocket,
@@ -59,9 +58,11 @@ import {
   Maximize2,
   PanelRightClose,
   PanelRightOpen,
-  ClipboardCheck
+  ClipboardCheck,
+  ScanSearch
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { SectionSpotlightZoom } from './common/SectionSpotlightZoom';
 import { getDatasetsForTrack } from '../data/engineering_sample_datasets';
 import {
   computeOrbitNodePosition,
@@ -76,8 +77,6 @@ import { PayaHoldingArtifactSimulator } from './PayaHoldingArtifactSimulator';
 import { HrArtifactsCanvasWorkshop } from './HrArtifactsCanvasWorkshop';
 import { ClaudeEnterpriseConnectors } from './connectors/ClaudeEnterpriseConnectors';
 import { ObsidianBrainSkillsWorkshop } from './obsidian/ObsidianBrainSkillsWorkshop';
-import { ProjectorSlideModal } from './ProjectorSlideModal';
-import { getPage0ModuleProjectorDeck, type Page0ModuleDeckBundle } from '../data/projectorDecks';
 import { ModuleExercisesView } from './ModuleExercisesView';
 import {
   getModuleExerciseDeck,
@@ -1465,51 +1464,6 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     }
   };
 
-  const [s1ProjectorDeck, setS1ProjectorDeck] = useState<
-    null | 's1_demo' | 's1_drive' | 's1_markdown' | 's1_github' | 's5_capstone'
-  >(null);
-  const [s1SlideIndex, setS1SlideIndex] = useState<number>(0);
-  const [universalProjectorDeck, setUniversalProjectorDeck] = useState<Page0ModuleDeckBundle | null>(null);
-  const [universalSlideIdx, setUniversalSlideIdx] = useState<number>(0);
-  const [nlmProjectorNonce, setNlmProjectorNonce] = useState<number>(0);
-
-  const openS1Projector = (
-    deck: 's1_demo' | 's1_drive' | 's1_markdown' | 's1_github' | 's5_capstone',
-    startIndex = 0
-  ) => {
-    playTactileSound('thock');
-    setS1SlideIndex(startIndex);
-    setS1ProjectorDeck(deck);
-  };
-
-  const handleOpenActiveModuleProjector = () => {
-    if (!activeTab || activeTab === 'all') return;
-    if (
-      activeTab === 's1_demo' ||
-      activeTab === 's1_drive' ||
-      activeTab === 's1_markdown' ||
-      activeTab === 's1_github'
-    ) {
-      openS1Projector(activeTab, 0);
-      return;
-    }
-    if (activeTab === 's5_orchestration' || activeTab === 's5_vibecoding') {
-      openS1Projector('s5_capstone', 0);
-      return;
-    }
-    if (activeTab === 'notebooklm') {
-      playTactileSound('thock');
-      setNlmProjectorNonce((n) => n + 1);
-      return;
-    }
-    const bundle = getPage0ModuleProjectorDeck(activeTab, activeTrackMetaphor.trackLabelFa);
-    if (bundle) {
-      playTactileSound('thock');
-      setUniversalSlideIdx(0);
-      setUniversalProjectorDeck(bundle);
-    }
-  };
-
   const downloadTextFile = (fileName: string, textContent: string, mime = 'text/plain;charset=utf-8;') => {
     playTactileSound('success');
     const blob = new Blob([textContent], { type: mime });
@@ -1536,9 +1490,28 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   const navPillsRef = useRef<HTMLDivElement | null>(null);
   const chapterStartRef = useRef<HTMLDivElement | null>(null);
   const contentPaneRef = useRef<HTMLDivElement | null>(null);
-  const [isOrbitWidgetHidden, setIsOrbitWidgetHidden] = useState<boolean>(false);
+  const [isOrbitWidgetHidden, setIsOrbitWidgetHidden] = useState<boolean>(true);
   const [isWidgetModulesOpen, setIsWidgetModulesOpen] = useState<boolean>(false);
-  const [isOrbitPaneCollapsed, setIsOrbitPaneCollapsed] = useState<boolean>(false);
+  const [isOrbitHubView, setIsOrbitHubView] = useState<boolean>(true);
+  const [hasLaunchedLesson, setHasLaunchedLesson] = useState<boolean>(false);
+  const [isOrbitPaneCollapsed, setIsOrbitPaneCollapsed] = useState<boolean>(true);
+  const [isSpotlightPickMode, setIsSpotlightPickMode] = useState<boolean>(false);
+  const [showOrbitNavHint, setShowOrbitNavHint] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('cpmai_page0_orbit_hint_dismissed_v1') !== 'true';
+    } catch {
+      return true;
+    }
+  });
+
+  const dismissOrbitNavHint = () => {
+    setShowOrbitNavHint(false);
+    try {
+      localStorage.setItem('cpmai_page0_orbit_hint_dismissed_v1', 'true');
+    } catch {
+      // ignore storage errors
+    }
+  };
 
   const TRACK_METAPHORS = {
     CIVIL_INFRA: {
@@ -1883,14 +1856,20 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   ) => {
     playTactileSound('thock');
     setActiveTab(tab);
+    setIsSpotlightPickMode(false);
     if (tab === 'all') {
       setPaneViewMode('lesson');
+      setIsOrbitHubView(false);
+      setIsOrbitPaneCollapsed(true);
+      setHasLaunchedLesson(true);
     } else if (tab) {
       const found = MODULE_NAV_ITEMS.find((m) => m.id === tab);
       if (found) setActiveSessionId(found.sessionId);
-      // Ensure the draggable mini dial + its submodule list open when picking a module
-      setIsOrbitWidgetHidden(false);
-      setIsWidgetModulesOpen(true);
+      setPaneViewMode('lesson');
+      // Auto-retract the circular orbit once a module is chosen so the lesson starts at full 100% width
+      setHasLaunchedLesson(true);
+      setIsOrbitHubView(false);
+      setIsOrbitPaneCollapsed(true);
     }
     setIsQuickDrawerOpen(false);
     if (scrollToTop || (tab !== 'all' && typeof window !== 'undefined' && window.innerWidth >= 1280)) {
@@ -1913,8 +1892,10 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     if (found) setActiveSessionId(found.sessionId);
     setActiveTab(resolvedModuleId);
     setPaneViewMode('exercise');
-    setIsOrbitWidgetHidden(false);
-    setIsWidgetModulesOpen(false);
+    setHasLaunchedLesson(true);
+    setIsOrbitHubView(false);
+    setIsOrbitPaneCollapsed(true);
+    setIsSpotlightPickMode(false);
     setIsQuickDrawerOpen(false);
     setTimeout(() => {
       scrollContentPaneToTop();
@@ -1928,13 +1909,15 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     playTactileSound('thock');
     setActiveSessionId(sessionId);
     const targetSession = FIVE_SESSIONS.find((s) => s.id === sessionId);
-    if (targetSession && targetSession.modules.length > 0) {
+    // In the full-scale Orbit Hub, clicking a session previews its modules beside the orbit
+    // until the learner clicks a module to launch full-width teaching.
+    if (!isOrbitHubView && targetSession && targetSession.modules.length > 0) {
       setActiveTab(targetSession.modules[0].id);
+      setHasLaunchedLesson(true);
+      setIsOrbitPaneCollapsed(true);
     }
     setIsQuickDrawerOpen(false);
-    setIsOrbitWidgetHidden(false);
-    setIsWidgetModulesOpen(true);
-    if (scrollToChapter) {
+    if (!isOrbitHubView && scrollToChapter) {
       setTimeout(() => {
         scrollContentPaneToTop();
       }, 140);
@@ -2878,13 +2861,13 @@ Tasks:
     document.documentElement.setAttribute('data-page0-split', isSplitCockpit ? 'true' : 'false');
     document.documentElement.setAttribute(
       'data-page0-fullwidth',
-      !isSplitCockpit || isOrbitPaneCollapsed ? 'true' : 'false'
+      !isSplitCockpit || isOrbitPaneCollapsed || isOrbitHubView ? 'true' : 'false'
     );
     return () => {
       document.documentElement.removeAttribute('data-page0-split');
       document.documentElement.removeAttribute('data-page0-fullwidth');
     };
-  }, [isSplitCockpit, isOrbitPaneCollapsed]);
+  }, [isSplitCockpit, isOrbitPaneCollapsed, isOrbitHubView]);
 
   const currentSessionModuleIdx = activeSessionObj.modules.findIndex((m) => m.id === activeTab);
   const currentModuleDone = currentModuleMeta
@@ -2979,7 +2962,210 @@ Tasks:
         </header>
       )}
 
-      {/* SIDE-BY-SIDE SPLIT COCKPIT (Single Module) OR FULL-WIDTH FLOW ("Show All" or Collapsed Orbit) */}
+      {/* 100%-ZOOM FULL-CANVAS ORBIT HUB (Entry Stage & On-Demand Map) OR FULL-WIDTH LESSON COCKPIT */}
+      {isSplitCockpit && isOrbitHubView ? (
+        <section
+          ref={navPillsRef}
+          data-testid="page0-orbit-entry-hub"
+          className="rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 shadow-xs p-4 sm:p-5 space-y-4 animate-fadeIn"
+        >
+          {/* Orbit Hub Top Control Strip */}
+          <div dir="rtl" className="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-slate-200/80 dark:border-slate-800">
+            <div className="space-y-0.5 min-w-0">
+              <h2 className="text-sm sm:text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <Compass className="w-4 h-4 text-[#1f5163] dark:text-[#6fb3c6] shrink-0" />
+                <span>
+                  {lang === 'fa'
+                    ? 'نقشه راه دایره‌ای دوره و کارگاه NotebookLM'
+                    : 'Circular Course Roadmap & NotebookLM Hub'}
+                </span>
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {lang === 'fa'
+                  ? 'جلسه مورد نظر را از روی مدار انتخاب کنید و روی اولین ماژول کلیک کنید تا آموزش با نمای ۱۰۰٪ تمام‌عرض آغاز شود.'
+                  : 'Select a session on the orbit and click any module to launch full-width 100% teaching.'}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap shrink-0">
+              {hasLaunchedLesson && currentModuleMeta && (
+                <button
+                  type="button"
+                  data-testid="return-to-active-lesson-btn"
+                  onClick={() => {
+                    playTactileSound('switch');
+                    setIsOrbitHubView(false);
+                    setIsOrbitPaneCollapsed(true);
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-[#1f5163] hover:bg-[#163c4a] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer whitespace-nowrap"
+                >
+                  <BookOpen className="w-3.5 h-3.5 shrink-0" />
+                  <span>
+                    {lang === 'fa'
+                      ? `بازگشت به درس (${currentModuleMeta.num})`
+                      : `Resume ${currentModuleMeta.num}`}
+                  </span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={(e) => handleTabClick('s1_demo', e, true)}
+                className="px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 hover:border-[#1f5163]/50 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer whitespace-nowrap"
+              >
+                {lang === 'fa' ? 'دموی ۱۵ دقیقه‌ای' : '15m Demo'}
+              </button>
+
+              <button
+                type="button"
+                onClick={(e) => handleTabClick('all', e, false)}
+                className="px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 hover:border-[#1f5163]/50 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer whitespace-nowrap"
+              >
+                {lang === 'fa' ? 'نمایش یکجای تمام جلسه‌ها' : 'Show All Sessions'}
+              </button>
+            </div>
+          </div>
+
+          {/* Balanced 100%-Scale 2-Column Entry Stage: Full Circular Orbit + Active Session Modules */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+            {/* Full-Scale Uncropped Circular Orbit (Right in RTL) */}
+            <div className="lg:col-span-7">
+              <OrbitRoadmapHub
+                lang={lang}
+                sessions={FIVE_SESSIONS}
+                activeSessionId={activeSessionId}
+                completedSessions={completedSessions}
+                progressPct={page0ProgressPct}
+                compactSplit={false}
+                isAdmin={!!isAdmin}
+                onSelectSession={(id) => handleOpenSession(id, false)}
+                onOpenSession={(id) => handleOpenSession(id, false)}
+                onToggleComplete={toggleSessionCompletion}
+                widgetHidden={false}
+              />
+            </div>
+
+            {/* Active Session Modules Selector Panel (Left in RTL) */}
+            <div className="lg:col-span-5 flex flex-col justify-between gap-4 rounded-2xl bg-slate-50/80 dark:bg-[#0f171e] border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5 h-full">
+              <div className="space-y-3.5">
+                <div className="space-y-1 pb-3 border-b border-slate-200/80 dark:border-slate-800">
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <span className="font-extrabold text-[#1f5163] dark:text-[#6fb3c6]">
+                      {lang === 'fa' ? `${activeSessionObj.numFa} · ${activeSessionObj.hoursFa}` : activeSessionObj.numFa}
+                    </span>
+                    <span className="font-mono text-[11px] font-bold text-slate-500 dark:text-slate-400 tabular-nums">
+                      {lang === 'fa'
+                        ? `${activeSessionObj.modules.length.toLocaleString('fa-IR')} ماژول آموزشی`
+                        : `${activeSessionObj.modules.length} Modules`}
+                    </span>
+                  </div>
+                  <h3 className="text-base font-black text-slate-900 dark:text-white leading-snug">
+                    {lang === 'fa' ? activeSessionObj.titleFa : activeSessionObj.titleEn}
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    {activeSessionObj.metaphorFa}
+                  </p>
+                </div>
+
+                {/* Clickable Full-Detail Module Cards */}
+                <div className="space-y-2">
+                  {activeSessionObj.modules.map((item) => {
+                    const isSelected = hasLaunchedLesson && activeTab === item.id;
+                    const isDone = isModuleCompleted(item.id, activeSessionObj.id);
+                    const modExTotal = getTotalModuleExercisesCount(item.id);
+                    const modExDone = getCompletedExercisesCountForModule(item.id, moduleExDoneMap);
+                    const modAllExDone = modExTotal > 0 && modExDone === modExTotal;
+
+                    return (
+                      <div key={item.id} className="flex items-stretch gap-1.5 min-w-0">
+                        <button
+                          type="button"
+                          data-testid={`orbit-entry-module-${item.id}`}
+                          onClick={(e) => handleTabClick(item.id, e, true)}
+                          className={`flex-1 min-w-0 group rounded-xl px-3 py-2.5 text-right border transition-all duration-150 cursor-pointer flex items-center gap-2.5 ${
+                            isSelected
+                              ? 'bg-[#1f5163] text-white border-[#1f5163] shadow-sm'
+                              : isDone
+                                ? 'bg-emerald-50/70 dark:bg-emerald-950/20 hover:bg-emerald-50 dark:hover:bg-emerald-950/35 border-emerald-200 dark:border-emerald-800/70 text-slate-900 dark:text-slate-100'
+                                : 'bg-white dark:bg-[#151f28] hover:border-[#1f5163] hover:shadow-xs border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100'
+                          }`}
+                        >
+                          <span
+                            dir="ltr"
+                            className={`px-2 py-0.5 rounded-lg font-mono text-xs font-extrabold tabular-nums shrink-0 ${
+                              isSelected
+                                ? 'bg-white/20 text-white'
+                                : isDone
+                                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                                  : 'bg-[#1f5163]/10 dark:bg-[#6fb3c6]/15 text-[#1f5163] dark:text-[#6fb3c6] group-hover:bg-[#1f5163] group-hover:text-white transition-colors'
+                            }`}
+                          >
+                            {item.num}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs sm:text-[13px] font-extrabold leading-snug truncate">
+                              {lang === 'fa' ? item.titleFa : item.titleEn}
+                            </div>
+                            <div
+                              className={`text-[11px] truncate mt-0.5 ${
+                                isSelected ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'
+                              }`}
+                            >
+                              {lang === 'fa' ? item.subFa : item.subEn}
+                            </div>
+                          </div>
+                          {isDone ? (
+                            <CheckCircle2
+                              className={`w-4 h-4 shrink-0 ${
+                                isSelected ? 'text-emerald-300' : 'text-emerald-600 dark:text-emerald-400'
+                              }`}
+                            />
+                          ) : (
+                            <ArrowLeft
+                              className={`w-3.5 h-3.5 shrink-0 transition-transform group-hover:-translate-x-0.5 ${
+                                isSelected ? 'text-white' : 'text-slate-400 group-hover:text-[#1f5163] dark:group-hover:text-[#6fb3c6]'
+                              }`}
+                            />
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => openModuleExercise(item.id)}
+                          data-testid={`mod-ex-btn-${item.id}`}
+                          className={`px-2.5 rounded-xl border text-[11px] font-extrabold flex items-center gap-1 shrink-0 cursor-pointer transition-colors whitespace-nowrap ${
+                            modAllExDone
+                              ? 'bg-emerald-50 dark:bg-emerald-950/25 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300'
+                              : 'bg-white dark:bg-[#151f28] border-slate-200 dark:border-slate-800 text-[#1f5163] dark:text-[#6fb3c6] hover:border-[#1f5163]'
+                          }`}
+                          title={lang === 'fa' ? `تمرین عملی ماژول ${item.num}` : `Lab for ${item.num}`}
+                        >
+                          <span>{lang === 'fa' ? 'تمرین' : 'Lab'}</span>
+                          {modAllExDone && <CheckCircle2 className="w-3 h-3 shrink-0" />}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                data-testid="orbit-entry-start-session-btn"
+                onClick={(e) => handleTabClick(activeSessionObj.modules[0].id, e, true)}
+                className="w-full py-2.5 px-4 rounded-xl bg-[#1f5163] hover:bg-[#163c4a] text-white text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+              >
+                <Play className="w-3.5 h-3.5 fill-white shrink-0" />
+                <span>
+                  {lang === 'fa'
+                    ? `شروع آموزش ${activeSessionObj.numFa} با نمای ۱۰۰٪`
+                    : `Start ${activeSessionObj.numFa} at 100% View`}
+                </span>
+              </button>
+            </div>
+          </div>
+        </section>
+      ) : (
       <div
         data-testid="page0-split-cockpit"
         className={
@@ -2994,7 +3180,7 @@ Tasks:
             : 'space-y-6'
         }
       >
-        {/* PANE 1 (Start / Right in RTL): Fixed Circular Orbit Hub + Active Session Module Picker (User-friendly Hideable) */}
+        {/* PANE 1 (Start / Right in RTL): Shown only in Show-All mode or if user explicitly expands split view */}
         {(!isSplitCockpit || !isOrbitPaneCollapsed) && (
         <div
           ref={navPillsRef}
@@ -3042,7 +3228,15 @@ Tasks:
 
               <button
                 type="button"
-                onClick={(e) => handleTabClick(activeTab === 'all' ? 's1_demo' : 'all', e, false)}
+                onClick={(e) => {
+                  if (activeTab === 'all') {
+                    setActiveTab('s1_demo');
+                    setIsOrbitHubView(true);
+                    setIsOrbitPaneCollapsed(true);
+                  } else {
+                    handleTabClick('all', e, false);
+                  }
+                }}
                 className={`px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-colors cursor-pointer whitespace-nowrap ${
                   activeTab === 'all'
                     ? 'bg-[#1f5163] text-white border-[#1f5163]'
@@ -3050,7 +3244,7 @@ Tasks:
                 }`}
               >
                 {activeTab === 'all'
-                  ? lang === 'fa' ? '✓ بازگشت به نمای دوتایی' : '✓ Back to Split View'
+                  ? lang === 'fa' ? '✓ بازگشت به مدار ۱۰۰٪' : '✓ Back to Orbit Hub'
                   : lang === 'fa' ? 'نمایش یکجای تمام جلسه‌ها' : 'Show All Sessions'}
               </button>
 
@@ -3060,8 +3254,6 @@ Tasks:
                   onClick={() => {
                     playTactileSound('switch');
                     setIsOrbitPaneCollapsed(true);
-                    setIsOrbitWidgetHidden(false);
-                    setIsWidgetModulesOpen(false);
                   }}
                   data-testid="collapse-orbit-pane-btn"
                   title={lang === 'fa' ? 'مخفی کردن مدار دایره‌ای و تمام‌عرض کردن بخش تدریس' : 'Collapse circular map for full-width teaching'}
@@ -3092,40 +3284,75 @@ Tasks:
           {isSplitCockpit && currentModuleMeta && (
             <div
               data-testid="page0-pane-header"
-              className="shrink-0 z-20 px-2.5 sm:px-3 py-1.5 bg-white/95 dark:bg-[#131c24]/95 border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap xl:flex-nowrap items-center justify-between gap-1.5"
+              data-spotlight-ignore="true"
+              className="relative shrink-0 z-30 px-2.5 sm:px-3.5 py-1.5 bg-white/95 dark:bg-[#131c24]/95 border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap xl:flex-nowrap items-center justify-between gap-2"
             >
-              <div className="flex items-center gap-1.5 min-w-0">
-                {isOrbitPaneCollapsed ? (
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="relative shrink-0">
                   <button
                     type="button"
                     onClick={() => {
                       playTactileSound('switch');
-                      setIsOrbitPaneCollapsed(false);
+                      dismissOrbitNavHint();
+                      setIsSpotlightPickMode(false);
+                      setIsOrbitHubView(true);
                     }}
                     data-testid="restore-orbit-pane-btn"
-                    className="px-2 py-1 rounded-lg bg-[#1f5163] hover:bg-[#163c4a] text-white text-[11px] font-bold flex items-center gap-1 shadow-xs transition-colors cursor-pointer whitespace-nowrap shrink-0"
-                    title={lang === 'fa' ? 'ظاهر کردن دوباره نقشه راه دایره‌ای' : 'Restore circular roadmap'}
+                    className="group px-2.5 py-1 rounded-lg bg-[#1f5163] hover:bg-[#163c4a] text-white text-[11px] font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer whitespace-nowrap"
+                    title={
+                      lang === 'fa'
+                        ? 'باز کردن مدار دایره‌ای برای رفتن به جلسات و ماژول‌های بعدی'
+                        : 'Open circular orbit roadmap to switch sessions & modules'
+                    }
                   >
-                    <PanelRightOpen className="w-3 h-3 shrink-0" />
+                    <Compass className="w-3.5 h-3.5 shrink-0" />
                     <span>{lang === 'fa' ? 'مدار' : 'Orbit'}</span>
+                    <span
+                      aria-hidden="true"
+                      className="hidden sm:inline w-px h-3 bg-white/25"
+                    />
+                    <span className="hidden sm:inline text-[10px] font-medium text-white/85 group-hover:text-white">
+                      {lang === 'fa' ? 'تغییر ماژول' : 'Modules'}
+                    </span>
                   </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      playTactileSound('switch');
-                      setIsOrbitPaneCollapsed(true);
-                      setIsOrbitWidgetHidden(false);
-                      setIsWidgetModulesOpen(false);
-                    }}
-                    data-testid="pane2-collapse-orbit-btn"
-                    className="hidden xl:flex px-1.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-[#1f5163] text-[10.5px] font-semibold text-[#1f5163] dark:text-[#6fb3c6] items-center gap-1 transition-colors cursor-pointer whitespace-nowrap shrink-0"
-                    title={lang === 'fa' ? 'مخفی کردن مدار و تمام‌عرض کردن تدریس' : 'Focus full width on lesson'}
-                  >
-                    <Maximize2 className="w-3 h-3 shrink-0" />
-                    <span>{lang === 'fa' ? 'تمام‌عرض' : 'Focus'}</span>
-                  </button>
-                )}
+
+                  {/* Smart First-Entry Callout Hint Pointing to the Orbit Button */}
+                  {showOrbitNavHint && !isPresentationMode && (
+                    <div
+                      data-testid="orbit-nav-hint"
+                      dir={lang === 'fa' ? 'rtl' : 'ltr'}
+                      className="absolute top-full start-0 mt-2.5 z-40 w-72 sm:w-80 rounded-xl bg-slate-900 dark:bg-[#0b131b] text-white border border-sky-400/35 shadow-2xl p-3 space-y-2 animate-fadeIn"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="absolute -top-1.5 start-5 w-3 h-3 rotate-45 bg-slate-900 dark:bg-[#0b131b] border-t border-s border-sky-400/35"
+                      />
+                      <div className="flex items-start gap-2">
+                        <span className="mt-1 w-2 h-2 rounded-full bg-sky-400 animate-pulse shrink-0" />
+                        <div className="space-y-0.5 text-right flex-1 min-w-0">
+                          <div className="text-xs font-extrabold text-sky-300">
+                            {lang === 'fa' ? 'راهنمای رفتن به ماژول‌های بعدی' : 'Switch Modules Anytime'}
+                          </div>
+                          <p className="text-[11px] text-slate-200 leading-relaxed">
+                            {lang === 'fa'
+                              ? 'برای انتخاب جلسه یا ماژول بعدی، هر زمان خواستید روی دکمه «مدار» در همین گوشه کلیک کنید.'
+                              : 'Click the Orbit button in this corner anytime to jump to other sessions and modules.'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-end gap-1.5 pt-0.5">
+                        <button
+                          type="button"
+                          data-testid="dismiss-orbit-hint-btn"
+                          onClick={dismissOrbitNavHint}
+                          className="px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white/25 text-white text-[10.5px] font-bold transition-colors cursor-pointer"
+                        >
+                          {lang === 'fa' ? 'متوجه شدم' : 'Got it'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 <span
                   dir="ltr"
@@ -3133,14 +3360,14 @@ Tasks:
                 >
                   {currentModuleMeta.num}
                 </span>
-                <div className="min-w-0 max-w-[140px] 2xl:max-w-[230px]">
-                  <div className="text-[11px] font-extrabold text-slate-800 dark:text-slate-100 truncate">
+                <div className="min-w-0 max-w-[180px] sm:max-w-[260px] 2xl:max-w-[380px]">
+                  <div className="text-[11.5px] font-extrabold text-slate-800 dark:text-slate-100 truncate">
                     {lang === 'fa' ? currentModuleMeta.titleFa : currentModuleMeta.titleEn}
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 shrink-0 flex-wrap xl:flex-nowrap">
+              <div className="flex items-center gap-1.5 shrink-0 flex-wrap xl:flex-nowrap">
                 {activeTab && (
                   <div
                     role="tablist"
@@ -3194,19 +3421,6 @@ Tasks:
                   </div>
                 )}
 
-                {activeTab && (
-                  <button
-                    type="button"
-                    onClick={handleOpenActiveModuleProjector}
-                    data-testid="page0-projector-btn"
-                    className="px-2 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 border border-amber-700/60 text-[10.5px] font-black flex items-center gap-1 shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
-                    title={lang === 'fa' ? 'پخش اسلایدهای پرژکتور برای ماژول فعلی' : 'Launch Projector Slides for Active Module'}
-                  >
-                    <Monitor className="w-3 h-3 shrink-0" />
-                    <span>{lang === 'fa' ? 'اسلایدها' : 'Slides'}</span>
-                  </button>
-                )}
-
                 {!isPresentationMode && (
                   <button
                     type="button"
@@ -3223,6 +3437,36 @@ Tasks:
                     <span>{currentModuleDone ? (lang === 'fa' ? 'تکمیل' : 'Done') : (lang === 'fa' ? 'ثبت' : 'Done')}</span>
                   </button>
                 )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    playTactileSound('switch');
+                    setIsSpotlightPickMode((prev) => !prev);
+                  }}
+                  data-testid="spotlight-zoom-toggle"
+                  className={`px-2 py-1 rounded-lg border text-[10.5px] font-bold flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap ${
+                    isSpotlightPickMode
+                      ? 'bg-sky-600 border-sky-600 text-white shadow-xs ring-2 ring-sky-400/40'
+                      : 'bg-sky-50/70 dark:bg-sky-950/30 border-sky-200 dark:border-sky-800/70 text-sky-700 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/40'
+                  }`}
+                  title={
+                    lang === 'fa'
+                      ? 'بزرگ‌نمایی و مجزاسازی هر بخش از صفحه با مات‌کردن بقیه بخش‌ها (یا Alt + کلیک روی هر کارت)'
+                      : 'Spotlight & zoom any section while blurring the rest (or Alt + Click any block)'
+                  }
+                >
+                  <ScanSearch className="w-3.5 h-3.5 shrink-0" />
+                  <span>
+                    {isSpotlightPickMode
+                      ? lang === 'fa'
+                        ? 'انتخاب بخش...'
+                        : 'Picking...'
+                      : lang === 'fa'
+                        ? 'فوکوس و زوم'
+                        : 'Spotlight Zoom'}
+                  </span>
+                </button>
 
                 <button
                   type="button"
@@ -3368,17 +3612,6 @@ Tasks:
                 </p>
               </div>
             </div>
-
-            {!isSplitCockpit && (
-              <button
-                type="button"
-                onClick={() => openS1Projector('s1_demo', 0)}
-                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
-              >
-                <Monitor className="w-4 h-4" />
-                <span>حالت اسلاید پروژکتور (۶ اسلاید)</span>
-              </button>
-            )}
           </div>
 
           {/* Layer 1: Zero-Assumption Intro Box (Always Visible) */}
@@ -3506,17 +3739,6 @@ Tasks:
                 </p>
               </div>
             </div>
-
-            {!isSplitCockpit && (
-              <button
-                type="button"
-                onClick={() => openS1Projector('s1_drive', 0)}
-                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
-              >
-                <Monitor className="w-4 h-4" />
-                <span>حالت اسلاید پروژکتور (۸ اسلاید)</span>
-              </button>
-            )}
           </div>
 
           {/* Layer 1: Zero-to-One Definition of Google Drive & Sheets */}
@@ -3675,17 +3897,6 @@ Tasks:
                 </p>
               </div>
             </div>
-
-            {!isSplitCockpit && (
-              <button
-                type="button"
-                onClick={() => openS1Projector('s1_markdown', 0)}
-                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
-              >
-                <Monitor className="w-4 h-4" />
-                <span>حالت اسلاید پروژکتور (۷ اسلاید)</span>
-              </button>
-            )}
           </div>
 
           {/* Layer 1: Zero-to-One Definition of Markdown */}
@@ -3793,17 +4004,6 @@ Tasks:
                 </p>
               </div>
             </div>
-
-            {!isSplitCockpit && (
-              <button
-                type="button"
-                onClick={() => openS1Projector('s1_github', 0)}
-                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
-              >
-                <Monitor className="w-4 h-4" />
-                <span>حالت اسلاید پروژکتور (۹ اسلاید)</span>
-              </button>
-            )}
           </div>
 
           {/* Layer 1: Zero-to-One Definition of Git & GitHub */}
@@ -5666,7 +5866,7 @@ Tasks:
           copiedId={copiedId}
           onOpenHrToolsWorkshop={() => handleTabClick('hr_interactive_tools', undefined, true)}
           isPresentationMode={isPresentationMode}
-          externalOpenProjectorNonce={nlmProjectorNonce}
+          isSplitCockpit={isSplitCockpit}
         />
       )}
 
@@ -6214,17 +6414,6 @@ Tasks:
                 </p>
               </div>
             </div>
-
-            {!isSplitCockpit && (
-              <button
-                type="button"
-                onClick={() => openS1Projector('s5_capstone', 0)}
-                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
-              >
-                <Monitor className="w-4 h-4" />
-                <span>حالت اسلاید پروژکتور جلسه ۵</span>
-              </button>
-            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
@@ -6321,16 +6510,6 @@ Tasks:
                 </p>
               </div>
             </div>
-            {!isSplitCockpit && (
-              <button
-                type="button"
-                onClick={() => openS1Projector('s5_capstone', 2)}
-                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs shrink-0 self-start sm:self-center"
-              >
-                <Monitor className="w-4 h-4" />
-                <span>اسلاید پروژکتور Vibe Coding</span>
-              </button>
-            )}
           </div>
 
           <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
@@ -6435,107 +6614,17 @@ Tasks:
           {isSplitCockpit && renderPromptSandbox(true)}
         </div>
       </div>
-
-      {/* FULL-SCREEN PROJECTOR SLIDE MODALS FOR SESSION 1 & SESSION 5 */}
-      {s1ProjectorDeck === 's1_demo' && (
-        <ProjectorSlideModal
-          isOpen={true}
-          onClose={() => setS1ProjectorDeck(null)}
-          deckTitleFa={
-            industryTrack === 'PAYA_SAMAN_PARS'
-              ? 'دموی ۱۵ دقیقه‌ای خروجی نهایی و معماری دوره پایا سامان پارس'
-              : 'دموی ۱۵ دقیقه‌ای خروجی نهایی و معماری دوره ۲۰ ساعته'
-          }
-          deckSubtitleFa={`جلسه ۱ · ماژول ۱-۱ (${sessionCurriculum.s1DemoSlides.length} اسلاید)`}
-          accentColor="purple"
-          slides={sessionCurriculum.s1DemoSlides}
-          activeIndex={s1SlideIndex}
-          onChangeIndex={setS1SlideIndex}
-          copyToClipboard={copyToClipboard}
-          copiedId={copiedId}
-        />
       )}
 
-      {s1ProjectorDeck === 's1_drive' && (
-        <ProjectorSlideModal
-          isOpen={true}
-          onClose={() => setS1ProjectorDeck(null)}
-          deckTitleFa={
-            industryTrack === 'PAYA_SAMAN_PARS'
-              ? 'Google Drive و استانداردسازی جداول ۱۴ شرکت تابعه پایا'
-              : 'آموزش کامل Google Drive و استانداردسازی جداول ماشین‌خوان'
-          }
-          deckSubtitleFa={`جلسه ۱ · ماژول ۱-۲ (${sessionCurriculum.s1DriveSlides.length} اسلاید)`}
-          accentColor="blue"
-          slides={sessionCurriculum.s1DriveSlides}
-          activeIndex={s1SlideIndex}
-          onChangeIndex={setS1SlideIndex}
-          copyToClipboard={copyToClipboard}
-          copiedId={copiedId}
-        />
-      )}
+      {/* Interactive In-Place Section Spotlight Zoom (Isolate & Magnify Any Block While Blurring the Rest) */}
+      <SectionSpotlightZoom
+        containerRef={contentPaneRef}
+        isPickMode={isSpotlightPickMode}
+        onPickModeChange={setIsSpotlightPickMode}
+        lang={lang}
+      />
 
-      {s1ProjectorDeck === 's1_markdown' && (
-        <ProjectorSlideModal
-          isOpen={true}
-          onClose={() => setS1ProjectorDeck(null)}
-          deckTitleFa="زبان Markdown (.md)؛ زبان مشترک مهندس، گیت‌هاب و هوش مصنوعی"
-          deckSubtitleFa={`جلسه ۱ · ماژول ۱-۳ (${sessionCurriculum.s1MarkdownSlides.length} اسلاید)`}
-          accentColor="purple"
-          slides={sessionCurriculum.s1MarkdownSlides}
-          activeIndex={s1SlideIndex}
-          onChangeIndex={setS1SlideIndex}
-          copyToClipboard={copyToClipboard}
-          copiedId={copiedId}
-        />
-      )}
-
-      {s1ProjectorDeck === 's1_github' && (
-        <ProjectorSlideModal
-          isOpen={true}
-          onClose={() => setS1ProjectorDeck(null)}
-          deckTitleFa="گیت‌هاب (GitHub) از صفر مطلق به زبان دفتر فنی و کنترل مدارک (DCC)"
-          deckSubtitleFa={`جلسه ۱ · ماژول ۱-۴ (${sessionCurriculum.s1GithubSlides.length} اسلاید)`}
-          accentColor="teal"
-          slides={sessionCurriculum.s1GithubSlides}
-          activeIndex={s1SlideIndex}
-          onChangeIndex={setS1SlideIndex}
-          copyToClipboard={copyToClipboard}
-          copiedId={copiedId}
-        />
-      )}
-
-      {s1ProjectorDeck === 's5_capstone' && (
-        <ProjectorSlideModal
-          isOpen={true}
-          onClose={() => setS1ProjectorDeck(null)}
-          deckTitleFa="ارکستراسیون کامل پایان دوره و پل ورود به Vibe Coding"
-          deckSubtitleFa="جلسه ۵ · ماژول‌های ۵-۱ و ۵-۳"
-          accentColor="purple"
-          slides={sessionCurriculum.s5CapstoneSlides}
-          activeIndex={s1SlideIndex}
-          onChangeIndex={setS1SlideIndex}
-          copyToClipboard={copyToClipboard}
-          copiedId={copiedId}
-        />
-      )}
-
-      {universalProjectorDeck && (
-        <ProjectorSlideModal
-          isOpen={true}
-          onClose={() => setUniversalProjectorDeck(null)}
-          deckTitleFa={universalProjectorDeck.deckTitleFa}
-          deckSubtitleFa={universalProjectorDeck.deckSubtitleFa}
-          accentColor={universalProjectorDeck.accentColor}
-          slides={universalProjectorDeck.slides}
-          activeIndex={universalSlideIdx}
-          onChangeIndex={setUniversalSlideIdx}
-          copyToClipboard={copyToClipboard}
-          copiedId={copiedId}
-        />
-      )}
-
-      {!isPresentationMode && !isOrbitWidgetHidden && (!isSplitCockpit || isOrbitPaneCollapsed) && (
+      {!isPresentationMode && !isOrbitHubView && !isOrbitWidgetHidden && (!isSplitCockpit || isOrbitPaneCollapsed) && (
         <FloatingOrbitWidget
           lang={lang}
           sessions={FIVE_SESSIONS}
@@ -6547,10 +6636,8 @@ Tasks:
           isBigOrbitCollapsed={isOrbitPaneCollapsed}
           onRestoreBigOrbit={() => {
             playTactileSound('thock');
-            setIsOrbitPaneCollapsed(false);
-            setTimeout(() => {
-              navPillsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 60);
+            setIsOrbitHubView(true);
+            setIsOrbitPaneCollapsed(true);
           }}
           onOpenSession={(id) => handleOpenSession(id, true)}
           onOpenModule={(modId) => {
@@ -6561,10 +6648,8 @@ Tasks:
           activePaneMode={paneViewMode}
           onBackToMap={() => {
             playTactileSound('thock');
-            setIsOrbitPaneCollapsed(false);
-            setTimeout(() => {
-              navPillsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 60);
+            setIsOrbitHubView(true);
+            setIsOrbitPaneCollapsed(true);
           }}
           onClose={() => setIsOrbitWidgetHidden(true)}
         />

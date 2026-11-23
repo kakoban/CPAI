@@ -25,7 +25,6 @@ import {
   Zap,
   Eye,
   ExternalLink,
-  Monitor,
   ChevronDown
 } from 'lucide-react';
 import {
@@ -36,11 +35,7 @@ import {
   MCP_MASTERCLASS_STEPS,
   MCP_TROUBLESHOOTING_TABLE
 } from '../../data/mcp_masterclass_curriculum';
-import {
-  ProjectorSlideModal,
-  ProjectorSlideItem,
-  splitPointTitleAndBody
-} from '../ProjectorSlideModal';
+import { splitPointTitleAndBody } from '../../utils/lessonText';
 
 interface ObsidianBrainSkillsWorkshopProps {
   lang: Language;
@@ -342,7 +337,6 @@ export const ObsidianBrainSkillsWorkshop: React.FC<ObsidianBrainSkillsWorkshopPr
   const [activeStepIndex, setActiveStepIndex] = useState<number>(0);
   const [activeObsidianStepIdx, setActiveObsidianStepIdx] = useState<number>(0);
   const [activeMcpStepIdx, setActiveMcpStepIdx] = useState<number>(0);
-  const [projectorDeck, setProjectorDeck] = useState<'skills' | 'obsidian' | 'mcp' | null>(null);
   const [selectedSkillId, setSelectedSkillId] = useState<string>(READY_SKILLS[0].id);
 
   // Interactive Custom SKILL.md Builder state
@@ -750,20 +744,6 @@ ${customOutputFormat.trim()}
                       ? 'مسیر یادگیری گام‌به‌گام ساخت AI Skills از صفر تا صد (روی هر گام کلیک کنید):'
                       : 'Step-by-Step Learning Path: Building AI Skills from Scratch:'}
                   </h3>
-                </div>
-
-                <div className="flex items-center gap-2 flex-wrap shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      playTactileSound('thock');
-                      setProjectorDeck('skills');
-                    }}
-                    className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs"
-                  >
-                    <Monitor className="w-4 h-4" />
-                    <span>حالت اسلاید پروژکتور (۱۲ اسلاید)</span>
-                  </button>
                 </div>
               </div>
 
@@ -1622,20 +1602,8 @@ ${customOutputFormat.trim()}
                   </h3>
                 </div>
 
-                {/* Prev/Next Chapter Buttons + Projector Slide Mode */}
+                {/* Prev/Next Chapter Buttons */}
                 <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      playTactileSound('thock');
-                      setProjectorDeck('obsidian');
-                    }}
-                    className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[3px] border-b-amber-900 active:translate-y-[2px] active:border-b cursor-pointer shadow-xs"
-                  >
-                    <Monitor className="w-4 h-4" />
-                    <span>حالت اسلاید پروژکتور (۱۳ اسلاید)</span>
-                  </button>
-
                   <button
                     type="button"
                     onClick={() => {
@@ -2181,21 +2149,8 @@ ${customOutputFormat.trim()}
             </h3>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto shrink-0 flex-wrap">
-            <button
-              type="button"
-              onClick={() => {
-                playTactileSound('thock');
-                setSubTab('mcp_protocol');
-                setProjectorDeck('mcp');
-              }}
-              className="px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black flex items-center gap-1.5 border border-amber-700 border-b-[4px] border-b-amber-900 active:translate-y-[2px] active:border-b transition-all cursor-pointer shadow-xs"
-            >
-              <Monitor className="w-4 h-4" />
-              <span>حالت اسلاید پروژکتور (۱۲ اسلاید)</span>
-            </button>
-
-            {subTab !== 'mcp_protocol' && (
+          {subTab !== 'mcp_protocol' && (
+            <div className="flex items-center gap-2 self-start sm:self-auto shrink-0 flex-wrap">
               <button
                 type="button"
                 onClick={() => {
@@ -2207,8 +2162,8 @@ ${customOutputFormat.trim()}
               >
                 ورود به مسترکلاس ۱۲ فصلی MCP ←
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Always-visible 3-Pillar High-Contrast Projector-Ready Summary Cards (Fixes Screenshot 1!) */}
@@ -2253,7 +2208,7 @@ ${customOutputFormat.trim()}
                       سرفصل‌های ۱۲ گانه دوره کامل MCP
                     </span>
                     <span className="text-xs font-bold text-[#334155] dark:text-[#cbd5e1]">
-                      روی هر کلید مکانیکی (M1 تا M12) کلیک کنید یا دکمه اسلاید پروژکتور را بزنید
+                      روی هر کلید مکانیکی (M1 تا M12) کلیک کنید
                     </span>
                   </div>
                   <h4 className="text-base sm:text-lg font-black text-[#0f172a] dark:text-white">
@@ -2570,85 +2525,6 @@ ${customOutputFormat.trim()}
           </div>
         )}
       </div>
-
-      {/* FULL-SCREEN PROJECTOR SLIDE DECK MODAL FOR SKILLS, OBSIDIAN & MCP */}
-      {projectorDeck === 'skills' && (
-        <ProjectorSlideModal
-          isOpen={true}
-          onClose={() => setProjectorDeck(null)}
-          deckTitleFa="مسترکلاس جامع ساخت AI Skills (استاندارد جهانی SKILL.md)"
-          deckSubtitleFa="بخش ۸ · تب ۱ (۱۲ گام اجرایی)"
-          accentColor="purple"
-          slides={CURRICULUM_MODULES.map((m, idx): ProjectorSlideItem => ({
-            stepNumber: m.stepNumber,
-            keyHint: `S${idx + 1}`,
-            badgeFa: m.badgeFa,
-            titleFa: m.titleFa,
-            titleEn: m.titleEn,
-            pointsFa: m.deepDiveFa
-              .split('\n\n')
-              .map((s) => s.trim())
-              .filter(Boolean),
-            proTipFa: m.keyTakeawayFa
-          }))}
-          activeIndex={activeStepIndex}
-          onChangeIndex={setActiveStepIndex}
-          copyToClipboard={copyToClipboard}
-          copiedId={copiedId}
-        />
-      )}
-
-      {projectorDeck === 'obsidian' && (
-        <ProjectorSlideModal
-          isOpen={true}
-          onClose={() => setProjectorDeck(null)}
-          deckTitleFa="راه‌اندازی «مغز دوم» با Obsidian و اتصال به Claude و Hermes"
-          deckSubtitleFa="بخش ۸ · تب ۲ (۱۳ فصل کامل)"
-          accentColor="teal"
-          slides={OBSIDIAN_SECOND_BRAIN_STEPS.map((st): ProjectorSlideItem => ({
-            stepNumber: st.stepNumber,
-            keyHint: st.keyHint,
-            badgeFa: st.badgeFa,
-            titleFa: st.titleFa,
-            titleEn: st.titleEn,
-            pointsFa: st.deepDiveFa,
-            proTipFa: st.proTipFa,
-            codeTitleFa: st.codeOrConfigSnippet?.titleFa,
-            codeSnippet: st.codeOrConfigSnippet?.code,
-            codeDir: 'ltr'
-          }))}
-          activeIndex={activeObsidianStepIdx}
-          onChangeIndex={setActiveObsidianStepIdx}
-          copyToClipboard={copyToClipboard}
-          copiedId={copiedId}
-        />
-      )}
-
-      {projectorDeck === 'mcp' && (
-        <ProjectorSlideModal
-          isOpen={true}
-          onClose={() => setProjectorDeck(null)}
-          deckTitleFa="مسترکلاس کامل پروتکل MCP (Model Context Protocol) و ساخت MCP Server"
-          deckSubtitleFa="بخش ۸ · تب ۳ (۱۲ فصل عملی با FastMCP)"
-          accentColor="blue"
-          slides={MCP_MASTERCLASS_STEPS.map((st): ProjectorSlideItem => ({
-            stepNumber: st.stepNumber,
-            keyHint: st.keyHint,
-            badgeFa: st.badgeFa,
-            titleFa: st.titleFa,
-            titleEn: st.titleEn,
-            pointsFa: st.deepDiveFa,
-            proTipFa: st.proTipFa,
-            codeTitleFa: st.codeOrConfigSnippet?.titleFa,
-            codeSnippet: st.codeOrConfigSnippet?.code,
-            codeDir: 'ltr'
-          }))}
-          activeIndex={activeMcpStepIdx}
-          onChangeIndex={setActiveMcpStepIdx}
-          copyToClipboard={copyToClipboard}
-          copiedId={copiedId}
-        />
-      )}
     </section>
   );
 };
