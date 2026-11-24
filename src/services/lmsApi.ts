@@ -8,6 +8,19 @@ import {
   ClassEntity
 } from '../types/lms';
 import { UserProfile } from '../types/auth';
+import {
+  CohortScheduleRecord,
+  CohortUserEntry,
+  getDefaultCohortSchedules,
+  searchCohortsByQuery
+} from '../utils/cohortScheduleEngine';
+
+export interface AdminWeekdayCohortsResponse {
+  cohorts: CohortScheduleRecord[];
+  usersByCohort: Record<string, CohortUserEntry[]>;
+  unmatchedUsers: CohortUserEntry[];
+  totalUsers: number;
+}
 
 export interface AdminOverviewResponse {
   classes: ClassEntity[];
@@ -442,6 +455,159 @@ class LmsApiService {
       studentCount: 0,
       createdAt: new Date().toISOString()
     };
+  }
+
+  /**
+   * Public zero-PII lookup of weekday cohorts & their reviewed/next modules
+   */
+  async fetchCohortSchedulesPublic(query?: string): Promise<CohortScheduleRecord[]> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const qs = query && query.trim() ? `?q=${encodeURIComponent(query.trim())}` : '';
+      const res = await fetch(`/api/cohorts/lookup${qs}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && Array.isArray(data.cohorts)) {
+          if (!query || !query.trim()) {
+            try {
+              localStorage.setItem('cpmai_cohort_schedules_cache_v1', JSON.stringify(data.cohorts));
+            } catch {}
+          }
+          return data.cohorts;
+        }
+      }
+    } catch (err: any) {
+      console.warn('Public cohort lookup failed, using cached fallback:', err?.message || err);
+    }
+
+    let cached: CohortScheduleRecord[] = getDefaultCohortSchedules();
+    try {
+      const raw = localStorage.getItem('cpmai_cohort_schedules_cache_v1');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) cached = parsed;
+      }
+    } catch {}
+
+    return query && query.trim() ? searchCohortsByQuery(cached, query) : cached;
+  }
+
+  /**
+   * Admin: Fetch weekday cohorts, first-entry classified user rosters, and module schedules from DB
+   */
+  async fetchAdminWeekdayCohorts(): Promise<AdminWeekdayCohortsResponse | null> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 7000);
+      const res = await fetch('/api/admin/cohorts/schedule', {
+        method: 'GET',
+        headers: this.getHeaders(),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const data: AdminWeekdayCohortsResponse = await res.json();
+        if (data && Array.isArray(data.cohorts)) {
+          try {
+            localStorage.setItem('cpmai_cohort_schedules_cache_v1', JSON.stringify(data.cohorts));
+          } catch {}
+          return data;
+        }
+      }
+    } catch (err: any) {
+      console.warn('Failed to fetch admin weekday cohorts:', err?.message || err);
+    }
+    return null;
+  }
+
+  /**
+   * Admin: Re-run automatic Tehran first-entry weekday classification in DB
+   */
+  async syncAdminWeekdayCohorts(
+    resetManual = false
+  ): Promise<{ success: boolean; updatedCount: number; error?: string }> {
+    try {
+      const res = await fetch('/api/admin/cohorts/sync-by-weekday', {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ resetManual })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { success: false, updatedCount: 0, error: data?.error || 'خطا در همگام‌سازی' };
+      }
+      return { success: true, updatedCount: Number(data.updatedCount || 0) };
+    } catch (err: any) {
+      return { success: false, updatedCount: 0, error: err?.message || 'خطای شبکه' };
+    }
+  }
+
+  /**
+   * Admin: Save reviewed modules, next-class modules, and instructor note for a weekday cohort in DB
+   */
+  async saveAdminCohortSchedule(payload: {
+    cohortId: string;
+    reviewedModules: string[];
+    nextModules: string[];
+    instructorNote?: string;
+    title?: string;
+    organization?: string;
+    aliases?: string[];
+  }): Promise<{ success: boolean; cohort?: CohortScheduleRecord; error?: string }> {
+    try {
+      const res = await fetch('/api/admin/cohorts/schedule', {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { success: false, error: data?.error || 'خطا در ذخیره برنامه کلاس' };
+      }
+      if (data.cohort) {
+        try {
+          const raw = localStorage.getItem('cpmai_cohort_schedules_cache_v1');
+          const list: CohortScheduleRecord[] = raw ? JSON.parse(raw) : getDefaultCohortSchedules();
+          const updatedList = list.map((c) => (c.id === data.cohort.id ? { ...c, ...data.cohort } : c));
+          localStorage.setItem('cpmai_cohort_schedules_cache_v1', JSON.stringify(updatedList));
+        } catch {}
+        window.dispatchEvent(new CustomEvent('cpmai_cohort_schedules_updated'));
+      }
+      return { success: true, cohort: data.cohort };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'خطای شبکه در ذخیره برنامه' };
+    }
+  }
+
+  /**
+   * Admin: Manually assign/move a user into one of the 4 official weekday cohorts
+   */
+  async assignUserToWeekdayCohort(
+    userId: string,
+    cohortId: string | null
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const res = await fetch('/api/admin/cohorts/assign-user', {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ userId, cohortId })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { success: false, error: data?.error || 'خطا در تغییر کلاس کاربر' };
+      }
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'خطای شبکه' };
+    }
   }
 }
 

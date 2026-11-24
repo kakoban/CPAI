@@ -40,6 +40,7 @@ import {
   Briefcase
 } from 'lucide-react';
 import { DISCIPLINE_REGISTRY } from '../../data/disciplineExamplesRegistry';
+import { AdminWeekdayCohortsPanel } from './AdminWeekdayCohortsPanel';
 
 export function parseTimeSlotInfo(code: string): { isSlot: boolean; labelFa: string; labelEn: string; dateStr: string } {
   const match = code.match(/^(\d{4})(\d{2})(\d{2})_SLOT(\d+)$/i);
@@ -76,7 +77,7 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
   currentUser,
   lang
 }) => {
-  const [activeTab, setActiveTab] = useState<'users' | 'matrix' | 'drip' | 'cohorts'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'matrix' | 'drip' | 'cohorts' | 'weekday_cohorts'>('weekday_cohorts');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [overview, setOverview] = useState<AdminOverviewResponse>(() => getDefaultAdminOverview(currentUser));
   const [selectedClassId, setSelectedClassId] = useState<string>('ALL');
@@ -505,7 +506,8 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
             </div>
           )}
 
-          {/* Cohort Class Selector Strip - Responsive */}
+          {/* Cohort Class Selector Strip - Responsive (Tabs 1-4) */}
+          {activeTab !== 'weekday_cohorts' && (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-2.5 sm:p-3 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.08] shrink-0">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
               <div className="flex items-center gap-1.5 shrink-0">
@@ -563,65 +565,112 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
               </div>
             )}
           </div>
+          )}
 
-          {/* Navigation Tabs - Fixed */}
-          <div className="flex items-center gap-2 border-b border-black/[0.06] dark:border-white/[0.08] overflow-x-auto no-scrollbar shrink-0">
+          {/* Navigation Tabs - Always Fully Visible (No Hidden Horizontal Scroll) */}
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 border-b border-black/[0.06] dark:border-white/[0.08] pb-2 shrink-0">
             <button
-              onClick={() => setActiveTab('users')}
-              className={`flex items-center gap-2 pb-3 px-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                activeTab === 'users'
-                  ? 'border-[#2563EB] text-[#2563EB]'
-                  : 'border-transparent text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              data-testid="admin-tab-weekday-cohorts"
+              onClick={() => setActiveTab('weekday_cohorts')}
+              className={`flex items-center gap-1.5 py-2 px-3 rounded-xl text-xs font-extrabold border transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'weekday_cohorts'
+                  ? 'bg-[#1f5163] text-white border-[#1f5163] shadow-xs'
+                  : 'bg-[#1f5163]/[0.07] dark:bg-[#1f5163]/20 border-[#1f5163]/25 text-[#1f5163] dark:text-[#7ac1d4] hover:bg-[#1f5163]/15'
               }`}
             >
-              <Users className="w-4 h-4" />
-              <span>۱. ثبت‌نامی‌ها و پرونده دانشجویان (User Registry)</span>
-              <span className="px-2 py-0.2 text-[10px] rounded-full bg-blue-500/10 text-blue-600 font-mono">
+              <Calendar className="w-3.5 h-3.5 shrink-0" />
+              <span>کلاس‌بندی روزهای هفته و برنامه ماژول‌ها</span>
+              <span
+                className={`px-1.5 py-0.5 text-[10px] rounded-md font-extrabold ${
+                  activeTab === 'weekday_cohorts'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-[#1f5163]/15 text-[#1f5163] dark:text-[#7ac1d4]'
+                }`}
+              >
+                ۴ کلاس رسمی
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`flex items-center gap-1.5 py-2 px-3 rounded-xl text-xs font-extrabold border transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'users'
+                  ? 'bg-[#2563EB] text-white border-[#2563EB] shadow-xs'
+                  : 'bg-black/[0.02] dark:bg-white/[0.03] border-black/[0.06] dark:border-white/[0.08] text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+              }`}
+            >
+              <Users className="w-3.5 h-3.5 shrink-0" />
+              <span>ثبت‌نامی‌ها و پرونده دانشجویان</span>
+              <span
+                className={`px-1.5 py-0.5 text-[10px] rounded-md font-mono ${
+                  activeTab === 'users'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-blue-500/10 text-blue-600'
+                }`}
+              >
                 {filteredUsers.length}
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab('matrix')}
-              className={`flex items-center gap-2 pb-3 px-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`flex items-center gap-1.5 py-2 px-3 rounded-xl text-xs font-extrabold border transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'matrix'
-                  ? 'border-[#2563EB] text-[#2563EB]'
-                  : 'border-transparent text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+                  ? 'bg-[#2563EB] text-white border-[#2563EB] shadow-xs'
+                  : 'bg-black/[0.02] dark:bg-white/[0.03] border-black/[0.06] dark:border-white/[0.08] text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
               }`}
             >
-              <Grid3X3 className="w-4 h-4" />
-              <span>۲. ماتریس ۲بعدی تعیین سطح (Placement Matrix)</span>
-              <span className="px-2 py-0.2 text-[10px] rounded-full bg-purple-500/10 text-purple-600 font-mono">
+              <Grid3X3 className="w-3.5 h-3.5 shrink-0" />
+              <span>ماتریس تعیین سطح</span>
+              <span
+                className={`px-1.5 py-0.5 text-[10px] rounded-md font-mono ${
+                  activeTab === 'matrix'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-purple-500/10 text-purple-600'
+                }`}
+              >
                 3×3
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab('drip')}
-              className={`flex items-center gap-2 pb-3 px-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`flex items-center gap-1.5 py-2 px-3 rounded-xl text-xs font-extrabold border transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'drip'
-                  ? 'border-[#2563EB] text-[#2563EB]'
-                  : 'border-transparent text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+                  ? 'bg-[#2563EB] text-white border-[#2563EB] shadow-xs'
+                  : 'bg-black/[0.02] dark:bg-white/[0.03] border-black/[0.06] dark:border-white/[0.08] text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
               }`}
             >
-              <Lock className="w-4 h-4" />
-              <span>۳. مدیریت دسترسی و زمان‌بندی قطره‌ای (Curriculum Drip)</span>
-              <span className="px-2 py-0.2 text-[10px] rounded-full bg-emerald-500/10 text-emerald-600 font-mono">
+              <Lock className="w-3.5 h-3.5 shrink-0" />
+              <span>دسترسی جلسات</span>
+              <span
+                className={`px-1.5 py-0.5 text-[10px] rounded-md font-mono ${
+                  activeTab === 'drip'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-emerald-500/10 text-emerald-600'
+                }`}
+              >
                 ۲۲ جلسه
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab('cohorts')}
-              className={`flex items-center gap-2 pb-3 px-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`flex items-center gap-1.5 py-2 px-3 rounded-xl text-xs font-extrabold border transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'cohorts'
-                  ? 'border-[#2563EB] text-[#2563EB]'
-                  : 'border-transparent text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
+                  ? 'bg-[#2563EB] text-white border-[#2563EB] shadow-xs'
+                  : 'bg-black/[0.02] dark:bg-white/[0.03] border-black/[0.06] dark:border-white/[0.08] text-[#5d6b73] hover:text-[#1c2830] dark:hover:text-[#e8ebe9]'
               }`}
             >
-              <FolderKanban className="w-4 h-4" />
-              <span>۴. مدیریت دوره‌ها و اسلات‌های زمانی (Cohorts & Time-Slots)</span>
-              <span className="px-2 py-0.2 text-[10px] rounded-full bg-amber-500/10 text-amber-600 font-mono">
+              <FolderKanban className="w-3.5 h-3.5 shrink-0" />
+              <span>اسلات‌های زمانی</span>
+              <span
+                className={`px-1.5 py-0.5 text-[10px] rounded-md font-mono ${
+                  activeTab === 'cohorts'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-amber-500/10 text-amber-600'
+                }`}
+              >
                 {overview?.classes.length || 0} کلاس
               </span>
             </button>
@@ -1399,6 +1448,14 @@ export const AdminControlCenterModal: React.FC<AdminControlCenterModalProps> = (
                 })}
               </div>
             </div>
+          )}
+
+          {/* TAB 5: Official Weekday Cohorts & Module Schedule */}
+          {activeTab === 'weekday_cohorts' && (
+            <AdminWeekdayCohortsPanel
+              fallbackUsers={rawUsers}
+              onNotify={showToast}
+            />
           )}
 
           </div>

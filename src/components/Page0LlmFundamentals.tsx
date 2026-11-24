@@ -78,6 +78,8 @@ import { HrArtifactsCanvasWorkshop } from './HrArtifactsCanvasWorkshop';
 import { ClaudeEnterpriseConnectors } from './connectors/ClaudeEnterpriseConnectors';
 import { ObsidianBrainSkillsWorkshop } from './obsidian/ObsidianBrainSkillsWorkshop';
 import { DatabaseCrudWorkshop } from './DatabaseCrudWorkshop';
+import { CohortRoadmapLookupCard } from './CohortRoadmapLookupCard';
+import { CohortScheduleRecord } from '../utils/cohortScheduleEngine';
 import { ModuleExercisesView } from './ModuleExercisesView';
 import {
   getModuleExerciseDeck,
@@ -1309,6 +1311,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     | 's5_database_crud'
     | 's5_vibecoding'
   >('s1_demo');
+  const [selectedOrgCohort, setSelectedOrgCohort] = useState<CohortScheduleRecord | null>(null);
   const [isSandboxOpen, setIsSandboxOpen] = useState<boolean>(false);
   const [paneViewMode, setPaneViewMode] = useState<'lesson' | 'exercise'>('lesson');
   const [moduleExDoneMap, setModuleExDoneMap] = useState<Record<string, boolean>>(() => {
@@ -3056,75 +3059,100 @@ Tasks:
               />
             </div>
 
-            {/* Active Session Modules Selector Panel (Left in RTL) */}
-            <div className="lg:col-span-5 flex flex-col justify-between gap-4 rounded-2xl bg-slate-50/80 dark:bg-[#0f171e] border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5 h-full">
-              <div className="space-y-3.5">
-                <div className="space-y-1 pb-3 border-b border-slate-200/80 dark:border-slate-800">
-                  <div className="flex items-center justify-between gap-2 text-xs">
-                    <span className="font-extrabold text-[#1f5163] dark:text-[#6fb3c6]">
-                      {lang === 'fa' ? `${activeSessionObj.numFa} · ${activeSessionObj.hoursFa}` : activeSessionObj.numFa}
-                    </span>
-                    <span className="font-mono text-[11px] font-bold text-slate-500 dark:text-slate-400 tabular-nums">
-                      {lang === 'fa'
-                        ? `${activeSessionObj.modules.length.toLocaleString('fa-IR')} ماژول آموزشی`
-                        : `${activeSessionObj.modules.length} Modules`}
-                    </span>
+            {/* Active Session Modules Selector + Cohort Roadmap Lookup (Left in RTL beside Orbit) */}
+            <div className="lg:col-span-5 flex flex-col gap-3.5 h-full">
+              <CohortRoadmapLookupCard
+                lang={lang}
+                onSelectModule={(moduleId) => handleTabClick(moduleId as typeof activeTab, undefined, true)}
+                onCohortChange={setSelectedOrgCohort}
+              />
+
+              <div className="flex-1 flex flex-col justify-between gap-4 rounded-2xl bg-slate-50/80 dark:bg-[#0f171e] border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5">
+                <div className="space-y-3.5">
+                  <div className="space-y-1 pb-3 border-b border-slate-200/80 dark:border-slate-800">
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                      <span className="font-extrabold text-[#1f5163] dark:text-[#6fb3c6]">
+                        {lang === 'fa' ? `${activeSessionObj.numFa} · ${activeSessionObj.hoursFa}` : activeSessionObj.numFa}
+                      </span>
+                      <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 tabular-nums">
+                        {lang === 'fa'
+                          ? `${activeSessionObj.modules.length.toLocaleString('fa-IR')} ماژول آموزشی`
+                          : `${activeSessionObj.modules.length} Modules`}
+                      </span>
+                    </div>
+                    <h3 className="text-base font-black text-slate-900 dark:text-white leading-snug">
+                      {lang === 'fa' ? activeSessionObj.titleFa : activeSessionObj.titleEn}
+                    </h3>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                      {activeSessionObj.metaphorFa}
+                    </p>
                   </div>
-                  <h3 className="text-base font-black text-slate-900 dark:text-white leading-snug">
-                    {lang === 'fa' ? activeSessionObj.titleFa : activeSessionObj.titleEn}
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                    {activeSessionObj.metaphorFa}
-                  </p>
-                </div>
 
-                {/* Clickable Full-Detail Module Cards */}
-                <div className="space-y-2">
-                  {activeSessionObj.modules.map((item) => {
-                    const isSelected = hasLaunchedLesson && activeTab === item.id;
-                    const isDone = isModuleCompleted(item.id, activeSessionObj.id);
-                    const modExTotal = getTotalModuleExercisesCount(item.id);
-                    const modExDone = getCompletedExercisesCountForModule(item.id, moduleExDoneMap);
-                    const modAllExDone = modExTotal > 0 && modExDone === modExTotal;
+                  {/* Clickable Full-Detail Module Cards */}
+                  <div className="space-y-2">
+                    {activeSessionObj.modules.map((item) => {
+                      const isSelected = hasLaunchedLesson && activeTab === item.id;
+                      const isDone = isModuleCompleted(item.id, activeSessionObj.id);
+                      const isCohortReviewed = !!selectedOrgCohort?.reviewedModules?.includes(item.id);
+                      const isCohortNext = !!selectedOrgCohort?.nextModules?.includes(item.id);
+                      const modExTotal = getTotalModuleExercisesCount(item.id);
+                      const modExDone = getCompletedExercisesCountForModule(item.id, moduleExDoneMap);
+                      const modAllExDone = modExTotal > 0 && modExDone === modExTotal;
 
-                    return (
-                      <div key={item.id} className="flex items-stretch gap-1.5 min-w-0">
-                        <button
-                          type="button"
-                          data-testid={`orbit-entry-module-${item.id}`}
-                          onClick={(e) => handleTabClick(item.id, e, true)}
-                          className={`flex-1 min-w-0 group rounded-xl px-3 py-2.5 text-right border transition-all duration-150 cursor-pointer flex items-center gap-2.5 ${
-                            isSelected
-                              ? 'bg-[#1f5163] text-white border-[#1f5163] shadow-sm'
-                              : isDone
-                                ? 'bg-emerald-50/70 dark:bg-emerald-950/20 hover:bg-emerald-50 dark:hover:bg-emerald-950/35 border-emerald-200 dark:border-emerald-800/70 text-slate-900 dark:text-slate-100'
-                                : 'bg-white dark:bg-[#151f28] hover:border-[#1f5163] hover:shadow-xs border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100'
-                          }`}
-                        >
-                          <span
-                            dir="ltr"
-                            className={`px-2 py-0.5 rounded-lg font-mono text-xs font-extrabold tabular-nums shrink-0 ${
+                      return (
+                        <div key={item.id} className="flex items-stretch gap-1.5 min-w-0">
+                          <button
+                            type="button"
+                            data-testid={`orbit-entry-module-${item.id}`}
+                            onClick={(e) => handleTabClick(item.id, e, true)}
+                            className={`flex-1 min-w-0 group rounded-xl px-3 py-2.5 text-right border transition-all duration-150 cursor-pointer flex items-center gap-2.5 ${
                               isSelected
-                                ? 'bg-white/20 text-white'
-                                : isDone
-                                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
-                                  : 'bg-[#1f5163]/10 dark:bg-[#6fb3c6]/15 text-[#1f5163] dark:text-[#6fb3c6] group-hover:bg-[#1f5163] group-hover:text-white transition-colors'
+                                ? 'bg-[#1f5163] text-white border-[#1f5163] shadow-sm'
+                                : isCohortNext
+                                  ? 'bg-amber-50/80 dark:bg-amber-950/20 hover:bg-amber-50 dark:hover:bg-amber-950/35 border-amber-300 dark:border-amber-700 text-slate-900 dark:text-slate-100'
+                                  : isDone || isCohortReviewed
+                                    ? 'bg-emerald-50/70 dark:bg-emerald-950/20 hover:bg-emerald-50 dark:hover:bg-emerald-950/35 border-emerald-200 dark:border-emerald-800/70 text-slate-900 dark:text-slate-100'
+                                    : 'bg-white dark:bg-[#151f28] hover:border-[#1f5163] hover:shadow-xs border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100'
                             }`}
                           >
-                            {item.num}
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <div className="text-xs sm:text-[13px] font-extrabold leading-snug truncate">
-                              {lang === 'fa' ? item.titleFa : item.titleEn}
-                            </div>
-                            <div
-                              className={`text-[11px] truncate mt-0.5 ${
-                                isSelected ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'
+                            <span
+                              dir="ltr"
+                              className={`px-2 py-0.5 rounded-lg font-mono text-xs font-extrabold tabular-nums shrink-0 ${
+                                isSelected
+                                  ? 'bg-white/20 text-white'
+                                  : isCohortNext
+                                    ? 'bg-amber-500/20 text-amber-800 dark:text-amber-200'
+                                    : isDone || isCohortReviewed
+                                      ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                                      : 'bg-[#1f5163]/10 dark:bg-[#6fb3c6]/15 text-[#1f5163] dark:text-[#6fb3c6] group-hover:bg-[#1f5163] group-hover:text-white transition-colors'
                               }`}
                             >
-                              {lang === 'fa' ? item.subFa : item.subEn}
+                              {item.num}
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-xs sm:text-[13px] font-extrabold leading-snug truncate">
+                                  {lang === 'fa' ? item.titleFa : item.titleEn}
+                                </span>
+                                {isCohortNext && !isSelected && (
+                                  <span className="px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-800 dark:text-amber-200 text-[9px] font-extrabold shrink-0 whitespace-nowrap">
+                                    کلاس بعدی
+                                  </span>
+                                )}
+                                {!isCohortNext && isCohortReviewed && !isSelected && (
+                                  <span className="px-1.5 py-0.2 rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[9px] font-extrabold shrink-0 whitespace-nowrap">
+                                    مرور شده
+                                  </span>
+                                )}
+                              </div>
+                              <div
+                                className={`text-[11px] truncate mt-0.5 ${
+                                  isSelected ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'
+                                }`}
+                              >
+                                {lang === 'fa' ? item.subFa : item.subEn}
+                              </div>
                             </div>
-                          </div>
                           {isDone ? (
                             <CheckCircle2
                               className={`w-4 h-4 shrink-0 ${
@@ -3173,6 +3201,7 @@ Tasks:
                     : `Start ${activeSessionObj.numFa} at 100% View`}
                 </span>
               </button>
+              </div>
             </div>
           </div>
         </section>

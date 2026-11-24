@@ -1678,6 +1678,579 @@ app.post(['/api/admin/sessions/unlock-all', '/admin/sessions/unlock-all'], async
   }
 });
 
+// -------------------------------------------------------------
+// Weekday Cohort Classification & Curriculum Progress Endpoints
+// -------------------------------------------------------------
+const CANONICAL_ORBIT_MODULE_IDS = [
+  's1_demo',
+  's1_drive',
+  's1_markdown',
+  's1_github',
+  'prompt_definition',
+  'prompting',
+  'tools',
+  'prompts_library',
+  'advanced_features',
+  'engineering_dashboards',
+  'notebooklm',
+  'hr_interactive_tools',
+  'contracts_and_gems',
+  'skills_lab',
+  'mcp_lab',
+  'connectors',
+  'safety',
+  'obsidian_brain',
+  's5_orchestration',
+  'masterclass',
+  's5_database_crud',
+  's5_vibecoding'
+] as const;
+
+const CANONICAL_ORBIT_MODULE_SET = new Set<string>(CANONICAL_ORBIT_MODULE_IDS);
+
+const SEED_WEEKDAY_COHORTS = [
+  {
+    id: 'cohort_mon_hera',
+    code: 'COHORT-MON-HERA',
+    title: 'موسسه حرا',
+    organization: 'موسسه حرا',
+    weekdayIndex: 1,
+    weekdayFa: 'دوشنبه‌ها',
+    aliases: ['حرا', 'موسسه حرا', 'مؤسسه حرا', 'دوشنبه', 'دوشنبه ها', 'hera']
+  },
+  {
+    id: 'cohort_wed_damavand_tehran',
+    code: 'COHORT-WED-DAMAVAND-TEHRAN',
+    title: 'طرح دماوند تهران',
+    organization: 'طرح دماوند — تهران',
+    weekdayIndex: 3,
+    weekdayFa: 'چهارشنبه‌ها',
+    aliases: ['دماوند تهران', 'طرح دماوند تهران', 'تهران', 'طرح دماوند', 'دماوند', 'چهارشنبه', 'چهارشنبه ها', 'damavand tehran']
+  },
+  {
+    id: 'cohort_thu_paya_damavand',
+    code: 'COHORT-THU-PAYA-DAMAVAND',
+    title: 'هلدینگ پایا سامان (موسسه دماوند)',
+    organization: 'هلدینگ پایا سامان — موسسه دماوند',
+    weekdayIndex: 4,
+    weekdayFa: 'پنج‌شنبه‌ها',
+    aliases: [
+      'پایا',
+      'پایا سامان',
+      'هلدینگ پایا سامان',
+      'هلدینگ پایا',
+      'موسسه دماوند',
+      'مؤسسه دماوند',
+      'دماوند',
+      'پنج شنبه',
+      'پنج‌شنبه',
+      'پنجشنبه',
+      'paya',
+      'paya saman'
+    ]
+  },
+  {
+    id: 'cohort_sun_damavand_asaluyeh',
+    code: 'COHORT-SUN-DAMAVAND-ASALUYEH',
+    title: 'طرح دماوند تیم عسلویه',
+    organization: 'طرح دماوند — تیم عسلویه',
+    weekdayIndex: 0,
+    weekdayFa: 'یکشنبه‌ها',
+    aliases: [
+      'عسلویه',
+      'تیم عسلویه',
+      'طرح دماوند عسلویه',
+      'طرح دماوند تیم عسلویه',
+      'طرح دماوند',
+      'دماوند',
+      'یکشنبه',
+      'یک‌شنبه',
+      'یکشنبه ها',
+      'asaluyeh'
+    ]
+  }
+];
+
+const SERVER_PERSIAN_WEEKDAYS: Record<number, string> = {
+  0: 'یکشنبه',
+  1: 'دوشنبه',
+  2: 'سه‌شنبه',
+  3: 'چهارشنبه',
+  4: 'پنج‌شنبه',
+  5: 'جمعه',
+  6: 'شنبه'
+};
+
+const SERVER_SHORT_DOW_MAP: Record<string, number> = {
+  Sun: 0,
+  Mon: 1,
+  Tue: 2,
+  Wed: 3,
+  Thu: 4,
+  Fri: 5,
+  Sat: 6
+};
+
+function sanitizeServerModuleIds(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const chosen = new Set<string>();
+  for (const item of raw) {
+    if (typeof item === 'string' && CANONICAL_ORBIT_MODULE_SET.has(item)) {
+      chosen.add(item);
+    }
+  }
+  return CANONICAL_ORBIT_MODULE_IDS.filter((id) => chosen.has(id));
+}
+
+function normalizeServerPersianQuery(input: string): string {
+  return String(input || '')
+    .replace(/[\u064A\u0649]/g, 'ی')
+    .replace(/\u0643/g, 'ک')
+    .replace(/\u0629/g, 'ه')
+    .replace(/[\u0622\u0623\u0625]/g, 'ا')
+    .replace(/\u0624/g, 'و')
+    .replace(/\u0626/g, 'ی')
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+    .replace(/[\u200C\u200D]/g, ' ')
+    .replace(/[()\-–—_.,،·/\\]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function getServerTehranDow(dateInput?: string | Date | null): number | null {
+  if (!dateInput) return null;
+  const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+  if (Number.isNaN(d.getTime())) return null;
+  try {
+    const shortDay = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Tehran',
+      weekday: 'short'
+    }).format(d);
+    return SERVER_SHORT_DOW_MAP[shortDay] ?? null;
+  } catch {
+    return d.getUTCDay();
+  }
+}
+
+function mapCohortScheduleRow(row: any) {
+  return {
+    id: row.id,
+    code: row.code,
+    title: row.title,
+    organization: row.organization,
+    weekdayIndex: Number(row.weekday_index),
+    weekdayFa: row.weekday_fa,
+    aliases: Array.isArray(row.aliases) ? row.aliases : [],
+    reviewedModules: sanitizeServerModuleIds(row.reviewed_modules),
+    nextModules: sanitizeServerModuleIds(row.next_modules),
+    instructorNote: typeof row.instructor_note === 'string' ? row.instructor_note : '',
+    studentCount: row.student_count !== undefined ? Number(row.student_count) : undefined,
+    updatedAt: row.updated_at
+  };
+}
+
+let isCohortTableReady = false;
+let cohortTableInitPromise: Promise<void> | null = null;
+
+async function ensureCohortScheduleTables(): Promise<void> {
+  if (isCohortTableReady) return;
+  if (cohortTableInitPromise) return cohortTableInitPromise;
+
+  cohortTableInitPromise = (async () => {
+    try {
+      await ensureUsersTable().catch(() => {});
+
+      const ddlStatements = [
+        `CREATE TABLE IF NOT EXISTS cohort_schedules (
+          id VARCHAR(64) PRIMARY KEY,
+          code VARCHAR(100) UNIQUE NOT NULL,
+          title VARCHAR(255) NOT NULL,
+          organization VARCHAR(255) NOT NULL,
+          weekday_index INT NOT NULL,
+          weekday_fa VARCHAR(64) NOT NULL,
+          aliases JSONB DEFAULT '[]'::jsonb,
+          reviewed_modules JSONB DEFAULT '[]'::jsonb,
+          next_modules JSONB DEFAULT '[]'::jsonb,
+          instructor_note TEXT DEFAULT '',
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        )`,
+        `ALTER TABLE users ADD COLUMN IF NOT EXISTS weekday_cohort_id VARCHAR(64)`,
+        `ALTER TABLE users ADD COLUMN IF NOT EXISTS weekday_cohort_manual BOOLEAN DEFAULT false`,
+        `CREATE INDEX IF NOT EXISTS idx_users_weekday_cohort_id ON users(weekday_cohort_id)`
+      ];
+
+      for (const sql of ddlStatements) {
+        try {
+          await pool.query(sql);
+        } catch (stmtErr: any) {
+          if (stmtErr?.code === '40P01') {
+            await new Promise((r) => setTimeout(r, 150));
+            await pool.query(sql).catch(() => {});
+          }
+        }
+      }
+
+      for (const cohort of SEED_WEEKDAY_COHORTS) {
+        await pool.query(
+          `INSERT INTO cohort_schedules (
+            id, code, title, organization, weekday_index, weekday_fa, aliases, reviewed_modules, next_modules, instructor_note, created_at, updated_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, '[]'::jsonb, '[]'::jsonb, '', NOW(), NOW())
+          ON CONFLICT (id) DO NOTHING;`,
+          [
+            cohort.id,
+            cohort.code,
+            cohort.title,
+            cohort.organization,
+            cohort.weekdayIndex,
+            cohort.weekdayFa,
+            JSON.stringify(cohort.aliases)
+          ]
+        );
+      }
+
+      // Auto-classify any unclassified users by their first entry weekday in Asia/Tehran
+      await pool.query(`
+        UPDATE users
+        SET weekday_cohort_id = CASE EXTRACT(DOW FROM created_at AT TIME ZONE 'Asia/Tehran')::int
+          WHEN 1 THEN 'cohort_mon_hera'
+          WHEN 3 THEN 'cohort_wed_damavand_tehran'
+          WHEN 4 THEN 'cohort_thu_paya_damavand'
+          WHEN 0 THEN 'cohort_sun_damavand_asaluyeh'
+          ELSE NULL
+        END
+        WHERE weekday_cohort_id IS NULL
+          AND COALESCE(weekday_cohort_manual, false) = false;
+      `);
+
+      isCohortTableReady = true;
+    } catch (err: any) {
+      if (err?.code !== '40P01') {
+        console.warn('Cohort schedule tables init warning (non-fatal):', err?.message || err);
+      }
+    } finally {
+      cohortTableInitPromise = null;
+    }
+  })();
+
+  return cohortTableInitPromise;
+}
+ensureCohortScheduleTables();
+
+// Public zero-PII Cohort Schedule Lookup for Students beside the Orbit Hub
+app.get(['/api/cohorts/lookup', '/cohorts/lookup'], async (req, res) => {
+  await ensureCohortScheduleTables().catch(() => {});
+  const rawQuery = typeof req.query.q === 'string' ? req.query.q.slice(0, 120) : '';
+
+  try {
+    const result = await pool.query(`
+      SELECT id, code, title, organization, weekday_index, weekday_fa, aliases,
+             reviewed_modules, next_modules, instructor_note, updated_at
+      FROM cohort_schedules
+      ORDER BY CASE weekday_index
+        WHEN 0 THEN 1
+        WHEN 1 THEN 2
+        WHEN 3 THEN 3
+        WHEN 4 THEN 4
+        ELSE 9
+      END ASC;
+    `);
+
+    const allCohorts = result.rows.map(mapCohortScheduleRow);
+    const normalizedQuery = normalizeServerPersianQuery(rawQuery);
+
+    if (!normalizedQuery) {
+      return res.json({ cohorts: allCohorts });
+    }
+
+    const queryTokens = normalizedQuery.split(' ').filter((t) => t.length >= 1);
+    const scored = allCohorts
+      .map((cohort) => {
+        const haystacks = [
+          cohort.title,
+          cohort.organization,
+          cohort.weekdayFa,
+          cohort.code,
+          ...(cohort.aliases || [])
+        ]
+          .map(normalizeServerPersianQuery)
+          .filter(Boolean);
+
+        const combined = haystacks.join(' ');
+        let score = 0;
+        if (haystacks.some((h) => h === normalizedQuery)) score = 100;
+        else if (haystacks.some((h) => h.startsWith(normalizedQuery))) score = 80;
+        else if (haystacks.some((h) => h.includes(normalizedQuery))) score = 65;
+        else if (queryTokens.length > 0 && queryTokens.every((tok) => combined.includes(tok))) score = 50;
+
+        return { cohort, score };
+      })
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    return res.json({ cohorts: scored.map((s) => s.cohort) });
+  } catch (err: any) {
+    console.warn('Error in /api/cohorts/lookup:', err?.message || err);
+    return res.json({
+      cohorts: SEED_WEEKDAY_COHORTS.map((c) => ({
+        ...c,
+        reviewedModules: [],
+        nextModules: [],
+        instructorNote: ''
+      }))
+    });
+  }
+});
+
+// Admin: Get all weekday cohorts, member rosters (classified by first entry day), and module schedules
+app.get(['/api/admin/cohorts/schedule', '/admin/cohorts/schedule'], async (req, res) => {
+  await ensureCohortScheduleTables().catch(() => {});
+  if (!verifyAdmin(req)) {
+    return res.status(403).json({ error: 'دسترسی غیرمجاز: این بخش مختص مدیریت ارشد سامانه است.' });
+  }
+
+  try {
+    // Ensure newly registered users without manual overrides are classified automatically
+    await pool.query(`
+      UPDATE users
+      SET weekday_cohort_id = CASE EXTRACT(DOW FROM created_at AT TIME ZONE 'Asia/Tehran')::int
+        WHEN 1 THEN 'cohort_mon_hera'
+        WHEN 3 THEN 'cohort_wed_damavand_tehran'
+        WHEN 4 THEN 'cohort_thu_paya_damavand'
+        WHEN 0 THEN 'cohort_sun_damavand_asaluyeh'
+        ELSE NULL
+      END
+      WHERE weekday_cohort_id IS NULL
+        AND COALESCE(weekday_cohort_manual, false) = false;
+    `);
+
+    const cohortsRes = await pool.query(`
+      SELECT id, code, title, organization, weekday_index, weekday_fa, aliases,
+             reviewed_modules, next_modules, instructor_note, updated_at
+      FROM cohort_schedules
+      ORDER BY CASE weekday_index
+        WHEN 0 THEN 1
+        WHEN 1 THEN 2
+        WHEN 3 THEN 3
+        WHEN 4 THEN 4
+        ELSE 9
+      END ASC;
+    `);
+
+    const usersRes = await pool.query(`
+      SELECT id, email, display_name, phone, specialty, role, created_at,
+             weekday_cohort_id, weekday_cohort_manual
+      FROM users
+      ORDER BY created_at ASC;
+    `);
+
+    const usersByCohort: Record<string, any[]> = {};
+    for (const row of cohortsRes.rows) {
+      usersByCohort[row.id] = [];
+    }
+    const unmatchedUsers: any[] = [];
+
+    for (const u of usersRes.rows) {
+      const dow = getServerTehranDow(u.created_at);
+      const mapped = {
+        id: u.id,
+        email: u.email,
+        fullName: u.display_name || u.email?.split('@')[0] || 'کاربر گرامی',
+        phone: u.phone || null,
+        specialty: u.specialty || null,
+        role: u.role || 'user',
+        createdAt: u.created_at,
+        weekdayCohortId: u.weekday_cohort_id || null,
+        weekdayCohortManual: !!u.weekday_cohort_manual,
+        resolvedCohortId: u.weekday_cohort_id && usersByCohort[u.weekday_cohort_id] ? u.weekday_cohort_id : null,
+        firstEntryWeekdayIndex: dow,
+        firstEntryWeekdayFa: dow !== null ? SERVER_PERSIAN_WEEKDAYS[dow] : 'نامشخص'
+      };
+
+      if (mapped.resolvedCohortId && usersByCohort[mapped.resolvedCohortId]) {
+        usersByCohort[mapped.resolvedCohortId].push(mapped);
+      } else {
+        unmatchedUsers.push(mapped);
+      }
+    }
+
+    const cohorts = cohortsRes.rows.map((row: any) => ({
+      ...mapCohortScheduleRow(row),
+      studentCount: (usersByCohort[row.id] || []).length
+    }));
+
+    return res.json({
+      cohorts,
+      usersByCohort,
+      unmatchedUsers,
+      totalUsers: usersRes.rows.length
+    });
+  } catch (err: any) {
+    console.error('Error in GET /api/admin/cohorts/schedule:', err);
+    return res.status(500).json({ error: 'خطا در خوانش برنامه‌ریزی کلاس‌ها از پایگاه داده.' });
+  }
+});
+
+// Admin: Re-run automatic first-entry Tehran weekday classification and persist in DB
+app.post(['/api/admin/cohorts/sync-by-weekday', '/admin/cohorts/sync-by-weekday'], async (req, res) => {
+  await ensureCohortScheduleTables().catch(() => {});
+  if (!verifyAdmin(req)) {
+    return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
+  }
+
+  const resetManual = Boolean(req.body?.resetManual);
+
+  try {
+    const sql = resetManual
+      ? `
+        UPDATE users
+        SET weekday_cohort_id = CASE EXTRACT(DOW FROM created_at AT TIME ZONE 'Asia/Tehran')::int
+              WHEN 1 THEN 'cohort_mon_hera'
+              WHEN 3 THEN 'cohort_wed_damavand_tehran'
+              WHEN 4 THEN 'cohort_thu_paya_damavand'
+              WHEN 0 THEN 'cohort_sun_damavand_asaluyeh'
+              ELSE NULL
+            END,
+            weekday_cohort_manual = false,
+            updated_at = NOW();
+      `
+      : `
+        UPDATE users
+        SET weekday_cohort_id = CASE EXTRACT(DOW FROM created_at AT TIME ZONE 'Asia/Tehran')::int
+              WHEN 1 THEN 'cohort_mon_hera'
+              WHEN 3 THEN 'cohort_wed_damavand_tehran'
+              WHEN 4 THEN 'cohort_thu_paya_damavand'
+              WHEN 0 THEN 'cohort_sun_damavand_asaluyeh'
+              ELSE NULL
+            END,
+            updated_at = NOW()
+        WHERE COALESCE(weekday_cohort_manual, false) = false;
+      `;
+
+    const updateRes = await pool.query(sql);
+    return res.json({
+      success: true,
+      updatedCount: updateRes.rowCount || 0
+    });
+  } catch (err: any) {
+    console.error('Error in POST /api/admin/cohorts/sync-by-weekday:', err);
+    return res.status(500).json({ error: 'خطا در همگام‌سازی خودکار کاربران بر اساس روز ورود.' });
+  }
+});
+
+// Admin: Save reviewed modules, next-class modules, and instructor note for a weekday cohort
+app.post(['/api/admin/cohorts/schedule', '/admin/cohorts/schedule'], async (req, res) => {
+  await ensureCohortScheduleTables().catch(() => {});
+  if (!verifyAdmin(req)) {
+    return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
+  }
+
+  const { cohortId, reviewedModules, nextModules, instructorNote, title, organization, aliases } = req.body || {};
+  if (!cohortId || typeof cohortId !== 'string') {
+    return res.status(400).json({ error: 'شناسه کلاس الزامی است.' });
+  }
+
+  const cleanReviewed = sanitizeServerModuleIds(reviewedModules);
+  const cleanNext = sanitizeServerModuleIds(nextModules);
+  const cleanNote = typeof instructorNote === 'string' ? instructorNote.trim().slice(0, 500) : '';
+  const cleanTitle = typeof title === 'string' && title.trim() ? title.trim().slice(0, 200) : null;
+  const cleanOrg = typeof organization === 'string' && organization.trim() ? organization.trim().slice(0, 200) : null;
+  const cleanAliases = Array.isArray(aliases)
+    ? aliases
+        .filter((a: unknown): a is string => typeof a === 'string' && a.trim().length > 0)
+        .map((a: string) => a.trim().slice(0, 80))
+        .slice(0, 25)
+    : null;
+
+  try {
+    const result = await pool.query(
+      `UPDATE cohort_schedules
+       SET reviewed_modules = $1::jsonb,
+           next_modules = $2::jsonb,
+           instructor_note = $3,
+           title = COALESCE($4, title),
+           organization = COALESCE($5, organization),
+           aliases = COALESCE($6::jsonb, aliases),
+           updated_at = NOW()
+       WHERE id = $7
+       RETURNING *;`,
+      [
+        JSON.stringify(cleanReviewed),
+        JSON.stringify(cleanNext),
+        cleanNote,
+        cleanTitle,
+        cleanOrg,
+        cleanAliases ? JSON.stringify(cleanAliases) : null,
+        cohortId
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'کلاس مورد نظر در پایگاه داده یافت نشد.' });
+    }
+
+    return res.json({
+      success: true,
+      cohort: mapCohortScheduleRow(result.rows[0])
+    });
+  } catch (err: any) {
+    console.error('Error in POST /api/admin/cohorts/schedule:', err);
+    return res.status(500).json({ error: 'خطا در ذخیره برنامه ماژول‌های کلاس.' });
+  }
+});
+
+// Admin: Manually reassign a user to one of the 4 weekday cohorts (or clear assignment)
+app.post(['/api/admin/cohorts/assign-user', '/admin/cohorts/assign-user'], async (req, res) => {
+  await ensureCohortScheduleTables().catch(() => {});
+  if (!verifyAdmin(req)) {
+    return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
+  }
+
+  const { userId, cohortId } = req.body || {};
+  if (!userId || typeof userId !== 'string') {
+    return res.status(400).json({ error: 'شناسه کاربر الزامی است.' });
+  }
+
+  const normalizedCohortId =
+    typeof cohortId === 'string' && cohortId.trim() && cohortId !== 'UNMATCHED'
+      ? cohortId.trim()
+      : null;
+
+  try {
+    if (normalizedCohortId) {
+      const checkCohort = await pool.query('SELECT id FROM cohort_schedules WHERE id = $1 LIMIT 1;', [
+        normalizedCohortId
+      ]);
+      if (checkCohort.rows.length === 0) {
+        return res.status(400).json({ error: 'کلاس انتخاب‌شده معتبر نیست.' });
+      }
+    }
+
+    const result = await pool.query(
+      `UPDATE users
+       SET weekday_cohort_id = $1,
+           weekday_cohort_manual = true,
+           updated_at = NOW()
+       WHERE id = $2
+       RETURNING id, weekday_cohort_id, weekday_cohort_manual;`,
+      [normalizedCohortId, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'کاربر یافت نشد.' });
+    }
+
+    return res.json({
+      success: true,
+      user: result.rows[0]
+    });
+  } catch (err: any) {
+    console.error('Error in POST /api/admin/cohorts/assign-user:', err);
+    return res.status(500).json({ error: 'خطا در تخصیص کاربر به کلاس.' });
+  }
+});
+
 // Health Check Endpoint (supports both /api/health and /health)
 app.get(['/api/health', '/health'], async (req, res) => {
   try {

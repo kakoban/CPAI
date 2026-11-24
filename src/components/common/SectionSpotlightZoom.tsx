@@ -1,8 +1,18 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { ZoomIn, ZoomOut, RotateCcw, ScanSearch, X, Crosshair } from 'lucide-react';
+import {
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  ScanSearch,
+  X,
+  Crosshair,
+  ChevronRight,
+  ChevronLeft
+} from 'lucide-react';
 import { Language } from '../../types/cpmai';
 import { playTactileSound } from '../../utils/uiSoundEffects';
+import { findMatchingDomPeers, resolvePeerStepDelta } from '../../utils/spotlightPeers';
 
 interface SectionSpotlightZoomProps {
   containerRef: React.RefObject<HTMLElement | null>;
@@ -29,6 +39,11 @@ interface SpotlightSnapshot {
   needsSurfaceBg: boolean;
   borderRadius: string;
   autoZoom: number;
+}
+
+interface PeerNavState {
+  peers: HTMLElement[];
+  currentIndex: number;
 }
 
 function isTransparentColor(color: string | null | undefined): boolean {
@@ -133,7 +148,7 @@ function buildSpotlightSnapshot(target: HTMLElement): SpotlightSnapshot {
   const origHeight = Math.max(60, Math.round(rect.height));
 
   // Smart auto-zoom: enlarge small/medium cards dramatically while fitting comfortably inside viewport
-  const maxStageW = window.innerWidth * 0.86;
+  const maxStageW = window.innerWidth * 0.82;
   const maxStageH = window.innerHeight * 0.74;
   const fitByW = maxStageW / origWidth;
   const fitByH = maxStageH / origHeight;
@@ -164,8 +179,11 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
   const isFa = lang === 'fa';
   const [hoverRect, setHoverRect] = useState<HighlightRect | null>(null);
   const [snapshot, setSnapshot] = useState<SpotlightSnapshot | null>(null);
+  const [peerNav, setPeerNav] = useState<PeerNavState>({ peers: [], currentIndex: 0 });
   const [zoomLevel, setZoomLevel] = useState<number>(1.3);
+  const [hasManualZoom, setHasManualZoom] = useState<boolean>(false);
   const [isEntered, setIsEntered] = useState<boolean>(false);
+  const [stepShiftPx, setStepShiftPx] = useState<number>(0);
   const hoveredElRef = useRef<HTMLElement | null>(null);
   const cloneHostRef = useRef<HTMLDivElement | null>(null);
 
@@ -182,9 +200,17 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
   const openSpotlightForElement = useCallback(
     (target: HTMLElement) => {
       playTactileSound('thock');
+      const root = containerRef.current;
+      const discovered = root
+        ? findMatchingDomPeers(target, root)
+        : { peers: [target], currentIndex: 0 };
+
       const snap = buildSpotlightSnapshot(target);
+      setPeerNav(discovered);
       setSnapshot(snap);
       setZoomLevel(snap.autoZoom);
+      setHasManualZoom(false);
+      setStepShiftPx(0);
       setHoverRect(null);
       hoveredElRef.current = null;
       onPickModeChange(false);
@@ -195,7 +221,40 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
         });
       });
     },
-    [onPickModeChange]
+    [containerRef, onPickModeChange]
+  );
+
+  const navigatePeer = useCallback(
+    (delta: -1 | 1) => {
+      const { peers, currentIndex } = peerNav;
+      if (peers.length <= 1) return;
+      const nextIndex = currentIndex + delta;
+      if (nextIndex < 0 || nextIndex >= peers.length) return;
+
+      const nextEl = peers[nextIndex];
+      if (!nextEl || !document.contains(nextEl)) return;
+
+      playTactileSound('switch');
+      // Keep the underlying blurred page subtly aligned with the newly spotlighted peer
+      try {
+        nextEl.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      } catch {
+        // ignore scroll errors in older browsers
+      }
+
+      const snap = buildSpotlightSnapshot(nextEl);
+      const dirSign = isFa ? -1 : 1;
+      setStepShiftPx(delta * dirSign * 26);
+      setPeerNav({ peers, currentIndex: nextIndex });
+      setSnapshot(snap);
+      if (!hasManualZoom) {
+        setZoomLevel(snap.autoZoom);
+      }
+      requestAnimationFrame(() => {
+        setStepShiftPx(0);
+      });
+    },
+    [peerNav, hasManualZoom, isFa]
   );
 
   const closeSpotlight = useCallback(() => {
@@ -203,6 +262,9 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
     setIsEntered(false);
     setTimeout(() => {
       setSnapshot(null);
+      setPeerNav({ peers: [], currentIndex: 0 });
+      setHasManualZoom(false);
+      setStepShiftPx(0);
     }, 170);
   }, []);
 
@@ -290,7 +352,7 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
     }
   }, [isPickMode]);
 
-  // Lock background scrolling & handle Escape / +/- keyboard controls while Spotlight or Pick Mode is open
+  // Lock background scrolling & handle Escape / +/- / Peer Arrow keyboard controls
   useEffect(() => {
     if (!snapshot && !isPickMode) return;
 
@@ -308,14 +370,30 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
         } else if (isPickMode) {
           onPickModeChange(false);
         }
-      } else if (snapshot && (e.key === '+' || e.key === '=')) {
+        return;
+      }
+
+      if (!snapshot) return;
+
+      const stepDelta = resolvePeerStepDelta(e.key, isFa ? 'rtl' : 'ltr');
+      if (stepDelta !== 0 && peerNav.peers.length > 1) {
         e.preventDefault();
+        e.stopPropagation();
+        navigatePeer(stepDelta);
+        return;
+      }
+
+      if (e.key === '+' || e.key === '=') {
+        e.preventDefault();
+        setHasManualZoom(true);
         setZoomLevel((z) => Math.min(2.2, Number((z + 0.15).toFixed(2))));
-      } else if (snapshot && (e.key === '-' || e.key === '_')) {
+      } else if (e.key === '-' || e.key === '_') {
         e.preventDefault();
+        setHasManualZoom(true);
         setZoomLevel((z) => Math.max(1.0, Number((z - 0.15).toFixed(2))));
-      } else if (snapshot && e.key === '0') {
+      } else if (e.key === '0') {
         e.preventDefault();
+        setHasManualZoom(false);
         setZoomLevel(snapshot.autoZoom);
       }
     };
@@ -327,7 +405,7 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
       }
       window.removeEventListener('keydown', handleKeyDown, true);
     };
-  }, [snapshot, isPickMode, closeSpotlight, onPickModeChange]);
+  }, [snapshot, isPickMode, closeSpotlight, onPickModeChange, peerNav.peers.length, navigatePeer, isFa]);
 
   if (typeof document === 'undefined') return null;
 
@@ -335,6 +413,10 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
   const viewportCenterY = typeof window !== 'undefined' ? window.innerHeight / 2 : 450;
   const initDx = snapshot ? Math.max(-320, Math.min(320, snapshot.originCenterX - viewportCenterX)) : 0;
   const initDy = snapshot ? Math.max(-220, Math.min(220, snapshot.originCenterY - viewportCenterY)) : 0;
+
+  const hasPeers = peerNav.peers.length > 1;
+  const canGoPrev = hasPeers && peerNav.currentIndex > 0;
+  const canGoNext = hasPeers && peerNav.currentIndex < peerNav.peers.length - 1;
 
   return createPortal(
     <>
@@ -347,7 +429,6 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
             dir={isFa ? 'rtl' : 'ltr'}
             className="fixed top-4 left-1/2 -translate-x-1/2 z-[85] px-4 py-2 rounded-full bg-slate-900/95 dark:bg-slate-950/95 text-white border border-sky-400/40 shadow-2xl backdrop-blur-md flex items-center gap-3 text-xs animate-fadeIn max-w-[94vw]"
           >
-            <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse shrink-0" />
             <Crosshair className="w-3.5 h-3.5 text-sky-300 shrink-0" />
             <span className="font-bold truncate">
               {isFa
@@ -403,14 +484,49 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
               : 'bg-slate-950/0 backdrop-blur-none opacity-0'
           }`}
         >
+          {/* Side Peer-Stepping Chevrons (for effortless lecture presentation across matching cards) */}
+          {hasPeers && (
+            <>
+              <button
+                type="button"
+                data-testid="spotlight-side-right"
+                aria-label={isFa ? 'بخش هم‌ردیف قبلی' : 'Next peer item'}
+                disabled={isFa ? !canGoPrev : !canGoNext}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigatePeer(isFa ? -1 : 1);
+                }}
+                className="hidden sm:flex fixed right-5 top-1/2 -translate-y-1/2 z-[98] w-11 h-11 rounded-full bg-slate-900/90 hover:bg-[#1f5163] disabled:opacity-25 disabled:cursor-not-allowed text-white border border-white/20 shadow-xl items-center justify-center transition-colors cursor-pointer"
+                title={isFa ? 'بخش قبلی هم‌ردیف (→)' : 'Next peer (→)'}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+
+              <button
+                type="button"
+                data-testid="spotlight-side-left"
+                aria-label={isFa ? 'بخش هم‌ردیف بعدی' : 'Previous peer item'}
+                disabled={isFa ? !canGoNext : !canGoPrev}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigatePeer(isFa ? 1 : -1);
+                }}
+                className="hidden sm:flex fixed left-5 top-1/2 -translate-y-1/2 z-[98] w-11 h-11 rounded-full bg-slate-900/90 hover:bg-[#1f5163] disabled:opacity-25 disabled:cursor-not-allowed text-white border border-white/20 shadow-xl items-center justify-center transition-colors cursor-pointer"
+                title={isFa ? 'بخش بعدی هم‌ردیف (←)' : 'Previous peer (←)'}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            </>
+          )}
+
           {/* Isolated Pop-Out Element Container */}
           <div
             data-testid="spotlight-zoom-stage"
             onClick={(e) => e.stopPropagation()}
-            className="relative max-w-[92vw] max-h-[80vh] overflow-auto rounded-2xl shadow-[0_32px_90px_-15px_rgba(0,0,0,0.65)] ring-1 ring-white/25 dark:ring-sky-400/25 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            className="relative max-w-[88vw] max-h-[80vh] overflow-auto rounded-2xl shadow-[0_32px_90px_-15px_rgba(0,0,0,0.65)] ring-1 ring-white/25 dark:ring-sky-400/25 transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
             style={{
               transform: isEntered
-                ? 'translate3d(0, 0, 0) scale(1)'
+                ? `translate3d(${stepShiftPx}px, 0, 0) scale(1)`
                 : `translate3d(${initDx * 0.25}px, ${initDy * 0.25}px, 0) scale(0.88)`,
               opacity: isEntered ? 1 : 0.3
             }}
@@ -433,7 +549,7 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
             />
           </div>
 
-          {/* Floating Bottom Studio Zoom Control Dock */}
+          {/* Floating Bottom Studio Zoom & Peer Navigation Control Dock */}
           <div
             data-testid="spotlight-zoom-controls"
             dir={isFa ? 'rtl' : 'ltr'}
@@ -442,11 +558,52 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
               isEntered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
             }`}
           >
+            {/* Same-Size / Same-Component Peer Stepper */}
+            {hasPeers && (
+              <>
+                <button
+                  type="button"
+                  data-testid="spotlight-peer-prev"
+                  onClick={() => navigatePeer(-1)}
+                  disabled={!canGoPrev}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 hover:bg-[#1f5163] disabled:opacity-35 disabled:cursor-not-allowed text-white text-xs font-bold transition-colors cursor-pointer whitespace-nowrap"
+                  title={isFa ? 'بخش هم‌ردیف قبلی (→)' : 'Previous peer (←)'}
+                >
+                  {isFa ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+                  <span>{isFa ? 'قبلی' : 'Prev'}</span>
+                </button>
+
+                <span
+                  data-testid="spotlight-peer-counter"
+                  className="px-2 py-0.5 text-xs font-bold text-sky-200 tabular-nums whitespace-nowrap"
+                >
+                  {isFa
+                    ? `${peerNav.currentIndex + 1} از ${peerNav.peers.length}`
+                    : `${peerNav.currentIndex + 1} / ${peerNav.peers.length}`}
+                </span>
+
+                <button
+                  type="button"
+                  data-testid="spotlight-peer-next"
+                  onClick={() => navigatePeer(1)}
+                  disabled={!canGoNext}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 hover:bg-[#1f5163] disabled:opacity-35 disabled:cursor-not-allowed text-white text-xs font-bold transition-colors cursor-pointer whitespace-nowrap"
+                  title={isFa ? 'بخش هم‌ردیف بعدی (←)' : 'Next peer (→)'}
+                >
+                  <span>{isFa ? 'بعدی' : 'Next'}</span>
+                  {isFa ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                </button>
+
+                <span aria-hidden="true" className="w-px h-4 bg-white/15 mx-0.5" />
+              </>
+            )}
+
             <button
               type="button"
               data-testid="spotlight-zoom-out"
               onClick={() => {
                 playTactileSound('switch');
+                setHasManualZoom(true);
                 setZoomLevel((z) => Math.max(1.0, Number((z - 0.15).toFixed(2))));
               }}
               disabled={zoomLevel <= 1.0}
@@ -461,6 +618,7 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
               data-testid="spotlight-zoom-reset"
               onClick={() => {
                 playTactileSound('switch');
+                setHasManualZoom(false);
                 setZoomLevel(snapshot.autoZoom);
               }}
               dir="ltr"
@@ -475,6 +633,7 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
               data-testid="spotlight-zoom-in"
               onClick={() => {
                 playTactileSound('switch');
+                setHasManualZoom(true);
                 setZoomLevel((z) => Math.min(2.2, Number((z + 0.15).toFixed(2))));
               }}
               disabled={zoomLevel >= 2.2}
@@ -492,10 +651,11 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
               onClick={() => {
                 playTactileSound('switch');
                 setSnapshot(null);
+                setPeerNav({ peers: [], currentIndex: 0 });
                 setIsEntered(false);
                 onPickModeChange(true);
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/20 hover:bg-sky-500/35 border border-sky-400/35 text-sky-200 text-xs font-bold transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/20 hover:bg-sky-500/35 border border-sky-400/35 text-sky-200 text-xs font-bold transition-colors cursor-pointer whitespace-nowrap"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>{isFa ? 'انتخاب بخش دیگر' : 'Pick Another'}</span>
@@ -505,7 +665,7 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
               type="button"
               data-testid="spotlight-close-btn"
               onClick={closeSpotlight}
-              className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/15 hover:bg-rose-500/80 text-white text-xs font-bold transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/15 hover:bg-rose-500/80 text-white text-xs font-bold transition-colors cursor-pointer whitespace-nowrap"
             >
               <X className="w-3.5 h-3.5" />
               <span>{isFa ? 'بستن (Esc)' : 'Close'}</span>
@@ -517,3 +677,4 @@ export const SectionSpotlightZoom: React.FC<SectionSpotlightZoomProps> = ({
     document.body
   );
 };
+
