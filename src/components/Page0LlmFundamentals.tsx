@@ -77,6 +77,7 @@ import { PayaHoldingArtifactSimulator } from './PayaHoldingArtifactSimulator';
 import { HrArtifactsCanvasWorkshop } from './HrArtifactsCanvasWorkshop';
 import { ClaudeEnterpriseConnectors } from './connectors/ClaudeEnterpriseConnectors';
 import { ObsidianBrainSkillsWorkshop } from './obsidian/ObsidianBrainSkillsWorkshop';
+import { DatabaseCrudWorkshop } from './DatabaseCrudWorkshop';
 import { ModuleExercisesView } from './ModuleExercisesView';
 import {
   getModuleExerciseDeck,
@@ -1305,6 +1306,7 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     | 'obsidian_brain'
     | 's5_orchestration'
     | 'masterclass'
+    | 's5_database_crud'
     | 's5_vibecoding'
   >('s1_demo');
   const [isSandboxOpen, setIsSandboxOpen] = useState<boolean>(false);
@@ -1810,9 +1812,18 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
           subEn: 'Deep Technical Reasoning Workflows'
         },
         {
-          id: 's5_vibecoding' as const,
+          id: 's5_database_crud' as const,
           sessionId: 's5' as const,
           num: '۵-۳',
+          titleFa: 'ساختارسازی داده، انتخاب پایگاه داده و عملیات دائمی (CRUD)',
+          subFa: '۸ خانواده دیتابیس، قوانین CPMAI، حذف نرم و مینی‌اپ زنده CRUD',
+          titleEn: 'Data Structuring, Database Selection & Persistent CRUD',
+          subEn: 'PMI-CPMAI Phase III · 8 DB Families, Soft Delete & Live CRUD Lab'
+        },
+        {
+          id: 's5_vibecoding' as const,
+          sessionId: 's5' as const,
+          num: '۵-۴',
           titleFa: 'پل ورود به Vibe Coding؛ فردا چه می‌کنیم؟',
           subFa: 'انتقال مغز AI، اسکیل‌ها و MCP به محیط IDE حرفه‌ای',
           titleEn: 'Bridge to Vibe Coding',
@@ -6495,12 +6506,22 @@ Tasks:
         />
       )}
 
-      {/* SESSION 5 - MODULE 5-3: BRIDGE TO VIBE CODING */}
+      {/* SESSION 5 - MODULE 5-3: DATA STRUCTURING, DATABASE SELECTION & CRUD */}
+      {(activeTab === 'all' || activeTab === 's5_database_crud') && (
+        <DatabaseCrudWorkshop
+          industryTrack={industryTrack}
+          onLoadToSandbox={loadPromptToSandbox}
+          copyToClipboard={copyToClipboard}
+          copiedId={copiedId}
+        />
+      )}
+
+      {/* SESSION 5 - MODULE 5-4: BRIDGE TO VIBE CODING */}
       {(activeTab === 'all' || activeTab === 's5_vibecoding') && (
         <section className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#173642] via-[#1f5163] to-[#132933] text-white border border-[#e0533c]/40 shadow-md space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/15">
             <div className="flex items-center gap-2.5">
-              <span className="px-2.5 py-1 rounded-lg bg-[#e0533c] text-white text-xs font-black shrink-0">۵-۳</span>
+              <span className="px-2.5 py-1 rounded-lg bg-[#e0533c] text-white text-xs font-black shrink-0">۵-۴</span>
               <div>
                 <h2 className="text-sm sm:text-base font-black text-white">
                   پل ورود به Vibe Coding؛ فردا قرار است چه کار کنیم؟ (۱.۵ ساعت)

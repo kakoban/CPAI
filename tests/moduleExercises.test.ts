@@ -28,10 +28,11 @@ const ALL_EXPECTED_PAGE0_MODULES = [
   'obsidian_brain',
   's5_orchestration',
   'masterclass',
+  's5_database_crud',
   's5_vibecoding'
 ];
 
-test('every Page 0 module (all 21) has a dedicated custom exercise deck', () => {
+test('every Page 0 module (all 22) has a dedicated custom exercise deck', () => {
   const registeredIds = getAllModuleExerciseIds();
   for (const moduleId of ALL_EXPECTED_PAGE0_MODULES) {
     assert.ok(
@@ -73,7 +74,7 @@ test('all exercises have unique IDs and complete custom fields', () => {
       assert.ok(ex.estimatedMinutes >= 5 && ex.estimatedMinutes <= 60);
     }
   }
-  assert.ok(seenExerciseIds.size >= 42);
+  assert.ok(seenExerciseIds.size >= 44);
 });
 
 test('exercise completion counters return exact module counts', () => {

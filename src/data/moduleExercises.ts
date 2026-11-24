@@ -1222,8 +1222,73 @@ description: ممیزی گزارش پیشرفت ماهانه و کشف مغای�
     ]
   },
 
-  s5_vibecoding: {
+  s5_database_crud: {
     moduleNum: '۵-۳',
+    moduleTitleFa: 'ساختارسازی داده، انتخاب پایگاه داده و عملیات دائمی (CRUD)',
+    workshopGoalFa:
+      'طراحی اسکیما تمیز بدون PII مطابق فاز سوم PMI-CPMAI، اجرای مینی‌اپ CRUD با حذف نرم و تحویل فایل‌های schema.sql و 05_data_selection_and_schema.md در گیت‌هاب',
+    exercises: [
+      {
+        id: 'ex_db_crud_1',
+        moduleId: 's5_database_crud',
+        stepBadgeFa: 'تمرین ۱ از ۲',
+        titleFa: 'پاک‌سازی جدول خام، حذف ستون‌های PII و تولید فایل `schema.sql`',
+        titleEn: 'Clean Raw Table, Strip PII & Generate schema.sql',
+        difficultyFa: 'عملیاتی',
+        estimatedMinutes: 20,
+        scenarioFa:
+          'یک فایل اکسل گزارش‌های روزانه فنی دارید که شامل نام کامل، شماره موبایل، تاریخ، دسته‌بندی، شرح مشکل، وضعیت و یادداشت‌های متفرقه است. پیش از ساخت دیتابیس، باید مطابق فاز سوم CPMAI ستون‌های حساس را حذف، اسکیما را با ستون id و قیدهای NOT NULL/CHECK تعریف و دلیل هر تصمیم را مستند کنید.',
+        stepsFa: [
+          'در تب ۲ کارگاه، ستون‌های PII (نام کامل و شماره موبایل) را غیرفعال کنید و دلیل حذف (Rationale) هر کدام را بازبینی کنید.',
+          'در سطح سطری تب ۲، رکوردهای تستی و ناقص را با حذف نرم (Soft Delete) و دلیل شفاف کنار بگذارید.',
+          'در تب ۳ موتور مورد نظر خود (SQLite یا PostgreSQL) را انتخاب کرده و فایل پویای schema.sql و گزارش 05_data_selection_and_schema.md را دانلود و در ریپازیتوری گیت‌هاب پروژه Commit کنید.'
+        ],
+        deliverableFa:
+          'فایل‌های schema.sql و 05_data_selection_and_schema.md ثبت‌شده در ریپازیتوری گیت‌هاب پروژه',
+        promptStarterFa: `جدول گزارش‌های روزانه واحد من را با نام technical_reports و مطابق استاندارد PMI-CPMAI فاز سوم طراحی کن.
+۱) ستون اول حتماً id (کلید اصلی افزایشی) باشد و هیچ ستون PII (نام کامل، کدملی، موبایل) ذخیره نشود.
+۲) ستون‌های title، report_date (ISO)، category، description، status ('باز'|'در حال پیگیری'|'بسته‌شده')، extra_metadata (JSON/JSONB)، is_deleted (پیش‌فرض FALSE)، exclusion_reason، created_at و updated_at را با قیدهای NOT NULL و CHECK بنویس.
+۳) هر ستون و قید را به فارسی ساده در یک خط توضیح بده.`,
+        selfCheckCriteriaFa: [
+          'هیچ ستون PII غیرضروری در فایل schema.sql وجود ندارد و ستون id اولین ستون جدول است.',
+          'قیدهای NOT NULL و CHECK روی title، description، category، status و exclusion_reason اعمال شده‌اند.',
+          'جدول توجیه شمول/حذف ستونی و سطری در فایل 05_data_selection_and_schema.md تکمیل شده است.'
+        ]
+      },
+      {
+        id: 'ex_db_crud_2',
+        moduleId: 's5_database_crud',
+        stepBadgeFa: 'تمرین ۲ از ۲',
+        titleFa: 'اجرای کارگاه CRUD، حذف نرم (Soft Delete) و آزمون ۴ مرحله‌ای شفافیت JSON',
+        titleEn: 'Run Live CRUD Lab, Soft Delete & 4-Step Transparency Test',
+        difficultyFa: 'پیشرفته',
+        estimatedMinutes: 25,
+        scenarioFa:
+          'برای اطمینان از اینکه سیستم مدیریت داده شما هم مانع ورود داده‌های خراب می‌شود و هم خروجی تمیز برای هوش مصنوعی تولید می‌کند، باید هر ۴ تست پذیرش کارگاه را به‌صورت واقعی اجرا و بررسی کنید.',
+        stepsFa: [
+          'در مینی‌اپ زنده تب ۳ (یا اپلیکیشن ساخته‌شده با پرامپت ۲)، یک بار فرم را با عنوان خالی ارسال کنید تا قید اعتبارسنجی جلوی ثبت آن را بگیرد.',
+          'یک گزارش معتبر با تاریخ، ویژگی کلید-مقدار در extra_metadata و شرح کامل ثبت کنید، سپس آن را ویرایش کرده و با رفرش کردن صفحه ماندگاری آن را تأیید کنید.',
+          'یک رکورد را با دکمه «حذف نرم» و وارد کردن دلیل مشخص (exclusion_reason) کنار بگذارید و مطمئن شوید فوراً از پنل پیش‌نمایش زنده JSON تمیز و فایل دانلودی حذف شده است.'
+        ],
+        deliverableFa:
+          'تکمیل ۴ تیک چک‌لیست تست کارگاه + فایل خروجی تمیز technical_reports_clean.json بدون رکوردهای حذف‌شده',
+        promptStarterFa: `با استفاده از قرارداد جدول technical_reports (شامل id، title، report_date، category، description، status، extra_metadata، is_deleted، exclusion_reason، created_at، updated_at) یک مینی‌اپ فارسی RTL با ۵ قابلیت بساز:
+۱) ثبت رکورد با اعتبارسنجی فیلدهای خالی و ورودی ساده کلید-مقدار برای extra_metadata
+۲) مشاهده و فیلتر با کلید نمایش رکوردهای حذف‌شده
+۳) ویرایش رکورد با بروزرسانی خودکار updated_at
+۴) حذف نرم اجباری با مودال ثبت exclusion_reason
+۵) جعبه شفافیت زنده شامل کوئری SQL فعال و پیش‌نمایش/دانلود JSON تمیز (WHERE is_deleted = FALSE).`,
+        selfCheckCriteriaFa: [
+          'ارسال فرم با عنوان یا شرح خالی متوقف شده و پیام خطای واضح نمایش داده شده است.',
+          'تغییرات پس از ویرایش و رفرش مرورگر به‌صورت دائمی حفظ شده‌اند.',
+          'رکورد حذف‌نرم‌شده همچنان در دیتابیس با دلیل کنارگذاری قابل بازیابی است اما در JSON تمیز وجود ندارد.'
+        ]
+      }
+    ]
+  },
+
+  s5_vibecoding: {
+    moduleNum: '۵-۴',
     moduleTitleFa: 'پل ورود به Vibe Coding؛ فردا چه می‌کنیم؟',
     workshopGoalFa: 'تدوین سند مشخصات مهندسی محصول (SPEC.md) برای ورود آماده به Vibe Coding و فاز اول CPMAI',
     exercises: [
