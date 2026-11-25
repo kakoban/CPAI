@@ -54,6 +54,7 @@ interface AuthModalProps {
   currentUser: UserProfile | null;
   onLoginSuccess: (user: UserProfile) => void;
   onLogout: () => void;
+  blockingGate?: boolean;
 }
 
 declare global {
@@ -68,7 +69,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   lang,
   currentUser,
   onLoginSuccess,
-  onLogout
+  onLogout,
+  blockingGate = false
 }) => {
   const [authTab, setAuthTab] = useState<'google' | 'email'>('email');
   const [emailInput, setEmailInput] = useState<string>('');
@@ -305,11 +307,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }, 800);
   };
 
+  const isHardGate = Boolean(blockingGate && !currentUser);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+    <div
+      data-testid={isHardGate ? 'mandatory-login-gate' : 'auth-modal'}
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 animate-fadeIn ${
+        isHardGate
+          ? 'bg-gradient-to-br from-[#0b1922] via-[#132c38] to-[#0a141b]'
+          : 'bg-black/60 backdrop-blur-sm'
+      }`}
+    >
       {/* Double Bezel Modal Container */}
-      <div className="relative w-full max-w-lg my-auto p-1.5 rounded-3xl bg-black/[0.05] dark:bg-white/[0.06] border border-black/[0.1] dark:border-white/[0.15] shadow-2xl">
-        <div className="rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 sm:p-7 space-y-5 max-h-[88vh] overflow-y-auto">
+      <div className="relative w-full max-w-lg my-auto p-1.5 rounded-3xl bg-white/[0.08] border border-white/[0.16] shadow-2xl">
+        <div className="rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 sm:p-7 space-y-5 max-h-[90vh] overflow-y-auto">
           {/* Header & Close */}
           <div className="flex items-center justify-between pb-3.5 border-b border-black/[0.06] dark:border-white/[0.08]">
             <div className="flex items-center gap-3">
@@ -330,8 +341,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       ? (lang === 'fa' ? 'ویرایش اطلاعات پروفایل' : 'Edit Profile')
                       : (lang === 'fa' ? 'پروفایل کاربری' : 'User Profile')
                     : lang === 'fa'
-                    ? 'ورود به سامانه CPMAI'
-                    : 'Sign In to CPMAI'}
+                    ? 'ورود به سامانه آموزشی CPMAI'
+                    : 'Sign In to CPMAI Platform'}
                 </h3>
                 <span className="text-[10px] text-[#5d6b73] dark:text-[#9aa8b0]">
                   {lang === 'fa'
@@ -341,12 +352,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
             </div>
 
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-[#5d6b73] dark:text-[#9aa8b0] transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            {!isHardGate && (
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label={lang === 'fa' ? 'بستن پنجره ورود' : 'Close sign-in modal'}
+                className="p-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-[#5d6b73] dark:text-[#9aa8b0] transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
           {/* If Logged In View */}
@@ -727,19 +742,38 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           ) : (
             /* Logged Out View (Clean Google First + Email Option) */
             <div className="space-y-4">
-              {/* Value Proposition */}
-              <div className="space-y-1 text-center">
-                <h4 className="text-sm font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa'
-                    ? 'ورود به کتاب‌کار و امکانات پلتفرم CPMAI'
-                    : 'Sign in to Access CPMAI Platform'}
-                </h4>
-                <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                  {lang === 'fa'
-                    ? 'جهت دسترسی به کتاب‌کار، کارگاه نوت‌بوک‌ال‌ام و آزمون سطح‌سنجی، لطفاً وارد شوید.'
-                    : 'Please sign in to access the workbook, NotebookLM lab, and quiz.'}
-                </p>
-              </div>
+              {/* Value Proposition / Mandatory Gate Notice */}
+              {isHardGate ? (
+                <div className="p-3.5 rounded-2xl bg-[#1f5163]/[0.07] dark:bg-[#6fb3c6]/10 border border-[#1f5163]/20 dark:border-[#6fb3c6]/25 space-y-1.5 text-center">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#1f5163] text-white text-[10px] font-black">
+                    <Lock className="w-3 h-3" />
+                    <span>{lang === 'fa' ? 'دسترسی اختصاصی اعضای دوره' : 'Members-Only Platform Access'}</span>
+                  </div>
+                  <h4 className="text-sm font-black text-[#12343b] dark:text-[#e8ebe9]">
+                    {lang === 'fa'
+                      ? 'برای استفاده از پلتفرم CPMAI لطفاً وارد شوید'
+                      : 'Sign in Required to Access CPMAI Platform'}
+                  </h4>
+                  <p className="text-[11px] text-[#4b6068] dark:text-[#9cb1b8] leading-relaxed">
+                    {lang === 'fa'
+                      ? 'با ورود به حساب کاربری، نقشه راه اختصاصی کلاس شما، کتاب‌کار، کارگاه‌های عملی، سهمیه ۵ پرسش غیرتکراری ماهانه مربی هوشمند AI و بانک پاسخ‌های مشترک دوره به‌صورت خودکار فعال می‌شود.'
+                      : 'Signing in unlocks your private class roadmap, workbook, interactive labs, 5 non-duplicate monthly AI mentor prompts, and the shared community Q&A bank.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-1 text-center">
+                  <h4 className="text-sm font-black text-[#1c2830] dark:text-[#e8ebe9]">
+                    {lang === 'fa'
+                      ? 'ورود به کتاب‌کار و امکانات پلتفرم CPMAI'
+                      : 'Sign in to Access CPMAI Platform'}
+                  </h4>
+                  <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                    {lang === 'fa'
+                      ? 'جهت دسترسی به کتاب‌کار، کارگاه نوت‌بوک‌ال‌ام و آزمون سطح‌سنجی، لطفاً وارد شوید.'
+                      : 'Please sign in to access the workbook, NotebookLM lab, and quiz.'}
+                  </p>
+                </div>
+              )}
 
               {/* Mode Tabs: Google Sign In vs Email & Password */}
               <div className="grid grid-cols-2 p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.05] border border-black/[0.06] text-xs font-bold">

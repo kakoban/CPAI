@@ -80,6 +80,8 @@ import { ObsidianBrainSkillsWorkshop } from './obsidian/ObsidianBrainSkillsWorks
 import { DatabaseCrudWorkshop } from './DatabaseCrudWorkshop';
 import { CohortRoadmapLookupCard } from './CohortRoadmapLookupCard';
 import { CohortScheduleRecord } from '../utils/cohortScheduleEngine';
+import { AiQuotaState } from '../utils/aiQuotaEngine';
+import { UserProfile } from '../types/auth';
 import { ModuleExercisesView } from './ModuleExercisesView';
 import {
   getModuleExerciseDeck,
@@ -107,6 +109,14 @@ import {
   isTactileSoundEnabled,
   setTactileSoundEnabled
 } from '../utils/uiSoundEffects';
+import {
+  ModuleTopicAnchor,
+  dedupeAndFilterSectionAnchors,
+  computeActiveSectionIndex,
+  computeIntraModuleNextAction,
+  computeIntraModulePrevAction,
+  resolveNextOrbitTargetAfterModule
+} from '../utils/moduleSectionStepper';
 
 interface Page0Props {
   lang: Language;
@@ -118,6 +128,11 @@ interface Page0Props {
   disciplineId?: DisciplineId;
   isAdmin?: boolean;
   isPresentationMode?: boolean;
+  currentUser?: UserProfile | null;
+  onOpenAuth?: () => void;
+  onOpenAiTutor?: () => void;
+  aiQuota?: AiQuotaState | null;
+  onModuleViewportLockChange?: (locked: boolean) => void;
 }
 
 interface PromptItem {
@@ -1266,7 +1281,12 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   industryTrack = 'CIVIL_INFRA',
   disciplineId,
   isAdmin = false,
-  isPresentationMode = false
+  isPresentationMode = false,
+  currentUser = null,
+  onOpenAuth,
+  onOpenAiTutor,
+  aiQuota = null,
+  onModuleViewportLockChange
 }) => {
   const effectiveDiscipline: DisciplineId =
     disciplineId ||
@@ -1942,21 +1962,194 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   const currentModuleMeta = currentModuleIdx >= 0 ? MODULE_NAV_ITEMS[currentModuleIdx] : null;
   const activeSessionObj = FIVE_SESSIONS.find((s) => s.id === activeSessionId) || FIVE_SESSIONS[0];
 
-  const handlePrevModule = () => {
-    if (currentModuleIdx <= 0) {
-      handleTabClick(MODULE_NAV_ITEMS[MODULE_NAV_ITEMS.length - 1].id, undefined, true);
+  const [moduleTopicAnchors, setModuleTopicAnchors] = useState<ModuleTopicAnchor[]>([]);
+  const [activeTopicIdx, setActiveTopicIdx] = useState<number>(0);
+
+  const isSingleModuleScrollLocked =
+    activeTab !== 'all' && !isOrbitHubView && activeTab !== null;
+
+  // Lock outer document/body scroll whenever a single module is open so ONLY the inner module container scrolls
+  useEffect(() => {
+    onModuleViewportLockChange?.(isSingleModuleScrollLocked);
+    if (typeof document === 'undefined' || typeof window === 'undefined') return;
+
+    if (isSingleModuleScrollLocked) {
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      window.scrollTo({ top: 0 });
     } else {
-      handleTabClick(MODULE_NAV_ITEMS[currentModuleIdx - 1].id, undefined, true);
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      onModuleViewportLockChange?.(false);
+    };
+  }, [isSingleModuleScrollLocked, onModuleViewportLockChange]);
+
+  const computeCurrentModuleAnchors = React.useCallback((): ModuleTopicAnchor[] => {
+    const container = contentPaneRef.current;
+    if (!container || !isSingleModuleScrollLocked) return [];
+
+    const containerRect = container.getBoundingClientRect();
+    const candidates = Array.from(
+      container.querySelectorAll<HTMLElement>(
+        '[data-module-topic], section, h2, h3'
+      )
+    ).filter((el) => {
+      if (el.closest('[data-spotlight-ignore="true"]')) return false;
+      const rect = el.getBoundingClientRect();
+      return rect.height > 8 && rect.width > 40;
+    });
+
+    const rawAnchors = candidates.map((el) => {
+      const rect = el.getBoundingClientRect();
+      const top = Math.max(0, Math.round(rect.top - containerRect.top + container.scrollTop - 12));
+      const label = (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+      return { top, label };
+    });
+
+    let anchors = dedupeAndFilterSectionAnchors(rawAnchors, 140);
+
+    // Ensure scrollable modules with few semantic headings still step cleanly through vertical pages
+    const maxScrollable = Math.max(0, container.scrollHeight - container.clientHeight);
+    if (anchors.length <= 1 && maxScrollable > 180) {
+      const stepPx = Math.max(260, Math.round(container.clientHeight * 0.72));
+      const synthetic: Array<{ top: number; label: string }> = [{ top: 0, label: 'بخش ۱' }];
+      for (let pos = stepPx; pos < maxScrollable - 60; pos += stepPx) {
+        synthetic.push({ top: pos, label: `بخش ${synthetic.length + 1}` });
+      }
+      synthetic.push({ top: maxScrollable, label: `بخش ${synthetic.length + 1}` });
+      anchors = dedupeAndFilterSectionAnchors(synthetic, 120);
+    }
+
+    if (anchors.length === 0) {
+      anchors = [
+        {
+          index: 0,
+          top: 0,
+          label: currentModuleMeta?.titleFa || 'بخش ۱'
+        }
+      ];
+    }
+
+    return anchors;
+  }, [isSingleModuleScrollLocked, currentModuleMeta?.titleFa]);
+
+  // Re-scan intra-module topic anchors whenever module/view changes or DOM updates
+  useEffect(() => {
+    if (!isSingleModuleScrollLocked) {
+      setModuleTopicAnchors([]);
+      setActiveTopicIdx(0);
+      return;
+    }
+
+    setActiveTopicIdx(0);
+    const refreshAnchors = () => {
+      const nextAnchors = computeCurrentModuleAnchors();
+      setModuleTopicAnchors(nextAnchors);
+      const container = contentPaneRef.current;
+      if (container) {
+        const idx = computeActiveSectionIndex(
+          container.scrollTop,
+          nextAnchors,
+          container.scrollHeight,
+          container.clientHeight
+        );
+        setActiveTopicIdx(idx);
+      }
+    };
+
+    const t1 = window.setTimeout(refreshAnchors, 80);
+    const t2 = window.setTimeout(refreshAnchors, 320);
+
+    const container = contentPaneRef.current;
+    let resizeObserver: ResizeObserver | null = null;
+    if (container && typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => {
+        refreshAnchors();
+      });
+      resizeObserver.observe(container);
+    }
+
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      resizeObserver?.disconnect();
+    };
+  }, [isSingleModuleScrollLocked, activeTab, paneViewMode, computeCurrentModuleAnchors]);
+
+  // Sync active intra-module topic indicator as user scrolls inside the module
+  useEffect(() => {
+    const container = contentPaneRef.current;
+    if (!container || !isSingleModuleScrollLocked) return;
+
+    const handleInnerScroll = () => {
+      const anchors = moduleTopicAnchors.length > 0 ? moduleTopicAnchors : computeCurrentModuleAnchors();
+      if (!anchors.length) return;
+      const idx = computeActiveSectionIndex(
+        container.scrollTop,
+        anchors,
+        container.scrollHeight,
+        container.clientHeight
+      );
+      setActiveTopicIdx(idx);
+    };
+
+    container.addEventListener('scroll', handleInnerScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleInnerScroll);
+  }, [isSingleModuleScrollLocked, moduleTopicAnchors, computeCurrentModuleAnchors]);
+
+  const finishCurrentModuleToOrbit = () => {
+    playTactileSound('success');
+    const nextOrbitTarget = resolveNextOrbitTargetAfterModule(
+      FIVE_SESSIONS,
+      activeTab && activeTab !== 'all' ? activeTab : 's1_demo'
+    );
+    setActiveSessionId(nextOrbitTarget.nextSessionId as OrbitSessionId);
+    setIsSpotlightPickMode(false);
+    setIsOrbitHubView(true);
+    setIsOrbitPaneCollapsed(true);
+  };
+
+  const handlePrevModuleTopic = () => {
+    const anchors = moduleTopicAnchors.length > 0 ? moduleTopicAnchors : computeCurrentModuleAnchors();
+    const { canStepPrev, targetIdx } = computeIntraModulePrevAction(activeTopicIdx);
+    if (!canStepPrev) {
+      scrollContentPaneToTop();
+      return;
+    }
+    playTactileSound('thock');
+    setActiveTopicIdx(targetIdx);
+    const targetAnchor = anchors[targetIdx];
+    if (contentPaneRef.current && targetAnchor) {
+      contentPaneRef.current.scrollTo({ top: targetAnchor.top, behavior: 'smooth' });
     }
   };
 
-  const handleNextModule = () => {
-    if (currentModuleIdx < 0 || currentModuleIdx >= MODULE_NAV_ITEMS.length - 1) {
-      handleTabClick(MODULE_NAV_ITEMS[0].id, undefined, true);
-    } else {
-      handleTabClick(MODULE_NAV_ITEMS[currentModuleIdx + 1].id, undefined, true);
+  const handleNextModuleTopic = () => {
+    const anchors = moduleTopicAnchors.length > 0 ? moduleTopicAnchors : computeCurrentModuleAnchors();
+    if (anchors.length !== moduleTopicAnchors.length) {
+      setModuleTopicAnchors(anchors);
+    }
+    const action = computeIntraModuleNextAction(activeTopicIdx, anchors.length);
+    if (action.action === 'finish_to_orbit') {
+      finishCurrentModuleToOrbit();
+      return;
+    }
+    playTactileSound('thock');
+    setActiveTopicIdx(action.targetIdx);
+    const targetAnchor = anchors[action.targetIdx];
+    if (contentPaneRef.current && targetAnchor) {
+      contentPaneRef.current.scrollTo({ top: targetAnchor.top, behavior: 'smooth' });
     }
   };
+
+  const totalModuleTopics = Math.max(1, moduleTopicAnchors.length);
+  const isAtFirstModuleTopic = activeTopicIdx <= 0;
+  const isAtLastModuleTopic = activeTopicIdx >= totalModuleTopics - 1;
 
   React.useEffect(() => {
     const nextDs = getDatasetsForTrack(industryTrack);
@@ -2890,7 +3083,11 @@ Tasks:
 
   return (
     <div
-      className="space-y-4 animate-fadeIn text-[#1c2830] dark:text-[#e8ebe9] pb-6"
+      className={
+        isSingleModuleScrollLocked
+          ? 'flex-1 min-h-0 h-full flex flex-col overflow-hidden animate-fadeIn text-[#1c2830] dark:text-[#e8ebe9]'
+          : 'space-y-4 animate-fadeIn text-[#1c2830] dark:text-[#e8ebe9] pb-6'
+      }
       onClickCapture={(e) => {
         const target = e.target as HTMLElement | null;
         const btn = target?.closest('button');
@@ -2899,8 +3096,8 @@ Tasks:
         }
       }}
     >
-      {/* Unified Compact Studio Entry Header (Hidden in Presentation Stage to Maximize Teaching Canvas) */}
-      {!isPresentationMode && (
+      {/* Unified Compact Studio Entry Header (Hidden inside Single-Module Locked View & Presentation Stage) */}
+      {!isPresentationMode && !isSingleModuleScrollLocked && (
         <header
           data-testid="page0-entry-header"
           className={`rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 shadow-xs ${
@@ -3063,6 +3260,10 @@ Tasks:
             <div className="lg:col-span-5 flex flex-col gap-3.5 h-full">
               <CohortRoadmapLookupCard
                 lang={lang}
+                currentUser={currentUser}
+                onOpenAuth={onOpenAuth}
+                onOpenAiTutor={onOpenAiTutor}
+                aiQuota={aiQuota}
                 onSelectModule={(moduleId) => handleTabClick(moduleId as typeof activeTab, undefined, true)}
                 onCohortChange={setSelectedOrgCohort}
               />
@@ -3211,12 +3412,8 @@ Tasks:
         className={
           isSplitCockpit
             ? isOrbitPaneCollapsed
-              ? isPresentationMode
-                ? 'grid grid-cols-1 gap-3 items-stretch xl:h-[calc(100dvh-6.25rem)] xl:min-h-[540px]'
-                : 'grid grid-cols-1 gap-4 items-stretch xl:h-[calc(100dvh-10rem)] xl:min-h-[540px]'
-              : isPresentationMode
-                ? 'grid grid-cols-1 xl:grid-cols-[minmax(580px,45%)_1fr] gap-4 items-stretch xl:h-[calc(100dvh-6.25rem)] xl:min-h-[540px]'
-                : 'grid grid-cols-1 xl:grid-cols-[minmax(580px,45%)_1fr] gap-4 items-stretch xl:h-[calc(100dvh-11.25rem)] xl:min-h-[540px]'
+              ? 'flex-1 min-h-0 h-full grid grid-cols-1 gap-3 items-stretch overflow-hidden'
+              : 'flex-1 min-h-0 h-full grid grid-cols-1 xl:grid-cols-[minmax(580px,45%)_1fr] gap-4 items-stretch overflow-hidden'
             : 'space-y-6'
         }
       >
@@ -3226,7 +3423,7 @@ Tasks:
           ref={navPillsRef}
           data-testid="page0-orbit-pane"
           className={`p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 shadow-xs space-y-2 ${
-            isSplitCockpit ? 'xl:h-full xl:overflow-y-auto flex flex-col' : ''
+            isSplitCockpit ? 'h-full min-h-0 overflow-y-auto flex flex-col' : ''
           }`}
         >
           {/* Top Control Bar (Map Controls Only) */}
@@ -3316,7 +3513,7 @@ Tasks:
           data-testid="page0-content-pane"
           className={
             isSplitCockpit
-              ? 'rounded-2xl bg-white/80 dark:bg-[#131c24]/85 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden flex flex-col xl:h-full'
+              ? 'h-full min-h-0 rounded-2xl bg-white/80 dark:bg-[#131c24]/85 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden flex flex-col'
               : 'space-y-6'
           }
         >
@@ -3525,8 +3722,13 @@ Tasks:
                   <span>{lang === 'fa' ? 'سندباکس' : 'Sandbox'}</span>
                 </button>
 
-                <span dir="ltr" className="hidden 2xl:inline text-[10.5px] font-mono font-bold text-slate-500 dark:text-slate-400 tabular-nums px-0.5">
-                  {currentModuleIdx + 1}/{MODULE_NAV_ITEMS.length}
+                <span
+                  data-testid="module-topic-counter"
+                  dir="ltr"
+                  className="inline-flex items-center text-[10.5px] font-mono font-bold text-slate-600 dark:text-slate-300 tabular-nums px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700"
+                  title={lang === 'fa' ? 'موضوع فعال در همین ماژول' : 'Active topic within this module'}
+                >
+                  {activeTopicIdx + 1}/{totalModuleTopics}
                 </span>
 
                 <button
@@ -3540,31 +3742,53 @@ Tasks:
 
                 <button
                   type="button"
-                  onClick={handlePrevModule}
-                  className="px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-[#1f5163] text-[10.5px] font-bold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer whitespace-nowrap"
-                  title={lang === 'fa' ? 'ماژول قبلی' : 'Previous Module'}
+                  data-testid="module-topic-prev-btn"
+                  disabled={isAtFirstModuleTopic}
+                  onClick={handlePrevModuleTopic}
+                  className="px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-[#1f5163] disabled:opacity-40 disabled:cursor-not-allowed text-[10.5px] font-bold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer whitespace-nowrap"
+                  title={lang === 'fa' ? 'موضوع قبلی در همین ماژول' : 'Previous topic inside this module'}
                 >
                   {lang === 'fa' ? 'قبلی' : 'Prev'}
                 </button>
                 <button
                   type="button"
-                  onClick={handleNextModule}
-                  className="px-2 py-1 rounded-lg bg-[#1f5163] hover:bg-[#163c4a] text-white text-[10.5px] font-bold transition-colors cursor-pointer whitespace-nowrap"
-                  title={lang === 'fa' ? 'ماژول بعدی' : 'Next Module'}
+                  data-testid="module-topic-next-btn"
+                  data-last-topic={isAtLastModuleTopic ? 'true' : 'false'}
+                  onClick={handleNextModuleTopic}
+                  className={`px-2.5 py-1 rounded-lg text-[10.5px] font-bold transition-colors cursor-pointer whitespace-nowrap ${
+                    isAtLastModuleTopic
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs'
+                      : 'bg-[#1f5163] hover:bg-[#163c4a] text-white'
+                  }`}
+                  title={
+                    isAtLastModuleTopic
+                      ? lang === 'fa'
+                        ? 'اتمام این ماژول و بازگشت به مدار دایره‌ای برای انتخاب ماژول بعدی'
+                        : 'Finish this module and return to Circular Orbit Hub'
+                      : lang === 'fa'
+                      ? 'موضوع بعدی در همین ماژول'
+                      : 'Next topic inside this module'
+                  }
                 >
-                  {lang === 'fa' ? 'بعدی' : 'Next'}
+                  {isAtLastModuleTopic
+                    ? lang === 'fa'
+                      ? 'اتمام ← مدار ↻'
+                      : 'Finish → Orbit ↻'
+                    : lang === 'fa'
+                    ? 'بعدی'
+                    : 'Next'}
                 </button>
               </div>
             </div>
           )}
 
-          {/* Independently Scrollable Module Reading Body */}
+          {/* Independently Scrollable Module Reading Body (ONLY Scrollbar When Single Module Is Open) */}
           <div
             ref={contentPaneRef}
             data-testid="page0-content-scroll"
             className={
               isSplitCockpit
-                ? 'flex-1 min-h-0 xl:overflow-y-auto p-4 sm:p-5 scroll-smooth space-y-5'
+                ? 'flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 scroll-smooth space-y-5'
                 : 'space-y-6'
             }
           >
@@ -6594,20 +6818,21 @@ Tasks:
       {/* Inline Prompt Sandbox in Full-Width / Show-All Flow */}
       {!isSplitCockpit && renderPromptSandbox(false)}
 
-      {/* Mobile Linear Pager Controls (Hidden on xl Desktop Split Cockpit since top bar is pinned) */}
+      {/* Mobile Intra-Module Pager Controls */}
       {activeTab && activeTab !== 'all' && (
         <div className="xl:hidden p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-xs">
           <button
             type="button"
-            onClick={handlePrevModule}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 transition-all cursor-pointer"
+            disabled={isAtFirstModuleTopic}
+            onClick={handlePrevModuleTopic}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 text-slate-800 dark:text-slate-100 transition-all cursor-pointer"
           >
-            <span>{lang === 'fa' ? '← ماژول قبلی' : '← Previous'}</span>
+            <span>{lang === 'fa' ? '← بخش قبلی' : '← Prev Topic'}</span>
           </button>
 
           <div className="flex items-center gap-2">
             <span dir="ltr" className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 tabular-nums">
-              {currentModuleIdx >= 0 ? `${currentModuleIdx + 1} / ${MODULE_NAV_ITEMS.length}` : ''}
+              {activeTopicIdx + 1} / {totalModuleTopics}
             </span>
             <button
               type="button"
@@ -6621,10 +6846,22 @@ Tasks:
 
           <button
             type="button"
-            onClick={handleNextModule}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#1f5163] hover:bg-[#163c4a] text-white shadow-xs transition-all cursor-pointer"
+            onClick={handleNextModuleTopic}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer ${
+              isAtLastModuleTopic
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                : 'bg-[#1f5163] hover:bg-[#163c4a] text-white'
+            }`}
           >
-            <span>{lang === 'fa' ? 'ماژول بعدی →' : 'Next Module →'}</span>
+            <span>
+              {isAtLastModuleTopic
+                ? lang === 'fa'
+                  ? 'اتمام و بازگشت به مدار ↻'
+                  : 'Finish → Orbit ↻'
+                : lang === 'fa'
+                ? 'بخش بعدی →'
+                : 'Next Topic →'}
+            </span>
           </button>
         </div>
       )}

@@ -350,3 +350,142 @@ Immediately after each answer selection, reveal whether it is correct or incorre
     ]
   }
 ];
+
+export interface HrNotebookLmCompanionData {
+  badgeFa: string;
+  badgeEn: string;
+  titleFa: string;
+  titleEn: string;
+  subtitleFa: string;
+  subtitleEn: string;
+  simulatedOutputFa: string;
+  simulatedOutputEn: string;
+  sampleCsv: string;
+  assumptionsFa: Array<{ title: string; detail: string; sourceTag: string }>;
+  assumptionsEn: Array<{ title: string; detail: string; sourceTag: string }>;
+  extractionPromptFa: string;
+  extractionPromptEn: string;
+}
+
+export const HR_NOTEBOOKLM_COMPANION: HrNotebookLmCompanionData = {
+  badgeFa: 'خروجی آماده گام ۱ (مستندسازی بدون توهم)',
+  badgeEn: 'Ready Step-1 Output (Zero-Hallucination Grounding)',
+  titleFa: 'خروجی فرضی و مستند NotebookLM + فرضیات لازم برای اجرای گام ۲ و ۳',
+  titleEn: 'Simulated Grounded NotebookLM Output & Extraction Assumptions for Steps 2–3',
+  subtitleFa:
+    'اگر همین الان به فایل‌های PDF قرارداد دسترسی ندارید، این خروجی مستندسازی‌شده NotebookLM و جدول CSV نمونه را کپی کنید و مستقیماً در گام ۲ (Gemini Canvas) یا گام ۳ (Claude Artifacts) استفاده نمایید؛ یا از تب دوم فرضیات و پرامپت استخراج را در NotebookLM خودتان اجرا کنید.',
+  subtitleEn:
+    'Copy this grounded NotebookLM synthesis and sample attendance CSV directly into Gemini Canvas (Step 2) or Claude Artifacts (Step 3), or review the required source assumptions and extraction prompt in Tab 2.',
+  simulatedOutputFa: `# گزارش مستند استخراج قواعد منابع انسانی و اداری (خروجی NotebookLM)
+
+## ۱. جدول سقف اضافه‌کاری، خط قرمز ایمنی (HSE) و استثنای شبانه‌روزی
+- **سقف اضافه‌کاری داخلی سازمان:**
+  - واحد ستاد مرکزی: حداکثر **۵۰ ساعت** در ماه \`[منبع ۲: بخشنامه داخلی اضافه‌کاری · بند ۱]\`
+  - دفتر فنی و مهندسی: حداکثر **۶۵ ساعت** (قابل افزایش تا **۸۰ ساعت** صرفاً با مجوز کتبی معاونت فنی) \`[منبع ۲: بند ۲]\`
+  - کارگاه‌های ایستگاهی (S-01 تا S-05): حداکثر **۸۵ ساعت** در ماه \`[منبع ۲: بند ۳]\`
+  - جبهه حفاری مکانیزه (TBM): حداکثر **۱۰۰ ساعت** در ماه (عملیات شبانه‌روزی پیوسته ۲۴/۷) \`[منبع ۱: ماده ۲۵ شرایط خصوصی]\`
+- **خط قرمز قطعی HSE (ریسک خستگی و حادثه):**
+  - اضافه‌کاری **بیش از ۱۱۰ ساعت در ماه** یا **بیش از ۱۴ روز کاری متوالی بدون استراحت** = وضعیت بحرانی (توقف فوری شیفت + اطلاع به افسر HSE) \`[منبع ۲: ضمیمه ایمنی]\`
+- **نحوه احراز رسمی کارکرد:** ملاک قانونی حضور پرسنل و پیمانکاران جزء، صرفاً تطابق کارت‌زنی با **لیست بیمه ممهور به مهر تأمین اجتماعی** است \`[منبع ۱: ماده ۲۵ شرایط خصوصی]\`.
+
+## ۲. فرجه قانونی اطلاع‌رسانی و نگاشت مهندس مشاور ناظر (بند ۴۲-۱)
+- **کار شبانه در ایستگاه‌ها:** الزام ارسال نامه رسمی **حداقل ۱ هفته (۷ روز) پیش از شروع عملیات** + تأیید حضور افسر HSE \`[منبع ۱: بند ۴۲-۱ ضمیمه]\`.
+- **اضافه‌کاری روزانه / روزهای تعطیل:** الزام اطلاع‌رسانی کتبی **حداقل ۲۴ ساعت قبل** به مشاور ناظر و مدیر طرح (PMC) \`[منبع ۱: بند ۴۲-۱]\`.
+- **استثنای قانونی TBM:** حفاری مکانیزه تونل به صورت ذاتی ۲۴ ساعته بوده و از مجوز موردی شب‌کاری معاف است \`[منبع ۱: ماده ۲۵]\`.
+- **جدول نگاشت ایستگاه ← مشاور ناظر:**
+  - ایستگاه مرکزی (S-01) و شمالی (S-03) ← **مهندس مشاور الف (Consultant A)**
+  - ایستگاه غربی (S-02) و جبهه TBM غربی ← **مهندس مشاور ب (Consultant B)**
+  - ایستگاه شرقی (S-04) و پایانه (S-05) ← **مهندس مشاور ج (Consultant C)**
+
+## ۳. استاندارد فضاهای کمپ کارگاهی و خدمات رفاهی (ماده ۲۰-ح و صفحه ۵۴)
+- **حداقل متراژ الزامی فضاها:** اتاق‌های کارگری \`150 m²\` · پرسنل اجرایی \`30 m²\` · اداری و خدماتی \`20 m²\` · دفتر فنی \`18 m²\` · اتاق جلسات \`18 m²\` · سرپرست کارگاه \`12 m²\` · واحد HSE و کمک‌های اولیه \`12 m²\` · نظارت \`13 m²\` · نماینده کارفرما، سرپرست نظارت و آزمایشگاه هر کدام \`9 m²\` · سرویس کارگری \`8 m²\` · سرویس اداری، حمام آب گرم ۲۴ ساعته (۳ باب) و نمازخانه هر کدام \`6 m²\` \`[منبع ۳: جدول حداقل متراژ ص ۵۴]\`.
+- **خدمات الزامی ماده ۲۰-ح:** نصب دستگاه کارت‌زن و تحویل لباس فرم (بند ۱۰)، استقرار حداقل ۱ کارشناس HSE مقیم (بند ۷)، ۱ کارگر تمام‌وقت آزمایشگاه + ۱ آبدارچی مجزا برای کارفرما/PMC/مشاور (بند ۹)، و تأمین **۳ وعده غذای روزانه برای حداقل ۱۰ نفر** عوامل مقیم کارفرما و مشاور \`[منبع ۱: ماده ۲۰-ح]\`.
+
+## ۴. تقویم گزارش‌دهی ماهانه نیروی انسانی (ماده ۱۸-۶ و بند ح-۲)
+- **بازه داده‌های کارت‌زن:** از روز **۱۶ ماه قبل تا ۱۵ ماه جاری** (Cut-off Date: پانزدهم هر ماه) \`[منبع ۴: ماده ۱۸-۶]\`.
+- **مهلت تحویل گزارش چاپی و نمودارها:** حداکثر تا **بیستم (۲۰) هر ماه** همراه با جدول و نمودار توزیع نیروی انسانی به تفکیک جبهه کاری و تخصص \`[منبع ۴: ماده ۱۸-ح ردیف ۲]\`.`,
+  simulatedOutputEn: `# Grounded HR & Site Admin Rules Synthesis (NotebookLM Step-1 Output)
+
+## 1. Overtime Caps, HSE Red Line & 24/7 TBM Exemption
+- **Internal Monthly Overtime Caps:** HQ \`50h\` · Technical Office \`65h\` (\`80h\` w/ written Deputy permit) · Station Sites (S-01..S-05) \`85h\` · Mechanized TBM Tunnel \`100h\` (24/7 continuous) \`[Source 1: Art. 25] [Source 2: HR Circular]\`.
+- **HSE Critical Red Line:** Overtime \`> 110h/month\` OR \`> 14 consecutive working days\` without rest triggers mandatory shift halt & HSE review \`[Source 2: HSE Appendix]\`.
+- **Verification Basis:** Stamped Social Security (SSO) insurance lists cross-checked against site time-card logs \`[Source 1: Art. 25]\`.
+
+## 2. Sub-Clause 42-1 Lead Times & Consultant Mapping
+- **Station Night Work:** Minimum **7 days (1 week)** prior formal written notice + on-site HSE officer \`[Source 1: Clause 42-1]\`.
+- **Daytime / Holiday Overtime:** Minimum **24 hours** prior written notice to Supervising Consultant & PMC \`[Source 1: Clause 42-1]\`.
+- **24/7 TBM Exemption:** Exempt from ad-hoc night-work permits per Article 25.
+- **Consultant Mapping:** Central S-01 & North S-03 → Consultant A · West S-02 & West TBM → Consultant B · East S-04 & Terminal S-05 → Consultant C.
+
+## 3. Camp Space Minimums & Welfare Obligations (Art. 20-H & Page 54)
+- **Spaces (m²):** Workers' Dorms \`150\`, Execution \`30\`, Admin \`20\`, Tech Office \`18\`, Meeting \`18\`, Superintendent \`12\`, HSE/First-Aid \`12\`, Supervision \`13\`, Employer Rep/Chief Sup/Lab \`9 each\`, Worker WC \`8\`, Office WC/3×Hot Showers/Prayer \`6 each\`.
+- **Mandatory Services:** Time-clock & uniforms (Item 10), ≥1 resident HSE officer (Item 7), 1 lab worker + 1 dedicated hospitality attendant (Item 9), 3 daily meals for ≥10 Employer/Consultant staff.
+
+## 4. Monthly Manpower Reporting Window (Art. 18-6 & H-2)
+- **Data Cutoff:** 16th of previous month to **15th of current month**.
+- **Submission Deadline:** **20th of each month** with breakdown tables & charts by site zone and role.`,
+  sampleCsv: `employee_id,full_name,unit_zone,role,station_code,consultant,overtime_hours,consecutive_days,sso_insured
+HR-101,مهندس رضا کریمی,دفتر فنی,مهندس,HQ-01,PMC,72,11,Yes
+HR-102,علی‌اکبر رضایی,جبهه TBM غربی,تکنسین,TBM-W,مشاور ب,96,13,Yes
+HR-103,سعید محمدی,ایستگاه مرکزی,کارگر ماهر,S-01,مشاور الف,118,16,Yes
+HR-104,مریم حسینی,ستاد مرکزی,کارشناس HR,HQ-01,PMC,44,6,Yes
+HR-105,حسین جلالی,ایستگاه شرقی,افسر HSE,S-04,مشاور ج,82,12,Yes
+HR-106,مهدی کاظمی,ایستگاه غربی,کارگر ماهر,S-02,مشاور ب,91,15,No`,
+  assumptionsFa: [
+    {
+      title: 'منبع ۱: فایل PDF شرایط خصوصی قرارداد کارگاهی',
+      detail: 'شامل ماده ۱۸ (تقویم گزارش ماهانه ۱۵ تا ۲۰)، ماده ۲۰-ح (رفاهیات و نفرات خدماتی)، ماده ۲۵ (کار شبانه، استثنای TBM و لیست بیمه ممهور) و بند ۴۲-۱ (فرجه ۷ روزه و ۲۴ ساعته).',
+      sourceTag: 'Contract_Particular_Conditions.pdf'
+    },
+    {
+      title: 'منبع ۲: بخشنامه داخلی اضافه‌کاری و ضوابط ایمنی HSE',
+      detail: 'تعیین سقف ماهانه هر واحد (ستاد ۵۰، دفتر فنی ۶۵/۸۰، ایستگاه ۸۵، TBM ۱۰۰ ساعت) و آستانه خط قرمز خستگی (>۱۱۰ ساعت یا >۱۴ روز متوالی).',
+      sourceTag: 'HR_Overtime_HSE_Policy.pdf'
+    },
+    {
+      title: 'منبع ۳: پیوست جدول حداقل متراژ تجهیز کارگاه (صفحه ۵۴)',
+      detail: 'جدول ۱۵ ردیفی حداقل متراژ فضاهای اسکان کارگری (۱۵۰ متر)، دفتر فنی (۱۸ متر)، HSE (۱۲ متر)، نظارت و سرویس‌های بهداشتی و حمام آب گرم.',
+      sourceTag: 'Page54_Camp_Space_Table.pdf'
+    },
+    {
+      title: 'منبع ۴ (ورودی گام ۲): فایل اکسل/CSV خروجی دستگاه کارت‌زن',
+      detail: 'شامل ستون‌های کد پرسنلی، واحد، کد ایستگاه، ساعات اضافه‌کاری، روزهای کاری متوالی و وضعیت تطابق با لیست بیمه تأمین اجتماعی (بازه ۱۶ ماه قبل تا ۱۵ ماه جاری).',
+      sourceTag: 'Attendance_16to15.csv'
+    }
+  ],
+  assumptionsEn: [
+    {
+      title: 'Source 1: Contract Particular Conditions PDF',
+      detail: 'Covers Art. 18 (15th cutoff / 20th submission), Art. 20-H (welfare & support staff), Art. 25 (night work, 24/7 TBM exemption, stamped SSO list), and Sub-Clause 42-1 (7-day & 24h notice).',
+      sourceTag: 'Contract_Particular_Conditions.pdf'
+    },
+    {
+      title: 'Source 2: Internal Overtime Circular & HSE Fatigue Rules',
+      detail: 'Defines monthly caps per unit (HQ 50h, Tech Office 65h/80h, Stations 85h, TBM 100h) and HSE critical red line (>110h/mo or >14 consecutive days).',
+      sourceTag: 'HR_Overtime_HSE_Policy.pdf'
+    },
+    {
+      title: 'Source 3: Contract Page 54 Minimum Camp Space Table',
+      detail: '15 mandatory camp space benchmarks (150m² worker dorms, 18m² tech office, 12m² HSE room, supervision rooms, hot showers, and restrooms).',
+      sourceTag: 'Page54_Camp_Space_Table.pdf'
+    },
+    {
+      title: 'Source 4 (For Step 2): Site Time-Card Attendance CSV',
+      detail: 'Columns: employee_id, unit_zone, station_code, consultant, overtime_hours, consecutive_days, sso_insured covering the 16th-to-15th reporting cycle.',
+      sourceTag: 'Attendance_16to15.csv'
+    }
+  ],
+  extractionPromptFa: `بر اساس اسناد بارگذاری‌شده (شرایط خصوصی قرارداد، بخشنامه داخلی اضافه‌کاری و جدول صفحه ۵۴)، صرفاً با استناد دقیق به شماره ماده، بند و صفحه منابع، یک سند ساختاری Markdown در ۴ بخش خروجی بده تا در گام بعدی به Gemini Canvas و Claude Artifacts بدهم:
+۱. سقف ماهانه اضافه‌کاری هر واحد (ستاد، دفتر فنی، ایستگاه‌ها، TBM)، خط قرمز HSE (ساعت و روز متوالی) و شرط لیست بیمه ممهور (ماده ۲۵).
+۲. فرجه‌های قانونی اطلاع‌رسانی شب‌کاری و اضافه‌کاری روزانه (بند ۴۲-۱)، استثنای ۲۴ ساعته TBM و جدول نگاشت هر ایستگاه به مشاور ناظر (الف/ب/ج).
+۳. جدول کامل حداقل متراژ ۱۵ فضای کمپ کارگاهی (صفحه ۵۴) و چک‌لیست تعهدات رفاهی و نفرات خدماتی (ماده ۲۰-ح).
+۴. تقویم ارسال گزارش ماهانه نیروی انسانی (بازه ۱۶ تا ۱۵ و مهلت ارسال بیستم ماه طبق ماده ۱۸).
+قانون سخت‌گیرانه: هیچ عددی را حدس نزن و جلوی هر قاعده، شماره ماده و منبع دقیق آن را داخل کروشه ذکر کن.`,
+  extractionPromptEn: `Using ONLY the uploaded sources (Contract Particular Conditions, Internal Overtime Circular, and Page 54 Camp Space Table), produce a grounded Markdown brief with exact inline clause/page citations ready for Gemini Canvas and Claude Artifacts:
+1. Monthly overtime caps per unit, HSE fatigue red line (>110h or >14 consecutive days), and stamped SSO insurance verification rule (Art. 25).
+2. Sub-Clause 42-1 advance notice windows (7 days night shift, 24h daytime overtime), 24/7 TBM exemption, and Station-to-Consultant (A/B/C) mapping.
+3. Full 15-row minimum camp space table (Page 54) and Article 20-H welfare/staffing obligations.
+4. Article 18 monthly manpower reporting cycle (15th cutoff, 20th submission).
+Strict rule: Never invent figures; cite exact article/clause numbers in brackets.`
+};
+

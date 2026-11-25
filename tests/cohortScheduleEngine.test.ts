@@ -7,6 +7,7 @@ import {
   classifyCohortIdByFirstEntryDate,
   groupUsersByWeekdayCohort,
   searchCohortsByQuery,
+  resolveUniqueCohortByQuery,
   buildExpectedLearningSummary,
   getDefaultCohortSchedules,
   sanitizeModuleIds
@@ -78,10 +79,51 @@ test('searchCohortsByQuery matches partial Persian org/project names cleanly', (
   assert.equal(tehran.length, 1);
   assert.equal(tehran[0].id, 'cohort_wed_damavand_tehran');
 
-  // Ambiguous query "دماوند" should return all 3 Damavand-affiliated cohorts so user can choose
   const damavand = searchCohortsByQuery(cohorts, 'دماوند');
   assert.equal(damavand.length, 3);
   assert.equal(OFFICIAL_WEEKDAY_COHORTS.length, 4);
+});
+
+test('resolveUniqueCohortByQuery blocks single-letter, ambiguous, and weekday enumeration without leaking other cohorts', () => {
+  const cohorts = getDefaultCohortSchedules();
+
+  // Single-letter or 2-letter fishing must NEVER leak any class
+  assert.deepEqual(resolveUniqueCohortByQuery(cohorts, 'م'), { status: 'too_short', cohort: null });
+  assert.deepEqual(resolveUniqueCohortByQuery(cohorts, 'حر'), { status: 'too_short', cohort: null });
+
+  // Broad/shared terms must return ambiguous with cohort: null (zero leakage of other organizations)
+  assert.deepEqual(resolveUniqueCohortByQuery(cohorts, 'موسسه'), { status: 'ambiguous', cohort: null });
+  assert.deepEqual(resolveUniqueCohortByQuery(cohorts, 'دماوند'), { status: 'ambiguous', cohort: null });
+  assert.deepEqual(resolveUniqueCohortByQuery(cohorts, 'طرح دماوند'), { status: 'ambiguous', cohort: null });
+
+  // Weekday-only guesses must NOT enumerate corporate clients
+  assert.deepEqual(resolveUniqueCohortByQuery(cohorts, 'دوشنبه'), { status: 'not_found', cohort: null });
+  assert.deepEqual(resolveUniqueCohortByQuery(cohorts, 'یکشنبه'), { status: 'not_found', cohort: null });
+  assert.deepEqual(resolveUniqueCohortByQuery(cohorts, 'پنجشنبه'), { status: 'not_found', cohort: null });
+
+  // Uniquely identifying queries return ONLY that single matched cohort
+  const hera = resolveUniqueCohortByQuery(cohorts, 'حرا');
+  assert.equal(hera.status, 'matched');
+  assert.equal(hera.cohort?.id, 'cohort_mon_hera');
+
+  const tehran = resolveUniqueCohortByQuery(cohorts, 'طرح دماوند تهران');
+  assert.equal(tehran.status, 'matched');
+  assert.equal(tehran.cohort?.id, 'cohort_wed_damavand_tehran');
+
+  const paya = resolveUniqueCohortByQuery(cohorts, 'پایا سامان');
+  assert.equal(paya.status, 'matched');
+  assert.equal(paya.cohort?.id, 'cohort_thu_paya_damavand');
+
+  const damavandInst = resolveUniqueCohortByQuery(cohorts, 'موسسه دماوند');
+  assert.equal(damavandInst.status, 'matched');
+  assert.equal(damavandInst.cohort?.id, 'cohort_thu_paya_damavand');
+
+  const asaluyeh = resolveUniqueCohortByQuery(cohorts, 'عسلویه');
+  assert.equal(asaluyeh.status, 'matched');
+  assert.equal(asaluyeh.cohort?.id, 'cohort_sun_damavand_asaluyeh');
+
+  // Unknown org
+  assert.deepEqual(resolveUniqueCohortByQuery(cohorts, 'شرکت ناموجود'), { status: 'not_found', cohort: null });
 });
 
 test('buildExpectedLearningSummary aggregates outcomes strictly from valid admin module selections', () => {

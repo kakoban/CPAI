@@ -55,6 +55,7 @@ import { PresenterNotesPanel } from './components/presentation/PresenterNotesPan
 import { getDisciplineMetadata } from './data/disciplineExamplesRegistry';
 import { authApi, isAuthorizedAdminUser } from './services/authApi';
 import { lmsApi } from './services/lmsApi';
+import { AiQuotaState } from './utils/aiQuotaEngine';
 import { UserProfile } from './types/auth';
 import { SessionLockEntity } from './types/lms';
 import { Footer } from './components/Footer';
@@ -199,6 +200,7 @@ export default function App() {
 
   // Contextual AI Tutor Sidebar state (always closed on initial entry)
   const [isTutorOpen, setIsTutorOpen] = useState<boolean>(false);
+  const [aiQuota, setAiQuota] = useState<AiQuotaState | null>(null);
 
   const toggleTutor = () => {
     setIsTutorOpen((prev) => {
@@ -323,6 +325,15 @@ export default function App() {
   };
 
   const [adminBypassLock, setAdminBypassLock] = useState<boolean>(false);
+  const [isPage0ModuleViewportLocked, setIsPage0ModuleViewportLocked] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (page !== 0) {
+      setIsPage0ModuleViewportLocked(false);
+    }
+  }, [page]);
+
+  const isViewportScrollLocked = page === 0 && isPage0ModuleViewportLocked;
 
   const refreshCurriculumLocks = () => {
     lmsApi.fetchCurriculumLocks().then((res) => {
@@ -373,12 +384,32 @@ export default function App() {
           u.role = 'admin';
         }
         setCurrentUser(u);
+      } else if (!authApi.getToken()) {
+        setCurrentUser(null);
       }
     });
   }, []);
 
   useEffect(() => {
+    if (!currentUser) {
+      setAiQuota(null);
+      setIsTutorOpen(false);
+      return;
+    }
     refreshCurriculumLocks();
+    let active = true;
+    lmsApi.fetchAiTutorQuota().then((q) => {
+      if (active && q) setAiQuota(q);
+    });
+    const onQuotaUpdated = (ev: Event) => {
+      const detail = (ev as CustomEvent<AiQuotaState>).detail;
+      if (detail) setAiQuota(detail);
+    };
+    window.addEventListener('cpmai_ai_quota_updated', onQuotaUpdated);
+    return () => {
+      active = false;
+      window.removeEventListener('cpmai_ai_quota_updated', onQuotaUpdated);
+    };
   }, [currentUser]);
 
   const isSessionLocked = (sessionNum: number): boolean => {
@@ -406,15 +437,12 @@ export default function App() {
     return true;
   };
 
-  // Enforce authentication: Login prompted only when entering deeper curriculum pages without session
+  // Strict full-platform authentication: unauthenticated users are gated before rendering any view.
   useEffect(() => {
-    // Sessions 0 and 1, plus landing & quiz are publicly viewable
-    const publicPages = ['landing', 'quiz', 0, 1];
-    if (!currentUser && !publicPages.includes(page)) {
-      setPage('landing');
-      setIsAuthModalOpen(true);
+    if (!currentUser) {
+      setIsTutorOpen(false);
     }
-  }, [currentUser, page]);
+  }, [currentUser]);
 
   // Page 0 state (Applied LLM Fundamentals & Prompting Toolkit Sandbox)
   const [page0Content, setPage0Content] = useState('');
@@ -640,6 +668,8 @@ export default function App() {
   const handleLogout = () => {
     authApi.logout();
     setCurrentUser(null);
+    setAiQuota(null);
+    setIsTutorOpen(false);
     setPage('landing');
     showToast(
       lang === 'fa'
@@ -941,6 +971,33 @@ export default function App() {
     }
   };
 
+  // Strict Full-Platform Mandatory Login Gate: NO platform UI is accessible without authentication
+  if (!currentUser) {
+    return (
+      <AuthModal
+        isOpen={true}
+        blockingGate={true}
+        onClose={() => {}}
+        lang={lang}
+        currentUser={null}
+        onLoginSuccess={(user) => {
+          setCurrentUser(user);
+          setIsAuthModalOpen(false);
+          showToast(
+            lang === 'fa'
+              ? `خوش آمدید، ${user.displayName || user.email}`
+              : `Welcome, ${user.displayName || user.email}`
+          );
+          if (page === 'landing' && user.isOnboarded) {
+            setPage(0);
+          }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
   // Agentify Enterprise Hero Landing Page (Pure English & Login-gated)
   // AJA Cinematic Brand Intro (Unseen Studio Inspired Experience)
   if (showBrandIntro) {
@@ -1064,7 +1121,11 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-transparent text-slate-900 dark:text-slate-100 transition-colors flex flex-col selection:bg-[#1f5163]/20 selection:text-[#1f5163] dark:selection:bg-[#6fb3c6]/20 dark:selection:text-[#6fb3c6]">
+    <div
+      className={`${
+        isViewportScrollLocked ? 'h-[100dvh] overflow-hidden' : 'min-h-[100dvh]'
+      } bg-transparent text-slate-900 dark:text-slate-100 transition-colors flex flex-col selection:bg-[#1f5163]/20 selection:text-[#1f5163] dark:selection:bg-[#6fb3c6]/20 dark:selection:text-[#6fb3c6]`}
+    >
       {/* OWJ Content Protection Shield (Anti-Copy, Anti-Print, Anti-Snipping with Smart Prompt Whitelist) */}
       <ContentProtectionShield lang={lang} isAdmin={isUserAdmin(currentUser)} />
 
@@ -1279,17 +1340,39 @@ export default function App() {
               type="button"
               onClick={toggleTutor}
               data-testid="ai-tutor-toggle-btn"
-              className={`flex items-center gap-1 px-2 py-1.5 rounded-xl text-[11px] font-bold transition-all border cursor-pointer shrink-0 whitespace-nowrap shadow-2xs ${
+              className={`flex items-center gap-1.5 px-2 py-1.5 rounded-xl text-[11px] font-bold transition-all border cursor-pointer shrink-0 whitespace-nowrap shadow-2xs ${
                 isTutorOpen
                   ? 'bg-[#1e8f6b] text-white border-[#1e8f6b]'
                   : 'bg-[#1e8f6b]/10 text-[#1e8f6b] dark:text-[#63c496] border-[#1e8f6b]/30 hover:bg-[#1e8f6b]/20'
               }`}
-              title={lang === 'fa' ? 'مربی هوشمند CPMAI (پاسخگویی بر اساس محتوای همین صفحه)' : 'Contextual CPMAI AI Tutor'}
+              title={lang === 'fa' ? 'مربی هوشمند AI (۵ پرسش غیرتکراری در ماه + بانک پاسخ مشترک رایگان)' : 'Contextual CPMAI AI Tutor (5 non-duplicate prompts/mo + free shared Q&A)'}
             >
               <Bot className="w-3.5 h-3.5 shrink-0" />
               <span className="hidden lg:inline whitespace-nowrap">
                 {lang === 'fa' ? 'مربی هوشمند AI' : 'AI Tutor'}
               </span>
+              {aiQuota && (
+                <span
+                  data-testid="navbar-ai-quota-badge"
+                  className={`px-1.5 py-0.5 rounded-md text-[10px] font-black tabular-nums ${
+                    isTutorOpen
+                      ? 'bg-white/20 text-white'
+                      : aiQuota.isUnlimited
+                      ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300'
+                      : aiQuota.isExhausted
+                      ? 'bg-rose-500/15 text-rose-700 dark:text-rose-300'
+                      : 'bg-[#1e8f6b]/15 text-[#1e8f6b] dark:text-[#63c496]'
+                  }`}
+                >
+                  {aiQuota.isUnlimited
+                    ? lang === 'fa'
+                      ? 'نامحدود'
+                      : '∞'
+                    : lang === 'fa'
+                    ? `${aiQuota.remaining.toLocaleString('fa-IR')}/${aiQuota.limit.toLocaleString('fa-IR')}`
+                    : `${aiQuota.remaining}/${aiQuota.limit}`}
+                </span>
+              )}
             </button>
 
             {/* Class Leaderboard Button */}
@@ -1381,7 +1464,11 @@ export default function App() {
       </header>
 
       {/* Workspace Body Layout (Sidebar + Main Workspace Area) */}
-      <div className={`flex-1 flex w-full mx-auto relative ${isPresentationMode ? 'max-w-none' : 'max-w-[1750px]'}`}>
+      <div
+        className={`flex-1 flex w-full mx-auto relative ${
+          isViewportScrollLocked ? 'min-h-0 overflow-hidden ' : ''
+        }${isPresentationMode ? 'max-w-none' : 'max-w-[1750px]'}`}
+      >
         {/* Responsive Workspace Sidebar */}
         {!isPresentationMode && (
           <WorkspaceSidebar
@@ -1400,14 +1487,18 @@ export default function App() {
 
         {/* Main Content Area */}
         <main className={`flex-1 w-full mx-auto min-w-0 transition-all duration-300 ${
+          isViewportScrollLocked ? 'min-h-0 overflow-hidden flex flex-col ' : ''
+        }${
           typeof page === 'number' && page >= 1 && page <= 21 ? 'cpmai-workbook-stage ' : ''
         }${
           isPresentationMode
             ? page === 0
-              ? 'max-w-none px-4 sm:px-6 lg:px-8 py-3 presentation-main'
+              ? 'max-w-none px-4 sm:px-6 lg:px-8 py-2.5 presentation-main'
               : 'max-w-6xl px-4 sm:px-8 lg:px-12 py-4 presentation-main'
             : page === 0
-            ? 'max-w-[1720px] p-3 sm:p-5 lg:px-7 lg:py-4'
+            ? isViewportScrollLocked
+              ? 'max-w-[1720px] px-3 sm:px-5 lg:px-6 py-2.5'
+              : 'max-w-[1720px] p-3 sm:p-5 lg:px-7 lg:py-4'
             : 'max-w-5xl p-4 sm:p-7 lg:p-10'
         }`}>
           {toastMsg && (
@@ -1454,6 +1545,11 @@ export default function App() {
             disciplineId={activeDiscipline}
             isAdmin={isUserAdmin(currentUser)}
             isPresentationMode={isPresentationMode}
+            currentUser={currentUser}
+            onOpenAuth={() => setIsAuthModalOpen(true)}
+            onOpenAiTutor={() => setIsTutorOpen(true)}
+            aiQuota={aiQuota}
+            onModuleViewportLockChange={setIsPage0ModuleViewportLocked}
           />
         )}
 
@@ -1953,8 +2049,8 @@ export default function App() {
           </>
         )}
 
-        {/* Persistent, Collapsible Bottom Quick Navigation Panel (Default Collapsed) */}
-        {!isPresentationMode && (
+        {/* Persistent, Collapsible Bottom Quick Navigation Panel (Hidden in Presentation & Single-Module Locked View) */}
+        {!isPresentationMode && !isViewportScrollLocked && (
         <>
         <section
           aria-label={lang === 'fa' ? 'ناوبری سریع پایین صفحه' : 'Bottom Quick Navigation'}
@@ -2199,6 +2295,8 @@ export default function App() {
             disciplineId={activeDiscipline}
             roleId={activeRole}
             activePageDraft={getActivePageDraft()}
+            initialQuota={aiQuota}
+            onQuotaChange={setAiQuota}
           />
         )}
       </div>

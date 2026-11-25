@@ -103,6 +103,13 @@ export const AdminWeekdayCohortsPanel: React.FC<AdminWeekdayCohortsPanelProps> =
         setUsersByCohort(data.usersByCohort || {});
         setUnmatchedUsers(data.unmatchedUsers || []);
         setTotalUsers(data.totalUsers || 0);
+        const current = data.cohorts.find((c) => c.id === selectedCohortId);
+        if (current) {
+          setDraftReviewed(current.reviewedModules || []);
+          setDraftNext(current.nextModules || []);
+          setDraftNote(current.instructorNote || '');
+          setHasUnsavedChanges(false);
+        }
       } else {
         // Fallback client-side grouping if API unreachable
         const grouped = groupUsersByWeekdayCohort(fallbackUsers);
@@ -129,7 +136,7 @@ export const AdminWeekdayCohortsPanel: React.FC<AdminWeekdayCohortsPanelProps> =
     [cohorts, selectedCohortId]
   );
 
-  // Sync draft editor whenever active cohort changes or reloads from DB
+  // Sync draft editor whenever selected cohort switches (or initial load completes)
   useEffect(() => {
     if (activeCohort) {
       setDraftReviewed(activeCohort.reviewedModules || []);
@@ -137,7 +144,44 @@ export const AdminWeekdayCohortsPanel: React.FC<AdminWeekdayCohortsPanelProps> =
       setDraftNote(activeCohort.instructorNote || '');
       setHasUnsavedChanges(false);
     }
-  }, [activeCohort?.id, activeCohort?.updatedAt]);
+  }, [activeCohort?.id]);
+
+  // Auto-save debounced persistence so toggling any module or note immediately syncs to DB & student Orbit panel
+  useEffect(() => {
+    if (!hasUnsavedChanges || !activeCohort) return;
+    const targetCohortId = activeCohort.id;
+    const targetTitle = activeCohort.title;
+    const reviewedSnapshot = [...draftReviewed];
+    const nextSnapshot = [...draftNext];
+    const noteSnapshot = draftNote;
+
+    const timer = window.setTimeout(async () => {
+      setIsSaving(true);
+      try {
+        const res = await lmsApi.saveAdminCohortSchedule({
+          cohortId: targetCohortId,
+          reviewedModules: reviewedSnapshot,
+          nextModules: nextSnapshot,
+          instructorNote: noteSnapshot
+        });
+        if (res.success && res.cohort) {
+          setCohorts((prev) =>
+            prev.map((c) =>
+              c.id === res.cohort!.id
+                ? { ...c, ...res.cohort!, studentCount: c.studentCount }
+                : c
+            )
+          );
+          setHasUnsavedChanges(false);
+          onNotify(`تغییرات «${targetTitle}» به‌صورت خودکار ذخیره و به پنل دانشجویان تزریق شد.`);
+        }
+      } finally {
+        setIsSaving(false);
+      }
+    }, 550);
+
+    return () => window.clearTimeout(timer);
+  }, [hasUnsavedChanges, activeCohort?.id, draftReviewed, draftNext, draftNote]);
 
   const activeMembers = useMemo(() => {
     const rawList =

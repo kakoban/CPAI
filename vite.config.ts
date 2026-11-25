@@ -8,23 +8,6 @@ export default defineConfig(() => {
     plugins: [
       react(),
       tailwindcss(),
-      {
-        name: 'express-api-server',
-        configureServer(server) {
-          server.middlewares.use(async (req, res, next) => {
-            if (req.url && (req.url.startsWith('/api') || req.url.startsWith('/auth'))) {
-              try {
-                const { default: app } = await import('./api/index.ts');
-                return app(req as any, res as any, next);
-              } catch (err) {
-                console.error('API middleware error:', err);
-                return next();
-              }
-            }
-            next();
-          });
-        },
-      },
     ],
     resolve: {
       alias: {
@@ -32,6 +15,9 @@ export default defineConfig(() => {
       },
     },
     server: {
+      host: '0.0.0.0',
+      port: 3000,
+      allowedHosts: true as const,
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',

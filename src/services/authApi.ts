@@ -42,6 +42,7 @@ class AuthService {
 
   getSavedUser(): UserProfile | null {
     try {
+      if (!this.getToken()) return null;
       const stored = localStorage.getItem(USER_KEY);
       if (!stored) return null;
       const parsed: UserProfile = JSON.parse(stored);
@@ -190,6 +191,11 @@ class AuthService {
       });
       clearTimeout(timeoutId);
 
+      if (res.status === 401 || res.status === 403) {
+        this.clearAuth();
+        return null;
+      }
+
       if (res.ok) {
         const data = await res.json();
         if (data.user) {
@@ -201,7 +207,7 @@ class AuthService {
         }
       }
     } catch {
-      // ignore
+      // ignore network error and keep valid existing session
     }
     return this.getSavedUser();
   }

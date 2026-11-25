@@ -22,6 +22,7 @@ import {
 import {
   HR_ARTIFACTS_WORKSHOP_HEADER,
   HR_ARTIFACT_EXERCISES,
+  HR_NOTEBOOKLM_COMPANION,
   HrArtifactExercise
 } from '../data/hr_artifacts_canvas_workshop';
 
@@ -39,6 +40,8 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
   copiedId
 }) => {
   const [selectedExId, setSelectedExId] = useState<string>(HR_ARTIFACT_EXERCISES[0].id);
+  const [notebookCompanionTab, setNotebookCompanionTab] = useState<'output' | 'assumptions'>('output');
+  const [isNotebookCompanionOpen, setIsNotebookCompanionOpen] = useState<boolean>(true);
 
   const activeEx: HrArtifactExercise =
     HR_ARTIFACT_EXERCISES.find((ex) => ex.id === selectedExId) || HR_ARTIFACT_EXERCISES[0];
@@ -62,6 +65,12 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
   const activePrompt = lang === 'fa' ? activeEx.promptFa : activeEx.promptEn;
   const copyKey = `hr_artifact_prompt_${activeEx.id}`;
   const isCopied = copiedId === copyKey;
+  const notebookOutputText =
+    lang === 'fa' ? HR_NOTEBOOKLM_COMPANION.simulatedOutputFa : HR_NOTEBOOKLM_COMPANION.simulatedOutputEn;
+  const notebookPromptText =
+    lang === 'fa' ? HR_NOTEBOOKLM_COMPANION.extractionPromptFa : HR_NOTEBOOKLM_COMPANION.extractionPromptEn;
+  const notebookAssumptions =
+    lang === 'fa' ? HR_NOTEBOOKLM_COMPANION.assumptionsFa : HR_NOTEBOOKLM_COMPANION.assumptionsEn;
 
   return (
     <div className="p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
@@ -174,6 +183,222 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
                 </p>
               </div>
             ))}
+          </div>
+
+          {/* Grounded NotebookLM Simulated Output + Assumptions Companion Pack */}
+          <div
+            data-testid="hr-notebooklm-companion-panel"
+            className="rounded-2xl bg-white/95 dark:bg-[#12171b] border border-[#9333ea]/25 dark:border-[#9333ea]/35 overflow-hidden shadow-xs"
+          >
+            <div className="px-4 py-3 bg-[#9333ea]/[0.07] dark:bg-[#9333ea]/15 border-b border-[#9333ea]/15 flex flex-wrap items-center justify-between gap-2">
+              <div className="space-y-0.5 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2 py-0.5 rounded-md bg-[#9333ea] text-white text-[10px] font-black">
+                    {lang === 'fa' ? HR_NOTEBOOKLM_COMPANION.badgeFa : HR_NOTEBOOKLM_COMPANION.badgeEn}
+                  </span>
+                  <h4 className="text-xs sm:text-[13px] font-black text-[#1c2830] dark:text-[#e8ebe9]">
+                    {lang === 'fa' ? HR_NOTEBOOKLM_COMPANION.titleFa : HR_NOTEBOOKLM_COMPANION.titleEn}
+                  </h4>
+                </div>
+                <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                  {lang === 'fa' ? HR_NOTEBOOKLM_COMPANION.subtitleFa : HR_NOTEBOOKLM_COMPANION.subtitleEn}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsNotebookCompanionOpen((prev) => !prev)}
+                className="px-2.5 py-1 rounded-lg border border-[#9333ea]/30 bg-white dark:bg-[#161e24] text-[11px] font-bold text-[#7e22ce] dark:text-[#d8b4fe] hover:bg-[#9333ea]/10 transition-colors cursor-pointer shrink-0"
+              >
+                {isNotebookCompanionOpen
+                  ? lang === 'fa'
+                    ? 'جمع کردن پنل'
+                    : 'Collapse'
+                  : lang === 'fa'
+                  ? 'مشاهده خروجی و فرضیات'
+                  : 'Expand Pack'}
+              </button>
+            </div>
+
+            {isNotebookCompanionOpen && (
+              <div className="p-4 space-y-3.5">
+                {/* 2-Tab Selector + Quick Copy Actions */}
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="inline-flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+                    <button
+                      type="button"
+                      data-testid="hr-nlm-tab-output"
+                      onClick={() => setNotebookCompanionTab('output')}
+                      className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer ${
+                        notebookCompanionTab === 'output'
+                          ? 'bg-[#9333ea] text-white shadow-2xs'
+                          : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      {lang === 'fa'
+                        ? '۱. خروجی فرضی و مستند NotebookLM'
+                        : '1. Simulated NotebookLM Output'}
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="hr-nlm-tab-assumptions"
+                      onClick={() => setNotebookCompanionTab('assumptions')}
+                      className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer ${
+                        notebookCompanionTab === 'assumptions'
+                          ? 'bg-[#9333ea] text-white shadow-2xs'
+                          : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      {lang === 'fa'
+                        ? '۲. فرضیات منابع و پرامپت استخراج'
+                        : '2. Source Assumptions & Extraction Prompt'}
+                    </button>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <button
+                      type="button"
+                      data-testid="hr-nlm-copy-output-btn"
+                      onClick={() => copyToClipboard(notebookOutputText, 'hr_nlm_simulated_output')}
+                      className="px-2.5 py-1.5 rounded-lg bg-[#9333ea] hover:bg-[#7e22ce] text-white text-[11px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                    >
+                      {copiedId === 'hr_nlm_simulated_output' ? (
+                        <Check className="w-3.5 h-3.5" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                      <span>
+                        {copiedId === 'hr_nlm_simulated_output'
+                          ? lang === 'fa'
+                            ? 'خروجی NotebookLM کپی شد'
+                            : 'Output Copied'
+                          : lang === 'fa'
+                          ? 'کپی خروجی NotebookLM (برای گام ۲ و ۳)'
+                          : 'Copy NotebookLM Output'}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      data-testid="hr-nlm-copy-csv-btn"
+                      onClick={() => copyToClipboard(HR_NOTEBOOKLM_COMPANION.sampleCsv, 'hr_nlm_sample_csv')}
+                      className="px-2.5 py-1.5 rounded-lg border border-[#1a73e8]/35 bg-[#1a73e8]/10 hover:bg-[#1a73e8]/20 text-[#1557b0] dark:text-[#7dd3fc] text-[11px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      {copiedId === 'hr_nlm_sample_csv' ? (
+                        <Check className="w-3.5 h-3.5" />
+                      ) : (
+                        <FileSpreadsheet className="w-3.5 h-3.5" />
+                      )}
+                      <span>
+                        {copiedId === 'hr_nlm_sample_csv'
+                          ? lang === 'fa'
+                            ? 'CSV نمونه کپی شد'
+                            : 'Sample CSV Copied'
+                          : lang === 'fa'
+                          ? 'کپی جدول نمونه CSV کارکرد'
+                          : 'Copy Sample CSV'}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {notebookCompanionTab === 'output' ? (
+                  <div className="space-y-3">
+                    <div
+                      dir={lang === 'fa' ? 'rtl' : 'ltr'}
+                      className="p-3.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-[#0d141a] border border-slate-200 dark:border-slate-800 max-h-72 overflow-y-auto text-[11.5px] leading-relaxed text-[#1c2830] dark:text-[#e8ebe9] whitespace-pre-wrap font-normal"
+                    >
+                      {notebookOutputText}
+                    </div>
+                    <div className="p-3 rounded-xl bg-[#1a73e8]/[0.06] border border-[#1a73e8]/20 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                      <div className="flex items-center gap-2 text-[#12343b] dark:text-[#d6e9ee]">
+                        <Sparkles className="w-3.5 h-3.5 text-[#1a73e8] shrink-0" />
+                        <span>
+                          {lang === 'fa'
+                            ? 'مسیر سریع اجرا: ابتدا دکمه «کپی خروجی NotebookLM» و «کپی جدول CSV» را بزنید، سپس پرامپت یکی از ۵ تمرین زیر را در Gemini Canvas یا Claude Artifacts پیست کنید.'
+                            : 'Fast Track: Copy the grounded NotebookLM output + sample CSV above, then paste any of the 5 prompts below into Gemini Canvas or Claude Artifacts.'}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onLoadToSandbox(`${notebookOutputText}\n\n--- CSV کارکرد نمونه ---\n${HR_NOTEBOOKLM_COMPANION.sampleCsv}`)
+                        }
+                        className="px-2.5 py-1 rounded-lg bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold text-[10.5px] cursor-pointer whitespace-nowrap"
+                      >
+                        {lang === 'fa' ? 'ارسال به سندباکس پرامپت' : 'Send to Sandbox'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                      {notebookAssumptions.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="p-3 rounded-xl bg-slate-50 dark:bg-[#0d141a] border border-slate-200 dark:border-slate-800 space-y-1"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[11.5px] font-extrabold text-[#1c2830] dark:text-[#e8ebe9]">
+                              {item.title}
+                            </span>
+                            <span
+                              dir="ltr"
+                              className="px-1.5 py-0.5 rounded bg-[#9333ea]/10 text-[#7e22ce] dark:text-[#d8b4fe] font-mono text-[9.5px] font-bold shrink-0"
+                            >
+                              {item.sourceTag}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
+                            {item.detail}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="p-3.5 rounded-xl bg-[#9333ea]/[0.05] border border-[#9333ea]/20 space-y-2">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <span className="text-[11.5px] font-extrabold text-[#7e22ce] dark:text-[#d8b4fe] flex items-center gap-1.5">
+                          <Code className="w-3.5 h-3.5" />
+                          <span>
+                            {lang === 'fa'
+                              ? 'پرامپت آماده استخراج قواعد در NotebookLM (گام ۱):'
+                              : 'Ready-to-Use NotebookLM Extraction Prompt (Step 1):'}
+                          </span>
+                        </span>
+                        <button
+                          type="button"
+                          data-testid="hr-nlm-copy-prompt-btn"
+                          onClick={() => copyToClipboard(notebookPromptText, 'hr_nlm_extraction_prompt')}
+                          className="px-2.5 py-1 rounded-lg bg-[#9333ea] hover:bg-[#7e22ce] text-white text-[10.5px] font-bold flex items-center gap-1 cursor-pointer"
+                        >
+                          {copiedId === 'hr_nlm_extraction_prompt' ? (
+                            <Check className="w-3 h-3" />
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
+                          <span>
+                            {copiedId === 'hr_nlm_extraction_prompt'
+                              ? lang === 'fa'
+                                ? 'کپی شد'
+                                : 'Copied'
+                              : lang === 'fa'
+                              ? 'کپی پرامپت گام ۱'
+                              : 'Copy Step-1 Prompt'}
+                          </span>
+                        </button>
+                      </div>
+                      <pre
+                        dir={lang === 'fa' ? 'rtl' : 'ltr'}
+                        className="p-3 rounded-lg bg-white dark:bg-[#12171b] border border-slate-200 dark:border-slate-800 text-[11px] leading-relaxed text-[#1c2830] dark:text-[#e8ebe9] whitespace-pre-wrap font-sans"
+                      >
+                        {notebookPromptText}
+                      </pre>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

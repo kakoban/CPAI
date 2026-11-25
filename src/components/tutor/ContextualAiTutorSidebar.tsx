@@ -23,6 +23,14 @@ const PAYA_ROLE_LABELS: Record<EngineeringRoleId, { titleFa: string; titleEn: st
   technical_engineer: { titleFa: 'کارشناس ارشد دفتر فنی، مناقصات، PMO و امور پیمان', titleEn: 'Holding PMO, Bidding & Contracts Specialist' },
   site_operator: { titleFa: 'رئیس کارگاه، ناظر اجرا، مهندس MEP و سرپرست ناوگان', titleEn: 'Site Superintendent, MEP & Fleet Lead' }
 };
+import { authApi } from '../../services/authApi';
+import { lmsApi } from '../../services/lmsApi';
+import {
+  AI_GUIDED_TOPICS,
+  AiQuotaState,
+  MONTHLY_AI_QUOTA_LIMIT,
+  SharedAiQaItem
+} from '../../utils/aiQuotaEngine';
 import {
   Bot,
   Sparkles,
@@ -37,7 +45,15 @@ import {
   HelpCircle,
   MessageSquareText,
   Layers,
-  Wand2
+  Wand2,
+  Crown,
+  Lock,
+  Compass,
+  Zap,
+  Users,
+  Search,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 export interface PageTutorMetadata {
@@ -426,6 +442,9 @@ export interface TutorChatMessage {
   text: string;
   timestamp: string;
   pageTag?: string;
+  fromSharedCache?: boolean;
+  reuseCount?: number;
+  savedToSharedBank?: boolean;
 }
 
 interface ContextualAiTutorSidebarProps {
@@ -437,6 +456,8 @@ interface ContextualAiTutorSidebarProps {
   disciplineId: DisciplineId;
   roleId: EngineeringRoleId;
   activePageDraft: string;
+  initialQuota?: AiQuotaState | null;
+  onQuotaChange?: (quota: AiQuotaState) => void;
 }
 
 const TUTOR_HISTORY_STORAGE_KEY = 'cpmai_contextual_tutor_history_v1';
@@ -449,7 +470,9 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
   industryTrack,
   disciplineId,
   roleId,
-  activePageDraft
+  activePageDraft,
+  initialQuota = null,
+  onQuotaChange
 }) => {
   const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
     try {
@@ -480,9 +503,65 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [quota, setQuota] = useState<AiQuotaState | null>(initialQuota);
+  const [quotaLoading, setQuotaLoading] = useState(false);
+  const [activeSidebarTab, setActiveSidebarTab] = useState<'chat' | 'shared'>('chat');
+  const [sharedQaItems, setSharedQaItems] = useState<SharedAiQaItem[]>([]);
+  const [sharedQaLoading, setSharedQaLoading] = useState(false);
+  const [sharedQaSearch, setSharedQaSearch] = useState('');
+  const [expandedSharedId, setExpandedSharedId] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentMessages = threadsByPage[pageKey] || [];
+
+  useEffect(() => {
+    if (initialQuota) {
+      setQuota(initialQuota);
+    }
+  }, [initialQuota]);
+
+  const applyQuotaUpdate = (nextQuota: AiQuotaState | null | undefined) => {
+    if (!nextQuota) return;
+    setQuota(nextQuota);
+    onQuotaChange?.(nextQuota);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('cpmai_ai_quota_updated', { detail: nextQuota }));
+    }
+  };
+
+  const loadSharedQaBank = async (searchQuery?: string) => {
+    setSharedQaLoading(true);
+    try {
+      const items = await lmsApi.fetchSharedAiQa({
+        q: searchQuery !== undefined ? searchQuery : sharedQaSearch,
+        lang
+      });
+      setSharedQaItems(items);
+    } finally {
+      setSharedQaLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let active = true;
+    setQuotaLoading(true);
+    lmsApi
+      .fetchAiTutorQuota()
+      .then((q) => {
+        if (active && q) {
+          applyQuotaUpdate(q);
+        }
+      })
+      .finally(() => {
+        if (active) setQuotaLoading(false);
+      });
+    loadSharedQaBank('');
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, lang]);
 
   useEffect(() => {
     try {
@@ -526,10 +605,13 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
     };
   }, [isDragging, sidebarWidth, lang]);
 
-  const handleSendQuestion = async (questionText?: string) => {
+  const isQuotaExhausted = Boolean(quota && !quota.isUnlimited && quota.isExhausted);
+
+  const handleSendQuestion = async (questionText?: string, topicId?: string) => {
     const q = (questionText ?? inputQuestion).trim();
     if (!q || isLoading) return;
 
+    setActiveSidebarTab('chat');
     setErrorMsg(null);
     if (!questionText) {
       setInputQuestion('');
@@ -555,13 +637,16 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
     setIsLoading(true);
 
     try {
+      const token = authApi.getToken();
       const response = await fetch('/api/ai/tutor', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
           question: q,
+          topicId: topicId || `page_${pageKey}`,
           lang,
           history: currentMessages.slice(-8).map((m) => ({
             role: m.role,
@@ -583,8 +668,17 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
 
       const data = await response.json();
 
+      if (data.quota) {
+        applyQuotaUpdate(data.quota as AiQuotaState);
+      }
+
       if (!response.ok || data.error) {
-        throw new Error(data.error || (lang === 'fa' ? 'خطا در دریافت پاسخ از مربی هوشمند' : 'Failed to get response from AI Tutor'));
+        throw new Error(
+          data.error ||
+            (lang === 'fa'
+              ? 'خطا در دریافت پاسخ از مربی هوشمند'
+              : 'Failed to get response from AI Tutor')
+        );
       }
 
       const aiMsg: TutorChatMessage = {
@@ -595,13 +689,20 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
           hour: '2-digit',
           minute: '2-digit'
         }),
-        pageTag: lang === 'fa' ? pageMeta.titleFa : pageMeta.titleEn
+        pageTag: lang === 'fa' ? pageMeta.titleFa : pageMeta.titleEn,
+        fromSharedCache: Boolean(data.fromSharedCache),
+        reuseCount: typeof data.reuseCount === 'number' ? data.reuseCount : undefined,
+        savedToSharedBank: Boolean(data.savedToSharedBank)
       };
 
       setThreadsByPage((prev) => ({
         ...prev,
         [pageKey]: [...(prev[pageKey] || []), aiMsg]
       }));
+
+      if (data.savedToSharedBank || data.fromSharedCache) {
+        loadSharedQaBank();
+      }
     } catch (err: any) {
       setErrorMsg(err?.message || (lang === 'fa' ? 'خطا در ارتباط با سرور هوش مصنوعی' : 'Connection error with AI Tutor server'));
     } finally {
@@ -713,6 +814,139 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
             </div>
           </div>
 
+          {/* Monthly AI Guidance Quota Meter Card (5 Non-Duplicate Prompts / Month + Free Shared Bank) */}
+          <div
+            data-testid="ai-quota-meter-card"
+            className={`p-2.5 rounded-xl border shadow-2xs space-y-2 ${
+              quota?.isUnlimited
+                ? 'bg-gradient-to-l from-amber-50/90 to-emerald-50/80 dark:from-amber-950/35 dark:to-emerald-950/30 border-amber-300/70 dark:border-amber-700/50'
+                : isQuotaExhausted
+                ? 'bg-rose-50/90 dark:bg-rose-950/35 border-rose-300 dark:border-rose-800/60'
+                : 'bg-gradient-to-l from-[#e7f4f1] to-white dark:from-[#12262b] dark:to-[#152227] border-[#b7d6d2] dark:border-[#244349]'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 min-w-0">
+                {quota?.isUnlimited ? (
+                  <Crown className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                ) : isQuotaExhausted ? (
+                  <Lock className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
+                ) : (
+                  <Zap className="w-3.5 h-3.5 text-[#1e8f6b] dark:text-[#63c496] shrink-0" />
+                )}
+                <span className="text-[11px] font-black text-[#12343b] dark:text-[#e4f0ee] truncate">
+                  {quota?.isUnlimited
+                    ? lang === 'fa'
+                      ? 'مدیر ارشد · راهنمای هوشمند نامحدود'
+                      : 'Admin · Unlimited AI Guidance'
+                    : lang === 'fa'
+                    ? 'سهمیه ۵ پرسش غیرتکراری ماهانه'
+                    : '5 Non-Duplicate Monthly Prompts'}
+                </span>
+              </div>
+
+              <span
+                data-testid="ai-quota-remaining-label"
+                className={`px-2 py-0.5 rounded-lg text-[10px] font-black tabular-nums shrink-0 ${
+                  quota?.isUnlimited
+                    ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300'
+                    : isQuotaExhausted
+                    ? 'bg-rose-500/15 text-rose-700 dark:text-rose-300'
+                    : (quota?.remaining ?? MONTHLY_AI_QUOTA_LIMIT) <= 2
+                    ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300'
+                    : 'bg-[#1e8f6b]/15 text-[#1e8f6b] dark:text-[#63c496]'
+                }`}
+              >
+                {quotaLoading && !quota
+                  ? '...'
+                  : quota?.isUnlimited
+                  ? lang === 'fa'
+                    ? 'نامحدود'
+                    : 'Unlimited'
+                  : lang === 'fa'
+                  ? `${(quota?.remaining ?? MONTHLY_AI_QUOTA_LIMIT).toLocaleString('fa-IR')} از ${(quota?.limit ?? MONTHLY_AI_QUOTA_LIMIT).toLocaleString('fa-IR')} باقی‌مانده`
+                  : `${quota?.remaining ?? MONTHLY_AI_QUOTA_LIMIT}/${quota?.limit ?? MONTHLY_AI_QUOTA_LIMIT} left`}
+              </span>
+            </div>
+
+            {!quota?.isUnlimited && (
+              <>
+                {/* 5 Tactile Credit Segments */}
+                <div
+                  data-testid="ai-quota-segments"
+                  className="grid grid-cols-5 gap-1.5"
+                  aria-label={lang === 'fa' ? 'نمودار سهمیه ۵ پرسش غیرتکراری ماهانه' : '5 monthly non-duplicate prompt credits'}
+                >
+                  {Array.from({ length: quota?.limit ?? MONTHLY_AI_QUOTA_LIMIT }).map((_, idx) => {
+                    const remainingCount = quota?.remaining ?? MONTHLY_AI_QUOTA_LIMIT;
+                    const isAvailable = idx < remainingCount;
+                    const activeColor =
+                      remainingCount <= 2
+                        ? 'bg-amber-500'
+                        : 'bg-gradient-to-t from-[#1e8f6b] to-[#2cb68a]';
+                    return (
+                      <span
+                        key={idx}
+                        className={`h-2 rounded-sm transition-all duration-300 ${
+                          isAvailable
+                            ? activeColor
+                            : 'bg-slate-200 dark:bg-slate-700/80'
+                        }`}
+                      />
+                    );
+                  })}
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-[#587479] dark:text-[#8ca8ab]">
+                  <span>
+                    {lang === 'fa'
+                      ? `مصرف این ماه: ${(quota?.used ?? 0).toLocaleString('fa-IR')} از ۵ · بانک مشترک رایگان`
+                      : `Used: ${quota?.used ?? 0}/5 · Shared Bank Free`}
+                  </span>
+                  <span>
+                    {lang === 'fa'
+                      ? `تجدید: ${quota?.resetLabelFa || 'ابتدای ماه بعد'}`
+                      : `Resets: ${quota?.resetLabelFa || 'Next month'}`}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* 2-Tab Mode Switcher: Ask AI vs Zero-Token-Burn Shared Community Q&A Bank */}
+          <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] border border-[#c3d4d4]/70 dark:border-[#274347]">
+            <button
+              type="button"
+              data-testid="ai-chat-tab"
+              onClick={() => setActiveSidebarTab('chat')}
+              className={`py-1.5 px-2 rounded-lg text-[11px] font-extrabold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                activeSidebarTab === 'chat'
+                  ? 'bg-white dark:bg-[#1a282e] text-[#12343b] dark:text-white shadow-2xs'
+                  : 'text-[#587479] dark:text-[#8ca8ab] hover:text-[#12343b] dark:hover:text-white'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#e0533c]" />
+              <span>{lang === 'fa' ? 'پرسش از AI' : 'Ask AI'}</span>
+            </button>
+            <button
+              type="button"
+              data-testid="ai-shared-qa-tab"
+              onClick={() => {
+                setActiveSidebarTab('shared');
+                loadSharedQaBank();
+              }}
+              className={`py-1.5 px-2 rounded-lg text-[11px] font-extrabold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                activeSidebarTab === 'shared'
+                  ? 'bg-[#1e8f6b] text-white shadow-2xs'
+                  : 'text-[#1e8f6b] dark:text-[#63c496] hover:bg-[#1e8f6b]/10'
+              }`}
+            >
+              <Users className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">
+                {lang === 'fa' ? `بانک هم‌دوره‌ای (${sharedQaItems.length.toLocaleString('fa-IR')})` : `Shared Q&A (${sharedQaItems.length})`}
+              </span>
+            </button>
+          </div>
+
           {/* Active Page Grounding Badge Card */}
           <div className="p-2.5 rounded-xl bg-white/75 dark:bg-[#152227]/90 border border-[#c3d4d4]/80 dark:border-[#274347] space-y-1.5 shadow-2xs">
             <div className="flex items-center justify-between gap-2">
@@ -750,6 +984,159 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
           </div>
         </div>
 
+        {/* Scrollable Body: Either Shared Community Q&A Bank OR Live AI Chat */}
+        {activeSidebarTab === 'shared' ? (
+          <div
+            data-testid="ai-shared-qa-panel"
+            className="flex-1 overflow-y-auto p-3.5 space-y-3 no-scrollbar"
+          >
+            <div className="p-3 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 space-y-1">
+              <div className="flex items-center gap-1.5 text-[11px] font-black text-emerald-800 dark:text-emerald-300">
+                <Users className="w-3.5 h-3.5 shrink-0" />
+                <span>
+                  {lang === 'fa'
+                    ? 'بانک پاسخ‌های مشترک دوره (رایگان · بدون مصرف توکن و سهمیه)'
+                    : 'Shared Community Q&A Bank (Free · Zero Token Burn)'}
+                </span>
+              </div>
+              <p className="text-[10.5px] text-emerald-700/90 dark:text-emerald-300/90 leading-relaxed">
+                {lang === 'fa'
+                  ? 'هر پرسش تخصصی که توسط هم‌دوره‌ای‌ها از AI پرسیده شود، به‌صورت ناشناس اینجا ذخیره می‌شود تا سایر کاربران بدون کسر از سهمیه ۵تایی از آن استفاده کنند.'
+                  : 'Every general course question answered by AI is anonymized and stored here so peers can reuse it without spending tokens or quota.'}
+              </p>
+            </div>
+
+            {/* Search Shared Q&A */}
+            <div className="flex items-center gap-1.5">
+              <div className="relative flex-1">
+                <Search className="w-3.5 h-3.5 text-[#587479] absolute top-1/2 -translate-y-1/2 start-2.5 pointer-events-none" />
+                <input
+                  type="text"
+                  value={sharedQaSearch}
+                  onChange={(e) => setSharedQaSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      loadSharedQaBank(sharedQaSearch);
+                    }
+                  }}
+                  placeholder={
+                    lang === 'fa'
+                      ? 'جستجو در پرسش‌های هم‌دوره‌ای‌ها (مثلاً MCP، ROI، NotebookLM)...'
+                      : 'Search shared course Q&A...'
+                  }
+                  className="w-full ps-8 pe-3 py-2 rounded-xl border border-[#c3d4d4] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] text-xs text-[#1c2830] dark:text-[#e8ebe9] focus:outline-hidden focus:border-[#1e8f6b]"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => loadSharedQaBank(sharedQaSearch)}
+                className="px-3 py-2 rounded-xl bg-[#1e8f6b] hover:bg-[#166e52] text-white text-xs font-bold cursor-pointer shrink-0"
+              >
+                {lang === 'fa' ? 'جستجو' : 'Go'}
+              </button>
+            </div>
+
+            {sharedQaLoading ? (
+              <div className="p-6 text-center text-xs text-[#587479] dark:text-[#8ca8ab]">
+                {lang === 'fa' ? 'در حال بارگذاری بانک پاسخ‌های مشترک...' : 'Loading shared Q&A bank...'}
+              </div>
+            ) : sharedQaItems.length === 0 ? (
+              <div className="p-5 rounded-xl border border-dashed border-[#c3d4d4] dark:border-[#2d3942] text-center space-y-2">
+                <p className="text-xs font-bold text-[#12343b] dark:text-[#e4f0ee]">
+                  {lang === 'fa'
+                    ? 'هنوز پاسخ مشترکی با این کلیدواژه ثبت نشده است.'
+                    : 'No shared Q&A entries found yet.'}
+                </p>
+                <p className="text-[11px] text-[#587479] dark:text-[#8ca8ab] leading-relaxed">
+                  {lang === 'fa'
+                    ? 'اولین نفر باشید! در تب «پرسش از AI» سوال خود را بپرسید تا پاسخ آن به‌صورت خودکار برای همه هم‌دوره‌ای‌ها اینجا ذخیره شود.'
+                    : 'Be the first! Ask a question in the Ask AI tab and its answer will automatically be shared here.'}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setActiveSidebarTab('chat')}
+                  className="px-3 py-1.5 rounded-lg bg-[#e0533c] text-white text-[11px] font-bold cursor-pointer"
+                >
+                  {lang === 'fa' ? 'طرح اولین پرسش' : 'Ask First Question'}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {sharedQaItems.map((item) => {
+                  const isExpanded = expandedSharedId === item.id;
+                  return (
+                    <div
+                      key={item.id}
+                      data-testid={`shared-qa-item-${item.id}`}
+                      className="rounded-xl bg-white/95 dark:bg-[#1a2228] border border-[#c3d4d4]/80 dark:border-[#2d3942] overflow-hidden shadow-2xs"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setExpandedSharedId(isExpanded ? null : item.id)}
+                        className="w-full p-3 text-start flex items-start justify-between gap-2 hover:bg-slate-50/80 dark:hover:bg-white/[0.03] transition-colors cursor-pointer"
+                      >
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <div className="text-xs font-extrabold text-[#12343b] dark:text-[#e4f0ee] leading-snug">
+                            {item.questionText}
+                          </div>
+                          <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-[#587479] dark:text-[#8ca8ab]">
+                            <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold">
+                              {lang === 'fa' ? 'رایگان · بدون کسر سهمیه' : 'Free · 0 Quota'}
+                            </span>
+                            <span>·</span>
+                            <span>
+                              {lang === 'fa'
+                                ? `${(item.reuseCount || 0).toLocaleString('fa-IR')} استفاده مجدد`
+                                : `${item.reuseCount || 0} reuses`}
+                            </span>
+                            {item.pageTitleFa && (
+                              <>
+                                <span>·</span>
+                                <span className="truncate max-w-[140px]">{item.pageTitleFa}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        {isExpanded ? (
+                          <ChevronUp className="w-4 h-4 text-[#587479] shrink-0 mt-0.5" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-[#587479] shrink-0 mt-0.5" />
+                        )}
+                      </button>
+
+                      {isExpanded && (
+                        <div className="px-3 pb-3 pt-2 border-t border-black/5 dark:border-white/5 space-y-2 text-xs">
+                          <TutorMarkdownRenderer content={item.answerText} lang={lang} />
+                          <div className="flex items-center justify-end pt-1 border-t border-black/5 dark:border-white/5">
+                            <button
+                              type="button"
+                              onClick={() => handleCopyMessage(`shared_${item.id}`, item.answerText)}
+                              className="flex items-center gap-1 text-[10.5px] font-bold text-[#1e8f6b] hover:underline cursor-pointer"
+                            >
+                              {copiedId === `shared_${item.id}` ? (
+                                <>
+                                  <Check className="w-3 h-3" />
+                                  <span>{lang === 'fa' ? 'کپی شد' : 'Copied'}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3 h-3" />
+                                  <span>{lang === 'fa' ? 'کپی پاسخ' : 'Copy Answer'}</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ) : (
+        <>
         {/* Scrollable Messages & Grounded Prompts Area */}
         <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 no-scrollbar">
           {/* Methodology Grounding Summary Card */}
@@ -769,26 +1156,63 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
             </div>
           </div>
 
-          {/* Suggested Contextual Prompts when empty or at top */}
+          {/* Course Topic Guidance Selector + Suggested Contextual Prompts */}
           {currentMessages.length === 0 && (
-            <div className="space-y-2 pt-1">
-              <div className="flex items-center gap-1.5 px-1 text-[11px] font-bold text-[#587479] dark:text-[#8ca8ab]">
-                <HelpCircle className="w-3.5 h-3.5 text-[#d98a1f]" />
-                <span>
-                  {lang === 'fa'
-                    ? 'پرسش‌های پیشنهادی ویژه این صفحه:'
-                    : 'Suggested questions for this page:'}
-                </span>
+            <div className="space-y-3 pt-1">
+              {/* Guided Course Topics (1-click thematic AI coaching) */}
+              <div data-testid="ai-guided-topics" className="space-y-2">
+                <div className="flex items-center justify-between gap-1.5 px-1">
+                  <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#12343b] dark:text-[#e4f0ee]">
+                    <Compass className="w-3.5 h-3.5 text-[#1e8f6b]" />
+                    <span>
+                      {lang === 'fa'
+                        ? 'راهنمایی موضوعی دوره (انتخاب سریع مبحث):'
+                        : 'Guided Course Topics (1-Click Help):'}
+                    </span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {AI_GUIDED_TOPICS.map((topic) => (
+                    <button
+                      key={topic.id}
+                      type="button"
+                      disabled={isLoading}
+                      onClick={() =>
+                        handleSendQuestion(
+                          lang === 'fa' ? topic.promptFa : topic.promptEn,
+                          topic.id
+                        )
+                      }
+                      className="text-start p-2 rounded-xl bg-white/85 dark:bg-[#1a2228]/95 hover:bg-[#e7f4f1] dark:hover:bg-[#152d30] border border-[#c3d4d4]/80 dark:border-[#2a3f46] hover:border-[#1e8f6b] transition-all cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed shadow-2xs space-y-0.5"
+                    >
+                      <div className="text-[11px] font-extrabold text-[#12343b] dark:text-[#e4f0ee] leading-snug">
+                        {lang === 'fa' ? topic.labelFa : topic.labelEn}
+                      </div>
+                      <div className="text-[9.5px] text-[#587479] dark:text-[#8ca8ab] leading-tight line-clamp-2">
+                        {lang === 'fa' ? topic.promptFa : topic.promptEn}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5 px-1 text-[11px] font-bold text-[#587479] dark:text-[#8ca8ab]">
+                  <HelpCircle className="w-3.5 h-3.5 text-[#d98a1f]" />
+                  <span>
+                    {lang === 'fa'
+                      ? 'پرسش‌های پیشنهادی ویژه این صفحه:'
+                      : 'Suggested questions for this page:'}
+                  </span>
+                </div>
+
                 {quickPrompts.map((promptText, idx) => (
                   <button
                     key={idx}
                     type="button"
                     disabled={isLoading}
                     onClick={() => handleSendQuestion(promptText)}
-                    className="w-full text-start p-2.5 rounded-xl bg-white/80 dark:bg-[#1a2228]/90 hover:bg-[#fdf0d8]/80 dark:hover:bg-[#2b2412]/70 border border-[#d9dad5]/80 dark:border-[#2d3942] hover:border-[#d98a1f] transition-all text-xs text-[#1c2830] dark:text-[#e8ebe9] flex items-start gap-2 group cursor-pointer shadow-2xs"
+                    className="w-full text-start p-2.5 rounded-xl bg-white/80 dark:bg-[#1a2228]/90 hover:bg-[#fdf0d8]/80 dark:hover:bg-[#2b2412]/70 border border-[#d9dad5]/80 dark:border-[#2d3942] hover:border-[#d98a1f] transition-all text-xs text-[#1c2830] dark:text-[#e8ebe9] flex items-start gap-2 group cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed shadow-2xs"
                   >
                     <Sparkles className="w-3.5 h-3.5 text-[#d98a1f] shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
                     <span className="leading-snug">{promptText}</span>
@@ -798,7 +1222,7 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
                 {hasUserDraft && (
                   <button
                     type="button"
-                    disabled={isLoading}
+                    disabled={isLoading || isQuotaExhausted}
                     onClick={() =>
                       handleSendQuestion(
                         lang === 'fa'
@@ -806,7 +1230,7 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
                           : 'Please audit my current draft on this page against CPMAI Phase I standards. Highlight strengths, blind spots, and actionable improvements for my discipline.'
                       )
                     }
-                    className="w-full text-start p-2.5 rounded-xl bg-gradient-to-r from-[#1e8f6b]/15 to-[#e0533c]/15 hover:from-[#1e8f6b]/25 hover:to-[#e0533c]/25 border border-[#1e8f6b]/40 transition-all text-xs font-bold text-[#12343b] dark:text-[#e4f0ee] flex items-start gap-2 cursor-pointer shadow-2xs"
+                    className="w-full text-start p-2.5 rounded-xl bg-gradient-to-r from-[#1e8f6b]/15 to-[#e0533c]/15 hover:from-[#1e8f6b]/25 hover:to-[#e0533c]/25 border border-[#1e8f6b]/40 transition-all text-xs font-bold text-[#12343b] dark:text-[#e4f0ee] flex items-start gap-2 cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed shadow-2xs"
                   >
                     <Wand2 className="w-4 h-4 text-[#1e8f6b] shrink-0 mt-0.5" />
                     <span className="leading-snug">
@@ -835,6 +1259,31 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
                       : 'bg-white/95 dark:bg-[#1a2228] text-[#1c2830] dark:text-[#e8ebe9] border border-[#d9dad5]/80 dark:border-[#2d3942] rounded-es-xs'
                   }`}
                 >
+                  {!isUser && msg.fromSharedCache && (
+                    <div
+                      data-testid="ai-shared-cache-badge"
+                      className="mb-2 px-2 py-1 rounded-lg bg-emerald-500/12 border border-emerald-500/30 text-[10px] font-extrabold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5"
+                    >
+                      <Users className="w-3 h-3 shrink-0" />
+                      <span>
+                        {lang === 'fa'
+                          ? 'پاسخ از بانک مشترک هم‌دوره‌ای‌ها · بدون کسر از سهمیه ۵تایی و بدون مصرف توکن'
+                          : 'Served from Shared Course Bank · 0 Quota Used, 0 Tokens Burned'}
+                      </span>
+                    </div>
+                  )}
+
+                  {!isUser && !msg.fromSharedCache && msg.savedToSharedBank && (
+                    <div className="mb-2 px-2 py-1 rounded-lg bg-sky-500/10 border border-sky-500/25 text-[10px] font-bold text-sky-700 dark:text-sky-300 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3 h-3 shrink-0" />
+                      <span>
+                        {lang === 'fa'
+                          ? 'در بانک پاسخ‌های مشترک ذخیره شد تا هم‌دوره‌ای‌ها بدون مصرف توکن استفاده کنند'
+                          : 'Saved anonymously to Shared Course Bank for peers'}
+                      </span>
+                    </div>
+                  )}
+
                   {isUser ? (
                     <div className="whitespace-pre-wrap break-words font-medium">{msg.text}</div>
                   ) : (
@@ -882,8 +1331,8 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
                 <div className="w-2 h-2 rounded-full bg-[#1e8f6b] animate-ping" />
                 <span>
                   {lang === 'fa'
-                    ? 'در حال تحلیل بر اساس متدولوژی CPMAI و صفحه فعال...'
-                    : 'Analyzing page context & CPMAI methodology...'}
+                    ? 'بررسی بانک پاسخ‌های مشترک و تحلیل بر اساس CPMAI...'
+                    : 'Checking Shared Q&A Bank & analyzing CPMAI context...'}
                 </span>
               </div>
             </div>
@@ -942,6 +1391,36 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
           }}
           className="p-3 border-t border-white/60 dark:border-white/10 bg-white/60 dark:bg-[#12171b]/80 space-y-2 shrink-0"
         >
+          {isQuotaExhausted && (
+            <div
+              data-testid="ai-quota-exhausted-notice"
+              className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/35 border border-amber-200 dark:border-amber-800/60 text-[11px] text-amber-900 dark:text-amber-200 space-y-1"
+            >
+              <div className="flex items-center justify-between gap-2 font-extrabold">
+                <span className="flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 shrink-0" />
+                  <span>
+                    {lang === 'fa'
+                      ? 'سهمیه ۵ پرسش جدید ماهانه تکمیل شد'
+                      : `Monthly limit (${MONTHLY_AI_QUOTA_LIMIT} new prompts) reached`}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setActiveSidebarTab('shared')}
+                  className="px-2 py-0.5 rounded-md bg-emerald-600 text-white text-[10px] font-bold cursor-pointer shrink-0"
+                >
+                  {lang === 'fa' ? 'بانک رایگان' : 'Free Bank'}
+                </button>
+              </div>
+              <p className="text-[10.5px] opacity-90 leading-relaxed">
+                {lang === 'fa'
+                  ? `تجدید سهمیه: ${quota?.resetLabelFa || 'ابتدای ماه بعد'}. همچنان می‌توانید پرسش‌های مشابه بانک مشترک را بدون مصرف سهمیه دریافت کنید.`
+                  : `Resets ${quota?.resetLabelFa || 'next month'}. Matching questions in the Shared Bank still answer for free.`}
+              </p>
+            </div>
+          )}
+
           <div className="relative flex items-end gap-2">
             <textarea
               rows={2}
@@ -955,8 +1434,8 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
               }}
               placeholder={
                 lang === 'fa'
-                  ? 'پرسش خود درباره متدولوژی CPMAI یا این صفحه را بنویسید...'
-                  : 'Ask about CPMAI methodology or this page...'
+                  ? 'پرسش غیرتکراری بپرسید (اگر هم‌دوره‌ای قبلاً پرسیده باشد، رایگان از بانک مشترک می‌آید)...'
+                  : 'Ask a non-duplicate question (matches in Shared Bank answer for free)...'
               }
               className="flex-1 resize-none rounded-xl border border-[#c3d4d4] dark:border-[#2d3942] bg-white dark:bg-[#1a2228] px-3 py-2 text-xs text-[#1c2830] dark:text-[#e8ebe9] placeholder-[#587479] focus:outline-hidden focus:border-[#e0533c] dark:focus:border-[#fb7185]"
             />
@@ -974,13 +1453,15 @@ export const ContextualAiTutorSidebar: React.FC<ContextualAiTutorSidebarProps> =
               <MessageSquareText className="w-3 h-3 text-[#1e8f6b]" />
               <span>
                 {lang === 'fa'
-                  ? 'پاسخ‌ها منطبق بر استاندارد CPMAI v6 و صفحه فعلی شماست'
-                  : 'Grounded in CPMAI v6 & current page'}
+                  ? '۵ پرسش غیرتکراری/ماه + استفاده رایگان از پاسخ‌های هم‌دوره‌ای‌ها'
+                  : '5 non-duplicate prompts/mo + free peer Q&A reuse'}
               </span>
             </span>
             <span className="font-mono text-[9px] opacity-75">Enter ↵</span>
           </div>
         </form>
+        </>
+        )}
       </aside>
     </>
   );

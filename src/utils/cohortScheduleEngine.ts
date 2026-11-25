@@ -302,8 +302,111 @@ export function groupUsersByWeekdayCohort<
   return { byCohort, unmatched };
 }
 
+export type PrivateCohortLookupStatus =
+  | 'idle'
+  | 'too_short'
+  | 'matched'
+  | 'ambiguous'
+  | 'not_found';
+
+export interface PrivateCohortLookupResult {
+  status: PrivateCohortLookupStatus;
+  cohort: CohortScheduleRecord | null;
+}
+
+const WEEKDAY_ONLY_TOKENS = new Set([
+  'شنبه',
+  'یکشنبه',
+  'یک شنبه',
+  'یکشنبه ها',
+  'یک شنبه ها',
+  'دوشنبه',
+  'دوشنبه ها',
+  'سه شنبه',
+  'سه شنبه ها',
+  'چهارشنبه',
+  'چهارشنبه ها',
+  'پنجشنبه',
+  'پنج شنبه',
+  'پنجشنبه ها',
+  'پنج شنبه ها',
+  'جمعه',
+  'جمعه ها'
+]);
+
 /**
- * Partial/full Persian & English cohort lookup supporting partial organization, company, project, or weekday names.
+ * Privacy-preserving single-cohort lookup:
+ * - Requires at least 3 normalized characters (blocks 1-2 letter fishing like "م").
+ * - Ignores weekday-only terms so users cannot enumerate organizations by guessing days of week.
+ * - Returns a cohort ONLY when the query uniquely identifies 1 organization/project.
+ * - Never returns multiple cohorts, counts, or suggestions of other classes.
+ */
+export function resolveUniqueCohortByQuery(
+  cohorts: CohortScheduleRecord[],
+  rawQuery: string
+): PrivateCohortLookupResult {
+  const normalizedQuery = normalizePersianSearchText(rawQuery);
+  if (!normalizedQuery) {
+    return { status: 'idle', cohort: null };
+  }
+
+  if (normalizedQuery.length < 3) {
+    return { status: 'too_short', cohort: null };
+  }
+
+  if (WEEKDAY_ONLY_TOKENS.has(normalizedQuery)) {
+    return { status: 'not_found', cohort: null };
+  }
+
+  const queryTokens = normalizedQuery
+    .split(' ')
+    .filter((t) => t.length >= 2 && !WEEKDAY_ONLY_TOKENS.has(t));
+
+  if (queryTokens.length === 0) {
+    return { status: 'too_short', cohort: null };
+  }
+
+  const matches: Array<{ cohort: CohortScheduleRecord; exact: boolean }> = [];
+
+  for (const cohort of cohorts) {
+    const privateHaystacks = [
+      cohort.title,
+      cohort.organization,
+      ...(Array.isArray(cohort.aliases) ? cohort.aliases : [])
+    ]
+      .map(normalizePersianSearchText)
+      .filter((h) => Boolean(h) && !WEEKDAY_ONLY_TOKENS.has(h));
+
+    const combined = privateHaystacks.join(' ');
+    const isExact = privateHaystacks.some((h) => h === normalizedQuery);
+    const isSubstring = privateHaystacks.some((h) => h.includes(normalizedQuery));
+    const isAllTokens = queryTokens.every((tok) => combined.includes(tok));
+
+    if (isExact || isSubstring || isAllTokens) {
+      matches.push({ cohort, exact: isExact });
+    }
+  }
+
+  if (matches.length === 0) {
+    return { status: 'not_found', cohort: null };
+  }
+
+  if (matches.length === 1) {
+    return { status: 'matched', cohort: matches[0].cohort };
+  }
+
+  // Only resolve among multiple candidates if the user typed the exact unique name of one specific org
+  // (e.g. "موسسه دماوند") while not matching other orgs exactly
+  const exactMatches = matches.filter((m) => m.exact);
+  if (exactMatches.length === 1) {
+    return { status: 'matched', cohort: exactMatches[0].cohort };
+  }
+
+  return { status: 'ambiguous', cohort: null };
+}
+
+/**
+ * Partial/full Persian & English cohort lookup (admin/internal helper).
  */
 export function searchCohortsByQuery(
   cohorts: CohortScheduleRecord[],

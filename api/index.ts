@@ -1938,68 +1938,229 @@ async function ensureCohortScheduleTables(): Promise<void> {
 }
 ensureCohortScheduleTables();
 
-// Public zero-PII Cohort Schedule Lookup for Students beside the Orbit Hub
+const SERVER_WEEKDAY_ONLY_TOKENS = new Set([
+  'شنبه',
+  'یکشنبه',
+  'یک شنبه',
+  'یکشنبه ها',
+  'یک شنبه ها',
+  'دوشنبه',
+  'دوشنبه ها',
+  'سه شنبه',
+  'سه شنبه ها',
+  'چهارشنبه',
+  'چهارشنبه ها',
+  'پنجشنبه',
+  'پنج شنبه',
+  'پنجشنبه ها',
+  'پنج شنبه ها',
+  'جمعه',
+  'جمعه ها'
+]);
+
+function mapStudentSafeCohortRow(row: any) {
+  return {
+    id: row.id,
+    code: row.code,
+    title: row.title,
+    organization: row.organization,
+    weekdayIndex: Number(row.weekday_index),
+    weekdayFa: row.weekday_fa,
+    aliases: [] as string[],
+    reviewedModules: sanitizeServerModuleIds(row.reviewed_modules),
+    nextModules: sanitizeServerModuleIds(row.next_modules),
+    instructorNote: typeof row.instructor_note === 'string' ? row.instructor_note : '',
+    updatedAt: row.updated_at
+  };
+}
+
+// Authenticated Student Endpoint: Automatically resolve the logged-in student's OWN cohort roadmap by email/account
+// Returns ONLY the authenticated student's single cohort (never exposes any other organization/class)
+app.get(['/api/cohorts/my-roadmap', '/cohorts/my-roadmap'], async (req, res) => {
+  await ensureCohortScheduleTables().catch(() => {});
+
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'برای مشاهده نقشه راه اختصاصی کلاس خود ابتدا وارد حساب کاربری شوید.' });
+  }
+
+  const token = authHeader.split(' ')[1];
+  let decoded: any = null;
+  try {
+    decoded = jwt.verify(token, JWT_SECRET);
+  } catch {
+    return res.status(401).json({ error: 'نشست کاربری نامعتبر یا منقضی است.' });
+  }
+
+  if (!decoded || (!decoded.id && !decoded.email)) {
+    return res.status(401).json({ error: 'اطلاعات کاربری معتبر نیست.' });
+  }
+
+  try {
+    const userRes = await pool.query(
+      `SELECT id, email, display_name, created_at, weekday_cohort_id, weekday_cohort_manual
+       FROM users
+       WHERE id = $1 OR LOWER(email) = LOWER($2)
+       LIMIT 1;`,
+      [decoded.id || 'none', decoded.email || 'none']
+    );
+
+    if (userRes.rows.length === 0) {
+      return res.json({
+        authenticated: true,
+        email: decoded.email || '',
+        assigned: false,
+        cohort: null
+      });
+    }
+
+    const userRow = userRes.rows[0];
+    let resolvedCohortId: string | null = userRow.weekday_cohort_id || null;
+
+    if (!resolvedCohortId && !userRow.weekday_cohort_manual) {
+      const dow = getServerTehranDow(userRow.created_at);
+      const autoMap: Record<number, string> = {
+        1: 'cohort_mon_hera',
+        3: 'cohort_wed_damavand_tehran',
+        4: 'cohort_thu_paya_damavand',
+        0: 'cohort_sun_damavand_asaluyeh'
+      };
+      if (dow !== null && autoMap[dow]) {
+        resolvedCohortId = autoMap[dow];
+        await pool.query(
+          `UPDATE users SET weekday_cohort_id = $1 WHERE id = $2 AND weekday_cohort_id IS NULL AND COALESCE(weekday_cohort_manual, false) = false;`,
+          [resolvedCohortId, userRow.id]
+        ).catch(() => {});
+      }
+    }
+
+    if (!resolvedCohortId) {
+      return res.json({
+        authenticated: true,
+        email: userRow.email,
+        assigned: false,
+        cohort: null
+      });
+    }
+
+    const cohortRes = await pool.query(
+      `SELECT id, code, title, organization, weekday_index, weekday_fa,
+              reviewed_modules, next_modules, instructor_note, updated_at
+       FROM cohort_schedules
+       WHERE id = $1
+       LIMIT 1;`,
+      [resolvedCohortId]
+    );
+
+    if (cohortRes.rows.length === 0) {
+      return res.json({
+        authenticated: true,
+        email: userRow.email,
+        assigned: false,
+        cohort: null
+      });
+    }
+
+    return res.json({
+      authenticated: true,
+      email: userRow.email,
+      assigned: true,
+      cohort: mapStudentSafeCohortRow(cohortRes.rows[0])
+    });
+  } catch (err: any) {
+    console.warn('Error in /api/cohorts/my-roadmap:', err?.message || err);
+    return res.status(500).json({ error: 'خطا در دریافت نقشه راه اختصاصی کلاس شما.' });
+  }
+});
+
+// Private Zero-Leak Single-Cohort Lookup (Authenticated Only):
+// NEVER returns a list of cohorts, NEVER reveals other organizations or counts.
+// Returns a single cohort ONLY when the query uniquely identifies 1 organization/project.
 app.get(['/api/cohorts/lookup', '/cohorts/lookup'], async (req, res) => {
   await ensureCohortScheduleTables().catch(() => {});
+
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'برای دسترسی به سامانه لطفاً ابتدا وارد حساب کاربری شوید.' });
+  }
+  try {
+    jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+  } catch {
+    return res.status(401).json({ error: 'نشست کاربری نامعتبر یا منقضی است.' });
+  }
+
   const rawQuery = typeof req.query.q === 'string' ? req.query.q.slice(0, 120) : '';
+  const normalizedQuery = normalizeServerPersianQuery(rawQuery);
+
+  if (!normalizedQuery) {
+    return res.json({ status: 'idle', cohort: null });
+  }
+
+  if (normalizedQuery.length < 3) {
+    return res.json({ status: 'too_short', cohort: null });
+  }
+
+  if (SERVER_WEEKDAY_ONLY_TOKENS.has(normalizedQuery)) {
+    return res.json({ status: 'not_found', cohort: null });
+  }
+
+  const queryTokens = normalizedQuery
+    .split(' ')
+    .filter((t) => t.length >= 2 && !SERVER_WEEKDAY_ONLY_TOKENS.has(t));
+
+  if (queryTokens.length === 0) {
+    return res.json({ status: 'too_short', cohort: null });
+  }
 
   try {
     const result = await pool.query(`
       SELECT id, code, title, organization, weekday_index, weekday_fa, aliases,
              reviewed_modules, next_modules, instructor_note, updated_at
-      FROM cohort_schedules
-      ORDER BY CASE weekday_index
-        WHEN 0 THEN 1
-        WHEN 1 THEN 2
-        WHEN 3 THEN 3
-        WHEN 4 THEN 4
-        ELSE 9
-      END ASC;
+      FROM cohort_schedules;
     `);
 
-    const allCohorts = result.rows.map(mapCohortScheduleRow);
-    const normalizedQuery = normalizeServerPersianQuery(rawQuery);
+    const matches: Array<{ row: any; exact: boolean }> = [];
 
-    if (!normalizedQuery) {
-      return res.json({ cohorts: allCohorts });
+    for (const row of result.rows) {
+      const aliases = Array.isArray(row.aliases) ? row.aliases : [];
+      const privateHaystacks = [row.title, row.organization, ...aliases]
+        .map(normalizeServerPersianQuery)
+        .filter((h) => Boolean(h) && !SERVER_WEEKDAY_ONLY_TOKENS.has(h));
+
+      const combined = privateHaystacks.join(' ');
+      const isExact = privateHaystacks.some((h) => h === normalizedQuery);
+      const isSubstring = privateHaystacks.some((h) => h.includes(normalizedQuery));
+      const isAllTokens = queryTokens.every((tok) => combined.includes(tok));
+
+      if (isExact || isSubstring || isAllTokens) {
+        matches.push({ row, exact: isExact });
+      }
     }
 
-    const queryTokens = normalizedQuery.split(' ').filter((t) => t.length >= 1);
-    const scored = allCohorts
-      .map((cohort) => {
-        const haystacks = [
-          cohort.title,
-          cohort.organization,
-          cohort.weekdayFa,
-          cohort.code,
-          ...(cohort.aliases || [])
-        ]
-          .map(normalizeServerPersianQuery)
-          .filter(Boolean);
+    if (matches.length === 0) {
+      return res.json({ status: 'not_found', cohort: null });
+    }
 
-        const combined = haystacks.join(' ');
-        let score = 0;
-        if (haystacks.some((h) => h === normalizedQuery)) score = 100;
-        else if (haystacks.some((h) => h.startsWith(normalizedQuery))) score = 80;
-        else if (haystacks.some((h) => h.includes(normalizedQuery))) score = 65;
-        else if (queryTokens.length > 0 && queryTokens.every((tok) => combined.includes(tok))) score = 50;
+    if (matches.length === 1) {
+      return res.json({
+        status: 'matched',
+        cohort: mapStudentSafeCohortRow(matches[0].row)
+      });
+    }
 
-        return { cohort, score };
-      })
-      .filter((item) => item.score > 0)
-      .sort((a, b) => b.score - a.score);
+    const exactMatches = matches.filter((m) => m.exact);
+    if (exactMatches.length === 1) {
+      return res.json({
+        status: 'matched',
+        cohort: mapStudentSafeCohortRow(exactMatches[0].row)
+      });
+    }
 
-    return res.json({ cohorts: scored.map((s) => s.cohort) });
+    // Multiple classes matched: intentionally return NO names, NO count, NO suggestions
+    return res.json({ status: 'ambiguous', cohort: null });
   } catch (err: any) {
     console.warn('Error in /api/cohorts/lookup:', err?.message || err);
-    return res.json({
-      cohorts: SEED_WEEKDAY_COHORTS.map((c) => ({
-        ...c,
-        reviewedModules: [],
-        nextModules: [],
-        instructorNote: ''
-      }))
-    });
+    return res.status(500).json({ status: 'not_found', cohort: null });
   }
 });
 
@@ -2389,8 +2550,319 @@ app.post(['/api/workbooks/sync', '/workbooks/sync'], async (req, res) => {
   }
 });
 
-// AI Evaluation endpoint using Vercel AI Gateway
+const SERVER_MONTHLY_AI_QUOTA_LIMIT = 5;
+
+const SERVER_AI_STOPWORDS = new Set([
+  'در', 'از', 'به', 'با', 'که', 'است', 'هست', 'این', 'آن', 'را', 'برای', 'یک', 'و', 'یا', 'تا', 'بر', 'هم',
+  'می', 'شود', 'شده', 'کن', 'کنم', 'کنیم', 'بده', 'دهید', 'بگو', 'توضیح', 'لطفاً', 'لطفا', 'چطور', 'چگونه',
+  'چیست', 'چه', 'کدام', 'آیا', 'من', 'ما', 'شما', 'خود', 'روی', 'بین', 'باید', 'دارد', 'دارند', 'اینکه',
+  'the', 'is', 'are', 'a', 'an', 'of', 'to', 'in', 'for', 'on', 'with', 'and', 'or', 'what', 'how',
+  'why', 'please', 'explain', 'give', 'me', 'my', 'can', 'should', 'do', 'does', 'this', 'that', 'it'
+]);
+
+function normalizeServerAiQuestion(text: string): string {
+  if (!text) return '';
+  return String(text)
+    .toLowerCase()
+    .replace(/[\u200c\u200b\u200d\ufeff]/g, ' ')
+    .replace(/[يیئ]/g, 'ی')
+    .replace(/[كک]/g, 'ک')
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/[ة]/g, 'ه')
+    .replace(/[ؤ]/g, 'و')
+    .replace(/[\u064b-\u065f\u0670]/g, '')
+    .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
+    .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[\u060c\u061b\u061f\u0640\u066a-\u066d]/g, ' ')
+    .replace(/[^a-z0-9\u0600-\u06ff\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function tokenizeServerAiQuestion(text: string): string[] {
+  const norm = normalizeServerAiQuestion(text);
+  if (!norm) return [];
+  const raw = norm.split(' ').filter((tok) => tok.length >= 2);
+  const meaningful = raw.filter((tok) => !SERVER_AI_STOPWORDS.has(tok));
+  return Array.from(new Set(meaningful.length > 0 ? meaningful : raw));
+}
+
+function buildServerNormalizedQuestionKey(text: string): string {
+  const tokens = tokenizeServerAiQuestion(text).sort();
+  if (!tokens.length) return normalizeServerAiQuestion(text).slice(0, 180);
+  return tokens.join('_').slice(0, 180);
+}
+
+function computeServerQuestionSimilarity(a: string, b: string): number {
+  const normA = normalizeServerAiQuestion(a);
+  const normB = normalizeServerAiQuestion(b);
+  if (!normA || !normB) return 0;
+  if (normA === normB) return 1;
+
+  const keyA = buildServerNormalizedQuestionKey(normA);
+  const keyB = buildServerNormalizedQuestionKey(normB);
+  if (keyA && keyA === keyB) return 1;
+
+  const setA = new Set(tokenizeServerAiQuestion(normA));
+  const setB = new Set(tokenizeServerAiQuestion(normB));
+  if (setA.size === 0 || setB.size === 0) return 0;
+
+  let intersection = 0;
+  for (const tok of setA) {
+    if (setB.has(tok)) intersection += 1;
+  }
+  const union = setA.size + setB.size - intersection;
+  const jaccard = union > 0 ? intersection / union : 0;
+  const dice = (2 * intersection) / (setA.size + setB.size);
+  return Number(((jaccard * 0.45) + (dice * 0.55)).toFixed(4));
+}
+
+function isServerPersonalDraftAudit(question: string, userDraft: string): boolean {
+  if (!userDraft || String(userDraft).trim().length < 20) return false;
+  const norm = normalizeServerAiQuestion(question);
+  return /(ممیزی|دست نویس|پیش نویس|پاسخ من|پاسخ فعلی|نوشتم|وارد کردم|نقد کن|بررسی کن|audit my|review my|critique my|my draft|my current)/i.test(
+    norm
+  );
+}
+
+function extractVerifiedAuthUser(req: any): { id: string; email: string; role: string; isAdmin: boolean } | null {
+  const authHeader = req.headers?.authorization;
+  if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded: any = jwt.verify(token, JWT_SECRET);
+    if (!decoded || (!decoded.id && !decoded.email)) return null;
+    const email = String(decoded.email || '').trim().toLowerCase();
+    const id = String(decoded.id || email || '');
+    const isAdmin =
+      decoded.role === 'admin' ||
+      isAuthorizedAdmin(email, decoded.username, decoded.displayName);
+    return { id, email, role: isAdmin ? 'admin' : String(decoded.role || 'user'), isAdmin };
+  } catch {
+    return null;
+  }
+}
+
+function getServerTehranMonthKey(dateInput?: Date): string {
+  const safeDate = dateInput || new Date();
+  try {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Tehran',
+      year: 'numeric',
+      month: '2-digit'
+    }).formatToParts(safeDate);
+    const year = parts.find((p) => p.type === 'year')?.value || String(safeDate.getUTCFullYear());
+    const month = parts.find((p) => p.type === 'month')?.value || String(safeDate.getUTCMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  } catch {
+    return `${safeDate.getUTCFullYear()}-${String(safeDate.getUTCMonth() + 1).padStart(2, '0')}`;
+  }
+}
+
+function getServerNextTehranMonthResetFa(monthKey: string): string {
+  const [yStr, mStr] = monthKey.split('-');
+  const year = parseInt(yStr, 10);
+  const month = parseInt(mStr, 10);
+  if (Number.isNaN(year) || Number.isNaN(month)) return 'شروع ماه آینده';
+  const nextYear = month === 12 ? year + 1 : year;
+  const nextMonth = month === 12 ? 1 : month + 1;
+  const nextFirst = new Date(Date.UTC(nextYear, nextMonth - 1, 1, 12, 0, 0));
+  try {
+    return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+      timeZone: 'Asia/Tehran',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }).format(nextFirst);
+  } catch {
+    return `${nextYear}-${String(nextMonth).padStart(2, '0')}-01`;
+  }
+}
+
+let isAiQuotaTableReady = false;
+let aiQuotaTablePromise: Promise<void> | null = null;
+
+async function ensureAiQuotaTables(): Promise<void> {
+  if (isAiQuotaTableReady) return;
+  if (aiQuotaTablePromise) return aiQuotaTablePromise;
+  aiQuotaTablePromise = (async () => {
+    try {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ai_tutor_usage (
+          id SERIAL PRIMARY KEY,
+          user_id VARCHAR(128) NOT NULL,
+          user_email VARCHAR(255) NOT NULL,
+          month_key VARCHAR(16) NOT NULL,
+          page_key VARCHAR(64) DEFAULT '0',
+          topic_title VARCHAR(255) DEFAULT '',
+          question_preview TEXT DEFAULT '',
+          normalized_key TEXT DEFAULT '',
+          created_at TIMESTAMPTZ DEFAULT NOW()
+        );
+      `);
+      await pool.query(`
+        ALTER TABLE ai_tutor_usage
+        ADD COLUMN IF NOT EXISTS normalized_key TEXT DEFAULT '';
+      `);
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS idx_ai_tutor_usage_user_month
+        ON ai_tutor_usage(user_id, month_key);
+      `);
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS idx_ai_tutor_usage_email_month
+        ON ai_tutor_usage(LOWER(user_email), month_key);
+      `);
+
+      // Shared Community Q&A Bank for Zero-Token-Burn Reuse Across All Students
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ai_shared_qa (
+          id SERIAL PRIMARY KEY,
+          question_text TEXT NOT NULL,
+          normalized_key TEXT NOT NULL,
+          answer_text TEXT NOT NULL,
+          topic_id VARCHAR(128) DEFAULT '',
+          page_key VARCHAR(64) DEFAULT '0',
+          page_title_fa VARCHAR(255) DEFAULT '',
+          industry_track VARCHAR(128) DEFAULT '',
+          lang VARCHAR(8) DEFAULT 'fa',
+          asked_by_label VARCHAR(120) DEFAULT 'هم‌دوره‌ای',
+          reuse_count INT DEFAULT 0,
+          created_at TIMESTAMPTZ DEFAULT NOW()
+        );
+      `);
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS idx_ai_shared_qa_norm_key
+        ON ai_shared_qa(normalized_key);
+      `);
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS idx_ai_shared_qa_created_at
+        ON ai_shared_qa(created_at DESC);
+      `);
+      isAiQuotaTableReady = true;
+    } catch (err: any) {
+      if (err?.code !== '40P01') {
+        console.warn('AI quota table init warning:', err?.message || err);
+      }
+    } finally {
+      aiQuotaTablePromise = null;
+    }
+  })();
+  return aiQuotaTablePromise;
+}
+ensureAiQuotaTables();
+
+async function fetchMonthlyAiQuota(authUser: { id: string; email: string; isAdmin: boolean }) {
+  await ensureAiQuotaTables().catch(() => {});
+  const monthKey = getServerTehranMonthKey();
+  const resetLabelFa = getServerNextTehranMonthResetFa(monthKey);
+  const countRes = await pool.query(
+    `SELECT COUNT(*)::int AS used_count
+     FROM ai_tutor_usage
+     WHERE month_key = $1
+       AND (user_id = $2 OR LOWER(user_email) = LOWER($3));`,
+    [monthKey, authUser.id, authUser.email]
+  );
+  const used = Number(countRes.rows[0]?.used_count || 0);
+  const remaining = authUser.isAdmin
+    ? SERVER_MONTHLY_AI_QUOTA_LIMIT
+    : Math.max(0, SERVER_MONTHLY_AI_QUOTA_LIMIT - used);
+  const isExhausted = !authUser.isAdmin && remaining <= 0;
+
+  return {
+    limit: SERVER_MONTHLY_AI_QUOTA_LIMIT,
+    used,
+    remaining,
+    monthKey,
+    resetLabelFa,
+    isUnlimited: authUser.isAdmin,
+    isExhausted
+  };
+}
+
+// Authenticated AI Tutor Monthly Quota Status Endpoint
+app.get(['/api/ai/quota', '/ai/quota'], async (req, res) => {
+  const authUser = extractVerifiedAuthUser(req);
+  if (!authUser) {
+    return res.status(401).json({ error: 'برای مشاهده سهمیه راهنمای هوش مصنوعی ابتدا وارد حساب کاربری شوید.' });
+  }
+  try {
+    const quota = await fetchMonthlyAiQuota(authUser);
+    return res.json({ quota });
+  } catch (err: any) {
+    console.warn('Error in GET /api/ai/quota:', err?.message || err);
+    return res.status(500).json({ error: 'خطا در بررسی سهمیه ماهانه هوش مصنوعی.' });
+  }
+});
+
+// Authenticated Shared Community Q&A Bank (Zero-Token-Burn Reuse, strictly anonymized)
+app.get(['/api/ai/shared-qa', '/ai/shared-qa'], async (req, res) => {
+  const authUser = extractVerifiedAuthUser(req);
+  if (!authUser) {
+    return res.status(401).json({ error: 'برای مشاهده بانک پاسخ‌های مشترک دوره ابتدا وارد حساب کاربری شوید.' });
+  }
+  try {
+    await ensureAiQuotaTables().catch(() => {});
+    const searchQ = typeof req.query?.q === 'string' ? req.query.q.trim().slice(0, 200) : '';
+    const pageKeyFilter = typeof req.query?.pageKey === 'string' ? req.query.pageKey.trim().slice(0, 64) : '';
+    const langFilter = typeof req.query?.lang === 'string' && req.query.lang === 'en' ? 'en' : '';
+
+    const params: any[] = [];
+    const conditions: string[] = [];
+
+    if (searchQ) {
+      params.push(`%${searchQ}%`);
+      const pIdx = params.length;
+      conditions.push(`(question_text ILIKE $${pIdx} OR answer_text ILIKE $${pIdx} OR page_title_fa ILIKE $${pIdx})`);
+    }
+    if (pageKeyFilter) {
+      params.push(pageKeyFilter);
+      conditions.push(`page_key = $${params.length}`);
+    }
+    if (langFilter) {
+      params.push(langFilter);
+      conditions.push(`lang = $${params.length}`);
+    }
+
+    const whereSql = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const result = await pool.query(
+      `SELECT id, question_text, answer_text, topic_id, page_key, page_title_fa, industry_track, lang, asked_by_label, reuse_count, created_at
+       FROM ai_shared_qa
+       ${whereSql}
+       ORDER BY reuse_count DESC, created_at DESC
+       LIMIT 60;`,
+      params
+    );
+
+    const items = result.rows.map((r: any) => ({
+      id: Number(r.id),
+      questionText: String(r.question_text || ''),
+      answerText: String(r.answer_text || ''),
+      topicId: String(r.topic_id || ''),
+      pageKey: String(r.page_key || '0'),
+      pageTitleFa: String(r.page_title_fa || ''),
+      industryTrack: String(r.industry_track || ''),
+      lang: String(r.lang || 'fa'),
+      askedByLabel: String(r.asked_by_label || 'هم‌دوره‌ای'),
+      reuseCount: Number(r.reuse_count || 0),
+      createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString()
+    }));
+
+    return res.json({ items, total: items.length });
+  } catch (err: any) {
+    console.warn('Error in GET /api/ai/shared-qa:', err?.message || err);
+    return res.status(500).json({ error: 'خطا در دریافت بانک پاسخ‌های مشترک دوره.' });
+  }
+});
+
+// AI Evaluation endpoint (Authenticated)
 app.post(['/api/ai/evaluate', '/ai/evaluate'], async (req, res) => {
+  const authUser = extractVerifiedAuthUser(req);
+  if (!authUser) {
+    return res.status(401).json({ error: 'برای ارزیابی هوشمند ابتدا وارد حساب کاربری شوید.' });
+  }
+
   const { workbookId, pageNumber, pageTitle, promptContent } = req.body;
   const apiKey = process.env.AI_GATEWAY_API_KEY;
 
@@ -2431,7 +2903,6 @@ app.post(['/api/ai/evaluate', '/ai/evaluate'], async (req, res) => {
 
     const aiFeedback = aiData.choices?.[0]?.message?.content || 'No feedback generated.';
 
-    // Save evaluation to Neon DB if workbookId is provided
     if (workbookId) {
       await pool.query(
         `INSERT INTO ai_evaluations (workbook_id, page_number, prompt, ai_feedback, score, model_name)
@@ -2450,14 +2921,27 @@ app.post(['/api/ai/evaluate', '/ai/evaluate'], async (req, res) => {
   }
 });
 
-// Contextual AI Tutor endpoint grounded in active CPMAI workbook page content
+// Contextual AI Tutor endpoint with:
+// 1) Shared Community Q&A Zero-Token-Burn Cache (free for everyone, 0 quota deducted)
+// 2) Per-User Non-Duplicate Guard (blocks duplicate prompts without burning tokens or quota)
+// 3) Server-enforced 5 non-duplicate requests/month quota & official @google/genai SDK
 app.post(['/api/ai/tutor', '/ai/tutor'], async (req, res) => {
+  const authUser = extractVerifiedAuthUser(req);
   const {
     question,
+    topicId = '',
     history = [],
     pageContext = {},
     lang = 'fa'
-  } = req.body;
+  } = req.body || {};
+
+  if (!authUser) {
+    return res.status(401).json({
+      error: lang === 'fa'
+        ? 'برای استفاده از راهنمای هوشمند AI ابتدا وارد حساب کاربری خود شوید.'
+        : 'Please sign in to use the AI Tutor.'
+    });
+  }
 
   if (!question || typeof question !== 'string' || !question.trim()) {
     return res.status(400).json({
@@ -2465,10 +2949,9 @@ app.post(['/api/ai/tutor', '/ai/tutor'], async (req, res) => {
     });
   }
 
-  const openRouterKey = process.env.OPENROUTER_API_KEY;
-  const openRouterModel = process.env.OPENROUTER_MODEL || 'z-ai/glm-5.3-flash';
-  const geminiKey = process.env.GEMINI_API_KEY;
-  const gatewayKey = process.env.AI_GATEWAY_API_KEY;
+  const trimmedQuestion = question.trim().slice(0, 2500);
+  const safeLang = lang === 'en' ? 'en' : 'fa';
+  const normalizedKey = buildServerNormalizedQuestionKey(trimmedQuestion);
 
   const {
     pageNumber,
@@ -2482,8 +2965,113 @@ app.post(['/api/ai/tutor', '/ai/tutor'], async (req, res) => {
     userDraft = ''
   } = pageContext;
 
+  const isPersonalDraftAudit = isServerPersonalDraftAudit(trimmedQuestion, String(userDraft || ''));
+  let currentQuota = await fetchMonthlyAiQuota(authUser);
+
+  // STEP 1: Shared Zero-Token-Burn Community Q&A Cache Check (runs BEFORE quota exhaustion & BEFORE LLM call)
+  if (!isPersonalDraftAudit && normalizedKey) {
+    try {
+      const exactRes = await pool.query(
+        `SELECT id, question_text, answer_text, reuse_count
+         FROM ai_shared_qa
+         WHERE lang = $1 AND normalized_key = $2
+         ORDER BY reuse_count DESC, created_at DESC
+         LIMIT 1;`,
+        [safeLang, normalizedKey]
+      );
+
+      let matchedRow = exactRes.rows[0] || null;
+
+      if (!matchedRow) {
+        const recentRes = await pool.query(
+          `SELECT id, question_text, answer_text, reuse_count
+           FROM ai_shared_qa
+           WHERE lang = $1
+           ORDER BY reuse_count DESC, created_at DESC
+           LIMIT 200;`,
+          [safeLang]
+        );
+        let bestScore = 0;
+        for (const candidate of recentRes.rows) {
+          const score = computeServerQuestionSimilarity(trimmedQuestion, String(candidate.question_text || ''));
+          if (score >= 0.72 && score > bestScore) {
+            bestScore = score;
+            matchedRow = candidate;
+            if (score === 1) break;
+          }
+        }
+      }
+
+      if (matchedRow) {
+        await pool.query(
+          `UPDATE ai_shared_qa SET reuse_count = reuse_count + 1 WHERE id = $1;`,
+          [matchedRow.id]
+        ).catch(() => {});
+        return res.json({
+          reply: String(matchedRow.answer_text || ''),
+          model: 'shared-course-cache',
+          fromSharedCache: true,
+          cachedQuestion: String(matchedRow.question_text || ''),
+          sharedQaId: Number(matchedRow.id),
+          reuseCount: Number(matchedRow.reuse_count || 0) + 1,
+          groundedPage: pageNumber,
+          quota: currentQuota
+        });
+      }
+    } catch (cacheErr: any) {
+      console.warn('Shared AI Q&A cache lookup warning:', cacheErr?.message || cacheErr);
+    }
+  }
+
+  // STEP 2: Per-User Non-Duplicate Guard (prevents wasting tokens/quota on repeating an already-asked prompt)
+  if (!authUser.isAdmin && normalizedKey) {
+    try {
+      const priorRes = await pool.query(
+        `SELECT normalized_key, question_preview
+         FROM ai_tutor_usage
+         WHERE month_key = $1
+           AND (user_id = $2 OR LOWER(user_email) = LOWER($3))
+         ORDER BY created_at DESC
+         LIMIT 20;`,
+        [currentQuota.monthKey, authUser.id, authUser.email]
+      );
+
+      const isUserDuplicate = priorRes.rows.some((row: any) => {
+        if (row.normalized_key && row.normalized_key === normalizedKey) return true;
+        return computeServerQuestionSimilarity(trimmedQuestion, String(row.question_preview || '')) >= 0.80;
+      });
+
+      if (isUserDuplicate) {
+        return res.status(409).json({
+          error: safeLang === 'fa'
+            ? 'این پرسش یا موضوع مشابه آن را قبلاً در همین ماه مطرح کرده‌اید. برای جلوگیری از مصرف تکراری سهمیه ۵ پرسش غیرتکراری، لطفاً موضوع جدیدی بپرسید یا تب «بانک پاسخ‌های هم‌دوره‌ای‌ها» را ببینید.'
+            : 'You already asked this or a very similar question this month. To protect your 5 non-duplicate monthly prompts, please ask a new topic or check the Shared Q&A Bank.',
+          duplicateDetected: true,
+          quota: currentQuota
+        });
+      }
+    } catch (dupErr: any) {
+      console.warn('Per-user AI duplicate check warning:', dupErr?.message || dupErr);
+    }
+  }
+
+  // STEP 3: Enforce strict 5 non-duplicate monthly prompts cap for students before calling LLM
+  if (currentQuota.isExhausted) {
+    return res.status(429).json({
+      error: safeLang === 'fa'
+        ? `سهمیه ${SERVER_MONTHLY_AI_QUOTA_LIMIT.toLocaleString('fa-IR')} پرسش غیرتکراری ماهانه شما تکمیل شده است (تجدید سهمیه: ${currentQuota.resetLabelFa}). همچنان می‌توانید به‌صورت رایگان و نامحدود از «بانک پاسخ‌های هم‌دوره‌ای‌ها» استفاده کنید.`
+        : `You have reached your monthly limit of ${SERVER_MONTHLY_AI_QUOTA_LIMIT} non-duplicate AI prompts. You can still browse the Shared Community Q&A Bank for free.`,
+      quota: currentQuota
+    });
+  }
+
+  const geminiKey = process.env.GEMINI_API_KEY;
+  const openRouterKey = process.env.OPENROUTER_API_KEY;
+  const openRouterModel = process.env.OPENROUTER_MODEL || 'z-ai/glm-5.3-flash';
+  const gatewayKey = process.env.AI_GATEWAY_API_KEY;
+
   const systemInstruction = `You are a world-class Certified CPMAI (Cognitive Project Management for AI) Master Instructor, Socratic AI Project Auditor, and Enterprise Mentor at OWJ Business Council (مشاوران مدیریت کسب و کار اوج).
-Your job is to answer the user's questions specifically about the PMI/Cognilytica CPMAI v6 methodology, strictly grounded in the currently selected workbook page and the user's live workbook inputs.
+Your job is to answer the student's questions specifically about the PMI/Cognilytica CPMAI v6 methodology and course topics, strictly grounded in the currently selected workbook page and the student's live inputs.
 
 === ACTIVE WORKBOOK PAGE CONTEXT ===
 - Selected Page / Session: ${pageNumber !== undefined ? `Page ${pageNumber}` : 'General'} (${pageTitleFa} / ${pageTitleEn})
@@ -2494,18 +3082,123 @@ Your job is to answer the user's questions specifically about the PMI/Cognilytic
 - User's Organizational Role: ${roleTitle || 'AI Project Manager'}
 - User's Current Live Workbook Content on this Page:
 """
-${userDraft ? userDraft.slice(0, 6000) : '(The user has not written their draft on this page yet.)'}
+${userDraft ? String(userDraft).slice(0, 6000) : '(The user has not written their draft on this page yet.)'}
 """
 
 === TEACHING & RESPONSE GUIDELINES ===
-1. Language: Respond in ${lang === 'fa' ? 'fluent, professional Persian (فارسی) with accurate English technical terms in parentheses where helpful' : 'clear, professional English'}.
+1. Language: Respond in ${safeLang === 'fa' ? 'fluent, professional Persian (فارسی) with accurate English technical terms in parentheses where helpful' : 'clear, professional English'}.
 2. Grounding: Anchor every explanation, example, or critique directly to the current page (${pageTitleFa || pageTitleEn}) and the user's selected industry track (${industryTrack}) and discipline (${disciplineTitle}).
 3. Socratic & Practical Coaching:
-   - If the user asks how to fill out this page, give concrete, tailored examples from their discipline (${disciplineTitle}).
-   - If the user asks you to review or critique their current draft, evaluate what they wrote in "User's Current Live Workbook Content" against CPMAI Phase I standards (strengths, blind spots, and an actionable improvement).
-   - Keep responses structured, scannable (using concise bullet points and bold key terms), and under 300 words unless deep technical detail is requested.`;
+   - Give concrete, actionable steps and tailored examples from their discipline (${disciplineTitle}).
+   - If the student asks you to review or critique their current draft, evaluate what they wrote in "User's Current Live Workbook Content" (strengths, blind spots, and concrete improvement).
+   - Keep responses structured, scannable (using concise bullet points and bold key terms), and under 320 words unless deep technical detail is requested.`;
 
-  // 1. Primary path: OpenRouter API with z-ai/glm-5.3-flash
+  const recordUsageAndShareAnswer = async (replyText: string) => {
+    let savedToSharedBank = false;
+    try {
+      await pool.query(
+        `INSERT INTO ai_tutor_usage (user_id, user_email, month_key, page_key, topic_title, question_preview, normalized_key, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW());`,
+        [
+          authUser.id,
+          authUser.email,
+          currentQuota.monthKey,
+          String(pageNumber ?? '0').slice(0, 64),
+          String(pageTitleFa || pageTitleEn || '').slice(0, 250),
+          trimmedQuestion.slice(0, 500),
+          normalizedKey
+        ]
+      );
+      currentQuota = await fetchMonthlyAiQuota(authUser);
+    } catch (logErr: any) {
+      console.warn('Failed to log AI tutor usage:', logErr?.message || logErr);
+    }
+
+    if (!isPersonalDraftAudit && replyText && replyText.trim().length > 20 && normalizedKey) {
+      try {
+        await pool.query(
+          `INSERT INTO ai_shared_qa (
+             question_text, normalized_key, answer_text, topic_id, page_key, page_title_fa, industry_track, lang, asked_by_label, reuse_count, created_at
+           )
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 0, NOW());`,
+          [
+            trimmedQuestion.slice(0, 1200),
+            normalizedKey,
+            replyText.slice(0, 12000),
+            String(topicId || '').slice(0, 120),
+            String(pageNumber ?? '0').slice(0, 64),
+            String(pageTitleFa || pageTitleEn || '').slice(0, 250),
+            String(industryTrack || '').slice(0, 120),
+            safeLang,
+            authUser.isAdmin ? 'مدرس دوره' : 'هم‌دوره‌ای'
+          ]
+        );
+        savedToSharedBank = true;
+      } catch (shareErr: any) {
+        console.warn('Failed to save shared AI Q&A:', shareErr?.message || shareErr);
+      }
+    }
+
+    return { updatedQuota: currentQuota, savedToSharedBank };
+  };
+
+  // 1. Primary path: Official @google/genai SDK with gemini-4-hydrogen
+  if (geminiKey) {
+    try {
+      const ai = new GoogleGenAI({
+        apiKey: geminiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          },
+        },
+      });
+
+      const formattedContents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
+      if (Array.isArray(history)) {
+        for (const msg of history.slice(-10)) {
+          if (msg && msg.text && (msg.role === 'user' || msg.role === 'model')) {
+            formattedContents.push({
+              role: msg.role,
+              parts: [{ text: String(msg.text).slice(0, 3000) }],
+            });
+          }
+        }
+      }
+      formattedContents.push({
+        role: 'user',
+        parts: [{ text: trimmedQuestion }],
+      });
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-4-hydrogen',
+        contents: formattedContents,
+        config: {
+          systemInstruction,
+        },
+      });
+
+      const replyText = response.text || (safeLang === 'fa' ? 'پاسخی دریافت نشد.' : 'No response generated.');
+      const { updatedQuota, savedToSharedBank } = await recordUsageAndShareAnswer(replyText);
+      return res.json({
+        reply: replyText,
+        model: 'gemini-4-hydrogen',
+        fromSharedCache: false,
+        savedToSharedBank,
+        groundedPage: pageNumber,
+        quota: updatedQuota
+      });
+    } catch (err: any) {
+      console.error('Gemini API error in /api/ai/tutor:', err?.message || err);
+      if (!openRouterKey && !gatewayKey) {
+        return res.status(500).json({
+          error: err?.message || 'Failed to generate response from Gemini AI Tutor.'
+        });
+      }
+    }
+  }
+
+  // 2. Secondary fallback path: OpenRouter API
   if (openRouterKey) {
     try {
       const messages = [
@@ -2513,10 +3206,10 @@ ${userDraft ? userDraft.slice(0, 6000) : '(The user has not written their draft 
         ...(Array.isArray(history)
           ? history.slice(-8).map((m: any) => ({
               role: m.role === 'model' || m.role === 'assistant' ? 'assistant' : 'user',
-              content: String(m.text || m.content || '')
+              content: String(m.text || m.content || '').slice(0, 3000)
             }))
           : []),
-        { role: 'user', content: question.trim() }
+        { role: 'user', content: trimmedQuestion }
       ];
 
       const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -2539,75 +3232,27 @@ ${userDraft ? userDraft.slice(0, 6000) : '(The user has not written their draft 
         throw new Error(aiData.error.message || 'OpenRouter error');
       }
 
-      const replyText = aiData.choices?.[0]?.message?.content || (lang === 'fa' ? 'پاسخی دریافت نشد.' : 'No response generated.');
+      const replyText = aiData.choices?.[0]?.message?.content || (safeLang === 'fa' ? 'پاسخی دریافت نشد.' : 'No response generated.');
+      const { updatedQuota, savedToSharedBank } = await recordUsageAndShareAnswer(replyText);
       return res.json({
         reply: replyText,
         model: aiData.model || openRouterModel,
-        groundedPage: pageNumber
+        fromSharedCache: false,
+        savedToSharedBank,
+        groundedPage: pageNumber,
+        quota: updatedQuota
       });
     } catch (err: any) {
       console.error('OpenRouter API error in /api/ai/tutor:', err?.message || err);
-      if (!geminiKey && !gatewayKey) {
-        return res.status(500).json({
-          error: err?.message || 'Failed to generate response from OpenRouter AI Tutor.'
-        });
-      }
-    }
-  }
-
-  // 2. Secondary path: Official @google/genai SDK with gemini-3.8-flash
-  if (geminiKey) {
-    try {
-      const ai = new GoogleGenAI({
-        apiKey: geminiKey,
-        httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build',
-          },
-        },
-      });
-
-      const formattedContents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
-      if (Array.isArray(history)) {
-        for (const msg of history.slice(-10)) {
-          if (msg && msg.text && (msg.role === 'user' || msg.role === 'model')) {
-            formattedContents.push({
-              role: msg.role,
-              parts: [{ text: String(msg.text) }],
-            });
-          }
-        }
-      }
-      formattedContents.push({
-        role: 'user',
-        parts: [{ text: question.trim() }],
-      });
-
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: formattedContents,
-        config: {
-          systemInstruction,
-        },
-      });
-
-      const replyText = response.text || (lang === 'fa' ? 'پاسخی دریافت نشد.' : 'No response generated.');
-      return res.json({
-        reply: replyText,
-        model: 'gemini-3.8-flash',
-        groundedPage: pageNumber
-      });
-    } catch (err: any) {
-      console.error('Gemini API error in /api/ai/tutor:', err?.message || err);
       if (!gatewayKey) {
         return res.status(500).json({
-          error: err?.message || 'Failed to generate response from Gemini AI Tutor.'
+          error: err?.message || 'Failed to generate response from AI Tutor.'
         });
       }
     }
   }
 
-  // 2. Secondary fallback path if AI_GATEWAY_API_KEY is configured
+  // 3. Tertiary fallback path if AI_GATEWAY_API_KEY is configured
   if (gatewayKey) {
     try {
       const messages = [
@@ -2615,10 +3260,10 @@ ${userDraft ? userDraft.slice(0, 6000) : '(The user has not written their draft 
         ...(Array.isArray(history)
           ? history.slice(-8).map((m: any) => ({
               role: m.role === 'model' ? 'assistant' : 'user',
-              content: String(m.text || '')
+              content: String(m.text || '').slice(0, 3000)
             }))
           : []),
-        { role: 'user', content: question.trim() }
+        { role: 'user', content: trimmedQuestion }
       ];
 
       const aiResponse = await fetch('https://ai-gateway.vercel.sh/v1/chat/completions', {
@@ -2639,10 +3284,14 @@ ${userDraft ? userDraft.slice(0, 6000) : '(The user has not written their draft 
       }
 
       const replyText = aiData.choices?.[0]?.message?.content || 'No response generated.';
+      const { updatedQuota, savedToSharedBank } = await recordUsageAndShareAnswer(replyText);
       return res.json({
         reply: replyText,
         model: aiData.model || 'gpt-4o-mini',
-        groundedPage: pageNumber
+        fromSharedCache: false,
+        savedToSharedBank,
+        groundedPage: pageNumber,
+        quota: updatedQuota
       });
     } catch (err: any) {
       return res.status(500).json({ error: err.message });
@@ -2650,9 +3299,9 @@ ${userDraft ? userDraft.slice(0, 6000) : '(The user has not written their draft 
   }
 
   return res.status(500).json({
-    error: lang === 'fa'
-      ? 'کلید API هوش مصنوعی در تنظیمات سرور فعال نشده است. لطفاً متغیر OPENROUTER_API_KEY یا GEMINI_API_KEY را بررسی فرمایید.'
-      : 'AI API key is not configured on the server. Please check OPENROUTER_API_KEY or GEMINI_API_KEY in server environment.'
+    error: safeLang === 'fa'
+      ? 'کلید API هوش مصنوعی در تنظیمات سرور فعال نشده است.'
+      : 'AI API key is not configured on the server.'
   });
 });
 

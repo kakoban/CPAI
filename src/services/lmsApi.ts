@@ -11,9 +11,21 @@ import { UserProfile } from '../types/auth';
 import {
   CohortScheduleRecord,
   CohortUserEntry,
-  getDefaultCohortSchedules,
-  searchCohortsByQuery
+  PrivateCohortLookupResult
 } from '../utils/cohortScheduleEngine';
+import {
+  AiQuotaState,
+  MONTHLY_AI_QUOTA_LIMIT,
+  SharedAiQaItem,
+  computeAiQuotaState
+} from '../utils/aiQuotaEngine';
+
+export interface MyCohortRoadmapResponse {
+  authenticated: boolean;
+  email?: string;
+  assigned: boolean;
+  cohort: CohortScheduleRecord | null;
+}
 
 export interface AdminWeekdayCohortsResponse {
   cohorts: CohortScheduleRecord[];
@@ -458,45 +470,143 @@ class LmsApiService {
   }
 
   /**
-   * Public zero-PII lookup of weekday cohorts & their reviewed/next modules
+   * Authenticated student endpoint: automatically resolve ONLY the logged-in student's own cohort roadmap by email/account
    */
-  async fetchCohortSchedulesPublic(query?: string): Promise<CohortScheduleRecord[]> {
+  async fetchMyCohortRoadmap(): Promise<MyCohortRoadmapResponse> {
+    const token = authApi.getToken();
+    if (!token) {
+      return { authenticated: false, assigned: false, cohort: null };
+    }
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      const qs = query && query.trim() ? `?q=${encodeURIComponent(query.trim())}` : '';
-      const res = await fetch(`/api/cohorts/lookup${qs}`, {
+      const res = await fetch('/api/cohorts/my-roadmap', {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getHeaders(),
+        cache: 'no-store',
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (res.status === 401) {
+        return { authenticated: false, assigned: false, cohort: null };
+      }
+
+      if (res.ok) {
+        const data = await res.json();
+        return {
+          authenticated: Boolean(data?.authenticated),
+          email: typeof data?.email === 'string' ? data.email : undefined,
+          assigned: Boolean(data?.assigned && data?.cohort),
+          cohort: data?.cohort || null
+        };
+      }
+    } catch (err: any) {
+      console.warn('Failed to fetch personal cohort roadmap:', err?.message || err);
+    }
+    return { authenticated: true, assigned: false, cohort: null };
+  }
+
+  /**
+   * Authenticated private zero-leak single-cohort search:
+   * Returns a single cohort ONLY when query uniquely matches 1 org/project (never leaks other classes)
+   */
+  async lookupPrivateCohortByQuery(query: string): Promise<PrivateCohortLookupResult> {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      return { status: 'idle', cohort: null };
+    }
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const res = await fetch(`/api/cohorts/lookup?q=${encodeURIComponent(trimmed)}`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+        cache: 'no-store',
         signal: controller.signal
       });
       clearTimeout(timeoutId);
 
       if (res.ok) {
         const data = await res.json();
-        if (data && Array.isArray(data.cohorts)) {
-          if (!query || !query.trim()) {
-            try {
-              localStorage.setItem('cpmai_cohort_schedules_cache_v1', JSON.stringify(data.cohorts));
-            } catch {}
-          }
-          return data.cohorts;
+        return {
+          status: data?.status || 'not_found',
+          cohort: data?.cohort || null
+        };
+      }
+    } catch (err: any) {
+      console.warn('Private cohort lookup failed:', err?.message || err);
+    }
+    return { status: 'not_found', cohort: null };
+  }
+
+  /**
+   * Fetch current authenticated user's monthly AI guidance quota (5 non-duplicate prompts/month for students)
+   */
+  async fetchAiTutorQuota(): Promise<AiQuotaState | null> {
+    const token = authApi.getToken();
+    if (!token) return null;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const res = await fetch('/api/ai/quota', {
+        method: 'GET',
+        headers: this.getHeaders(),
+        cache: 'no-store',
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.quota) {
+          const q = data.quota;
+          return computeAiQuotaState(
+            Number(q.used || 0),
+            Boolean(q.isUnlimited),
+            Number(q.limit || MONTHLY_AI_QUOTA_LIMIT)
+          );
         }
       }
     } catch (err: any) {
-      console.warn('Public cohort lookup failed, using cached fallback:', err?.message || err);
+      console.warn('Failed to fetch AI tutor quota:', err?.message || err);
     }
+    return null;
+  }
 
-    let cached: CohortScheduleRecord[] = getDefaultCohortSchedules();
+  /**
+   * Fetch anonymized Shared Community Q&A Bank so any student can reuse prior AI answers with zero token burn
+   */
+  async fetchSharedAiQa(params?: { q?: string; pageKey?: string; lang?: string }): Promise<SharedAiQaItem[]> {
+    const token = authApi.getToken();
+    if (!token) return [];
     try {
-      const raw = localStorage.getItem('cpmai_cohort_schedules_cache_v1');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) cached = parsed;
-      }
-    } catch {}
+      const query = new URLSearchParams();
+      if (params?.q && params.q.trim()) query.set('q', params.q.trim());
+      if (params?.pageKey) query.set('pageKey', params.pageKey);
+      if (params?.lang) query.set('lang', params.lang);
 
-    return query && query.trim() ? searchCohortsByQuery(cached, query) : cached;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const qs = query.toString();
+      const res = await fetch(`/api/ai/shared-qa${qs ? `?${qs}` : ''}`, {
+        method: 'GET',
+        headers: this.getHeaders(),
+        cache: 'no-store',
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data?.items)) {
+          return data.items as SharedAiQaItem[];
+        }
+      }
+    } catch (err: any) {
+      console.warn('Failed to fetch shared AI Q&A bank:', err?.message || err);
+    }
+    return [];
   }
 
   /**
@@ -509,6 +619,7 @@ class LmsApiService {
       const res = await fetch('/api/admin/cohorts/schedule', {
         method: 'GET',
         headers: this.getHeaders(),
+        cache: 'no-store',
         signal: controller.signal
       });
       clearTimeout(timeoutId);
@@ -516,9 +627,6 @@ class LmsApiService {
       if (res.ok) {
         const data: AdminWeekdayCohortsResponse = await res.json();
         if (data && Array.isArray(data.cohorts)) {
-          try {
-            localStorage.setItem('cpmai_cohort_schedules_cache_v1', JSON.stringify(data.cohorts));
-          } catch {}
           return data;
         }
       }
@@ -544,6 +652,7 @@ class LmsApiService {
       if (!res.ok) {
         return { success: false, updatedCount: 0, error: data?.error || 'خطا در همگام‌سازی' };
       }
+      window.dispatchEvent(new CustomEvent('cpmai_cohort_schedules_updated', { detail: { synced: true } }));
       return { success: true, updatedCount: Number(data.updatedCount || 0) };
     } catch (err: any) {
       return { success: false, updatedCount: 0, error: err?.message || 'خطای شبکه' };
@@ -573,13 +682,11 @@ class LmsApiService {
         return { success: false, error: data?.error || 'خطا در ذخیره برنامه کلاس' };
       }
       if (data.cohort) {
-        try {
-          const raw = localStorage.getItem('cpmai_cohort_schedules_cache_v1');
-          const list: CohortScheduleRecord[] = raw ? JSON.parse(raw) : getDefaultCohortSchedules();
-          const updatedList = list.map((c) => (c.id === data.cohort.id ? { ...c, ...data.cohort } : c));
-          localStorage.setItem('cpmai_cohort_schedules_cache_v1', JSON.stringify(updatedList));
-        } catch {}
-        window.dispatchEvent(new CustomEvent('cpmai_cohort_schedules_updated'));
+        window.dispatchEvent(
+          new CustomEvent('cpmai_cohort_schedules_updated', {
+            detail: { cohort: data.cohort }
+          })
+        );
       }
       return { success: true, cohort: data.cohort };
     } catch (err: any) {
@@ -604,6 +711,11 @@ class LmsApiService {
       if (!res.ok) {
         return { success: false, error: data?.error || 'خطا در تغییر کلاس کاربر' };
       }
+      window.dispatchEvent(
+        new CustomEvent('cpmai_cohort_schedules_updated', {
+          detail: { userAssigned: true, userId, cohortId }
+        })
+      );
       return { success: true };
     } catch (err: any) {
       return { success: false, error: err?.message || 'خطای شبکه' };

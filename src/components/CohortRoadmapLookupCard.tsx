@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Search,
   Building2,
@@ -10,87 +10,150 @@ import {
   Calendar,
   Sparkles,
   BookOpen,
-  Check
+  Check,
+  UserCheck,
+  LogIn,
+  ShieldCheck,
+  ChevronDown,
+  ChevronUp,
+  RotateCcw,
+  RefreshCw,
+  Bot
 } from 'lucide-react';
 import { Language } from '../types/cpmai';
+import { UserProfile } from '../types/auth';
 import {
   CohortScheduleRecord,
-  buildExpectedLearningSummary,
-  getDefaultCohortSchedules,
-  searchCohortsByQuery
+  PrivateCohortLookupStatus,
+  buildExpectedLearningSummary
 } from '../utils/cohortScheduleEngine';
-import { ORBIT_MODULE_BY_ID } from '../data/orbitCurriculumCatalog';
+import { AiQuotaState } from '../utils/aiQuotaEngine';
 import { lmsApi } from '../services/lmsApi';
 
-const SELECTED_COHORT_STORAGE_KEY = 'cpmai_selected_org_cohort_v1';
 const SELF_CHECK_STORAGE_PREFIX = 'cpmai_cohort_outcomes_check_v1_';
+const PANEL_CLOSED_STORAGE_KEY = 'cpmai_cohort_panel_closed_v1';
 
 interface CohortRoadmapLookupCardProps {
   lang: Language;
+  currentUser?: UserProfile | null;
+  onOpenAuth?: () => void;
+  onOpenAiTutor?: () => void;
+  aiQuota?: AiQuotaState | null;
   onSelectModule: (moduleId: string) => void;
   onCohortChange?: (cohort: CohortScheduleRecord | null) => void;
 }
 
 export const CohortRoadmapLookupCard: React.FC<CohortRoadmapLookupCardProps> = ({
   lang,
+  currentUser,
+  onOpenAuth,
+  onOpenAiTutor,
+  aiQuota,
   onSelectModule,
   onCohortChange
 }) => {
-  const [allCohorts, setAllCohorts] = useState<CohortScheduleRecord[]>(() => getDefaultCohortSchedules());
-  const [query, setQuery] = useState<string>('');
-  const [selectedCohortId, setSelectedCohortId] = useState<string | null>(() => {
+  // User-controlled panel close/minimize state
+  const [isPanelClosed, setIsPanelClosed] = useState<boolean>(() => {
     try {
-      return localStorage.getItem(SELECTED_COHORT_STORAGE_KEY) || null;
+      return localStorage.getItem(PANEL_CLOSED_STORAGE_KEY) === '1';
     } catch {
-      return null;
+      return false;
     }
   });
+
+  // Automatic email-bound cohort resolved from server for the logged-in student
+  const [myCohort, setMyCohort] = useState<CohortScheduleRecord | null>(null);
+  const [isMyCohortLoading, setIsMyCohortLoading] = useState<boolean>(false);
+  const [hasLoadedMyCohort, setHasLoadedMyCohort] = useState<boolean>(false);
+  const [isRoadmapExpanded, setIsRoadmapExpanded] = useState<boolean>(true);
+
+  // Secondary private zero-leak lookup state (never lists or leaks other classes)
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+  const [query, setQuery] = useState<string>('');
+  const [lastMatchedQuery, setLastMatchedQuery] = useState<string>('');
+  const [searchStatus, setSearchStatus] = useState<PrivateCohortLookupStatus>('idle');
+  const [searchedCohort, setSearchedCohort] = useState<CohortScheduleRecord | null>(null);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+
+  // Interactive Expected Learning Outcomes modal state
   const [isOutcomesModalOpen, setIsOutcomesModalOpen] = useState<boolean>(false);
   const [checkedOutcomeKeys, setCheckedOutcomeKeys] = useState<Record<string, boolean>>({});
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const loadCohorts = async () => {
-    setIsLoading(true);
+  const togglePanelClosed = (closed: boolean) => {
+    setIsPanelClosed(closed);
     try {
-      const list = await lmsApi.fetchCohortSchedulesPublic();
-      if (list && list.length > 0) {
-        setAllCohorts(list);
-      }
+      if (closed) localStorage.setItem(PANEL_CLOSED_STORAGE_KEY, '1');
+      else localStorage.removeItem(PANEL_CLOSED_STORAGE_KEY);
+    } catch {}
+  };
+
+  const loadMyRoadmap = useCallback(async () => {
+    if (!currentUser) {
+      setMyCohort(null);
+      setHasLoadedMyCohort(false);
+      return;
+    }
+    setIsMyCohortLoading(true);
+    try {
+      const res = await lmsApi.fetchMyCohortRoadmap();
+      setMyCohort(res.assigned && res.cohort ? res.cohort : null);
+      setHasLoadedMyCohort(true);
     } finally {
-      setIsLoading(false);
+      setIsMyCohortLoading(false);
+    }
+  }, [currentUser?.id, currentUser?.email]);
+
+  useEffect(() => {
+    loadMyRoadmap();
+  }, [loadMyRoadmap]);
+
+  // Live zero-lag injection whenever Admin saves a cohort schedule or reassigns a user
+  useEffect(() => {
+    const handleUpdated = (ev: Event) => {
+      const detail = (ev as CustomEvent<{ cohort?: CohortScheduleRecord }>)?.detail;
+      const updatedCohort = detail?.cohort;
+
+      if (updatedCohort && updatedCohort.id) {
+        setMyCohort((prev) => (prev && prev.id === updatedCohort.id ? { ...prev, ...updatedCohort } : prev));
+        setSearchedCohort((prev) =>
+          prev && prev.id === updatedCohort.id ? { ...prev, ...updatedCohort } : prev
+        );
+      }
+
+      // Always re-sync fresh from DB in background to stay 100% consistent
+      loadMyRoadmap();
+      const refreshQuery = lastMatchedQuery || query.trim();
+      if (searchedCohort && refreshQuery) {
+        lmsApi.lookupPrivateCohortByQuery(refreshQuery).then((res) => {
+          if (res.status === 'matched' && res.cohort) {
+            setSearchedCohort(res.cohort);
+          }
+        });
+      }
+    };
+
+    window.addEventListener('cpmai_cohort_schedules_updated', handleUpdated);
+    return () => window.removeEventListener('cpmai_cohort_schedules_updated', handleUpdated);
+  }, [loadMyRoadmap, searchedCohort?.id, lastMatchedQuery, query]);
+
+  const handleManualRefresh = async () => {
+    await loadMyRoadmap();
+    const refreshQuery = lastMatchedQuery || query.trim();
+    if (searchedCohort && refreshQuery) {
+      setIsSearching(true);
+      try {
+        const res = await lmsApi.lookupPrivateCohortByQuery(refreshQuery);
+        if (res.status === 'matched' && res.cohort) {
+          setSearchedCohort(res.cohort);
+        }
+      } finally {
+        setIsSearching(false);
+      }
     }
   };
 
-  useEffect(() => {
-    loadCohorts();
-    const handleUpdated = () => {
-      loadCohorts();
-    };
-    window.addEventListener('cpmai_cohort_schedules_updated', handleUpdated);
-    return () => window.removeEventListener('cpmai_cohort_schedules_updated', handleUpdated);
-  }, []);
-
-  const searchMatches = useMemo(() => {
-    if (!query.trim()) return [];
-    return searchCohortsByQuery(allCohorts, query);
-  }, [allCohorts, query]);
-
-  // Resolve the active cohort: explicit selection OR unique auto-match from typed query
-  const activeCohort = useMemo(() => {
-    if (query.trim()) {
-      if (searchMatches.length === 1) {
-        return searchMatches[0];
-      }
-      if (selectedCohortId && searchMatches.some((c) => c.id === selectedCohortId)) {
-        return searchMatches.find((c) => c.id === selectedCohortId) || null;
-      }
-      return null;
-    }
-    if (selectedCohortId) {
-      return allCohorts.find((c) => c.id === selectedCohortId) || null;
-    }
-    return null;
-  }, [allCohorts, query, searchMatches, selectedCohortId]);
+  // Priority: explicit private search match if active; otherwise the student's own email-bound cohort
+  const activeCohort = searchedCohort || myCohort;
 
   useEffect(() => {
     onCohortChange?.(activeCohort);
@@ -110,20 +173,37 @@ export const CohortRoadmapLookupCard: React.FC<CohortRoadmapLookupCardProps> = (
     }
   }, [activeCohort?.id]);
 
-  const handleChooseCohort = (cohort: CohortScheduleRecord) => {
-    setSelectedCohortId(cohort.id);
-    setQuery('');
+  const handlePrivateSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setSearchStatus('idle');
+      setSearchedCohort(null);
+      setLastMatchedQuery('');
+      return;
+    }
+    setIsSearching(true);
     try {
-      localStorage.setItem(SELECTED_COHORT_STORAGE_KEY, cohort.id);
-    } catch {}
+      const res = await lmsApi.lookupPrivateCohortByQuery(trimmed);
+      setSearchStatus(res.status);
+      if (res.status === 'matched' && res.cohort) {
+        setSearchedCohort(res.cohort);
+        setLastMatchedQuery(trimmed);
+        setIsRoadmapExpanded(true);
+      } else {
+        setSearchedCohort(null);
+        setLastMatchedQuery('');
+      }
+    } finally {
+      setIsSearching(false);
+    }
   };
 
-  const handleClearSelection = () => {
-    setSelectedCohortId(null);
+  const handleClearSearch = () => {
     setQuery('');
-    try {
-      localStorage.removeItem(SELECTED_COHORT_STORAGE_KEY);
-    } catch {}
+    setLastMatchedQuery('');
+    setSearchStatus('idle');
+    setSearchedCohort(null);
   };
 
   const toggleOutcomeCheck = (key: string) => {
@@ -158,6 +238,65 @@ export const CohortRoadmapLookupCard: React.FC<CohortRoadmapLookupCardProps> = (
       ? Math.round((selfCheckedCount / learningSummary.totalExpectedOutcomes) * 100)
       : 0;
 
+  const quotaBadgeLabel = aiQuota
+    ? aiQuota.isUnlimited
+      ? 'نامحدود'
+      : `${aiQuota.remaining.toLocaleString('fa-IR')} از ${aiQuota.limit.toLocaleString('fa-IR')}`
+    : '۱۰ پرسش ماهانه';
+
+  // Collapsed compact bar when user closes the panel
+  if (isPanelClosed) {
+    return (
+      <div
+        dir="rtl"
+        data-testid="cohort-panel-collapsed-bar"
+        className="rounded-2xl bg-white dark:bg-[#131d26] border border-[#1f5163]/20 dark:border-[#6fb3c6]/20 px-3 py-2.5 shadow-2xs flex items-center justify-between gap-2"
+      >
+        <button
+          type="button"
+          data-testid="cohort-panel-reopen-btn"
+          onClick={() => togglePanelClosed(false)}
+          className="flex items-center gap-2 min-w-0 text-right cursor-pointer group flex-1"
+        >
+          <div className="w-7 h-7 rounded-xl bg-[#1f5163]/10 dark:bg-[#6fb3c6]/15 text-[#1f5163] dark:text-[#6fb3c6] flex items-center justify-center shrink-0">
+            <Building2 className="w-3.5 h-3.5" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-xs font-black text-slate-900 dark:text-white group-hover:text-[#1f5163] dark:group-hover:text-[#7ac1d4] transition-colors truncate">
+              {activeCohort ? `نقشه راه کلاس: ${activeCohort.title}` : 'نقشه راه اختصاصی کلاس شما'}
+            </div>
+            <div className="text-[10px] text-slate-500 dark:text-slate-400">
+              برای مشاهده برنامه ماژول‌ها کلیک کنید
+            </div>
+          </div>
+        </button>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          {onOpenAiTutor && (
+            <button
+              type="button"
+              data-testid="cohort-collapsed-ai-btn"
+              onClick={onOpenAiTutor}
+              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-l from-[#1f5163] to-[#1e7b6e] text-white text-[10px] font-extrabold flex items-center gap-1 cursor-pointer hover:opacity-95 transition-opacity"
+            >
+              <Bot className="w-3.5 h-3.5 shrink-0" />
+              <span>راهنمای AI ({quotaBadgeLabel})</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => togglePanelClosed(false)}
+            aria-label="باز کردن پنل نقشه راه"
+            className="px-2 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[10px] font-extrabold text-slate-700 dark:text-slate-200 cursor-pointer flex items-center gap-1"
+          >
+            <span>باز کردن</span>
+            <ChevronDown className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div
@@ -165,98 +304,109 @@ export const CohortRoadmapLookupCard: React.FC<CohortRoadmapLookupCardProps> = (
         data-testid="cohort-roadmap-lookup-card"
         className="rounded-2xl bg-white dark:bg-[#131d26] border border-[#1f5163]/20 dark:border-[#6fb3c6]/20 p-3.5 shadow-2xs space-y-3"
       >
-        {/* Header & Search Input */}
-        <div className="space-y-2">
+        {/* Card Header + Refresh & Close Panel Controls */}
+        <div className="space-y-2.5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 min-w-0">
               <div className="w-6 h-6 rounded-lg bg-[#1f5163]/10 dark:bg-[#6fb3c6]/15 text-[#1f5163] dark:text-[#6fb3c6] flex items-center justify-center shrink-0">
                 <Building2 className="w-3.5 h-3.5" />
               </div>
               <h4 className="text-xs font-black text-slate-900 dark:text-white truncate">
-                {lang === 'fa'
-                  ? 'برنامه کلاس موسسه / پروژه شما'
-                  : 'Your Organization Class Roadmap'}
+                {lang === 'fa' ? 'نقشه راه اختصاصی کلاس شما' : 'Your Personal Class Roadmap'}
               </h4>
             </div>
-            {activeCohort && !query.trim() && (
+
+            <div className="flex items-center gap-1 shrink-0">
+              {searchedCohort && myCohort && (
+                <button
+                  type="button"
+                  data-testid="cohort-back-to-mine-btn"
+                  onClick={handleClearSearch}
+                  className="px-2 py-1 rounded-lg text-[10px] font-extrabold text-[#1f5163] dark:text-[#7ac1d4] hover:bg-[#1f5163]/10 flex items-center gap-1 cursor-pointer"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>کلاس من</span>
+                </button>
+              )}
+
               <button
                 type="button"
-                data-testid="cohort-reset-btn"
-                onClick={handleClearSelection}
-                className="text-[10px] font-bold text-slate-500 hover:text-[#1f5163] dark:text-slate-400 dark:hover:text-[#6fb3c6] cursor-pointer shrink-0"
+                data-testid="cohort-panel-refresh-btn"
+                onClick={handleManualRefresh}
+                title="تازه‌سازی آخرین تغییرات مدرس"
+                aria-label="تازه‌سازی برنامه کلاس"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-[#1f5163] dark:hover:text-[#7ac1d4] hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
-                تغییر موسسه
+                <RefreshCw className={`w-3.5 h-3.5 ${isMyCohortLoading || isSearching ? 'animate-spin' : ''}`} />
               </button>
-            )}
+
+              <button
+                type="button"
+                data-testid="cohort-panel-close-btn"
+                onClick={() => togglePanelClosed(true)}
+                title="بستن و جمع‌کردن پنل"
+                aria-label="بستن پنل نقشه راه کلاس"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              type="text"
-              data-testid="cohort-lookup-input"
-              aria-label="جستجوی نام موسسه، شرکت یا طرح و پروژه"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={
-                lang === 'fa'
-                  ? 'نام کامل یا بخشی از اسم موسسه، شرکت یا طرح (مثلاً حرا، دماوند، پایا، عسلویه)...'
-                  : 'Enter your organization or project name...'
-              }
-              className="w-full pr-8 pl-7 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-[#0d151c] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#1f5163]/40 focus:border-[#1f5163]"
-            />
-            {query && (
-              <button
-                type="button"
-                aria-label="پاک کردن جستجو"
-                onClick={() => setQuery('')}
-                className="absolute left-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            )}
-          </div>
+          {/* Primary Auto-Detected Personal Roadmap CTA */}
+          {!currentUser ? (
+            <button
+              type="button"
+              data-testid="cohort-login-roadmap-btn"
+              onClick={() => onOpenAuth?.()}
+              className="w-full py-2.5 px-3 rounded-xl bg-[#1f5163] hover:bg-[#163c4a] text-white text-xs font-extrabold flex items-center justify-between gap-2 shadow-xs transition-colors cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                <LogIn className="w-4 h-4 shrink-0" />
+                <span>ورود با ایمیل و نمایش نقشه راه کلاس من</span>
+              </span>
+              <ArrowLeft className="w-3.5 h-3.5 shrink-0" />
+            </button>
+          ) : isMyCohortLoading && !activeCohort ? (
+            <div className="w-full py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 text-center">
+              در حال شناسایی خودکار کلاس بر اساس حساب کاربری شما...
+            </div>
+          ) : myCohort && !searchedCohort ? (
+            <button
+              type="button"
+              data-testid="my-cohort-roadmap-btn"
+              onClick={() => setIsRoadmapExpanded((prev) => !prev)}
+              className="w-full py-2.5 px-3 rounded-xl bg-[#1f5163]/[0.08] dark:bg-[#1f5163]/25 hover:bg-[#1f5163]/15 border border-[#1f5163]/25 text-right transition-colors cursor-pointer flex items-center justify-between gap-2"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <UserCheck className="w-4 h-4 text-[#1f5163] dark:text-[#7ac1d4] shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-xs font-black text-slate-900 dark:text-white truncate">
+                    نقشه راه کلاس من: {myCohort.title}
+                  </div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                    تشخیص خودکار از ایمیل شما · برگزاری {myCohort.weekdayFa}
+                  </div>
+                </div>
+              </div>
+              {isRoadmapExpanded ? (
+                <ChevronUp className="w-4 h-4 text-[#1f5163] dark:text-[#7ac1d4] shrink-0" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-[#1f5163] dark:text-[#7ac1d4] shrink-0" />
+              )}
+            </button>
+          ) : hasLoadedMyCohort && !myCohort && !searchedCohort ? (
+            <div
+              data-testid="cohort-unassigned-notice"
+              className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed"
+            >
+              حساب <span className="font-bold" dir="ltr">{currentUser.email}</span> هنوز به یکی از کلاس‌های ثابت هفته متصل نشده است. در صورت نیاز می‌توانید نام دقیق تیم یا موسسه خود را از بخش جستجوی محرمانه پایین وارد کنید.
+            </div>
+          ) : null}
         </div>
 
-        {/* Multiple Matching Suggestions (e.g. typing "دماوند") */}
-        {query.trim().length > 0 && searchMatches.length > 1 && (
-          <div
-            data-testid="cohort-search-suggestions"
-            className="space-y-1.5 animate-fadeIn"
-          >
-            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-              {searchMatches.length.toLocaleString('fa-IR')} کلاس مرتبط یافت شد — تیم خود را انتخاب کنید:
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {searchMatches.map((cohort) => (
-                <button
-                  key={cohort.id}
-                  type="button"
-                  data-testid={`cohort-suggestion-${cohort.id}`}
-                  onClick={() => handleChooseCohort(cohort)}
-                  className="px-2.5 py-1.5 rounded-xl border border-[#1f5163]/25 bg-[#1f5163]/[0.06] hover:bg-[#1f5163] hover:text-white text-[#1f5163] dark:text-[#7ac1d4] dark:hover:text-white text-[11px] font-extrabold transition-colors cursor-pointer flex items-center gap-1.5"
-                >
-                  <span>{cohort.title}</span>
-                  <span className="opacity-75 text-[10px]">({cohort.weekdayFa})</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* No Match State */}
-        {query.trim().length > 0 && searchMatches.length === 0 && !isLoading && (
-          <div
-            data-testid="cohort-no-match"
-            className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70 text-[11px] text-slate-500 dark:text-slate-400"
-          >
-            کلاسی با عبارت «{query}» یافت نشد. بخشی از نام مانند <strong>حرا</strong>،{' '}
-            <strong>دماوند تهران</strong>، <strong>پایا سامان</strong> یا <strong>عسلویه</strong> را امتحان کنید.
-          </div>
-        )}
-
-        {/* Active Matched Cohort Live Status Card */}
-        {activeCohort && learningSummary && (
+        {/* Active Cohort Roadmap Details (Only the user's OWN class OR exact unique private match) */}
+        {activeCohort && learningSummary && isRoadmapExpanded && (
           <div
             data-testid="cohort-status-card"
             className="space-y-2.5 pt-2 border-t border-slate-200/80 dark:border-slate-800 animate-fadeIn"
@@ -286,7 +436,7 @@ export const CohortRoadmapLookupCard: React.FC<CohortRoadmapLookupCardProps> = (
               </div>
               {learningSummary.reviewedModules.length === 0 ? (
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/40 rounded-lg px-2.5 py-1.5">
-                  هنوز ماژول مرور شده‌ای توسط مدرس برای این کلاس ثبت نشده است.
+                  هنوز ماژول مرور شده‌ای توسط مدرس برای کلاس شما ثبت نشده است.
                 </p>
               ) : (
                 <div className="flex flex-wrap gap-1.5">
@@ -373,6 +523,119 @@ export const CohortRoadmapLookupCard: React.FC<CohortRoadmapLookupCardProps> = (
             </button>
           </div>
         )}
+
+        {/* Attractive Monthly AI Guidance CTA (10 requests/month for students) */}
+        {onOpenAiTutor && (
+          <button
+            type="button"
+            data-testid="cohort-open-ai-guide-btn"
+            onClick={onOpenAiTutor}
+            className="w-full p-2.5 rounded-xl bg-gradient-to-l from-[#123c48] via-[#1b5a63] to-[#1e7b6e] hover:brightness-110 text-white transition-all cursor-pointer flex items-center justify-between gap-2 shadow-xs"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
+                <Sparkles className="w-4 h-4 text-amber-300" />
+              </div>
+              <div className="text-right min-w-0">
+                <div className="text-[11px] font-black truncate">
+                  راهنمای هوشمند AI در موضوعات دوره
+                </div>
+                <div className="text-[10px] text-white/80 truncate">
+                  پرسش، مثال صنعتی و ممیزی تمرین‌ها با هوش مصنوعی
+                </div>
+              </div>
+            </div>
+            <span className="px-2 py-1 rounded-lg bg-white/15 border border-white/20 text-[10px] font-extrabold shrink-0 tabular-nums">
+              {quotaBadgeLabel}
+            </span>
+          </button>
+        )}
+
+        {/* Secondary Privacy-Preserving Exact Search (NEVER lists or reveals any other cohorts) */}
+        <div className="pt-2 border-t border-slate-200/70 dark:border-slate-800/80 space-y-2">
+          <button
+            type="button"
+            data-testid="cohort-toggle-private-search-btn"
+            onClick={() => setIsSearchOpen((prev) => !prev)}
+            className="w-full flex items-center justify-between gap-2 text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:text-[#1f5163] dark:hover:text-[#7ac1d4] transition-colors cursor-pointer"
+          >
+            <span className="flex items-center gap-1.5">
+              <Search className="w-3.5 h-3.5 shrink-0" />
+              <span>جستجوی محرمانه با نام دقیق موسسه یا پروژه</span>
+            </span>
+            {isSearchOpen ? (
+              <ChevronUp className="w-3.5 h-3.5 shrink-0" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5 shrink-0" />
+            )}
+          </button>
+
+          {isSearchOpen && (
+            <form onSubmit={handlePrivateSearch} className="space-y-2 animate-fadeIn">
+              <div className="flex items-center gap-1.5">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    data-testid="cohort-lookup-input"
+                    aria-label="نام دقیق موسسه، شرکت یا پروژه شما"
+                    value={query}
+                    onChange={(e) => {
+                      setQuery(e.target.value);
+                      if (searchStatus !== 'idle') setSearchStatus('idle');
+                    }}
+                    placeholder={
+                      lang === 'fa'
+                        ? 'نام دقیق موسسه، شرکت یا پروژه خود را بنویسید...'
+                        : 'Enter your exact organization or project name...'
+                    }
+                    className="w-full pr-3 pl-7 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-[#0d151c] text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#1f5163]/40 focus:border-[#1f5163]"
+                  />
+                  {query && (
+                    <button
+                      type="button"
+                      aria-label="پاک کردن جستجو"
+                      onClick={handleClearSearch}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  data-testid="cohort-lookup-submit-btn"
+                  disabled={isSearching || !query.trim()}
+                  className="px-3 py-1.5 rounded-xl bg-[#1f5163] hover:bg-[#163c4a] disabled:opacity-50 text-white text-xs font-extrabold transition-colors cursor-pointer shrink-0"
+                >
+                  {isSearching ? '...' : 'جستجو'}
+                </button>
+              </div>
+
+              {/* Privacy-Safe Feedback (Never lists or hints at other organizations) */}
+              {(searchStatus === 'too_short' || searchStatus === 'ambiguous') && (
+                <div
+                  data-testid="cohort-private-hint"
+                  className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70 text-[11px] text-slate-600 dark:text-slate-300 flex items-start gap-1.5 leading-relaxed"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#1f5163] dark:text-[#7ac1d4] shrink-0 mt-0.5" />
+                  <span>
+                    برای حفظ محرمانگی سایر کلاس‌ها، لطفاً نام دقیق‌تر موسسه، پروژه یا شهر تیم خود را وارد کنید.
+                  </span>
+                </div>
+              )}
+
+              {searchStatus === 'not_found' && (
+                <div
+                  data-testid="cohort-no-match"
+                  className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/70 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed"
+                >
+                  کلاسی با این نام دقیق ثبت نشده است. لطفاً املای نام موسسه یا تیم خود را بررسی کنید.
+                </div>
+              )}
+            </form>
+          )}
+        </div>
       </div>
 
       {/* Interactive Modal: Expected Learning Outcomes So Far */}
@@ -548,9 +811,9 @@ export const CohortRoadmapLookupCard: React.FC<CohortRoadmapLookupCardProps> = (
                 <div className="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 space-y-2">
                   <div className="flex items-center gap-1.5 text-xs font-black text-amber-800 dark:text-amber-300">
                     <Target className="w-4 h-4" />
-                    <span>آمادگی برای کلاس بعدی ({activeCohort.weekdayFa}):</span>
+                    <span>آمادگی برای کلاس بعدی ({activeCohort.weekdayFa})</span>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {learningSummary.nextModules.map((mod) => (
                       <button
                         key={mod.id}
@@ -559,13 +822,13 @@ export const CohortRoadmapLookupCard: React.FC<CohortRoadmapLookupCardProps> = (
                           setIsOutcomesModalOpen(false);
                           onSelectModule(mod.id);
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-white dark:bg-[#131c24] border border-amber-300 dark:border-amber-700 text-xs font-bold text-amber-900 dark:text-amber-200 hover:bg-amber-500 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5"
+                        className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#141e27] border border-amber-300 dark:border-amber-700/70 hover:border-amber-500 text-[11px] font-extrabold text-slate-800 dark:text-slate-100 flex items-center gap-1.5 cursor-pointer"
                       >
-                        <span dir="ltr" className="font-extrabold">
+                        <span dir="ltr" className="text-amber-700 dark:text-amber-300">
                           {mod.num}
                         </span>
                         <span>{mod.titleFa}</span>
-                        <ArrowLeft className="w-3.5 h-3.5" />
+                        <ArrowLeft className="w-3 h-3 text-amber-600" />
                       </button>
                     ))}
                   </div>
@@ -574,14 +837,14 @@ export const CohortRoadmapLookupCard: React.FC<CohortRoadmapLookupCardProps> = (
             </div>
 
             {/* Modal Footer */}
-            <div className="p-3.5 sm:px-5 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-[#0f171e] shrink-0">
+            <div className="p-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-[#0f171e] flex items-center justify-between gap-2 shrink-0">
               <span className="text-[11px] text-slate-500 dark:text-slate-400">
                 چک‌لیست خودارزیابی شما به‌صورت خودکار در همین مرورگر ذخیره می‌شود.
               </span>
               <button
                 type="button"
                 onClick={() => setIsOutcomesModalOpen(false)}
-                className="px-4 py-1.5 rounded-xl bg-[#1f5163] hover:bg-[#163c4a] text-white text-xs font-extrabold cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[#1f5163] hover:bg-[#163c4a] text-white text-xs font-extrabold cursor-pointer transition-colors"
               >
                 بستن
               </button>
