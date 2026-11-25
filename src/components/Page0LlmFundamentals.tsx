@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Language } from '../types/cpmai';
 import {
   Sparkles,
@@ -59,7 +59,9 @@ import {
   PanelRightClose,
   PanelRightOpen,
   ClipboardCheck,
-  ScanSearch
+  ScanSearch,
+  Calendar,
+  Lock
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { SectionSpotlightZoom } from './common/SectionSpotlightZoom';
@@ -79,7 +81,13 @@ import { ClaudeEnterpriseConnectors } from './connectors/ClaudeEnterpriseConnect
 import { ObsidianBrainSkillsWorkshop } from './obsidian/ObsidianBrainSkillsWorkshop';
 import { DatabaseCrudWorkshop } from './DatabaseCrudWorkshop';
 import { CohortRoadmapLookupCard } from './CohortRoadmapLookupCard';
-import { CohortScheduleRecord } from '../utils/cohortScheduleEngine';
+import {
+  CohortScheduleRecord,
+  OrbitCohortHighlights,
+  computeOrbitCohortHighlights,
+  isModuleReviewedByCohort,
+  resolveEffectiveModuleCompletion
+} from '../utils/cohortScheduleEngine';
 import { AiQuotaState } from '../utils/aiQuotaEngine';
 import { UserProfile } from '../types/auth';
 import { ModuleExercisesView } from './ModuleExercisesView';
@@ -413,6 +421,8 @@ interface OrbitRoadmapHubProps {
   onToggleComplete: (id: string, e: React.MouseEvent) => void;
   widgetHidden?: boolean;
   onRestoreWidget?: () => void;
+  cohortHighlights?: OrbitCohortHighlights | null;
+  onOpenModule?: (moduleId: string) => void;
 }
 
 const ORBIT_W = 800;
@@ -438,7 +448,9 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
   onOpenSession,
   onToggleComplete,
   widgetHidden,
-  onRestoreWidget
+  onRestoreWidget,
+  cohortHighlights,
+  onOpenModule
 }) => {
   const count = sessions.length;
   const stepDeg = computeOrbitStepDeg(count);
@@ -641,6 +653,21 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
         <span dir="ltr" className={`font-mono font-bold text-emerald-600 tabular-nums ${size === 'compact' ? 'text-[9px]' : 'text-[10px]'}`}>
           {resolvedPct}%
         </span>
+        {cohortHighlights && size !== 'compact' && (
+          <span
+            className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold whitespace-nowrap max-w-[148px] truncate ${
+              cohortHighlights.isClassDayToday
+                ? 'bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-200 border border-amber-300/80'
+                : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
+            }`}
+          >
+            {cohortHighlights.isClassDayToday
+              ? lang === 'fa'
+                ? `امروز · ${cohortHighlights.weekdayFa}`
+                : 'Today is Class Day'
+              : cohortHighlights.weekdayFa}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -648,10 +675,20 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
   const renderCard = (sess: OrbitSessionNode) => {
     const isSessActive = activeSessionId === sess.id;
     const isCompleted = !!completedSessions[sess.id];
+    const sessionHighlight = cohortHighlights?.bySession?.[sess.id];
+    const isCohortCurrent = !!sessionHighlight?.isCurrentClassSession;
+    const isCohortFullyReviewed = !!sessionHighlight?.isFullyReviewedByAdmin;
+    const isCohortPartiallyReviewed = !!sessionHighlight?.isPartiallyReviewedByAdmin;
+    const isEffectiveDone = isCompleted || isCohortFullyReviewed;
+    const assignedNums = sessionHighlight?.nextModules?.map((m) => m.num).join('، ') || '';
+
     return (
       <div
         role="button"
         tabIndex={0}
+        data-testid={`orbit-node-${sess.id}`}
+        data-cohort-current={isCohortCurrent ? 'true' : 'false'}
+        data-cohort-reviewed={isCohortFullyReviewed ? 'true' : 'false'}
         onClick={() => {
           if (suppressClickRef.current) return;
           onOpenSession(sess.id);
@@ -664,23 +701,61 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
         }}
         dir="rtl"
         className={`rounded-2xl border text-right transition-[background,box-shadow,transform,border-color] duration-200 cursor-pointer flex flex-col select-none w-full overflow-hidden ${
-          compactSplit ? 'p-2 gap-1' : 'p-3 gap-2'
+          compactSplit ? 'p-2 gap-1' : 'p-3 gap-1.5'
         } ${
           isSessActive
             ? `bg-gradient-to-br from-purple-600 via-fuchsia-600 to-orange-500 text-white ${
                 compactSplit ? 'scale-[1.01] ring-2' : 'scale-105 ring-4'
-              } ring-purple-200 dark:ring-purple-900 border-transparent shadow-xl`
-            : isCompleted
-            ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-950 dark:text-emerald-100 border-emerald-400/60 shadow-xs hover:shadow-md'
+              } ${
+                isCohortCurrent
+                  ? 'ring-amber-300 dark:ring-amber-500/80 border-amber-200/70 shadow-xl'
+                  : isEffectiveDone
+                    ? 'ring-emerald-300 dark:ring-emerald-600/80 border-emerald-200/70 shadow-xl'
+                    : 'ring-purple-200 dark:ring-purple-900 border-transparent shadow-xl'
+              }`
+            : isCohortCurrent
+            ? 'bg-gradient-to-br from-amber-50 via-white to-orange-50/90 dark:from-amber-950/45 dark:via-[#23192b] dark:to-orange-950/35 text-amber-950 dark:text-amber-50 border-amber-400 dark:border-amber-500/80 ring-2 ring-amber-300/70 dark:ring-amber-500/40 shadow-md hover:shadow-lg'
+            : isEffectiveDone
+            ? 'bg-gradient-to-br from-emerald-50 via-emerald-50/90 to-teal-50/80 dark:from-emerald-950/55 dark:via-emerald-900/35 dark:to-teal-950/40 text-emerald-950 dark:text-emerald-50 border-emerald-500/80 dark:border-emerald-500/70 ring-1 ring-emerald-400/50 shadow-sm hover:shadow-md'
+            : isCohortPartiallyReviewed
+            ? 'bg-gradient-to-br from-emerald-50/50 via-white to-white dark:from-emerald-950/20 dark:via-[#201729] dark:to-[#201729] text-[#261a1d] dark:text-[#faedf3] border-emerald-300/80 dark:border-emerald-700/60 shadow-xs hover:shadow-md'
             : 'bg-white dark:bg-[#201729] text-[#261a1d] dark:text-[#faedf3] border-[#ecdcd8] dark:border-[#382645] shadow-xs hover:shadow-md hover:border-[#e0533c]/50'
         }`}
       >
+        {isCohortCurrent && cohortHighlights && (
+          <div className="flex items-center justify-between gap-1 min-w-0">
+            <span
+              data-testid="orbit-current-session-badge"
+              data-session-id={sess.id}
+              data-is-today={cohortHighlights.isClassDayToday ? 'true' : 'false'}
+              className={`inline-flex items-center gap-1 rounded-full font-black whitespace-nowrap shrink-0 ${
+                compactSplit ? 'px-1.5 py-0.5 text-[8px]' : 'px-2 py-0.5 text-[9.5px]'
+              } ${
+                isSessActive
+                  ? 'bg-amber-300 text-slate-950 shadow-xs'
+                  : 'bg-amber-500 text-white shadow-xs'
+              }`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse shrink-0" />
+              <span>{lang === 'fa' ? cohortHighlights.nodeBadgeFa : cohortHighlights.nodeBadgeEn}</span>
+            </span>
+            {assignedNums && !compactSplit && (
+              <span
+                className={`text-[9px] font-mono font-extrabold truncate ${
+                  isSessActive ? 'text-amber-100' : 'text-amber-800 dark:text-amber-300'
+                }`}
+              >
+                {lang === 'fa' ? `ماژول ${assignedNums}` : assignedNums}
+              </span>
+            )}
+          </div>
+        )}
         <div className="flex flex-wrap items-center justify-between gap-1 min-w-0">
           <span
             dir={lang === 'fa' ? 'rtl' : 'ltr'}
             className={`font-bold inline-flex items-center gap-0.5 whitespace-nowrap shrink-0 ${
               compactSplit ? 'text-[9px]' : 'text-[10px] gap-1'
-            } ${isSessActive ? 'text-white/90' : 'text-[#755e66] dark:text-[#ad99ab]'}`}
+            } ${isSessActive ? 'text-white/90' : isEffectiveDone ? 'text-emerald-800/80 dark:text-emerald-200/80' : 'text-[#755e66] dark:text-[#ad99ab]'}`}
           >
             {lang === 'fa' ? (
               <>
@@ -696,12 +771,12 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
             <button
               type="button"
               onClick={(e) => onToggleComplete(sess.id, e)}
-              title={isCompleted ? 'لغو وضعیت تکمیل (ویژه ادمین)' : 'ثبت به عنوان تکمیل‌شده / سبز کردن (ویژه ادمین)'}
+              title={isEffectiveDone ? 'لغو وضعیت تکمیل (ویژه ادمین)' : 'ثبت به عنوان تکمیل‌شده / سبز کردن (ویژه ادمین)'}
               className={`rounded-full font-black flex items-center gap-0.5 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 compactSplit ? 'px-1.5 py-0.5 text-[8.5px]' : 'px-2 py-0.5 text-[10px] gap-1'
               } ${
-                isCompleted
-                  ? 'bg-emerald-500 text-white shadow-2xs'
+                isEffectiveDone
+                  ? 'bg-emerald-600 text-white shadow-2xs'
                   : isSessActive
                   ? 'bg-white/25 text-white hover:bg-white/35'
                   : 'bg-black/[0.05] dark:bg-white/[0.08] text-[#755e66] dark:text-[#ad99ab] hover:bg-emerald-500/20 hover:text-emerald-700'
@@ -709,19 +784,55 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
             >
               <CheckCircle2 className={compactSplit ? 'w-2.5 h-2.5 shrink-0' : 'w-3 h-3 shrink-0'} />
               <span>
-                {isCompleted
+                {isCohortFullyReviewed
+                  ? lang === 'fa' ? 'طی شده' : 'Done'
+                  : isCompleted
                   ? lang === 'fa' ? 'تکمیل شد' : 'Done'
                   : compactSplit
                   ? lang === 'fa' ? 'تکمیل' : 'Done'
                   : lang === 'fa' ? '✓ سبز کردن' : '✓ Done'}
               </span>
             </button>
+          ) : isCohortFullyReviewed ? (
+            <span
+              data-testid="orbit-reviewed-session-badge"
+              data-locked-reviewed="true"
+              title={lang === 'fa' ? 'طی‌شده توسط کلاس (تأیید مدرس · قابل مرور)' : 'Completed in class (Instructor verified · Click to review)'}
+              className={`rounded-full font-black flex items-center gap-1 whitespace-nowrap shrink-0 shadow-2xs ${
+                compactSplit ? 'px-1.5 py-0.5 text-[8px]' : 'px-2 py-0.5 text-[9.5px]'
+              } ${
+                isSessActive
+                  ? 'bg-emerald-400 text-slate-950'
+                  : 'bg-emerald-600 text-white'
+              }`}
+            >
+              <CheckCircle2 className={compactSplit ? 'w-2.5 h-2.5 shrink-0' : 'w-3 h-3 shrink-0'} />
+              <span>{lang === 'fa' ? 'طی شده · مرور' : 'Done · Review'}</span>
+            </span>
           ) : isCompleted ? (
-            <span className={`rounded-full font-black flex items-center gap-1 bg-emerald-500 text-white whitespace-nowrap shrink-0 ${
+            <span className={`rounded-full font-black flex items-center gap-1 bg-emerald-600 text-white whitespace-nowrap shrink-0 ${
               compactSplit ? 'px-1.5 py-0.5 text-[8.5px]' : 'px-2 py-0.5 text-[10px]'
             }`}>
               <CheckCircle2 className={compactSplit ? 'w-2.5 h-2.5 shrink-0' : 'w-3 h-3 shrink-0'} />
               <span>{lang === 'fa' ? 'تکمیل‌شده' : 'Done'}</span>
+            </span>
+          ) : isCohortPartiallyReviewed && sessionHighlight ? (
+            <span
+              data-testid="orbit-partial-reviewed-badge"
+              className={`rounded-full font-extrabold flex items-center gap-1 whitespace-nowrap shrink-0 ${
+                compactSplit ? 'px-1.5 py-0.5 text-[8px]' : 'px-2 py-0.5 text-[9px]'
+              } ${
+                isSessActive
+                  ? 'bg-emerald-300/25 text-emerald-50 border border-emerald-200/40'
+                  : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200 border border-emerald-300/70'
+              }`}
+            >
+              <CheckCircle2 className={compactSplit ? 'w-2.5 h-2.5 shrink-0' : 'w-2.5 h-2.5 shrink-0'} />
+              <span>
+                {lang === 'fa'
+                  ? `${sessionHighlight.reviewedModulesCount.toLocaleString('fa-IR')} از ${sessionHighlight.totalSessionModulesCount.toLocaleString('fa-IR')} طی شده`
+                  : `${sessionHighlight.reviewedModulesCount}/${sessionHighlight.totalSessionModulesCount} Done`}
+              </span>
             </span>
           ) : null}
         </div>
@@ -737,6 +848,87 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
         compactSplit ? 'p-1.5 sm:p-2' : 'p-3 sm:p-4'
       }`}
     >
+      {/* Contextual Today / Current-Week Cohort Banner Directly Inside Orbit Hub */}
+      {cohortHighlights && !compactSplit && (
+        <div
+          data-testid="orbit-cohort-today-banner"
+          data-is-class-day={cohortHighlights.isClassDayToday ? 'true' : 'false'}
+          className={`mb-3 rounded-2xl border px-3.5 py-2.5 flex flex-col gap-2 transition-colors ${
+            cohortHighlights.isClassDayToday
+              ? 'bg-gradient-to-l from-amber-50 via-white to-emerald-50/70 dark:from-amber-950/35 dark:via-[#211728] dark:to-emerald-950/25 border-amber-300 dark:border-amber-700/70 shadow-xs'
+              : 'bg-white/90 dark:bg-[#22172b]/90 border-[#ecd7dc] dark:border-[#3d2a4c]'
+          }`}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 ${
+                  cohortHighlights.isClassDayToday
+                    ? 'bg-amber-500 text-white shadow-xs'
+                    : 'bg-[#1f5163]/12 text-[#1f5163] dark:bg-[#6fb3c6]/15 dark:text-[#8fd0e2]'
+                }`}
+              >
+                <Calendar className="w-3.5 h-3.5 shrink-0" />
+                <span>
+                  {cohortHighlights.isClassDayToday
+                    ? lang === 'fa'
+                      ? 'امروز روز کلاس شماست'
+                      : 'Today is Your Class'
+                    : cohortHighlights.weekdayFa}
+                </span>
+              </span>
+              <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                {lang === 'fa' ? cohortHighlights.bannerTitleFa : cohortHighlights.bannerTitleEn}
+              </span>
+            </div>
+
+            {cohortHighlights.primaryCurrentSessionId &&
+              activeSessionId !== cohortHighlights.primaryCurrentSessionId && (
+                <button
+                  type="button"
+                  data-testid="orbit-jump-to-today-session-btn"
+                  onClick={() => onSelectSession(cohortHighlights.primaryCurrentSessionId!)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-extrabold shadow-xs transition-colors cursor-pointer shrink-0"
+                >
+                  <Target className="w-3.5 h-3.5 shrink-0" />
+                  <span>
+                    {cohortHighlights.isClassDayToday
+                      ? lang === 'fa'
+                        ? 'تمرکز روی جلسه امروز'
+                        : "Focus Today's Session"
+                      : lang === 'fa'
+                        ? 'تمرکز روی جلسه هفته جاری'
+                        : "Focus This Week's Session"}
+                  </span>
+                </button>
+              )}
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[11px] font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+              {lang === 'fa' ? cohortHighlights.bannerSubtitleFa : cohortHighlights.bannerSubtitleEn}
+            </p>
+            {cohortHighlights.currentModules.length > 0 && onOpenModule && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {cohortHighlights.currentModules.map((mod) => (
+                  <button
+                    key={mod.id}
+                    type="button"
+                    data-testid={`orbit-banner-module-${mod.id}`}
+                    onClick={() => onOpenModule(mod.id)}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100/90 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-900/60 border border-amber-300/80 dark:border-amber-700/70 text-amber-950 dark:text-amber-100 text-[10.5px] font-extrabold transition-colors cursor-pointer"
+                  >
+                    <span className="font-mono">{mod.num}</span>
+                    <span className="max-w-[140px] truncate">{lang === 'fa' ? mod.titleFa : mod.titleEn}</span>
+                    <ArrowLeft className="w-3 h-3 shrink-0" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Desktop / tablet: rotatable radial pentagon orbit */}
       <div className="hidden md:block">
         <div
@@ -771,8 +963,20 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
             {sessions.map((sess, i) => {
               const { x, y } = computeOrbitNodePosition(i, count, rotation, CX, CY, ORBIT_R);
               const isActive = activeSessionId === sess.id;
-              const isDone = !!completedSessions[sess.id];
-              const stroke = isActive ? '#c026d3' : isDone ? '#10b981' : '#e5cfcb';
+              const isCohortFullyReviewed = !!cohortHighlights?.bySession?.[sess.id]?.isFullyReviewedByAdmin;
+              const isDone = !!completedSessions[sess.id] || isCohortFullyReviewed;
+              const isCohortCurrent = !!cohortHighlights?.bySession?.[sess.id]?.isCurrentClassSession;
+              const stroke = isActive
+                ? isCohortCurrent
+                  ? '#f59e0b'
+                  : isDone
+                    ? '#10b981'
+                    : '#c026d3'
+                : isCohortCurrent
+                  ? '#f59e0b'
+                  : isDone
+                    ? '#10b981'
+                    : '#e5cfcb';
               return (
                 <line
                   key={sess.id}
@@ -781,11 +985,11 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
                   x2={x}
                   y2={y}
                   stroke={stroke}
-                  strokeWidth={isActive ? 3 : 2}
+                  strokeWidth={isActive || isCohortCurrent ? 3 : isDone ? 2.5 : 2}
                   strokeLinecap="round"
-                  strokeDasharray={isActive ? '7 6' : isDone ? undefined : '3 6'}
+                  strokeDasharray={isActive || isCohortCurrent ? '7 6' : isDone ? undefined : '3 6'}
                 >
-                  {isActive && (
+                  {(isActive || isCohortCurrent) && (
                     <animate attributeName="stroke-dashoffset" from="26" to="0" dur="1s" repeatCount="indefinite" />
                   )}
                 </line>
@@ -1332,6 +1536,11 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     | 's5_vibecoding'
   >('s1_demo');
   const [selectedOrgCohort, setSelectedOrgCohort] = useState<CohortScheduleRecord | null>(null);
+  const orbitCohortHighlights = useMemo(
+    () => computeOrbitCohortHighlights(selectedOrgCohort),
+    [selectedOrgCohort]
+  );
+  const autoFocusedCohortSigRef = useRef<string>('');
   const [isSandboxOpen, setIsSandboxOpen] = useState<boolean>(false);
   const [paneViewMode, setPaneViewMode] = useState<'lesson' | 'exercise'>('lesson');
   const [moduleExDoneMap, setModuleExDoneMap] = useState<Record<string, boolean>>(() => {
@@ -1414,13 +1623,27 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
     }
   });
 
-  const isModuleCompleted = (moduleId: string, sessionId?: string) => {
-    if (completedModules[moduleId]) return true;
-    if (sessionId && completedSessions[sessionId]) return true;
-    return false;
-  };
+  const getModuleCompletionState = (moduleId: string, sessionId?: string) =>
+    resolveEffectiveModuleCompletion({
+      moduleId,
+      sessionId,
+      localCompletedModules: completedModules,
+      localCompletedSessions: completedSessions,
+      cohort: selectedOrgCohort,
+      isAdmin: !!isAdmin
+    });
+
+  const isModuleCompleted = (moduleId: string, sessionId?: string) =>
+    getModuleCompletionState(moduleId, sessionId).isCompleted;
+
+  const isModuleLockedByCohort = (moduleId: string) =>
+    isModuleReviewedByCohort(moduleId, selectedOrgCohort) && !isAdmin;
 
   const toggleModuleCompletion = (moduleId: string, sessionId: string) => {
+    // Admin-reviewed cohort modules stay locked green/done for students (reviewable, not uncheckable).
+    if (isModuleLockedByCohort(moduleId)) {
+      return;
+    }
     playTactileSound('success');
     const currentlyDone = isModuleCompleted(moduleId, sessionId);
     const nextVal = !currentlyDone;
@@ -1519,6 +1742,19 @@ export const Page0LlmFundamentals: React.FC<Page0Props> = ({
   const [isWidgetModulesOpen, setIsWidgetModulesOpen] = useState<boolean>(false);
   const [isOrbitHubView, setIsOrbitHubView] = useState<boolean>(true);
   const [hasLaunchedLesson, setHasLaunchedLesson] = useState<boolean>(false);
+
+  // Automatically spin the Circular Orbit Wheel to the student's current/today class session
+  // whenever their cohort schedule loads or is updated by the admin (without hijacking manual rotation).
+  useEffect(() => {
+    if (!orbitCohortHighlights?.primaryCurrentSessionId || hasLaunchedLesson) return;
+    const sig = `${orbitCohortHighlights.cohortId}:${orbitCohortHighlights.primaryCurrentSessionId}:${orbitCohortHighlights.currentModules
+      .map((m) => m.id)
+      .join(',')}`;
+    if (autoFocusedCohortSigRef.current === sig) return;
+    autoFocusedCohortSigRef.current = sig;
+    setActiveSessionId(orbitCohortHighlights.primaryCurrentSessionId);
+  }, [orbitCohortHighlights, hasLaunchedLesson]);
+
   const [isOrbitPaneCollapsed, setIsOrbitPaneCollapsed] = useState<boolean>(true);
   const [isSpotlightPickMode, setIsSpotlightPickMode] = useState<boolean>(false);
   const [showOrbitNavHint, setShowOrbitNavHint] = useState<boolean>(() => {
@@ -3037,6 +3273,8 @@ Tasks:
           onToggleComplete={toggleSessionCompletion}
           widgetHidden={isOrbitWidgetHidden}
           onRestoreWidget={() => setIsOrbitWidgetHidden(false)}
+          cohortHighlights={orbitCohortHighlights}
+          onOpenModule={(moduleId) => handleTabClick(moduleId as typeof activeTab, undefined, true)}
         />
 
         {/* Track-Adaptive Metaphor Strip for Active Session */}
@@ -3253,6 +3491,8 @@ Tasks:
                 onOpenSession={(id) => handleOpenSession(id, false)}
                 onToggleComplete={toggleSessionCompletion}
                 widgetHidden={false}
+                cohortHighlights={orbitCohortHighlights}
+                onOpenModule={(moduleId) => handleTabClick(moduleId as typeof activeTab, undefined, true)}
               />
             </div>
 
@@ -3336,13 +3576,21 @@ Tasks:
                                   {lang === 'fa' ? item.titleFa : item.titleEn}
                                 </span>
                                 {isCohortNext && !isSelected && (
-                                  <span className="px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-800 dark:text-amber-200 text-[9px] font-extrabold shrink-0 whitespace-nowrap">
-                                    کلاس بعدی
+                                  <span
+                                    data-testid="module-cohort-today-badge"
+                                    className="px-1.5 py-0.2 rounded-md bg-amber-500 text-white text-[9px] font-extrabold shrink-0 whitespace-nowrap shadow-2xs"
+                                  >
+                                    {orbitCohortHighlights?.isClassDayToday ? 'جلسه امروز' : 'جلسه هفته جاری'}
                                   </span>
                                 )}
                                 {!isCohortNext && isCohortReviewed && !isSelected && (
-                                  <span className="px-1.5 py-0.2 rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[9px] font-extrabold shrink-0 whitespace-nowrap">
-                                    مرور شده
+                                  <span
+                                    data-testid="module-cohort-reviewed-badge"
+                                    data-locked-reviewed={!isAdmin ? 'true' : 'false'}
+                                    className="px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[9px] font-extrabold shrink-0 whitespace-nowrap inline-flex items-center gap-0.5 shadow-2xs"
+                                  >
+                                    <CheckCircle2 className="w-2.5 h-2.5 shrink-0" />
+                                    <span>{lang === 'fa' ? 'طی شده · مرور' : 'Done · Review'}</span>
                                   </span>
                                 )}
                               </div>
@@ -3658,22 +3906,50 @@ Tasks:
                   </div>
                 )}
 
-                {!isPresentationMode && (
-                  <button
-                    type="button"
-                    onClick={() => toggleModuleCompletion(currentModuleMeta.id, currentModuleMeta.sessionId)}
-                    data-testid="toggle-module-complete-btn"
-                    className={`px-2 py-1 rounded-lg border text-[10.5px] font-bold flex items-center gap-1 transition-colors cursor-pointer whitespace-nowrap ${
-                      currentModuleDone
-                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs'
-                        : 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
-                    }`}
-                    title={lang === 'fa' ? 'ثبت پیشرفت این ماژول در مدار دایره‌ای' : 'Mark module complete'}
-                  >
-                    <CheckCircle2 className="w-3 h-3 shrink-0" />
-                    <span>{currentModuleDone ? (lang === 'fa' ? 'تکمیل' : 'Done') : (lang === 'fa' ? 'ثبت' : 'Done')}</span>
-                  </button>
-                )}
+                {!isPresentationMode && (() => {
+                  const lockedByCohort = isModuleLockedByCohort(currentModuleMeta.id);
+                  return (
+                    <button
+                      type="button"
+                      disabled={lockedByCohort}
+                      onClick={() => toggleModuleCompletion(currentModuleMeta.id, currentModuleMeta.sessionId)}
+                      data-testid="toggle-module-complete-btn"
+                      data-locked-by-cohort={lockedByCohort ? 'true' : 'false'}
+                      className={`px-2 py-1 rounded-lg border text-[10.5px] font-bold flex items-center gap-1 transition-colors whitespace-nowrap ${
+                        lockedByCohort
+                          ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs cursor-not-allowed opacity-95'
+                          : currentModuleDone
+                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs cursor-pointer'
+                            : 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 cursor-pointer'
+                      }`}
+                      title={
+                        lockedByCohort
+                          ? lang === 'fa'
+                            ? 'این ماژول توسط مدرس به عنوان طی‌شده ثبت شده و تیک آن قابل برداشتن نیست؛ هر زمان می‌توانید محتوای آن را مرور کنید.'
+                            : 'Marked completed by instructor (locked). You can review this module anytime.'
+                          : lang === 'fa'
+                            ? 'ثبت پیشرفت این ماژول در مدار دایره‌ای'
+                            : 'Mark module complete'
+                      }
+                    >
+                      <CheckCircle2 className="w-3 h-3 shrink-0" />
+                      {lockedByCohort && <Lock className="w-2.5 h-2.5 shrink-0 opacity-90" />}
+                      <span>
+                        {lockedByCohort
+                          ? lang === 'fa'
+                            ? 'طی شده (تأیید مدرس)'
+                            : 'Done (Verified)'
+                          : currentModuleDone
+                            ? lang === 'fa'
+                              ? 'تکمیل'
+                              : 'Done'
+                            : lang === 'fa'
+                              ? 'ثبت'
+                              : 'Done'}
+                      </span>
+                    </button>
+                  );
+                })()}
 
                 <button
                   type="button"

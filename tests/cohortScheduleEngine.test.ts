@@ -9,6 +9,9 @@ import {
   searchCohortsByQuery,
   resolveUniqueCohortByQuery,
   buildExpectedLearningSummary,
+  computeOrbitCohortHighlights,
+  isModuleReviewedByCohort,
+  resolveEffectiveModuleCompletion,
   getDefaultCohortSchedules,
   sanitizeModuleIds
 } from '../src/utils/cohortScheduleEngine';
@@ -144,3 +147,97 @@ test('buildExpectedLearningSummary aggregates outcomes strictly from valid admin
   assert.equal(summary.nextModules[0].id, 's5_database_crud');
   assert.ok(summary.totalExpectedOutcomes >= 6);
 });
+
+test('computeOrbitCohortHighlights identifies class day in Asia/Tehran and highlights admin-selected current sessions', () => {
+  const wedCohort = getDefaultCohortSchedules().find((c) => c.id === 'cohort_wed_damavand_tehran')!;
+  const cohortWithSchedule = {
+    ...wedCohort,
+    reviewedModules: ['s1_demo', 's1_drive', 's1_markdown', 's1_github'],
+    nextModules: ['notebooklm', 'skills_lab'],
+    instructorNote: 'لطفاً فایل قرارداد نمونه را همراه داشته باشید.'
+  };
+
+  // Wednesday in Asia/Tehran (2026-11-25T10:00:00Z -> Wed 13:30 Tehran)
+  const onClassDay = computeOrbitCohortHighlights(cohortWithSchedule, '2026-11-25T10:00:00Z')!;
+  assert.equal(onClassDay.isClassDayToday, true);
+  assert.equal(onClassDay.nodeBadgeFa, 'جلسه امروز');
+  assert.equal(onClassDay.primaryCurrentSessionId, 's_nlm');
+  assert.deepEqual(onClassDay.currentSessionIds, ['s_nlm', 's3']);
+  assert.equal(onClassDay.bySession.s1.isFullyReviewedByAdmin, true);
+  assert.equal(onClassDay.bySession.s_nlm.isCurrentClassSession, true);
+  assert.equal(onClassDay.bySession.s3.isCurrentClassSession, true);
+  assert.equal(onClassDay.bySession.s2.isCurrentClassSession, false);
+  assert.ok(onClassDay.bannerTitleFa.includes('امروز روز کلاس شماست'));
+
+  // Thursday in Asia/Tehran -> NOT Wednesday class day
+  const onOtherDay = computeOrbitCohortHighlights(cohortWithSchedule, '2026-11-26T10:00:00Z')!;
+  assert.equal(onOtherDay.isClassDayToday, false);
+  assert.equal(onOtherDay.nodeBadgeFa, 'جلسه هفته جاری');
+  assert.equal(onOtherDay.primaryCurrentSessionId, 's_nlm');
+  assert.ok(onOtherDay.bannerTitleFa.includes('چهارشنبه‌ها'));
+
+  // Fallback when admin marked reviewed modules only (no nextModules yet)
+  const reviewedOnly = computeOrbitCohortHighlights(
+    { ...wedCohort, reviewedModules: ['s1_demo', 's1_drive', 's1_markdown', 's1_github'], nextModules: [] },
+    '2026-11-25T10:00:00Z'
+  )!;
+  assert.equal(reviewedOnly.primaryCurrentSessionId, 's2');
+  assert.deepEqual(reviewedOnly.currentSessionIds, []);
+
+  // Null safety
+  assert.equal(computeOrbitCohortHighlights(null), null);
+});
+
+test('resolveEffectiveModuleCompletion marks admin-reviewed cohort modules as done and non-uncheckable for students', () => {
+  const cohort = {
+    ...getDefaultCohortSchedules()[0],
+    reviewedModules: ['s1_demo', 's1_markdown'],
+    nextModules: ['s1_github']
+  };
+
+  assert.equal(isModuleReviewedByCohort('s1_demo', cohort), true);
+  assert.equal(isModuleReviewedByCohort('s1_github', cohort), false);
+  assert.equal(isModuleReviewedByCohort('nonexistent_mod', cohort), false);
+
+  // Student viewing an admin-reviewed module: done=true, locked=true, canUserToggle=false
+  const studentReviewed = resolveEffectiveModuleCompletion({
+    moduleId: 's1_demo',
+    sessionId: 's1',
+    localCompletedModules: {},
+    localCompletedSessions: {},
+    cohort,
+    isAdmin: false
+  });
+  assert.equal(studentReviewed.isCompleted, true);
+  assert.equal(studentReviewed.isReviewedByCohort, true);
+  assert.equal(studentReviewed.isLockedByAdminCohort, true);
+  assert.equal(studentReviewed.canUserToggle, false);
+
+  // Student viewing a non-reviewed module: done=false, locked=false, canUserToggle=true
+  const studentUnreviewed = resolveEffectiveModuleCompletion({
+    moduleId: 's1_github',
+    sessionId: 's1',
+    localCompletedModules: {},
+    localCompletedSessions: {},
+    cohort,
+    isAdmin: false
+  });
+  assert.equal(studentUnreviewed.isCompleted, false);
+  assert.equal(studentUnreviewed.isLockedByAdminCohort, false);
+  assert.equal(studentUnreviewed.canUserToggle, true);
+
+  // Admin retains toggle ability even on cohort-reviewed modules
+  const adminReviewed = resolveEffectiveModuleCompletion({
+    moduleId: 's1_demo',
+    sessionId: 's1',
+    localCompletedModules: {},
+    localCompletedSessions: {},
+    cohort,
+    isAdmin: true
+  });
+  assert.equal(adminReviewed.isCompleted, true);
+  assert.equal(adminReviewed.isLockedByAdminCohort, false);
+  assert.equal(adminReviewed.canUserToggle, true);
+});
+
+

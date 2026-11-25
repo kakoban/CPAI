@@ -504,3 +504,197 @@ export function buildExpectedLearningSummary(
     totalExpectedOutcomes
   };
 }
+
+export interface OrbitCohortSessionHighlight {
+  sessionId: OrbitSessionId;
+  nextModules: OrbitModuleCatalogItem[];
+  reviewedModulesCount: number;
+  totalSessionModulesCount: number;
+  isCurrentClassSession: boolean;
+  isFullyReviewedByAdmin: boolean;
+  isPartiallyReviewedByAdmin: boolean;
+}
+
+export interface OrbitCohortHighlights {
+  cohortId: string;
+  cohortTitle: string;
+  weekdayIndex: number;
+  weekdayFa: string;
+  todayWeekdayIndex: number | null;
+  todayWeekdayFa: string;
+  isClassDayToday: boolean;
+  primaryCurrentSessionId: OrbitSessionId | null;
+  currentSessionIds: OrbitSessionId[];
+  bySession: Record<OrbitSessionId, OrbitCohortSessionHighlight>;
+  currentModules: OrbitModuleCatalogItem[];
+  nodeBadgeFa: string;
+  nodeBadgeEn: string;
+  bannerTitleFa: string;
+  bannerTitleEn: string;
+  bannerSubtitleFa: string;
+  bannerSubtitleEn: string;
+  instructorNote: string;
+}
+
+const ORDERED_ORBIT_SESSION_IDS: OrbitSessionId[] = ['s1', 's2', 's_nlm', 's3', 's4', 's5'];
+
+/**
+ * Pure helper mapping a student's weekday cohort + admin-assigned reviewed/next modules
+ * onto the 6 Circular Orbit sessions, aware of Asia/Tehran weekday to distinguish
+ * "Today's Class Session" vs "This Week's Current Session".
+ */
+export function computeOrbitCohortHighlights(
+  cohort: CohortScheduleRecord | null | undefined,
+  nowDate?: string | Date | null
+): OrbitCohortHighlights | null {
+  if (!cohort) return null;
+
+  const todayWeekdayIndex = getTehranWeekdayIndex(nowDate ?? new Date());
+  const todayWeekdayFa =
+    todayWeekdayIndex !== null ? PERSIAN_WEEKDAY_NAMES[todayWeekdayIndex] || 'امروز' : 'امروز';
+  const isClassDayToday =
+    todayWeekdayIndex !== null && Number(cohort.weekdayIndex) === todayWeekdayIndex;
+
+  const cleanReviewedSet = new Set(sanitizeModuleIds(cohort.reviewedModules));
+  const cleanNextIds = sanitizeModuleIds(cohort.nextModules);
+  const cleanNextSet = new Set(cleanNextIds);
+
+  const bySession = {} as Record<OrbitSessionId, OrbitCohortSessionHighlight>;
+  const currentSessionIds: OrbitSessionId[] = [];
+  const currentModules: OrbitModuleCatalogItem[] = [];
+
+  for (const sessionId of ORDERED_ORBIT_SESSION_IDS) {
+    const sessionCatalogMods = ORBIT_MODULES_CATALOG.filter((m) => m.sessionId === sessionId);
+    const nextModsInSession = sessionCatalogMods.filter((m) => cleanNextSet.has(m.id));
+    const reviewedCount = sessionCatalogMods.filter((m) => cleanReviewedSet.has(m.id)).length;
+    const totalCount = sessionCatalogMods.length;
+    const isCurrentClassSession = nextModsInSession.length > 0;
+
+    if (isCurrentClassSession) {
+      currentSessionIds.push(sessionId);
+      currentModules.push(...nextModsInSession);
+    }
+
+    bySession[sessionId] = {
+      sessionId,
+      nextModules: nextModsInSession,
+      reviewedModulesCount: reviewedCount,
+      totalSessionModulesCount: totalCount,
+      isCurrentClassSession,
+      isFullyReviewedByAdmin: totalCount > 0 && reviewedCount === totalCount,
+      isPartiallyReviewedByAdmin: reviewedCount > 0 && reviewedCount < totalCount
+    };
+  }
+
+  // Primary focus session: first admin-assigned current/next-week session;
+  // fallback if admin only marked reviewed modules so far: first session not fully reviewed yet.
+  let primaryCurrentSessionId: OrbitSessionId | null = currentSessionIds[0] ?? null;
+  if (!primaryCurrentSessionId && cleanReviewedSet.size > 0) {
+    const firstPending = ORDERED_ORBIT_SESSION_IDS.find(
+      (sid) => !bySession[sid].isFullyReviewedByAdmin
+    );
+    primaryCurrentSessionId = firstPending ?? ORDERED_ORBIT_SESSION_IDS[ORDERED_ORBIT_SESSION_IDS.length - 1];
+  }
+
+  const moduleSummaryFa = currentModules.map((m) => `${m.num} (${m.titleFa})`).join('، ');
+  const moduleSummaryEn = currentModules.map((m) => `${m.num} (${m.titleEn})`).join(', ');
+
+  const nodeBadgeFa = isClassDayToday ? 'جلسه امروز' : 'جلسه هفته جاری';
+  const nodeBadgeEn = isClassDayToday ? "Today's Class" : "This Week's Class";
+
+  const bannerTitleFa = isClassDayToday
+    ? `امروز روز کلاس شماست (${cohort.weekdayFa} · ${cohort.title})`
+    : `برنامه کلاس شما: ${cohort.weekdayFa} · ${cohort.title}`;
+
+  const bannerTitleEn = isClassDayToday
+    ? `Today is your class day (${cohort.title})`
+    : `Your class schedule: ${cohort.title}`;
+
+  const bannerSubtitleFa =
+    currentModules.length > 0
+      ? isClassDayToday
+        ? `جلسه امروز شما روی گردونه مشخص شده است: ${moduleSummaryFa}`
+        : `جلسه جاری این هفته روی گردونه مشخص شده است: ${moduleSummaryFa}`
+      : isClassDayToday
+        ? 'امروز روز کلاس شماست؛ مدرس هنوز ماژول جلسه امروز را انتخاب نکرده است.'
+        : 'به محض انتخاب ماژول هفته جاری توسط مدرس، جلسه هدف روی همین گردونه روشن می‌شود.';
+
+  const bannerSubtitleEn =
+    currentModules.length > 0
+      ? isClassDayToday
+        ? `Today's session is highlighted on the orbit: ${moduleSummaryEn}`
+        : `This week's session is highlighted on the orbit: ${moduleSummaryEn}`
+      : 'Waiting for instructor to assign the upcoming module for your cohort.';
+
+  return {
+    cohortId: cohort.id,
+    cohortTitle: cohort.title,
+    weekdayIndex: cohort.weekdayIndex,
+    weekdayFa: cohort.weekdayFa,
+    todayWeekdayIndex,
+    todayWeekdayFa,
+    isClassDayToday,
+    primaryCurrentSessionId,
+    currentSessionIds,
+    bySession,
+    currentModules,
+    nodeBadgeFa,
+    nodeBadgeEn,
+    bannerTitleFa,
+    bannerTitleEn,
+    bannerSubtitleFa,
+    bannerSubtitleEn,
+    instructorNote: cohort.instructorNote || ''
+  };
+}
+
+/**
+ * Returns true if the student's active cohort has this module marked as reviewed/completed by the admin.
+ */
+export function isModuleReviewedByCohort(
+  moduleId: string,
+  cohort: CohortScheduleRecord | null | undefined
+): boolean {
+  if (!moduleId || !cohort || !Array.isArray(cohort.reviewedModules)) return false;
+  if (!VALID_ORBIT_MODULE_IDS.has(moduleId)) return false;
+  return cohort.reviewedModules.includes(moduleId);
+}
+
+export interface EffectiveModuleCompletionState {
+  isCompleted: boolean;
+  isReviewedByCohort: boolean;
+  isLockedByAdminCohort: boolean;
+  canUserToggle: boolean;
+}
+
+/**
+ * Pure completion resolver:
+ * - Admin-reviewed cohort modules automatically appear completed (Done & Green) for the student.
+ * - Non-admin students cannot uncheck/remove the completion checkmark on admin-reviewed modules,
+ *   while remaining completely free to open and review the module content.
+ */
+export function resolveEffectiveModuleCompletion(params: {
+  moduleId: string;
+  sessionId?: string;
+  localCompletedModules: Record<string, boolean>;
+  localCompletedSessions: Record<string, boolean>;
+  cohort: CohortScheduleRecord | null | undefined;
+  isAdmin: boolean;
+}): EffectiveModuleCompletionState {
+  const { moduleId, sessionId, localCompletedModules, localCompletedSessions, cohort, isAdmin } = params;
+  const isReviewedByCohort = isModuleReviewedByCohort(moduleId, cohort);
+  const isLocallyDone = Boolean(
+    localCompletedModules[moduleId] || (sessionId && localCompletedSessions[sessionId])
+  );
+  const isCompleted = isReviewedByCohort || isLocallyDone;
+  const isLockedByAdminCohort = isReviewedByCohort && !isAdmin;
+
+  return {
+    isCompleted,
+    isReviewedByCohort,
+    isLockedByAdminCohort,
+    canUserToggle: !isLockedByAdminCohort
+  };
+}
+
+
