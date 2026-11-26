@@ -1124,7 +1124,7 @@ export default function App() {
     <div
       className={`${
         isViewportScrollLocked ? 'h-[100dvh] overflow-hidden' : 'min-h-[100dvh]'
-      } bg-transparent text-slate-900 dark:text-slate-100 transition-colors flex flex-col selection:bg-[#1f5163]/20 selection:text-[#1f5163] dark:selection:bg-[#6fb3c6]/20 dark:selection:text-[#6fb3c6]`}
+      } cpai-redesign-app bg-transparent text-slate-900 dark:text-slate-100 transition-colors flex flex-col selection:bg-[#1f5163]/20 selection:text-[#1f5163] dark:selection:bg-[#6fb3c6]/20 dark:selection:text-[#6fb3c6]`}
     >
       {/* OWJ Content Protection Shield (Anti-Copy, Anti-Print, Anti-Snipping with Smart Prompt Whitelist) */}
       <ContentProtectionShield lang={lang} isAdmin={isUserAdmin(currentUser)} />
@@ -1240,7 +1240,7 @@ export default function App() {
             </div>
           </div>
         ) : (
-        <div className="w-full max-w-[1750px] mx-auto px-2 sm:px-4 h-15 flex items-center justify-between gap-1.5 sm:gap-2 flex-nowrap overflow-x-auto">
+        <div className="cpai-app-toolbar w-full max-w-[1750px] mx-auto px-3 sm:px-5 flex items-center justify-between gap-3">
           {/* Section 1: Hamburger Menu + Brand */}
           <div className="flex items-center gap-1.5 shrink-0">
             {/* Sidebar Toggle Button */}
@@ -1324,8 +1324,10 @@ export default function App() {
             />
           </div>
 
-          {/* Section 3: Tools & Utilities */}
-          <div className="flex items-center gap-1 shrink-0">
+          {/* Section 3: Tools & Utilities — secondary actions remain available */}
+          <details className="cpai-app-tools">
+            <summary>{lang === 'fa' ? 'ابزارها و حساب کاربری' : 'Tools & account'} <ChevronDown className="w-4 h-4" /></summary>
+          <div className="cpai-app-tools-panel">
             {/* OWJ Markdown Studio Pro Trigger Button */}
             <button
               type="button"
@@ -1459,6 +1461,7 @@ export default function App() {
               {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
             </button>
           </div>
+          </details>
         </div>
         )}
       </header>
@@ -1469,6 +1472,21 @@ export default function App() {
           isViewportScrollLocked ? 'min-h-0 overflow-hidden ' : ''
         }${isPresentationMode ? 'max-w-none' : 'max-w-[1750px]'}`}
       >
+        {!isPresentationMode && !isSidebarOpen && (
+          <nav className="cpai-app-navigation" aria-label={lang === 'fa' ? 'ناوبری اصلی' : 'Main navigation'}>
+            <div className="cpai-app-nav-brand">
+              <img src={OWJ_LOGO} alt="OWJ" onError={(e) => { e.currentTarget.src = OWJ_LOGO_FALLBACK; }} />
+              <strong>{lang === 'fa' ? 'آکادمی مدیریت اوج' : 'OWJ Academy'}</strong>
+            </div>
+            <button type="button" onClick={() => navigateToPage('landing')}><Home size={18}/>{lang === 'fa' ? 'خانه' : 'Home'}</button>
+            <button type="button" aria-current={page === 0 ? 'page' : undefined} onClick={() => navigateToPage(0)}><BookOpen size={18}/>{lang === 'fa' ? 'مسیر یادگیری' : 'Learning path'}</button>
+            <button type="button" onClick={toggleSidebar}><Layers size={18}/>{lang === 'fa' ? 'سرفصل‌ها و کتاب کار' : 'Curriculum & workbook'}</button>
+            <button type="button" aria-current={page === 'quiz' ? 'page' : undefined} onClick={() => navigateToPage('quiz')}><GraduationCap size={18}/>{lang === 'fa' ? 'آزمون سطح‌سنجی' : 'Placement quiz'}</button>
+            <button type="button" aria-pressed={isTutorOpen} onClick={toggleTutor}><Bot size={18}/>{lang === 'fa' ? 'مربی هوشمند AI' : 'AI tutor'}</button>
+            {isUserAdmin(currentUser) && <button type="button" onClick={() => setIsAdminModalOpen(true)}><ShieldCheck size={18}/>{lang === 'fa' ? 'مدیریت آموزش' : 'Administration'}</button>}
+            <button type="button" onClick={() => setIsAuthModalOpen(true)}><span className="cpai-app-nav-account">{currentUser?.displayName?.charAt(0) || '•'}</span>{lang === 'fa' ? 'حساب کاربری' : 'Account'}</button>
+          </nav>
+        )}
         {/* Responsive Workspace Sidebar */}
         {!isPresentationMode && (
           <WorkspaceSidebar
@@ -1486,7 +1504,7 @@ export default function App() {
         )}
 
         {/* Main Content Area */}
-        <main className={`flex-1 w-full mx-auto min-w-0 transition-all duration-300 ${
+        <main className={`cpai-app-main flex-1 w-full mx-auto min-w-0 transition-all duration-300 ${
           isViewportScrollLocked ? 'min-h-0 overflow-hidden flex flex-col ' : ''
         }${
           typeof page === 'number' && page >= 1 && page <= 21 ? 'cpmai-workbook-stage ' : ''
