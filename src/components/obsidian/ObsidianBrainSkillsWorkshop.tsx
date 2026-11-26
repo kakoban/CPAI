@@ -335,6 +335,9 @@ export const ObsidianBrainSkillsWorkshop: React.FC<ObsidianBrainSkillsWorkshopPr
   );
   const subTab = mode !== 'all' ? mode : internalSubTab;
   const [activeStepIndex, setActiveStepIndex] = useState<number>(0);
+  const [skillsNavOpen, setSkillsNavOpen] = useState(false);
+  const skillsNavId = React.useId();
+  const skillsHeadingRef = useRef<HTMLHeadingElement>(null);
   const [activeObsidianStepIdx, setActiveObsidianStepIdx] = useState<number>(0);
   const [activeMcpStepIdx, setActiveMcpStepIdx] = useState<number>(0);
   const [selectedSkillId, setSelectedSkillId] = useState<string>(READY_SKILLS[0].id);
@@ -438,52 +441,41 @@ ${customOutputFormat.trim()}
 
   const topSectionRef = useRef<HTMLDivElement>(null);
 
-  const render12StepKeycaps = (scrollToTopOnSelect: boolean) => (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 text-xs">
-      {CURRICULUM_MODULES.map((mod, idx) => {
-        const isCurrent = activeStepIndex === idx;
-        return (
-          <button
-            key={mod.stepNumber}
-            type="button"
-            onClick={() => {
-              playTactileSound('thock');
-              setActiveStepIndex(idx);
-              if (scrollToTopOnSelect) {
-                setTimeout(() => {
-                  topSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 40);
-              }
-            }}
-            className={`p-2.5 rounded-xl border text-right transition-all duration-150 cursor-pointer flex items-center gap-2 select-none active:scale-[0.98] ${
-              isCurrent
-                ? 'bg-gradient-to-r from-[#e0533c] to-[#c026d3] text-white border-transparent shadow-md'
-                : 'bg-white dark:bg-[#201729] text-[#261a1d] dark:text-[#faedf3] border-[#ecdcd8] dark:border-[#382645] hover:border-[#e0533c]/50 hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 shadow-2xs'
-            }`}
-          >
-            <span
-              className={`w-6 h-6 rounded-lg font-mono text-[10px] font-black flex items-center justify-center shrink-0 ${
-                isCurrent
-                  ? 'bg-white/20 text-white'
-                  : 'bg-black/[0.05] dark:bg-white/[0.08] text-[#e0533c] dark:text-[#fb7185]'
-              }`}
-            >
-              {String(idx + 1).padStart(2, '0')}
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-extrabold leading-tight truncate">{mod.titleFa}</div>
-              <div
-                className={`text-[9px] truncate ${
-                  isCurrent ? 'text-white/80' : 'text-[#755e66] dark:text-[#ad99ab]'
-                }`}
-              >
-                {mod.badgeFa}
-              </div>
-            </div>
-          </button>
-        );
-      })}
-    </div>
+  const selectSkillsStep = (index: number) => {
+    setActiveStepIndex(index);
+    setSkillsNavOpen(false);
+    requestAnimationFrame(() => {
+      skillsHeadingRef.current?.focus({ preventScroll: true });
+      skillsHeadingRef.current?.scrollIntoView({ block: 'nearest' });
+    });
+  };
+
+  const renderSkillsNavigation = () => (
+    <nav className="cpai-skills-nav" aria-label={lang === 'fa' ? 'محتوای ماژول' : 'Module contents'}>
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-base font-semibold">{lang === 'fa' ? 'محتوای ماژول' : 'Module contents'}</h3>
+        <button type="button" className="cpai-skills-action cpai-skills-nav-toggle"
+          aria-expanded={skillsNavOpen} aria-controls={skillsNavId}
+          onClick={() => setSkillsNavOpen(open => !open)}>
+          {lang === 'fa' ? 'فهرست گام‌ها' : 'Steps'} <ChevronDown className="w-4 h-4" />
+        </button>
+      </div>
+      <p className="mt-2 text-sm text-[var(--cpai-muted)]">
+        {lang === 'fa' ? 'گام' : 'Step'} {activeStepIndex + 1} {lang === 'fa' ? 'از' : 'of'} {CURRICULUM_MODULES.length}
+      </p>
+      <ol id={skillsNavId} className="cpai-skills-nav-list" data-expanded={skillsNavOpen}>
+        {CURRICULUM_MODULES.map((mod, idx) => (
+          <li key={mod.stepNumber}>
+            <button type="button" className="cpai-skills-step"
+              aria-current={activeStepIndex === idx ? 'step' : undefined}
+              onClick={() => { playTactileSound('thock'); selectSkillsStep(idx); }}>
+              <span className="shrink-0 tabular-nums text-[var(--cpai-muted)]" dir="ltr">{String(idx + 1).padStart(2, '0')}</span>
+              <span>{lang === 'fa' ? mod.titleFa : mod.titleEn}</span>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </nav>
   );
 
   const currentObsidianStep =
@@ -724,124 +716,45 @@ ${customOutputFormat.trim()}
       {/* SUB-TAB 1: COMPREHENSIVE AI SKILLS MASTERCLASS (INTERACTIVE LAB)      */}
       {/* ===================================================================== */}
       {subTab === 'agent_skills' && (
-        <div className="space-y-6 animate-fadeIn">
-          {/* 1. 12-STEP INTERACTIVE CURRICULUM ROADMAP (ALL-VISIBLE GRID, NO NESTED SCROLLBAR) */}
-          <div className="p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.07] dark:border-white/[0.09] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <div className="rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 sm:p-6 space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20 flex items-center gap-1">
-                      <BookOpen className="w-3.5 h-3.5" />
-                      <span>نقشه راه ۱۲ گام استاندارد جهانی AI Skills</span>
-                    </span>
-                    <span className="text-[11px] font-semibold text-[#5d6b73] dark:text-[#9aa8b0]">
-                      قابل اجرا در Claude · ChatGPT · Codex · Gemini
-                    </span>
-                  </div>
-                  <h3 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                    {lang === 'fa'
-                      ? 'مسیر یادگیری گام‌به‌گام ساخت AI Skills از صفر تا صد (روی هر گام کلیک کنید):'
-                      : 'Step-by-Step Learning Path: Building AI Skills from Scratch:'}
-                  </h3>
-                </div>
+        <div className="cpai-skills space-y-4" dir={lang === 'fa' ? 'rtl' : 'ltr'}>
+          <div className="cpai-skills-shell">
+            {renderSkillsNavigation()}
+            <article className="cpai-skills-reading space-y-6" dir="rtl">
+              <div className="text-sm text-[var(--cpai-muted)]">
+                {currentModule.stepNumber} / {currentModule.badgeFa}
               </div>
-
-              {/* Clean 4-Column All-Visible Tactile Keycap Grid of 12 Steps */}
-              {render12StepKeycaps(false)}
-
-              {/* Active Step Slide-Ready Multi-Column Presentation Card (No Nested Wall-of-Text!) */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-purple-500/[0.07] via-white to-indigo-500/[0.05] dark:from-purple-950/30 dark:via-[#141c23] dark:to-indigo-950/25 border-2 border-purple-500/35 space-y-5">
-                <div className="flex items-center justify-between gap-3 flex-wrap pb-3 border-b border-purple-500/20">
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <span className="px-3.5 py-1 rounded-xl bg-purple-600 text-white text-xs sm:text-sm font-black">
-                      {currentModule.stepNumber} — {currentModule.badgeFa}
-                    </span>
-                    <span className="text-xs sm:text-sm font-mono font-bold text-[#334155] dark:text-[#cbd5e1]" dir="ltr">
-                      {currentModule.titleEn}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        playTactileSound('switch');
-                        setActiveStepIndex((prev) => (prev > 0 ? prev - 1 : CURRICULUM_MODULES.length - 1));
-                      }}
-                      className="px-3 py-1.5 rounded-xl text-xs font-black bg-white dark:bg-[#1d262d] text-[#0f172a] dark:text-white border border-black/15 border-b-[3px] border-b-black/30 active:translate-y-[2px] active:border-b cursor-pointer"
-                    >
-                      → گام قبلی
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        playTactileSound('switch');
-                        setActiveStepIndex((prev) => (prev < CURRICULUM_MODULES.length - 1 ? prev + 1 : 0));
-                      }}
-                      className="px-3 py-1.5 rounded-xl text-xs font-black bg-purple-600 text-white border border-purple-800 border-b-[3px] border-b-purple-950 active:translate-y-[2px] active:border-b cursor-pointer"
-                    >
-                      گام بعدی ←
-                    </button>
-                  </div>
-                </div>
-
-                <h4 className="text-lg sm:text-2xl font-black text-[#0f172a] dark:text-white leading-snug">
-                  {currentModule.titleFa}
-                </h4>
-
-                {/* Multi-Column Scannable Slide Points */}
-                {(() => {
-                  const pts = currentModule.deepDiveFa
-                    .split('\n\n')
-                    .map((s) => s.trim())
-                    .filter(Boolean);
-                  return (
-                    <div
-                      className={`grid grid-cols-1 ${
-                        pts.length === 2 ? 'lg:grid-cols-2' : pts.length >= 3 ? 'md:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-1'
-                      } gap-4`}
-                    >
-                      {pts.map((pt, pIdx) => {
-                        const { heading, body } = splitPointTitleAndBody(pt);
-                        return (
-                          <div
-                            key={pIdx}
-                            className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#11171d] border border-purple-500/25 shadow-2xs space-y-2.5 flex flex-col justify-between"
-                          >
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2.5">
-                                <span className="w-7 h-7 rounded-lg bg-purple-600 text-white font-mono text-xs font-black flex items-center justify-center shrink-0">
-                                  {pIdx + 1}
-                                </span>
-                                <span className="text-sm sm:text-base font-black text-purple-800 dark:text-purple-300 leading-snug">
-                                  {heading || `نکته کلیدی ${pIdx + 1}`}
-                                </span>
-                              </div>
-                              <p className="text-sm sm:text-[15px] font-semibold text-[#0f172a] dark:text-[#f1f5f9] leading-relaxed">
-                                {body}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })()}
-
-                <div className="p-4 rounded-2xl bg-emerald-500/15 border-2 border-emerald-500/35 flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
-                  <div className="text-sm sm:text-base font-bold text-[#0f172a] dark:text-emerald-100 leading-relaxed">
-                    <strong className="font-black text-emerald-800 dark:text-emerald-300">جمع‌بندی طلایی این گام: </strong>
-                    {currentModule.keyTakeawayFa}
-                  </div>
-                </div>
-              </div>
-            </div>
+              <header className="space-y-2 pb-5 border-b border-[var(--cpai-border)]">
+                <h2 ref={skillsHeadingRef} tabIndex={-1}>{currentModule.titleFa}</h2>
+                <div className="text-base text-[var(--cpai-muted)]" dir="ltr" lang="en">{currentModule.titleEn}</div>
+              </header>
+              {currentModule.deepDiveFa.split('\n\n').map(s => s.trim()).filter(Boolean).map((pt, pIdx) => {
+                const { heading, body } = splitPointTitleAndBody(pt);
+                return (
+                  <section key={pIdx} className="space-y-2">
+                    <h3>{heading || `نکته کلیدی ${pIdx + 1}`}</h3>
+                    <p>{body}</p>
+                  </section>
+                );
+              })}
+              <aside className="cpai-skills-takeaway space-y-2">
+                <h3>جمع‌بندی طلایی این گام</h3>
+                <p>{currentModule.keyTakeawayFa}</p>
+              </aside>
+              <footer className="flex flex-wrap items-center justify-between gap-3 pt-5 border-t border-[var(--cpai-border)]">
+                <button type="button" className="cpai-skills-action"
+                  onClick={() => { playTactileSound('switch'); selectSkillsStep((activeStepIndex + CURRICULUM_MODULES.length - 1) % CURRICULUM_MODULES.length); }}>
+                  → گام قبلی
+                </button>
+                <button type="button" className="cpai-skills-action cpai-skills-action-primary"
+                  onClick={() => { playTactileSound('switch'); selectSkillsStep((activeStepIndex + 1) % CURRICULUM_MODULES.length); }}>
+                  گام بعدی ←
+                </button>
+              </footer>
+            </article>
           </div>
 
           {/* 2. THE GOLDEN TRIANGLE: PROMPT vs. SKILL vs. MCP (Collapsible Accordion) */}
-          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all">
+          <details className="group cpai-skills-extra overflow-hidden">
             <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
               <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185]">
                 <Layers className="w-5 h-5 shrink-0" />
@@ -955,7 +868,7 @@ ${customOutputFormat.trim()}
           </details>
 
           {/* 3. ANATOMY OF SKILL.MD & 5-STEP ZERO-CODE CREATION GUIDE (Collapsible Accordion) */}
-          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all">
+          <details className="group cpai-skills-extra overflow-hidden">
             <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
               <div className="flex items-center gap-2 text-[#e0533c] dark:text-[#fb7185]">
                 <Code2 className="w-5 h-5 shrink-0" />
@@ -1104,6 +1017,8 @@ ${customOutputFormat.trim()}
           </details>
 
           {/* 4. HANDS-ON SKILL TESTING LAB: 3 READY SKILLS + TEST 1 vs TEST 2 */}
+          <details className="cpai-skills-extra">
+            <summary>{lang === 'fa' ? 'آزمایشگاه عملی و سندباکس — ۳ پکیج آماده SKILL.md' : 'Practice lab and sandbox — 3 ready SKILL.md packages'}</summary>
           <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-purple-500/[0.04] via-blue-500/[0.03] to-emerald-500/[0.04] border border-purple-500/25 space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
               <div className="space-y-1">
@@ -1341,9 +1256,10 @@ ${customOutputFormat.trim()}
               </div>
             </div>
           </div>
+          </details>
 
           {/* 5. INTERACTIVE LIVE SKILL.MD BUILDER (Collapsible Accordion) */}
-          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all">
+          <details className="group cpai-skills-extra overflow-hidden">
             <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
               <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185]">
                 <Wrench className="w-5 h-5 shrink-0" />
@@ -1489,7 +1405,7 @@ ${customOutputFormat.trim()}
           </details>
 
           {/* 6. WHEN NOT TO BUILD A SKILL & SECURITY RED LINES (Collapsible Accordion) */}
-          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all">
+          <details className="group cpai-skills-extra overflow-hidden">
             <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
               <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
                 <ShieldAlert className="w-5 h-5 shrink-0" />
