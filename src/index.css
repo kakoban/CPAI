@@ -394,3 +394,95 @@
 :root[data-presentation="true"] .presentation-main .cpmai-workbook-stage h3 {
   font-size: clamp(1.02rem, 0.96rem + 0.32vw, 1.28rem);
 }
+
+/* CPAI focused learning pilot — scoped; legacy theme remains unchanged. */
+.cpai-skills {
+  --cpai-primary: #007D86; --cpai-primary-strong: #07515A;
+  --cpai-bg: #F8F9FA; --cpai-surface: #FFFFFF;
+  --cpai-text: #242B30; --cpai-muted: #646D73; --cpai-border: #DCE2E4;
+  --cpai-success-bg: #EAF5EE; --cpai-success-text: #245B3B;
+  --cpai-focus: #07515A; --cpai-active: #E6F3F3;
+  color: var(--cpai-text); font-family: var(--font-fa);
+}
+.dark .cpai-skills, [data-theme="dark"] .cpai-skills {
+  --cpai-primary: #63D0D4; --cpai-primary-strong: #A0E5E7;
+  --cpai-bg: #151B1E; --cpai-surface: #20282C;
+  --cpai-text: #F1F4F5; --cpai-muted: #B6C2C7; --cpai-border: #3C494F;
+  --cpai-success-bg: #203B30; --cpai-success-text: #A7E3BD;
+  --cpai-focus: #A0E5E7; --cpai-active: #173C40;
+}
+.cpai-skills-shell { display: grid; grid-template-columns: minmax(0, 1fr); background: var(--cpai-surface); border: 1px solid var(--cpai-border); border-radius: 12px; }
+.cpai-skills-nav { min-width: 0; padding: 16px; border-block-end: 1px solid var(--cpai-border); background: var(--cpai-bg); border-radius: 12px; }
+.cpai-skills-nav-list { display: none; margin-block-start: 12px; }
+.cpai-skills-nav-list[data-expanded="true"] { display: grid; gap: 4px; }
+.cpai-skills-step { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 8px 10px; text-align: start; font-size: 14px; line-height: 1.6; border-radius: 8px; border-inline-start: 3px solid transparent; color: var(--cpai-text); overflow-wrap: anywhere; }
+.cpai-skills-step:hover { background: var(--cpai-active); }
+.cpai-skills-step[aria-current="step"] { background: var(--cpai-active); border-inline-start-color: var(--cpai-primary); font-weight: 600; color: var(--cpai-primary-strong); }
+.cpai-skills-reading { min-width: 0; width: 100%; max-width: 904px; margin-inline: auto; padding: clamp(16px, 3vw, 40px); overflow-wrap: anywhere; }
+.cpai-skills-reading h2 { font-size: clamp(24px, 3vw, 30px); font-weight: 700; line-height: 1.5; }
+.cpai-skills-reading h3 { font-size: 20px; font-weight: 600; line-height: 1.6; }
+.cpai-skills-reading p { font-size: clamp(18px, 1.5vw, 20px); font-weight: 400; line-height: 1.8; white-space: pre-line; }
+.cpai-skills-takeaway { padding: 20px; border-radius: 10px; background: var(--cpai-success-bg); color: var(--cpai-success-text); }
+.cpai-skills-action { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 16px; border: 1px solid var(--cpai-border); border-radius: 8px; color: var(--cpai-text); font-size: 14px; font-weight: 600; }
+.cpai-skills-action:hover { background: var(--cpai-active); }
+.cpai-skills-action-primary { background: #007D86; color: #fff; border-color: #007D86; }
+.cpai-skills-action-primary:hover { background: #07515A; }
+.cpai-skills button:focus-visible, .cpai-skills summary:focus-visible { outline: 2px solid var(--cpai-focus); outline-offset: 2px; }
+.cpai-skills-extra { border: 1px solid var(--cpai-border); border-radius: 10px; background: var(--cpai-surface); }
+.cpai-skills-extra > summary { min-height: 48px; padding: 12px 16px; font-size: 16px; font-weight: 600; cursor: pointer; color: var(--cpai-text); }
+.cpai-skills-extra > summary:hover { background: var(--cpai-active); }
+@media (min-width: 1024px) {
+  .cpai-skills-shell { grid-template-columns: minmax(220px, 30%) minmax(0, 1fr); }
+  .cpai-skills-nav { border-block-end: 0; border-inline-end: 1px solid var(--cpai-border); }
+  .cpai-skills-nav-list, .cpai-skills-nav-list[data-expanded="false"] { display: grid; gap: 4px; }
+  .cpai-skills-nav-toggle { display: none; }
+}
+
+
+/* Shared academy shell — based on the approved light/dark palette. */
+.cpai-redesign-app {
+  --academy-bg: #F8F9FA; --academy-surface: #fff; --academy-text: #242B30;
+  --academy-muted: #646D73; --academy-line: #DCE2E4; --academy-accent: #007D86;
+  --academy-active: #E6F3F3;
+  background: var(--academy-bg); color: var(--academy-text);
+}
+.dark .cpai-redesign-app, [data-theme="dark"] .cpai-redesign-app {
+  --academy-bg: #10212D; --academy-surface: #19323F; --academy-text: #F1F4F5;
+  --academy-muted: #B6C2C7; --academy-line: #34515D; --academy-accent: #63D0D4;
+  --academy-active: #214650;
+}
+.cpai-redesign-app > header { background: var(--academy-surface); border-color: var(--academy-line); box-shadow: none; }
+.cpai-app-toolbar { min-height: 64px; flex-wrap: wrap; padding-block: 8px; }
+.cpai-app-toolbar > div { max-width: 100%; flex-wrap: wrap; }
+.cpai-app-tools { position: relative; flex-shrink: 0; }
+.cpai-app-tools > summary { display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 12px; border: 1px solid var(--academy-line); border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; list-style: none; }
+.cpai-app-tools > summary::-webkit-details-marker { display: none; }
+.cpai-app-tools-panel { position: absolute; inset-inline-end: 0; top: calc(100% + 8px); width: min(300px, calc(100vw - 24px)); padding: 10px; display: grid; gap: 6px; background: var(--academy-surface); border: 1px solid var(--academy-line); border-radius: 10px; box-shadow: 0 8px 24px #0002; z-index: 50; }
+.cpai-app-tools-panel > button { min-height: 42px; justify-content: flex-start; font-size: 13px; font-weight: 500; background: transparent; border-color: transparent; color: var(--academy-text); box-shadow: none; }
+.cpai-app-tools-panel > button > span { display: inline; }
+.cpai-app-tools-panel > button:hover { background: var(--academy-active); }
+.cpai-app-navigation { display: none; }
+.cpai-app-nav-brand { display: grid; gap: 10px; padding: 20px 12px 24px; border-bottom: 1px solid var(--academy-line); margin-bottom: 12px; }
+.cpai-app-nav-brand img { width: 84px; height: auto; object-fit: contain; background: #fff; border-radius: 4px; }
+.cpai-app-nav-brand strong { font-size: 16px; font-weight: 600; }
+.cpai-app-navigation > button { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 10px 12px; border-radius: 6px; border-inline-start: 3px solid transparent; text-align: start; font-size: 14px; font-weight: 500; color: var(--academy-text); }
+.cpai-app-navigation > button:hover, .cpai-app-navigation > button[aria-current], .cpai-app-navigation > button[aria-pressed="true"] { background: var(--academy-active); color: var(--academy-accent); border-inline-start-color: var(--academy-accent); }
+.cpai-app-nav-account { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--academy-active); }
+.cpai-app-navigation button:focus-visible, .cpai-app-tools summary:focus-visible { outline: 2px solid var(--academy-accent); outline-offset: 2px; }
+@media (min-width: 1200px) {
+  .cpai-app-navigation { display: flex; flex-direction: column; gap: 4px; width: 224px; flex: 0 0 224px; padding: 16px 12px; background: var(--academy-surface); border-inline-end: 1px solid var(--academy-line); align-self: stretch; overflow-y: auto; }
+}
+@media (max-width: 639px) {
+  .cpai-app-toolbar { gap: 6px; min-height: 56px; }
+  .cpai-app-tools > summary { font-size: 12px; padding-inline: 8px; }
+}
+
+/* Roadmap reading hierarchy */
+.cpai-roadmap-page { box-shadow:none; border-color:var(--academy-line); }
+.cpai-roadmap-page h2 { font-size:22px; font-weight:600; }
+.cpai-roadmap-page h3 { font-size:18px; font-weight:600; }
+.cpai-roadmap-page p { font-size:14px; line-height:1.8; }
+.cpai-roadmap-details [data-testid^="orbit-entry-module-"] { min-height:60px; }
+.cpai-roadmap-details [data-testid^="orbit-entry-module-"] .truncate { white-space:normal; overflow-wrap:anywhere; }
+.cpai-roadmap-details [data-testid^="orbit-entry-module-"] .font-extrabold { font-weight:600; font-size:14px; }
+@media(min-width:1500px){.cpai-roadmap-grid { grid-template-columns:minmax(0, 1.25fr) minmax(0, 1fr); }}
