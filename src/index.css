@@ -476,3 +476,13 @@
   .cpai-app-toolbar { gap: 6px; min-height: 56px; }
   .cpai-app-tools > summary { font-size: 12px; padding-inline: 8px; }
 }
+
+/* Roadmap reading hierarchy */
+.cpai-roadmap-page { box-shadow:none; border-color:var(--academy-line); }
+.cpai-roadmap-page h2 { font-size:22px; font-weight:600; }
+.cpai-roadmap-page h3 { font-size:18px; font-weight:600; }
+.cpai-roadmap-page p { font-size:14px; line-height:1.8; }
+.cpai-roadmap-details [data-testid^="orbit-entry-module-"] { min-height:60px; }
+.cpai-roadmap-details [data-testid^="orbit-entry-module-"] .truncate { white-space:normal; overflow-wrap:anywhere; }
+.cpai-roadmap-details [data-testid^="orbit-entry-module-"] .font-extrabold { font-weight:600; font-size:14px; }
+@media(min-width:1500px){.cpai-roadmap-grid { grid-template-columns:minmax(0, 1.25fr) minmax(0, 1fr); }}
