@@ -437,3 +437,42 @@
   .cpai-skills-nav-list, .cpai-skills-nav-list[data-expanded="false"] { display: grid; gap: 4px; }
   .cpai-skills-nav-toggle { display: none; }
 }
+
+
+/* Shared academy shell — based on the approved light/dark palette. */
+.cpai-redesign-app {
+  --academy-bg: #F8F9FA; --academy-surface: #fff; --academy-text: #242B30;
+  --academy-muted: #646D73; --academy-line: #DCE2E4; --academy-accent: #007D86;
+  --academy-active: #E6F3F3;
+  background: var(--academy-bg); color: var(--academy-text);
+}
+.dark .cpai-redesign-app, [data-theme="dark"] .cpai-redesign-app {
+  --academy-bg: #10212D; --academy-surface: #19323F; --academy-text: #F1F4F5;
+  --academy-muted: #B6C2C7; --academy-line: #34515D; --academy-accent: #63D0D4;
+  --academy-active: #214650;
+}
+.cpai-redesign-app > header { background: var(--academy-surface); border-color: var(--academy-line); box-shadow: none; }
+.cpai-app-toolbar { min-height: 64px; flex-wrap: wrap; padding-block: 8px; }
+.cpai-app-toolbar > div { max-width: 100%; flex-wrap: wrap; }
+.cpai-app-tools { position: relative; flex-shrink: 0; }
+.cpai-app-tools > summary { display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 12px; border: 1px solid var(--academy-line); border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; list-style: none; }
+.cpai-app-tools > summary::-webkit-details-marker { display: none; }
+.cpai-app-tools-panel { position: absolute; inset-inline-end: 0; top: calc(100% + 8px); width: min(300px, calc(100vw - 24px)); padding: 10px; display: grid; gap: 6px; background: var(--academy-surface); border: 1px solid var(--academy-line); border-radius: 10px; box-shadow: 0 8px 24px #0002; z-index: 50; }
+.cpai-app-tools-panel > button { min-height: 42px; justify-content: flex-start; font-size: 13px; font-weight: 500; background: transparent; border-color: transparent; color: var(--academy-text); box-shadow: none; }
+.cpai-app-tools-panel > button > span { display: inline; }
+.cpai-app-tools-panel > button:hover { background: var(--academy-active); }
+.cpai-app-navigation { display: none; }
+.cpai-app-nav-brand { display: grid; gap: 10px; padding: 20px 12px 24px; border-bottom: 1px solid var(--academy-line); margin-bottom: 12px; }
+.cpai-app-nav-brand img { width: 84px; height: auto; object-fit: contain; background: #fff; border-radius: 4px; }
+.cpai-app-nav-brand strong { font-size: 16px; font-weight: 600; }
+.cpai-app-navigation > button { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 10px 12px; border-radius: 6px; border-inline-start: 3px solid transparent; text-align: start; font-size: 14px; font-weight: 500; color: var(--academy-text); }
+.cpai-app-navigation > button:hover, .cpai-app-navigation > button[aria-current], .cpai-app-navigation > button[aria-pressed="true"] { background: var(--academy-active); color: var(--academy-accent); border-inline-start-color: var(--academy-accent); }
+.cpai-app-nav-account { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--academy-active); }
+.cpai-app-navigation button:focus-visible, .cpai-app-tools summary:focus-visible { outline: 2px solid var(--academy-accent); outline-offset: 2px; }
+@media (min-width: 1200px) {
+  .cpai-app-navigation { display: flex; flex-direction: column; gap: 4px; width: 224px; flex: 0 0 224px; padding: 16px 12px; background: var(--academy-surface); border-inline-end: 1px solid var(--academy-line); align-self: stretch; overflow-y: auto; }
+}
+@media (max-width: 639px) {
+  .cpai-app-toolbar { gap: 6px; min-height: 56px; }
+  .cpai-app-tools > summary { font-size: 12px; padding-inline: 8px; }
+}
