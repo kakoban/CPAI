@@ -687,6 +687,7 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
         role="button"
         tabIndex={0}
         data-testid={`orbit-node-${sess.id}`}
+        aria-pressed={isSessActive}
         data-cohort-current={isCohortCurrent ? 'true' : 'false'}
         data-cohort-reviewed={isCohortFullyReviewed ? 'true' : 'false'}
         onClick={() => {
@@ -704,21 +705,21 @@ const OrbitRoadmapHub: React.FC<OrbitRoadmapHubProps> = ({
           compactSplit ? 'p-2 gap-1' : 'p-3 gap-1.5'
         } ${
           isSessActive
-            ? `bg-gradient-to-br from-purple-600 via-fuchsia-600 to-orange-500 text-white ${
+            ? `bg-[#007D86] text-white ${
                 compactSplit ? 'scale-[1.01] ring-2' : 'scale-105 ring-4'
               } ${
                 isCohortCurrent
                   ? 'ring-amber-300 dark:ring-amber-500/80 border-amber-200/70 shadow-xl'
                   : isEffectiveDone
                     ? 'ring-emerald-300 dark:ring-emerald-600/80 border-emerald-200/70 shadow-xl'
-                    : 'ring-purple-200 dark:ring-purple-900 border-transparent shadow-xl'
+                    : 'ring-[#B5DEDF] dark:ring-[#07515A] border-transparent shadow-sm'
               }`
             : isCohortCurrent
-            ? 'bg-gradient-to-br from-amber-50 via-white to-orange-50/90 dark:from-amber-950/45 dark:via-[#23192b] dark:to-orange-950/35 text-amber-950 dark:text-amber-50 border-amber-400 dark:border-amber-500/80 ring-2 ring-amber-300/70 dark:ring-amber-500/40 shadow-md hover:shadow-lg'
+            ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-950 dark:text-amber-50 border-amber-400 dark:border-amber-500/80 ring-2 ring-amber-300/70 dark:ring-amber-500/40 shadow-md hover:shadow-lg'
             : isEffectiveDone
-            ? 'bg-gradient-to-br from-emerald-50 via-emerald-50/90 to-teal-50/80 dark:from-emerald-950/55 dark:via-emerald-900/35 dark:to-teal-950/40 text-emerald-950 dark:text-emerald-50 border-emerald-500/80 dark:border-emerald-500/70 ring-1 ring-emerald-400/50 shadow-sm hover:shadow-md'
+            ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-950 dark:text-emerald-50 border-emerald-500/80 dark:border-emerald-500/70 ring-1 ring-emerald-400/50 shadow-sm hover:shadow-md'
             : isCohortPartiallyReviewed
-            ? 'bg-gradient-to-br from-emerald-50/50 via-white to-white dark:from-emerald-950/20 dark:via-[#201729] dark:to-[#201729] text-[#261a1d] dark:text-[#faedf3] border-emerald-300/80 dark:border-emerald-700/60 shadow-xs hover:shadow-md'
+            ? 'bg-white dark:bg-[#19323F] text-[#261a1d] dark:text-[#faedf3] border-emerald-300/80 dark:border-emerald-700/60 shadow-xs hover:shadow-md'
             : 'bg-white dark:bg-[#201729] text-[#261a1d] dark:text-[#faedf3] border-[#ecdcd8] dark:border-[#382645] shadow-xs hover:shadow-md hover:border-[#e0533c]/50'
         }`}
       >
@@ -3416,7 +3417,7 @@ Tasks:
         <section
           ref={navPillsRef}
           data-testid="page0-orbit-entry-hub"
-          className="rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 shadow-xs p-4 sm:p-5 space-y-4 animate-fadeIn"
+          className="cpai-roadmap-page rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 shadow-xs p-4 sm:p-5 space-y-4 animate-fadeIn"
         >
           {/* Orbit Hub Top Control Strip */}
           <div dir="rtl" className="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-slate-200/80 dark:border-slate-800">
@@ -3476,9 +3477,9 @@ Tasks:
           </div>
 
           {/* Balanced 100%-Scale 2-Column Entry Stage: Full Circular Orbit + Active Session Modules */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+          <div className="cpai-roadmap-grid grid grid-cols-1 gap-6 items-start">
             {/* Full-Scale Uncropped Circular Orbit (Right in RTL) */}
-            <div className="lg:col-span-7">
+            <div className="cpai-roadmap-orbit min-w-0">
               <OrbitRoadmapHub
                 lang={lang}
                 sessions={FIVE_SESSIONS}
@@ -3497,7 +3498,7 @@ Tasks:
             </div>
 
             {/* Active Session Modules Selector + Cohort Roadmap Lookup (Left in RTL beside Orbit) */}
-            <div className="lg:col-span-5 flex flex-col gap-3.5 h-full">
+            <div className="cpai-roadmap-details min-w-0 flex flex-col gap-4">
               <CohortRoadmapLookupCard
                 lang={lang}
                 currentUser={currentUser}
