@@ -19,6 +19,7 @@ interface AgentifyLandingProps {
   onOpenBookModal?: () => void;
   onOpenMarkdownStudio?: () => void;
   currentTrack?: IndustryTrackId;
+  allowedTracks?: IndustryTrackId[];
   onSelectTrack?: (track: IndustryTrackId) => void;
   onOpenTrackModal?: () => void;
 }
@@ -32,6 +33,7 @@ export const AgentifyLanding: React.FC<AgentifyLandingProps> = ({
   onOpenBookModal,
   onOpenMarkdownStudio,
   currentTrack,
+  allowedTracks,
   onSelectTrack,
   onOpenTrackModal
 }) => {
@@ -73,6 +75,7 @@ export const AgentifyLanding: React.FC<AgentifyLandingProps> = ({
           onOpenBookModal={onOpenBookModal}
           onOpenMarkdownStudio={onOpenMarkdownStudio}
           currentTrack={currentTrack}
+          allowedTracks={allowedTracks}
           onSelectTrack={onSelectTrack}
           onOpenTrackModal={onOpenTrackModal}
         />

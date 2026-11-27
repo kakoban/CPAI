@@ -19,6 +19,13 @@ import {
   SharedAiQaItem,
   computeAiQuotaState
 } from '../utils/aiQuotaEngine';
+import {
+  CommunitySocialConfig,
+  DEFAULT_COMMUNITY_SOCIAL_CONFIG,
+  sanitizeCommunitySocialConfig
+} from '../utils/communityLinksEngine';
+
+const COMMUNITY_LINKS_STORAGE_KEY = 'cpmai_community_social_links_v1';
 
 export interface MyCohortRoadmapResponse {
   authenticated: boolean;
@@ -719,6 +726,81 @@ class LmsApiService {
       return { success: true };
     } catch (err: any) {
       return { success: false, error: err?.message || 'خطای شبکه' };
+    }
+  }
+
+  /**
+   * Fetch admin-configured community & social links for the student dashboard
+   */
+  async fetchCommunitySocialLinks(): Promise<CommunitySocialConfig> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const res = await fetch('/api/community-links', {
+        method: 'GET',
+        cache: 'no-store',
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        const cleaned = sanitizeCommunitySocialConfig(data?.config);
+        try {
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem(COMMUNITY_LINKS_STORAGE_KEY, JSON.stringify(cleaned));
+          }
+        } catch {}
+        return cleaned;
+      }
+    } catch {
+      // fallback to localStorage cache
+    }
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const cached = localStorage.getItem(COMMUNITY_LINKS_STORAGE_KEY);
+        if (cached) {
+          return sanitizeCommunitySocialConfig(JSON.parse(cached));
+        }
+      }
+    } catch {}
+    return { ...DEFAULT_COMMUNITY_SOCIAL_CONFIG };
+  }
+
+  /**
+   * Admin: Save community & social invite links shown as clean badges inside the student dashboard
+   */
+  async saveAdminCommunitySocialLinks(
+    config: CommunitySocialConfig
+  ): Promise<{ success: boolean; config?: CommunitySocialConfig; error?: string }> {
+    const sanitized = sanitizeCommunitySocialConfig(config);
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(COMMUNITY_LINKS_STORAGE_KEY, JSON.stringify(sanitized));
+      }
+    } catch {}
+
+    try {
+      const res = await fetch('/api/admin/community-links', {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ config: sanitized })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        return { success: false, error: data?.error || 'خطا در ذخیره لینک‌های شبکه‌های اجتماعی' };
+      }
+      const saved = sanitizeCommunitySocialConfig(data?.config || sanitized);
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(COMMUNITY_LINKS_STORAGE_KEY, JSON.stringify(saved));
+        }
+        window.dispatchEvent(
+          new CustomEvent('cpmai_community_links_updated', { detail: { config: saved } })
+        );
+      } catch {}
+      return { success: true, config: saved };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'خطای شبکه در ذخیره لینک‌ها' };
     }
   }
 }

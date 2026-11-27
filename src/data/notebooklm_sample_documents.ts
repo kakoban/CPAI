@@ -1,4 +1,5 @@
-import { IndustryTrackId } from '../types/industryTrack';
+import { DisciplineId, EngineeringRoleId, IndustryTrackId } from '../types/industryTrack';
+import { buildDisciplineNotebookLmDocument } from '../utils/disciplineAdaptation';
 
 export interface SampleSubDocument {
   id: string;
@@ -1129,18 +1130,38 @@ export interface NotebookLmDocsBundle {
 }
 
 export function getNotebookLmSampleDocsForTrack(
-  trackId: IndustryTrackId = 'CIVIL_INFRA'
+  trackId: IndustryTrackId = 'CIVIL_INFRA',
+  disciplineId?: DisciplineId,
+  roleId?: EngineeringRoleId
 ): NotebookLmDocsBundle {
-  if (trackId === 'PAYA_SAMAN_PARS') {
-    return {
-      departmentDocs: PAYA_SAMPLE_DEPARTMENT_DOCS,
-      blueprintDocs: PAYA_SAMPLE_BLUEPRINT_DOCS,
-      exerciseDocs: PAYA_SAMPLE_EXERCISE_DOCS
-    };
+  const baseDocs: NotebookLmDocsBundle =
+    trackId === 'PAYA_SAMAN_PARS'
+      ? {
+          departmentDocs: PAYA_SAMPLE_DEPARTMENT_DOCS,
+          blueprintDocs: PAYA_SAMPLE_BLUEPRINT_DOCS,
+          exerciseDocs: PAYA_SAMPLE_EXERCISE_DOCS
+        }
+      : {
+          departmentDocs: SAMPLE_DEPARTMENT_DOCS,
+          blueprintDocs: SAMPLE_BLUEPRINT_DOCS,
+          exerciseDocs: SAMPLE_EXERCISE_DOCS
+        };
+
+  if (!disciplineId) {
+    return baseDocs;
   }
+
+  const disciplineDoc = buildDisciplineNotebookLmDocument(disciplineId, roleId);
+
   return {
-    departmentDocs: SAMPLE_DEPARTMENT_DOCS,
-    blueprintDocs: SAMPLE_BLUEPRINT_DOCS,
-    exerciseDocs: SAMPLE_EXERCISE_DOCS
+    departmentDocs: {
+      discipline_active: disciplineDoc,
+      ...baseDocs.departmentDocs
+    },
+    blueprintDocs: baseDocs.blueprintDocs,
+    exerciseDocs: {
+      ex0_discipline_active: disciplineDoc,
+      ...baseDocs.exerciseDocs
+    }
   };
 }

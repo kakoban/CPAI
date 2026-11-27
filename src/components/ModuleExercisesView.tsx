@@ -1,22 +1,41 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  CheckCircle2,
-  ClipboardCheck,
-  Copy,
-  Check,
-  Terminal,
   BookOpen,
-  Clock,
-  Sparkles,
-  FileCheck2,
-  ArrowLeft,
-  ArrowRight,
-  Circle,
+  Check,
+  CheckCircle2,
   CheckSquare,
-  Square
+  Circle,
+  Copy,
+  Square,
+  Terminal
 } from 'lucide-react';
 import { Language } from '../types/cpmai';
-import { ModuleExerciseDeck, ModuleExerciseDifficulty } from '../data/moduleExercises';
+import { ModuleExerciseDeck } from '../data/moduleExercises';
+import { FocusedLessonLayout, FocusedStepItem } from './learning/FocusedLessonLayout';
+import { FocusedLessonFooter } from './learning/FocusedLessonFooter';
+import { LessonTakeawayCallout } from './learning/LessonTakeawayCallout';
+import { formatStepNumber, getStepBoundaryState } from '../utils/focusedLessonEngine';
+import {
+  computeExerciseDeckSummary,
+  computeExerciseSelfCheckProgress,
+  parseInlineCodeSegments,
+  resolveInitialExerciseIndex
+} from '../utils/exerciseDeckEngine';
+
+const renderInlineCode = (raw: string): React.ReactNode =>
+  parseInlineCodeSegments(raw).map((seg, idx) =>
+    seg.type === 'code' ? (
+      <code
+        key={idx}
+        dir="ltr"
+        className="inline-block px-1.5 py-0.5 mx-0.5 rounded bg-[var(--cpai-surface-subtle)] border border-[var(--cpai-border)] font-mono text-[0.86em] text-[var(--cpai-primary-strong)] align-baseline"
+      >
+        {seg.value}
+      </code>
+    ) : (
+      <React.Fragment key={idx}>{seg.value}</React.Fragment>
+    )
+  );
 
 interface ModuleExercisesViewProps {
   lang: Language;
@@ -33,13 +52,9 @@ interface ModuleExercisesViewProps {
   onSwitchToLesson: () => void;
   onNextModuleExercises?: () => void;
   nextModuleLabelFa?: string;
+  activeDisciplineLabel?: string;
+  activeRoleLabel?: string;
 }
-
-const DIFFICULTY_STYLES: Record<ModuleExerciseDifficulty, string> = {
-  'پایه': 'text-emerald-700 dark:text-emerald-300',
-  'عملیاتی': 'text-[#1f5163] dark:text-[#6fb3c6]',
-  'پیشرفته': 'text-purple-700 dark:text-purple-300'
-};
 
 export const ModuleExercisesView: React.FC<ModuleExercisesViewProps> = ({
   lang,
@@ -55,345 +70,368 @@ export const ModuleExercisesView: React.FC<ModuleExercisesViewProps> = ({
   copiedId,
   onSwitchToLesson,
   onNextModuleExercises,
-  nextModuleLabelFa
+  nextModuleLabelFa,
+  activeDisciplineLabel,
+  activeRoleLabel
 }) => {
-  const totalCount = deck.exercises.length;
-  const doneCount = deck.exercises.filter((ex) => !!completedMap[ex.id]).length;
-  const totalMinutes = deck.exercises.reduce((sum, ex) => sum + ex.estimatedMinutes, 0);
+  const isFa = lang === 'fa';
+  const [activeExerciseIndex, setActiveExerciseIndex] = useState<number>(() =>
+    resolveInitialExerciseIndex(deck.exercises, completedMap)
+  );
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
+
+  // Reset active exercise cleanly whenever the learner switches to a different module's exercise deck
+  useEffect(() => {
+    setActiveExerciseIndex(resolveInitialExerciseIndex(deck.exercises, completedMap));
+    setIsMobileDrawerOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deck.moduleId]);
+
+  const summary = useMemo(
+    () => computeExerciseDeckSummary(deck.exercises, completedMap),
+    [deck.exercises, completedMap]
+  );
+
+  const steps: FocusedStepItem[] = useMemo(
+    () =>
+      deck.exercises.map((ex) => ({
+        id: ex.id,
+        title: ex.titleFa.replace(/`/g, ''),
+        category: isFa
+          ? `سطح: ${ex.difficultyFa} · ${formatStepNumber(ex.estimatedMinutes, 'fa')} دقیقه`
+          : `${ex.difficultyFa} · ${ex.estimatedMinutes} min`
+      })),
+    [deck.exercises, isFa]
+  );
+
+  const boundary = getStepBoundaryState(activeExerciseIndex, deck.exercises.length);
+  const activeExercise = deck.exercises[boundary.currentIndex];
+
+  if (!activeExercise) {
+    return null;
+  }
+
+  const isDone = !!completedMap[activeExercise.id];
+  const selfCheck = computeExerciseSelfCheckProgress(
+    activeExercise.id,
+    activeExercise.selfCheckCriteriaFa.length,
+    checksMap
+  );
+  const noteValue = notesMap[activeExercise.id] || '';
+  const copyKey = `ex_prompt_${activeExercise.id}`;
 
   return (
-    <div
-      data-testid="module-exercises-panel"
-      className="space-y-5 animate-fadeIn"
-    >
-      {/* Focused Module Exercise Header Card */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-l from-[#1f5163]/8 via-white to-emerald-50/50 dark:from-[#1f5163]/20 dark:via-[#151e27] dark:to-emerald-950/20 border border-[#1f5163]/25 dark:border-[#6fb3c6]/25 shadow-xs space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="space-y-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold text-[#1f5163] dark:text-[#6fb3c6]">
-              <span className="inline-flex items-center gap-1">
-                <ClipboardCheck className="w-3.5 h-3.5 shrink-0" />
-                <span>
-                  {lang === 'fa'
-                    ? `کارگاه تمرین عملی ماژول ${deck.moduleNum}`
-                    : `Hands-On Lab · Module ${deck.moduleNum}`}
+    <div data-testid="module-exercises-panel" className="animate-fadeIn">
+      <FocusedLessonLayout
+        lang={lang}
+        moduleCode={
+          activeDisciplineLabel
+            ? isFa
+              ? `تمرین ماژول ${deck.moduleNum} · ${activeDisciplineLabel}`
+              : `Lab ${deck.moduleNum} · ${activeDisciplineLabel}`
+            : isFa
+            ? `تمرین ماژول ${deck.moduleNum}`
+            : `Lab · Module ${deck.moduleNum}`
+        }
+        moduleTitle={deck.moduleTitleFa}
+        moduleSubtitle={
+          isFa
+            ? `${formatStepNumber(summary.totalMinutes, 'fa')} دقیقه کل تمرین${
+                activeRoleLabel ? ` · جایگاه: ${activeRoleLabel}` : ''
+              } · ${deck.workshopGoalFa}`
+            : `${summary.totalMinutes} min total · ${deck.workshopGoalFa}`
+        }
+        steps={steps}
+        activeStepIndex={boundary.currentIndex}
+        visitedStepIndices={summary.completedIndices}
+        onSelectStep={setActiveExerciseIndex}
+        isStepListVisible
+        isMobileDrawerOpen={isMobileDrawerOpen}
+        onToggleMobileDrawer={setIsMobileDrawerOpen}
+        sidebarTitleFa="فهرست تمرین‌های ماژول"
+        sidebarTitleEn="Module Exercises"
+        progressLabelFa="تمرین‌های ثبت‌شده"
+        progressLabelEn="Completed exercises"
+        stepUnitFa="تمرین"
+        stepUnitEn="exercises"
+        allowZeroProgress
+        progressTestId="module-exercises-progress"
+        headerAction={
+          <button
+            type="button"
+            onClick={onSwitchToLesson}
+            data-testid="back-to-module-lesson-btn"
+            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-[var(--cpai-radius)] border border-[var(--cpai-border)] bg-[var(--cpai-surface)] text-xs sm:text-sm font-medium text-[var(--cpai-text)] hover:border-[var(--cpai-primary)] hover:text-[var(--cpai-primary-strong)] transition-colors whitespace-nowrap"
+          >
+            <BookOpen aria-hidden="true" className="w-4 h-4 text-[var(--cpai-primary)] shrink-0" />
+            <span>{isFa ? 'بازگشت به درس ماژول' : 'Back to Lesson'}</span>
+          </button>
+        }
+      >
+        <article
+          data-testid={`module-exercise-card-${activeExercise.id}`}
+          className="space-y-6"
+        >
+          {/* Calm Unboxed Exercise Header */}
+          <header className="pb-5 border-b border-[var(--cpai-border)] flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div className="min-w-0 space-y-2">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--cpai-muted)]">
+                <span className="font-semibold text-[var(--cpai-primary-strong)] tabular-nums">
+                  {activeExercise.stepBadgeFa}
                 </span>
-              </span>
-              <span aria-hidden="true">·</span>
-              <span className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
-                <Clock className="w-3.5 h-3.5 shrink-0" />
+                <span aria-hidden="true">·</span>
                 <span>
-                  {lang === 'fa'
-                    ? `${totalMinutes.toLocaleString('fa-IR')} دقیقه کل تمرین`
-                    : `${totalMinutes} min total`}
+                  {isFa ? `سطح: ${activeExercise.difficultyFa}` : activeExercise.difficultyFa}
                 </span>
-              </span>
-            </div>
+                <span aria-hidden="true">·</span>
+                <span className="tabular-nums">
+                  {isFa
+                    ? `زمان پیشنهادی: ${formatStepNumber(activeExercise.estimatedMinutes, 'fa')} دقیقه`
+                    : `${activeExercise.estimatedMinutes} min`}
+                </span>
+              </div>
 
-            <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-snug">
-              {deck.moduleTitleFa}
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              {deck.workshopGoalFa}
-            </p>
-          </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-[var(--cpai-text)] leading-snug">
+                {renderInlineCode(activeExercise.titleFa)}
+              </h3>
 
-          <div className="flex flex-wrap items-center gap-2 shrink-0 self-start sm:self-center">
-            <div
-              data-testid="module-exercises-progress"
-              className={`px-3 py-1.5 rounded-xl border text-xs font-extrabold tabular-nums ${
-                doneCount === totalCount
-                  ? 'bg-emerald-600 text-white border-emerald-600'
-                  : 'bg-white dark:bg-[#131c24] text-[#1f5163] dark:text-[#6fb3c6] border-slate-200 dark:border-slate-700'
-              }`}
-            >
-              {lang === 'fa'
-                ? `${doneCount.toLocaleString('fa-IR')} از ${totalCount.toLocaleString('fa-IR')} تمرین ثبت شده`
-                : `${doneCount} / ${totalCount} Completed`}
+              <p
+                dir="ltr"
+                className={`text-xs font-mono text-[var(--cpai-muted)] ${isFa ? 'text-right' : 'text-left'}`}
+              >
+                {activeExercise.titleEn}
+              </p>
             </div>
 
             <button
               type="button"
-              onClick={onSwitchToLesson}
-              data-testid="back-to-module-lesson-btn"
-              className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#131c24] hover:border-[#1f5163] text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 cursor-pointer transition-colors whitespace-nowrap"
-            >
-              <BookOpen className="w-3.5 h-3.5 text-[#1f5163] dark:text-[#6fb3c6]" />
-              <span>{lang === 'fa' ? 'بازگشت به درس ماژول' : 'Back to Lesson'}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Exercise Cards */}
-      <div className="space-y-5">
-        {deck.exercises.map((ex, idx) => {
-          const isDone = !!completedMap[ex.id];
-          const checksDone = ex.selfCheckCriteriaFa.filter(
-            (_, cIdx) => !!checksMap[`${ex.id}__${cIdx}`]
-          ).length;
-          const noteValue = notesMap[ex.id] || '';
-          const copyKey = `ex_prompt_${ex.id}`;
-
-          return (
-            <article
-              key={ex.id}
-              data-testid={`module-exercise-card-${ex.id}`}
-              className={`p-4 sm:p-5 rounded-2xl border transition-all space-y-4 shadow-xs ${
+              onClick={() => onToggleComplete(activeExercise.id)}
+              data-testid={`toggle-ex-done-${activeExercise.id}`}
+              aria-pressed={isDone}
+              className={`inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-[var(--cpai-radius)] border text-sm font-semibold transition-colors whitespace-nowrap shrink-0 self-start ${
                 isDone
-                  ? 'bg-emerald-50/40 dark:bg-emerald-950/15 border-emerald-300 dark:border-emerald-800/70'
-                  : 'bg-white dark:bg-[#18212b] border-slate-200 dark:border-slate-800'
+                  ? 'bg-[var(--cpai-success-bg)] border-[var(--cpai-success-border)] text-[var(--cpai-success-text)]'
+                  : 'bg-[var(--cpai-primary)] hover:bg-[var(--cpai-primary-strong)] border-[var(--cpai-primary)] text-white dark:text-[#0F171A]'
               }`}
             >
-              {/* Card Top Bar */}
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3 border-b border-slate-200/70 dark:border-slate-800">
-                <div className="space-y-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold">
-                    <span className="px-2 py-0.5 rounded-md bg-[#1f5163] text-white font-mono">
-                      {ex.stepBadgeFa}
-                    </span>
-                    <span className={DIFFICULTY_STYLES[ex.difficultyFa]}>
-                      {lang === 'fa' ? `سطح: ${ex.difficultyFa}` : ex.difficultyFa}
-                    </span>
-                    <span aria-hidden="true" className="text-slate-400">·</span>
-                    <span className="text-slate-500 dark:text-slate-400">
-                      {lang === 'fa'
-                        ? `زمان پیشنهادی: ${ex.estimatedMinutes.toLocaleString('fa-IR')} دقیقه`
-                        : `${ex.estimatedMinutes} min`}
-                    </span>
-                  </div>
+              {isDone ? (
+                <CheckCircle2 aria-hidden="true" className="w-4 h-4 shrink-0" />
+              ) : (
+                <Circle aria-hidden="true" className="w-4 h-4 shrink-0" />
+              )}
+              <span>
+                {isDone
+                  ? isFa
+                    ? 'تمرین انجام شد'
+                    : 'Completed'
+                  : isFa
+                  ? 'ثبت انجام تمرین'
+                  : 'Mark Complete'}
+              </span>
+            </button>
+          </header>
 
-                  <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white leading-snug">
-                    {(idx + 1).toLocaleString('fa-IR')}. {ex.titleFa}
-                  </h3>
-                  <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400" dir="ltr">
-                    {ex.titleEn}
-                  </div>
-                </div>
+          {/* Practical Scenario (Calm Readable Prose) */}
+          <section className="space-y-2">
+            <h4 className="text-sm font-semibold text-[var(--cpai-primary-strong)]">
+              {isFa ? 'سناریو و مسئله عملی شما' : 'Practical Scenario'}
+            </h4>
+            <p className="text-[16px] sm:text-[17px] leading-[1.85] text-[var(--cpai-text)]">
+              {renderInlineCode(activeExercise.scenarioFa)}
+            </p>
+          </section>
 
+          {/* Expected Deliverable Callout */}
+          <LessonTakeawayCallout
+            lang={lang}
+            labelFa="خروجی قابل تحویل (Deliverable)"
+            labelEn="Expected Deliverable"
+            text={renderInlineCode(activeExercise.deliverableFa)}
+          />
+
+          {/* Execution Steps */}
+          <section className="space-y-3">
+            <h4 className="text-sm font-semibold text-[var(--cpai-text)]">
+              {isFa ? 'گام‌های اجرای تمرین' : 'Execution Steps'}
+            </h4>
+            <ol className="space-y-3">
+              {activeExercise.stepsFa.map((step, sIdx) => (
+                <li
+                  key={sIdx}
+                  className="flex items-start gap-3 text-[15.5px] sm:text-[16px] leading-[1.8] text-[var(--cpai-text)]"
+                >
+                  <span className="w-6 h-6 mt-1 rounded-md bg-[var(--cpai-primary-soft)] text-[var(--cpai-primary-strong)] text-xs font-semibold tabular-nums flex items-center justify-center shrink-0">
+                    {formatStepNumber(sIdx + 1, lang)}
+                  </span>
+                  <span className="min-w-0 flex-1">{renderInlineCode(step)}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          {/* Dedicated Starter Prompt Block + Direct Sandbox & Copy Actions */}
+          <section className="rounded-[var(--cpai-radius)] border border-[var(--cpai-border)] bg-[var(--cpai-code-bg)] text-[var(--cpai-code-text)] overflow-hidden">
+            <div className="px-4 py-3 border-b border-white/10 flex flex-wrap items-center justify-between gap-2.5">
+              <span className="text-xs font-semibold text-[var(--cpai-code-text)] inline-flex items-center gap-2">
+                <Terminal aria-hidden="true" className="w-4 h-4 text-[#63D0D4] shrink-0" />
+                <span>
+                  {isFa
+                    ? 'پرامپت آماده اختصاصی این تمرین'
+                    : 'Dedicated Exercise Starter Prompt'}
+                </span>
+              </span>
+
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   type="button"
-                  onClick={() => onToggleComplete(ex.id)}
-                  data-testid={`toggle-ex-done-${ex.id}`}
-                  className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
-                    isDone
-                      ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs'
-                      : 'bg-white dark:bg-[#131c24] border-emerald-300 dark:border-emerald-700/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'
-                  }`}
+                  onClick={() => onLoadToSandbox(activeExercise.promptStarterFa)}
+                  data-testid={`load-ex-sandbox-${activeExercise.id}`}
+                  className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-[var(--cpai-primary)] hover:bg-[var(--cpai-primary-strong)] text-white dark:text-[#0F171A] text-xs font-semibold transition-colors"
                 >
-                  {isDone ? (
-                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <Terminal aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
+                  <span>{isFa ? 'بارگذاری در سندباکس' : 'Load in Sandbox'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(activeExercise.promptStarterFa, copyKey)}
+                  data-testid={`copy-ex-prompt-${activeExercise.id}`}
+                  className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-[var(--cpai-code-text)] text-xs font-medium transition-colors"
+                >
+                  {copiedId === copyKey ? (
+                    <>
+                      <Check aria-hidden="true" className="w-3.5 h-3.5 text-[#A7E3BD] shrink-0" />
+                      <span>{isFa ? 'کپی شد' : 'Copied'}</span>
+                    </>
                   ) : (
-                    <Circle className="w-4 h-4 shrink-0" />
+                    <>
+                      <Copy aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
+                      <span>{isFa ? 'کپی پرامپت' : 'Copy'}</span>
+                    </>
                   )}
-                  <span>
-                    {isDone
-                      ? lang === 'fa'
-                        ? 'تمرین انجام شد'
-                        : 'Completed'
-                      : lang === 'fa'
-                      ? 'ثبت انجام تمرین'
-                      : 'Mark Complete'}
-                  </span>
                 </button>
               </div>
+            </div>
 
-              {/* Scenario + Expected Deliverable */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                <div className="lg:col-span-2 p-3.5 rounded-xl bg-slate-50 dark:bg-[#131c24] border border-slate-200/80 dark:border-slate-800 space-y-1.5">
-                  <div className="text-[11px] font-extrabold text-[#1f5163] dark:text-[#6fb3c6] flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                    <span>{lang === 'fa' ? 'سناریو و مسئله عملی شما' : 'Practical Scenario'}</span>
-                  </div>
-                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed">
-                    {ex.scenarioFa}
-                  </p>
-                </div>
+            <pre
+              dir={isFa ? 'rtl' : 'ltr'}
+              className={`p-4 sm:p-5 text-[13.5px] sm:text-[14px] leading-[1.85] whitespace-pre-wrap font-sans text-[var(--cpai-code-text)] overflow-x-auto ${
+                isFa ? 'text-right' : 'text-left'
+              }`}
+            >
+              {activeExercise.promptStarterFa}
+            </pre>
+          </section>
 
-                <div className="p-3.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-800/50 space-y-1.5">
-                  <div className="text-[11px] font-extrabold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
-                    <FileCheck2 className="w-3.5 h-3.5 shrink-0" />
-                    <span>{lang === 'fa' ? 'خروجی قابل تحویل (Deliverable)' : 'Expected Deliverable'}</span>
-                  </div>
-                  <p className="text-xs sm:text-sm font-semibold text-amber-950 dark:text-amber-100 leading-relaxed">
-                    {ex.deliverableFa}
-                  </p>
-                </div>
+          {/* Self-Check Rubric & Auto-Saved Learner Worklog */}
+          <section className="pt-2 grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div className="rounded-[var(--cpai-radius)] bg-[var(--cpai-surface-subtle)] border border-[var(--cpai-border)] p-4 sm:p-5 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="text-sm font-semibold text-[var(--cpai-text)]">
+                  {isFa ? 'چک‌لیست خودارزیابی خروجی' : 'Self-Check Criteria'}
+                </h4>
+                <span className="text-xs font-semibold text-[var(--cpai-primary-strong)] tabular-nums">
+                  {isFa
+                    ? `${formatStepNumber(selfCheck.checkedCount, 'fa')} از ${formatStepNumber(selfCheck.totalCount, 'fa')}`
+                    : `${selfCheck.checkedCount}/${selfCheck.totalCount}`}
+                </span>
               </div>
 
-              {/* Execution Steps */}
               <div className="space-y-2">
-                <div className="text-xs font-extrabold text-slate-800 dark:text-slate-100">
-                  {lang === 'fa' ? 'گام‌های اجرای تمرین:' : 'Execution Steps:'}
-                </div>
-                <ol className="space-y-1.5">
-                  {ex.stepsFa.map((step, sIdx) => (
-                    <li
-                      key={sIdx}
-                      className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed"
-                    >
-                      <span className="w-5 h-5 rounded-md bg-[#1f5163]/12 text-[#1f5163] dark:bg-[#6fb3c6]/20 dark:text-[#6fb3c6] font-mono text-[11px] font-black flex items-center justify-center shrink-0 mt-0.5">
-                        {(sIdx + 1).toLocaleString('fa-IR')}
-                      </span>
-                      <span>{step}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-
-              {/* Starter Prompt Block + Direct Sandbox & Copy Actions */}
-              <div className="rounded-xl border border-slate-200 dark:border-slate-700/80 bg-slate-900 dark:bg-[#0d131a] text-slate-100 overflow-hidden">
-                <div className="px-3.5 py-2 bg-slate-800/90 dark:bg-[#131c24] border-b border-slate-700/80 flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-[11px] font-bold text-slate-200 flex items-center gap-1.5">
-                    <Terminal className="w-3.5 h-3.5 text-[#6fb3c6]" />
-                    <span>
-                      {lang === 'fa'
-                        ? 'پرامپت آماده اختصاصی این تمرین'
-                        : 'Dedicated Exercise Starter Prompt'}
-                    </span>
-                  </span>
-                  <div className="flex items-center gap-1.5 flex-wrap">
+                {activeExercise.selfCheckCriteriaFa.map((criterion, cIdx) => {
+                  const checkKey = `${activeExercise.id}__${cIdx}`;
+                  const checked = !!checksMap[checkKey];
+                  return (
                     <button
+                      key={checkKey}
                       type="button"
-                      onClick={() => onLoadToSandbox(ex.promptStarterFa)}
-                      data-testid={`load-ex-sandbox-${ex.id}`}
-                      className="px-2.5 py-1 rounded-lg bg-[#1f5163] hover:bg-[#296880] text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                      onClick={() => onToggleCheck(checkKey)}
+                      data-testid={`ex-check-${checkKey}`}
+                      aria-pressed={checked}
+                      className={`w-full min-h-[44px] text-start p-3 rounded-[var(--cpai-radius)] border text-sm leading-relaxed flex items-start gap-2.5 transition-colors ${
+                        checked
+                          ? 'bg-[var(--cpai-success-bg)] border-[var(--cpai-success-border)] text-[var(--cpai-success-text)]'
+                          : 'bg-[var(--cpai-surface)] border-[var(--cpai-border)] text-[var(--cpai-text)] hover:border-[var(--cpai-primary)]'
+                      }`}
                     >
-                      <Terminal className="w-3 h-3" />
-                      <span>
-                        {lang === 'fa' ? 'بارگذاری در سندباکس' : 'Load in Sandbox'}
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(ex.promptStarterFa, copyKey)}
-                      data-testid={`copy-ex-prompt-${ex.id}`}
-                      className="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-100 text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors"
-                    >
-                      {copiedId === copyKey ? (
-                        <>
-                          <Check className="w-3 h-3 text-emerald-400" />
-                          <span>{lang === 'fa' ? 'کپی شد' : 'Copied'}</span>
-                        </>
+                      {checked ? (
+                        <CheckSquare
+                          aria-hidden="true"
+                          className="w-4 h-4 text-[var(--cpai-success-text)] shrink-0 mt-1"
+                        />
                       ) : (
-                        <>
-                          <Copy className="w-3 h-3" />
-                          <span>{lang === 'fa' ? 'کپی پرامپت' : 'Copy'}</span>
-                        </>
+                        <Square
+                          aria-hidden="true"
+                          className="w-4 h-4 text-[var(--cpai-muted)] shrink-0 mt-1"
+                        />
                       )}
+                      <span>{renderInlineCode(criterion)}</span>
                     </button>
-                  </div>
-                </div>
-                <pre
-                  dir={lang === 'fa' ? 'rtl' : 'ltr'}
-                  className={`p-3.5 text-xs leading-relaxed whitespace-pre-wrap font-sans text-slate-100 overflow-x-auto ${
-                    lang === 'fa' ? 'text-right' : 'text-left'
-                  }`}
-                >
-                  {ex.promptStarterFa}
-                </pre>
+                  );
+                })}
               </div>
+            </div>
 
-              {/* Interactive Self-Check Rubric + Learner Worklog */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 pt-1">
-                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#131c24] border border-slate-200/80 dark:border-slate-800 space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-extrabold text-slate-800 dark:text-slate-100">
-                      {lang === 'fa' ? 'چک‌لیست خودارزیابی خروجی' : 'Self-Check Criteria'}
-                    </span>
-                    <span className="text-[11px] font-mono font-bold text-[#1f5163] dark:text-[#6fb3c6] tabular-nums">
-                      {checksDone}/{ex.selfCheckCriteriaFa.length}
-                    </span>
-                  </div>
-                  <div className="space-y-1.5">
-                    {ex.selfCheckCriteriaFa.map((criterion, cIdx) => {
-                      const checkKey = `${ex.id}__${cIdx}`;
-                      const checked = !!checksMap[checkKey];
-                      return (
-                        <button
-                          key={checkKey}
-                          type="button"
-                          onClick={() => onToggleCheck(checkKey)}
-                          data-testid={`ex-check-${checkKey}`}
-                          aria-pressed={checked}
-                          className={`w-full text-right p-2 rounded-lg border text-xs flex items-start gap-2 transition-colors cursor-pointer ${
-                            checked
-                              ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-100'
-                              : 'bg-white dark:bg-[#18212b] border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-[#1f5163]/50'
-                          }`}
-                        >
-                          {checked ? (
-                            <CheckSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                          ) : (
-                            <Square className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-                          )}
-                          <span className={checked ? 'line-through opacity-80' : ''}>
-                            {criterion}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+            <div className="rounded-[var(--cpai-radius)] bg-[var(--cpai-surface-subtle)] border border-[var(--cpai-border)] p-4 sm:p-5 space-y-2.5 flex flex-col">
+              <label
+                htmlFor={`note-${activeExercise.id}`}
+                className="text-sm font-semibold text-[var(--cpai-text)]"
+              >
+                {isFa
+                  ? 'یادداشت، لینک فایل یا خلاصه خروجی شما (ذخیره خودکار)'
+                  : 'Your Worklog, File Link or Result Summary (Auto-saved)'}
+              </label>
+              <textarea
+                id={`note-${activeExercise.id}`}
+                data-testid={`ex-note-${activeExercise.id}`}
+                value={noteValue}
+                onChange={(e) => onChangeNote(activeExercise.id, e.target.value)}
+                rows={4}
+                placeholder={
+                  isFa
+                    ? 'لینک شیت/گیت‌هاب یا نکات کلیدی که در اجرای این تمرین به دست آوردید اینجا بنویسید...'
+                    : 'Paste your sheet/GitHub link or key takeaways from completing this exercise...'
+                }
+                className="w-full flex-1 rounded-[var(--cpai-radius)] border border-[var(--cpai-border)] bg-[var(--cpai-surface)] px-3.5 py-2.5 text-sm leading-relaxed text-[var(--cpai-text)] placeholder:text-[var(--cpai-muted)] focus:outline-none focus:border-[var(--cpai-primary)] resize-y"
+              />
+            </div>
+          </section>
 
-                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#131c24] border border-slate-200/80 dark:border-slate-800 space-y-2 flex flex-col">
-                  <label
-                    htmlFor={`note-${ex.id}`}
-                    className="text-xs font-extrabold text-slate-800 dark:text-slate-100"
-                  >
-                    {lang === 'fa'
-                      ? 'یادداشت، لینک فایل یا خلاصه خروجی شما (ذخیره خودکار)'
-                      : 'Your Worklog, File Link or Result Summary (Auto-saved)'}
-                  </label>
-                  <textarea
-                    id={`note-${ex.id}`}
-                    data-testid={`ex-note-${ex.id}`}
-                    value={noteValue}
-                    onChange={(e) => onChangeNote(ex.id, e.target.value)}
-                    rows={3}
-                    placeholder={
-                      lang === 'fa'
-                        ? 'لینک شیت/گیت‌هاب یا نکات کلیدی که در اجرای این تمرین به دست آوردید اینجا بنویسید...'
-                        : 'Paste your sheet/GitHub link or key takeaways from completing this exercise...'
-                    }
-                    className="w-full flex-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#18212b] px-3 py-2 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1f5163]/40 resize-y"
-                  />
-                </div>
-              </div>
-            </article>
-          );
-        })}
-      </div>
-
-      {/* Bottom Footer Actions */}
-      <div className="p-4 rounded-2xl bg-white dark:bg-[#18212b] border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={onSwitchToLesson}
-          className="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-[#1f5163] text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 cursor-pointer transition-colors"
-        >
-          <BookOpen className="w-4 h-4 text-[#1f5163] dark:text-[#6fb3c6]" />
-          <span>{lang === 'fa' ? 'مرور دوباره درس این ماژول' : 'Review Module Lesson'}</span>
-        </button>
-
-        {onNextModuleExercises && (
-          <button
-            type="button"
-            onClick={onNextModuleExercises}
-            data-testid="next-module-exercises-btn"
-            className="px-4 py-2 rounded-xl bg-[#1f5163] hover:bg-[#163c4a] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
-          >
-            <span>
-              {lang === 'fa'
-                ? nextModuleLabelFa
-                  ? `تمرین ماژول بعدی (${nextModuleLabelFa})`
-                  : 'تمرین ماژول بعدی'
-                : 'Next Module Exercises'}
-            </span>
-            {lang === 'fa' ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-          </button>
-        )}
-      </div>
+          {/* Clean Exercise Step Navigation Footer */}
+          <FocusedLessonFooter
+            lang={lang}
+            boundary={boundary}
+            onPrev={() => setActiveExerciseIndex(Math.max(0, boundary.currentIndex - 1))}
+            onNext={() =>
+              setActiveExerciseIndex(
+                Math.min(deck.exercises.length - 1, boundary.currentIndex + 1)
+              )
+            }
+            prevLabelFa="تمرین قبلی"
+            prevLabelEn="Previous exercise"
+            nextLabelFa="تمرین بعدی"
+            nextLabelEn="Next exercise"
+            stepUnitFa="تمرین"
+            stepUnitEn="Exercise"
+            secondaryAction={{
+              label: isFa ? 'مرور دوباره درس این ماژول' : 'Review Module Lesson',
+              onClick: onSwitchToLesson
+            }}
+            finalStepCta={
+              onNextModuleExercises
+                ? {
+                    label: isFa
+                      ? nextModuleLabelFa
+                        ? `تمرین ماژول بعدی (${nextModuleLabelFa})`
+                        : 'تمرین ماژول بعدی'
+                      : 'Next Module Exercises',
+                    onClick: onNextModuleExercises,
+                    testId: 'next-module-exercises-btn'
+                  }
+                : undefined
+            }
+          />
+        </article>
+      </FocusedLessonLayout>
     </div>
   );
 };

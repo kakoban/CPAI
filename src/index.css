@@ -20,6 +20,40 @@
     --font-ui: "IBM Plex Sans", system-ui, sans-serif;
     --font-serif: "Newsreader", Georgia, serif;
     --font-fa: "Vazirmatn", system-ui, sans-serif;
+
+    /* CPAI Focused Learning Design System Tokens (Phase 1 — Scoped) */
+    --cpai-primary: #007D86;
+    --cpai-primary-strong: #07515A;
+    --cpai-primary-soft: #E6F4F5;
+    --cpai-bg: #F8F9FA;
+    --cpai-surface: #FFFFFF;
+    --cpai-surface-subtle: #F2F5F6;
+    --cpai-text: #242B30;
+    --cpai-muted: #5A6369;
+    --cpai-border: #DCE2E4;
+    --cpai-success-bg: #EAF5EE;
+    --cpai-success-border: #C4E2CE;
+    --cpai-success-text: #205436;
+    --cpai-warning-bg: #FDF6E7;
+    --cpai-warning-border: #EAD4A2;
+    --cpai-warning-text: #7A4708;
+    --cpai-error-bg: #FDF2F2;
+    --cpai-error-border: #F2C5C1;
+    --cpai-error: #B42318;
+    --cpai-focus: #07515A;
+    --cpai-code-bg: #182026;
+    --cpai-code-text: #E6EDF0;
+    --cpai-font: "Vazirmatn", Tahoma, system-ui, sans-serif;
+    --cpai-space-1: 4px;
+    --cpai-space-2: 8px;
+    --cpai-space-3: 12px;
+    --cpai-space-4: 16px;
+    --cpai-space-6: 24px;
+    --cpai-space-8: 32px;
+    --cpai-radius: 10px;
+    --cpai-reading-width: 904px;
+    --cpai-body-size: 18px;
+    --cpai-body-leading: 1.75;
   }
 
   :root.dark,
@@ -38,6 +72,29 @@
     --bad: #fb7185;
     --badbg: #40141f;
     --focus: #6fb3c6;
+
+    /* CPAI Focused Learning Design System Tokens — Dark Mode */
+    --cpai-primary: #63D0D4;
+    --cpai-primary-strong: #A0E5E7;
+    --cpai-primary-soft: #163338;
+    --cpai-bg: #151B1E;
+    --cpai-surface: #20282C;
+    --cpai-surface-subtle: #1A2226;
+    --cpai-text: #F1F4F5;
+    --cpai-muted: #B6C2C7;
+    --cpai-border: #3C494F;
+    --cpai-success-bg: #1B342A;
+    --cpai-success-border: #2D5A48;
+    --cpai-success-text: #A7E3BD;
+    --cpai-warning-bg: #312512;
+    --cpai-warning-border: #5C431C;
+    --cpai-warning-text: #F6CF86;
+    --cpai-error-bg: #361A1B;
+    --cpai-error-border: #663033;
+    --cpai-error: #FFB4AB;
+    --cpai-focus: #A0E5E7;
+    --cpai-code-bg: #101518;
+    --cpai-code-text: #E9F0F2;
   }
 
   body {
@@ -393,4 +450,131 @@
 :root[data-presentation="true"] .presentation-main [data-testid="page0-content-scroll"] h3,
 :root[data-presentation="true"] .presentation-main .cpmai-workbook-stage h3 {
   font-size: clamp(1.02rem, 0.96rem + 0.32vw, 1.28rem);
+}
+
+/* ========================================================================= */
+/* CPAI Focused Learning Reader Scoped Styles (Phase 1 & 2 Pilot)            */
+/* ========================================================================= */
+.cpai-focused-reader {
+  font-family: var(--cpai-font);
+  color: var(--cpai-text);
+}
+
+.cpai-focused-reader .cpai-lesson-title {
+  font-size: clamp(1.45rem, 1.25rem + 0.85vw, 1.875rem);
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--cpai-text);
+  text-wrap: balance;
+}
+
+.cpai-focused-reader .cpai-lesson-lead {
+  font-size: clamp(1.02rem, 0.98rem + 0.25vw, 1.125rem);
+  font-weight: 400;
+  line-height: 1.75;
+  color: var(--cpai-muted);
+}
+
+.cpai-focused-reader .cpai-prose,
+.cpai-focused-reader .cpai-prose p,
+.cpai-focused-reader .cpai-prose li {
+  font-size: clamp(1.05rem, 1rem + 0.2vw, 1.15rem);
+  font-weight: 400;
+  line-height: 1.82;
+  color: var(--cpai-text);
+}
+
+:root[data-presentation="true"] .cpai-focused-reader .cpai-prose,
+:root[data-presentation="true"] .cpai-focused-reader .cpai-prose p,
+:root[data-presentation="true"] .cpai-focused-reader .cpai-prose li {
+  font-size: clamp(1.15rem, 1.08rem + 0.35vw, 1.32rem);
+  line-height: 1.88;
+}
+
+.cpai-focused-reader .cpai-code-block {
+  background-color: var(--cpai-code-bg);
+  color: var(--cpai-code-text);
+  border: 1px solid var(--cpai-border);
+  border-radius: var(--cpai-radius);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+
+.cpai-focused-reader button:focus-visible,
+.cpai-focused-reader a:focus-visible,
+.cpai-focused-reader input:focus-visible,
+.cpai-focused-reader textarea:focus-visible {
+  outline: 2px solid var(--cpai-focus);
+  outline-offset: 2px;
+}
+
+/* Desktop locked-frame reader: module header & step sidebar remain pinned; ONLY reading content scrolls */
+@media (min-width: 1024px) {
+  .cpai-split-stage:has(.cpai-focused-reader) {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+    gap: 0.75rem;
+  }
+
+  .cpai-split-stage:has(.cpai-focused-reader) :has(.cpai-focused-reader) {
+    flex: 1 1 0%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0 !important;
+  }
+
+  .cpai-split-stage:has(.cpai-focused-reader) .cpai-focused-reader {
+    flex: 1 1 0%;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-top: 0 !important;
+  }
+
+  .cpai-split-stage:has(.cpai-focused-reader) [data-testid="focused-reader-body"] {
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow: hidden;
+    align-items: stretch;
+  }
+
+  .cpai-split-stage:has(.cpai-focused-reader) [data-testid="desktop-step-sidebar"] {
+    position: static;
+    height: 100%;
+    max-height: 100%;
+  }
+
+  .cpai-split-stage:has(.cpai-focused-reader) [data-testid="focused-content-scroll"] {
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Mobile & tablet (<1024px): flush stage edges so sticky module controls lock seamlessly with zero top gap */
+@media (max-width: 1023.98px) {
+  .cpai-split-stage:has(.cpai-focused-reader) {
+    padding: 0 !important;
+  }
+
+  .cpai-split-stage:has(.cpai-focused-reader) .cpai-focused-reader {
+    border-radius: 0;
+    border-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cpai-focused-reader *,
+  .cpai-focused-reader *::before,
+  .cpai-focused-reader *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

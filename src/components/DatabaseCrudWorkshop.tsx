@@ -80,6 +80,9 @@ import {
 } from '../utils/databaseCrudEngine';
 import { IndustryTrackId } from '../types/industryTrack';
 import { playTactileSound } from '../utils/uiSoundEffects';
+import { FocusedLessonLayout, FocusedStepItem } from './learning/FocusedLessonLayout';
+import { FocusedLessonFooter } from './learning/FocusedLessonFooter';
+import { clampStepIndex, getStepBoundaryState, markStepVisited } from '../utils/focusedLessonEngine';
 
 interface DatabaseCrudWorkshopProps {
   industryTrack?: IndustryTrackId;
@@ -146,6 +149,8 @@ export const DatabaseCrudWorkshop: React.FC<DatabaseCrudWorkshopProps> = ({
   copiedId
 }) => {
   const [activeStage, setActiveStage] = useState<WorkshopStageTab>('databases');
+  const [visitedStageIndices, setVisitedStageIndices] = useState<Set<number>>(() => new Set([0]));
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
 
   // --- Tab 1: 8-DB Story & Decision Simulator ---
   const [selectedFamilyId, setSelectedFamilyId] = useState<DatabaseFamilyId>('relational');
@@ -597,105 +602,53 @@ export const DatabaseCrudWorkshop: React.FC<DatabaseCrudWorkshopProps> = ({
     setFormFeedbackFa('داده‌های نمونه اولیه و چک‌لیست تست ۴ مرحله‌ای بازنشانی شدند.');
   };
 
-  const currentStageIdx = STAGE_TABS.findIndex((s) => s.id === activeStage);
+  const currentStageIdx = Math.max(0, STAGE_TABS.findIndex((s) => s.id === activeStage));
+  const stageSteps: FocusedStepItem[] = STAGE_TABS.map((tab) => ({
+    id: tab.id,
+    title: tab.labelFa,
+    category: tab.shortSubFa
+  }));
+  const boundary = getStepBoundaryState(currentStageIdx, stageSteps.length);
+
+  const handleSelectStageByIndex = (idx: number) => {
+    const nextIdx = clampStepIndex(idx, stageSteps.length);
+    setVisitedStageIndices((prev) => markStepVisited(prev, nextIdx));
+    handleStageChange(STAGE_TABS[nextIdx].id);
+  };
 
   return (
-    <section
-      data-testid="database-crud-workshop"
-      className="space-y-6 text-right"
-      dir="rtl"
-    >
-      {/* ================================================================= */}
-      {/* MODULE HERO HEADER & GOLDEN CLASS RULE                            */}
-      {/* ================================================================= */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645] space-y-5">
-        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 pb-4 border-b border-[#ecdcd8]/70 dark:border-[#382645]/70">
-          <div className="flex items-start gap-3">
-            <span className="px-2.5 py-1 rounded-lg bg-[#e0533c] text-white text-xs font-black tabular-nums shrink-0 mt-0.5">
-              ۵-۳
-            </span>
-            <div className="space-y-1.5">
-              <div className="flex flex-wrap items-center gap-2 text-xs text-[#64748b] dark:text-[#ad99ab]">
-                <span>جلسه ۵</span>
-                <span aria-hidden="true">·</span>
-                <span>استاندارد PMI-CPMAI: فاز سوم — آماده‌سازی داده (Data Preparation)</span>
-                <span aria-hidden="true">·</span>
-                <span className="font-mono text-[#1f5163] dark:text-[#6fb3c6]">{CANONICAL_TABLE_NAME}</span>
-              </div>
-              <h2 className="text-lg sm:text-xl font-black text-[#261a1d] dark:text-[#faedf3] text-balance leading-snug">
-                ساختارسازی داده، انتخاب پایگاه داده و عملیات دائمی (CRUD)
-              </h2>
-              <p className="text-xs sm:text-sm text-[#475569] dark:text-[#cbd5e1] leading-relaxed max-w-4xl">
-                در پایان این ماژول بدون نیاز به حفظ کردن سینتکس پیچیده، ۸ خانواده اصلی پایگاه داده را می‌شناسید، بهترین گزینه را برای شروع پروژه انتخاب می‌کنید، داده‌های مفید را با منطق شفاف CPMAI از داده‌های مزاحم جدا می‌کنید و یک سیستم ثبت و مدیریت دائمی اطلاعات (CRUD + Soft Delete) می‌سازید.
+    <div data-testid="database-crud-workshop" className="text-right" dir="rtl">
+      <FocusedLessonLayout
+        lang="fa"
+        moduleCode="ماژول ۵-۳"
+        moduleTitle="ساختارسازی داده، انتخاب پایگاه داده و عملیات دائمی (CRUD)"
+        moduleSubtitle={`استاندارد PMI-CPMAI: فاز سوم — آماده‌سازی داده · جدول ${CANONICAL_TABLE_NAME}`}
+        steps={stageSteps}
+        activeStepIndex={currentStageIdx}
+        visitedStepIndices={visitedStageIndices}
+        onSelectStep={handleSelectStageByIndex}
+        isMobileDrawerOpen={isMobileDrawerOpen}
+        onToggleMobileDrawer={setIsMobileDrawerOpen}
+        sidebarTitleFa="مراحل کارگاه دیتابیس"
+        stepUnitFa="مرحله"
+      >
+        <div className="space-y-6">
+          {/* Calm Golden Class Rule banner */}
+          <div className="rounded-[var(--cpai-radius)] bg-[var(--cpai-primary-soft)] border border-[var(--cpai-border)] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-[var(--cpai-primary-strong)]">
+                قانون طلایی این کلاس
+              </p>
+              <p className="text-sm text-[var(--cpai-text)] leading-relaxed">
+                شما قرار نیست کدها را از حفظ بنویسید. نقش شما <strong className="font-bold text-[var(--cpai-primary-strong)]">طراح و تصمیم‌گیرنده</strong> است و نقش هوش مصنوعی <strong className="font-bold text-[var(--cpai-primary-strong)]">کدنویس کمکی</strong>. اگر مفهوم و منطق این درس را بفهمید، هوش مصنوعی تمام کدها را دقیق و بی‌نقص تولید می‌کند.
               </p>
             </div>
+            <div className="flex items-center gap-2 text-xs text-[var(--cpai-muted)] shrink-0 tabular-nums">
+              <span>۴ مرحله کارگاهی</span>
+              <span aria-hidden="true" className="opacity-40">|</span>
+              <span>۲۵ واژه مرجع</span>
+            </div>
           </div>
-        </div>
-
-        {/* Golden Class Rule — clean surface contrast without thick left border */}
-        <div className="p-4 rounded-xl bg-[#f4f9fb] dark:bg-[#16222c] border border-[#cde1e8] dark:border-[#2a4554] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="space-y-1">
-            <p className="text-xs font-bold text-[#1f5163] dark:text-[#7ec6da]">
-              قانون طلایی این کلاس
-            </p>
-            <p className="text-xs sm:text-sm text-[#1e293b] dark:text-[#e2e8f0] leading-relaxed">
-              شما قرار نیست کدها را از حفظ بنویسید. نقش شما <strong className="font-black text-[#1f5163] dark:text-[#7ec6da]">طراح و تصمیم‌گیرنده</strong> است و نقش هوش مصنوعی <strong className="font-black text-[#1f5163] dark:text-[#7ec6da]">کدنویس کمکی</strong>. اگر مفهوم و منطق این درس را بفهمید، هوش مصنوعی تمام کدها را دقیق و بی‌نقص تولید می‌کند.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-[#475569] dark:text-[#94a3b8] shrink-0 tabular-nums">
-            <span>۴ مرحله کارگاهی</span>
-            <span aria-hidden="true" className="opacity-40">|</span>
-            <span>۲۵ واژه مرجع</span>
-          </div>
-        </div>
-
-        {/* 4-Stage Navigation Tabs */}
-        <div
-          role="tablist"
-          aria-label="مراحل چهارگانه ماژول پایگاه داده و CRUD"
-          className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2.5"
-        >
-          {STAGE_TABS.map((tab) => {
-            const isActive = activeStage === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                onClick={() => handleStageChange(tab.id)}
-                className={`p-3 rounded-xl border text-right transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1f5163] ${
-                  isActive
-                    ? 'bg-[#1f5163] text-white border-[#1f5163]'
-                    : 'bg-[#fdf8f5] dark:bg-[#16101c] text-[#261a1d] dark:text-[#faedf3] border-[#ecdcd8] dark:border-[#382645] hover:border-[#1f5163]/50'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`w-6 h-6 rounded-md text-xs font-black flex items-center justify-center shrink-0 tabular-nums ${
-                      isActive
-                        ? 'bg-white/20 text-white'
-                        : 'bg-[#1f5163]/10 dark:bg-[#6fb3c6]/15 text-[#1f5163] dark:text-[#7ec6da]'
-                    }`}
-                  >
-                    {tab.stepNumFa}
-                  </span>
-                  <span className="text-xs sm:text-[13px] font-bold truncate">
-                    {tab.labelFa}
-                  </span>
-                </div>
-                <p
-                  className={`text-[11px] mt-1.5 truncate ${
-                    isActive ? 'text-white/80' : 'text-[#64748b] dark:text-[#ad99ab]'
-                  }`}
-                >
-                  {tab.shortSubFa}
-                </p>
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
       {/* ================================================================= */}
       {/* TAB 1: EXCEL VS DB + 8 DATABASE FAMILIES & DECISION SIMULATOR     */}
@@ -2587,48 +2540,17 @@ export const DatabaseCrudWorkshop: React.FC<DatabaseCrudWorkshopProps> = ({
         </div>
       )}
 
-      {/* ================================================================= */}
-      {/* STAGE FOOTER: PREVIOUS / NEXT STAGE NAVIGATION                    */}
-      {/* ================================================================= */}
-      <div className="flex items-center justify-between gap-3 p-4 rounded-2xl bg-white dark:bg-[#201729] border border-[#ecdcd8] dark:border-[#382645]">
-        <button
-          type="button"
-          disabled={currentStageIdx <= 0}
-          onClick={() => {
-            if (currentStageIdx > 0) handleStageChange(STAGE_TABS[currentStageIdx - 1].id);
-          }}
-          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border transition-colors ${
-            currentStageIdx <= 0
-              ? 'opacity-40 cursor-not-allowed border-[#ecdcd8] dark:border-[#382645] text-[#64748b]'
-              : 'cursor-pointer border-[#ecdcd8] dark:border-[#382645] hover:border-[#1f5163] text-[#261a1d] dark:text-[#faedf3]'
-          }`}
-        >
-          <ArrowRight className="w-4 h-4" />
-          <span>مرحله قبلی</span>
-        </button>
-
-        <span className="text-xs font-semibold text-[#64748b] dark:text-[#ad99ab] tabular-nums">
-          مرحله {currentStageIdx + 1} از {STAGE_TABS.length} · {STAGE_TABS[currentStageIdx].labelFa}
-        </span>
-
-        <button
-          type="button"
-          disabled={currentStageIdx >= STAGE_TABS.length - 1}
-          onClick={() => {
-            if (currentStageIdx < STAGE_TABS.length - 1) {
-              handleStageChange(STAGE_TABS[currentStageIdx + 1].id);
-            }
-          }}
-          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors ${
-            currentStageIdx >= STAGE_TABS.length - 1
-              ? 'opacity-40 cursor-not-allowed bg-[#cbd5e1] dark:bg-[#334155] text-[#475569]'
-              : 'cursor-pointer bg-[#1f5163] hover:bg-[#173f4e] text-white'
-          }`}
-        >
-          <span>مرحله بعدی</span>
-          <ArrowLeft className="w-4 h-4" />
-        </button>
-      </div>
+          <FocusedLessonFooter
+            lang="fa"
+            boundary={boundary}
+            onPrev={() => handleSelectStageByIndex(boundary.currentIndex - 1)}
+            onNext={() => handleSelectStageByIndex(boundary.currentIndex + 1)}
+            prevLabelFa="مرحله قبلی"
+            nextLabelFa="مرحله بعدی"
+            stepUnitFa="مرحله"
+          />
+        </div>
+      </FocusedLessonLayout>
 
       {/* ================================================================= */}
       {/* SOFT DELETE MANDATORY REASON MODAL                                */}
@@ -2720,6 +2642,6 @@ export const DatabaseCrudWorkshop: React.FC<DatabaseCrudWorkshopProps> = ({
           </form>
         </div>
       )}
-    </section>
+    </div>
   );
 };

@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Language } from '../types/cpmai';
-import { IndustryTrackId } from '../types/industryTrack';
+import { DisciplineId, EngineeringRoleId, IndustryTrackId } from '../types/industryTrack';
+import { getDisciplineMetadata } from '../data/disciplineExamplesRegistry';
+import { getRoleChallengeProfile, getRoleDisplayMeta } from '../utils/disciplineAdaptation';
+import { openAiCompanionWindow } from '../utils/companionWindow';
 import { playTactileSound } from '../utils/uiSoundEffects';
 import {
   Sparkles,
@@ -48,16 +51,23 @@ import {
   NOTEBOOKLM_STUDIO_TOOLS
 } from '../data/notebooklm_mastery_curriculum';
 import { SpecimenDocumentCard } from './notebooklm/SpecimenDocumentCard';
+import { FocusedLessonLayout, FocusedStepItem, FocusedViewTab } from './learning/FocusedLessonLayout';
+import { FocusedLessonFooter } from './learning/FocusedLessonFooter';
+import { clampStepIndex, getStepBoundaryState, markStepVisited } from '../utils/focusedLessonEngine';
 
 type NotebookLmStage = 'basics' | 'studio' | 'usecases' | 'labs';
 
 interface NotebookLmWorkshopProps {
   lang: Language;
   industryTrack?: IndustryTrackId;
+  disciplineId?: DisciplineId;
+  roleId?: EngineeringRoleId;
   onLoadToSandbox: (promptText: string) => void;
   copyToClipboard: (text: string, id: string) => void;
   copiedId: string | null;
   onOpenHrToolsWorkshop?: () => void;
+  onOpenDisciplineModal?: () => void;
+  openCompanionWindow?: (url: string, name: string) => void;
   isPresentationMode?: boolean;
   isSplitCockpit?: boolean;
 }
@@ -65,25 +75,32 @@ interface NotebookLmWorkshopProps {
 export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
   lang,
   industryTrack = 'CIVIL_INFRA',
+  disciplineId,
+  roleId = 'technical_engineer',
   onLoadToSandbox,
   copyToClipboard,
   copiedId,
   onOpenHrToolsWorkshop,
+  onOpenDisciplineModal,
+  openCompanionWindow,
   isPresentationMode = false,
   isSplitCockpit = false
 }) => {
   const isFa = lang === 'fa';
+  const activeDisciplineMeta = disciplineId ? getDisciplineMetadata(disciplineId) : null;
+  const activeRoleMeta = getRoleDisplayMeta(roleId, industryTrack);
+  const roleProfile = getRoleChallengeProfile(roleId, industryTrack);
   const {
     overview: NOTEBOOKLM_OVERVIEW,
     departments: UNIT_MANAGERS_MATRIX,
     blueprints: PRESENTATION_INFOGRAPHIC_GUIDES,
     exercises: NOTEBOOKLM_EXERCISES
-  } = getNotebookLmGuideForTrack(industryTrack);
+  } = getNotebookLmGuideForTrack(industryTrack, disciplineId, roleId);
   const {
     departmentDocs: SAMPLE_DEPARTMENT_DOCS,
     blueprintDocs: SAMPLE_BLUEPRINT_DOCS,
     exerciseDocs: SAMPLE_EXERCISE_DOCS
-  } = getNotebookLmSampleDocsForTrack(industryTrack);
+  } = getNotebookLmSampleDocsForTrack(industryTrack, disciplineId, roleId);
 
   // Clean 4-stage sequential flow: 1. Basics (7 lessons) -> 2. Studio (6 tools) -> 3. Org Use Cases (Depts & Decks) -> 4. Real-Doc Labs
   const [activeStage, setActiveStage] = useState<NotebookLmStage>('basics');
@@ -96,8 +113,11 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
   const [previewDocId, setPreviewDocId] = useState<string | null>(null);
   const [docCopiedId, setDocCopiedId] = useState<string | null>(null);
   const [activeScenarioIdx, setActiveScenarioIdx] = useState<number>(0);
-  // Start collapsed so learners reach the actual syllabus and lessons immediately above the fold
   const [isOverviewExpanded, setIsOverviewExpanded] = useState<boolean>(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
+  const [visitedBasics, setVisitedBasics] = useState<Set<number>>(() => new Set([0]));
+  const [visitedStudio, setVisitedStudio] = useState<Set<number>>(() => new Set([0]));
+  const [visitedLabs, setVisitedLabs] = useState<Set<number>>(() => new Set([0]));
   const stageTopRef = useRef<HTMLDivElement>(null);
   const basicsPanelRef = useRef<HTMLDivElement>(null);
 
@@ -126,7 +146,7 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
     setSelectedExerciseId(NOTEBOOKLM_EXERCISES[0]?.id || 'ex1_contract_claim_extraction');
     setPreviewDocId(null);
     setActiveScenarioIdx(0);
-  }, [industryTrack]);
+  }, [industryTrack, disciplineId, roleId]);
 
   const STAGES: Array<{
     id: NotebookLmStage;
@@ -260,41 +280,152 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
   const prevStageObj = currentStageIdx > 0 ? STAGES[currentStageIdx - 1] : null;
 
   const activeMasteryMod = NOTEBOOKLM_MASTERY_MODULES[activeMasteryIdx] || NOTEBOOKLM_MASTERY_MODULES[0];
-  const activeStudioTool =
-    NOTEBOOKLM_STUDIO_TOOLS.find((t) => t.id === activeStudioToolId) || NOTEBOOKLM_STUDIO_TOOLS[0];
+  const activeStudioIdx = Math.max(
+    0,
+    NOTEBOOKLM_STUDIO_TOOLS.findIndex((t) => t.id === activeStudioToolId)
+  );
+  const activeStudioTool = NOTEBOOKLM_STUDIO_TOOLS[activeStudioIdx] || NOTEBOOKLM_STUDIO_TOOLS[0];
+  const activeLabIdx = Math.max(
+    0,
+    NOTEBOOKLM_EXERCISES.findIndex((e) => e.id === selectedExerciseId)
+  );
+
+  const viewTabs: FocusedViewTab[] = STAGES.map((st) => ({
+    id: st.id,
+    label: isFa ? st.labelFa : st.labelEn
+  }));
+
+  const basicsSteps: FocusedStepItem[] = NOTEBOOKLM_MASTERY_MODULES.map((item, idx) => ({
+    id: item.id,
+    title: item.titleFa,
+    category: isFa ? `درس ${(idx + 1).toLocaleString('fa-IR')}` : `Lesson ${idx + 1}`
+  }));
+
+  const studioSteps: FocusedStepItem[] = NOTEBOOKLM_STUDIO_TOOLS.map((tool) => ({
+    id: tool.id,
+    title: tool.nameFa,
+    category: tool.nameEn
+  }));
+
+  const labSteps: FocusedStepItem[] = NOTEBOOKLM_EXERCISES.map((ex) => ({
+    id: ex.id,
+    title: isFa ? ex.titleFa : ex.titleEn,
+    category:
+      ex.exerciseNumber === 0
+        ? isFa
+          ? `اختصاصی دیسیپلین · ${ex.estimatedMinutes} دقیقه`
+          : `Active Discipline · ${ex.estimatedMinutes}m`
+        : isFa
+        ? `سناریو ${ex.exerciseNumber.toLocaleString('fa-IR')} · ${ex.estimatedMinutes} دقیقه`
+        : `Lab #${ex.exerciseNumber} · ${ex.estimatedMinutes}m`
+  }));
+
+  const currentSidebarSteps =
+    activeStage === 'basics'
+      ? basicsSteps
+      : activeStage === 'studio'
+      ? studioSteps
+      : activeStage === 'labs'
+      ? labSteps
+      : [];
+
+  const currentStepIndex =
+    activeStage === 'basics'
+      ? activeMasteryIdx
+      : activeStage === 'studio'
+      ? activeStudioIdx
+      : activeStage === 'labs'
+      ? activeLabIdx
+      : 0;
+
+  const currentVisitedSet =
+    activeStage === 'basics'
+      ? visitedBasics
+      : activeStage === 'studio'
+      ? visitedStudio
+      : visitedLabs;
+
+  const handleSelectCurrentStageStep = (idx: number) => {
+    if (activeStage === 'basics') {
+      const next = clampStepIndex(idx, basicsSteps.length);
+      selectMasteryLesson(next);
+      setVisitedBasics((prev) => markStepVisited(prev, next));
+    } else if (activeStage === 'studio') {
+      const next = clampStepIndex(idx, studioSteps.length);
+      playTactileSound('switch');
+      setActiveStudioToolId(NOTEBOOKLM_STUDIO_TOOLS[next].id);
+      setVisitedStudio((prev) => markStepVisited(prev, next));
+    } else if (activeStage === 'labs') {
+      const next = clampStepIndex(idx, labSteps.length);
+      playTactileSound('switch');
+      setSelectedExerciseId(NOTEBOOKLM_EXERCISES[next].id);
+      setActiveScenarioIdx(0);
+      setPreviewDocId(null);
+      setVisitedLabs((prev) => markStepVisited(prev, next));
+    }
+  };
+
+  const currentBoundary = getStepBoundaryState(currentStepIndex, currentSidebarSteps.length);
 
   return (
-    <section className="space-y-4">
-      {/* 1. COMPACT TOP HEADER BAR (Collapsed by Default; Overview Opens On-Demand) */}
-      <div
-        ref={stageTopRef}
-        data-testid={isOverviewExpanded ? 'notebooklm-overview-expanded' : 'notebooklm-overview-collapsed'}
-        className="rounded-2xl bg-white dark:bg-[#151e26] border border-slate-200 dark:border-slate-800 shadow-2xs overflow-hidden scroll-mt-4"
-      >
-        <div className="px-4 py-2.5 sm:px-5 flex flex-wrap items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2.5 min-w-0 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 text-sm font-black text-slate-900 dark:text-white">
-              <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400 shrink-0" />
-              <span>{isFa ? 'Google NotebookLM' : 'Google NotebookLM'}</span>
-            </span>
-            <span aria-hidden="true" className="text-slate-300 dark:text-slate-600 hidden sm:inline">·</span>
-            <span className="text-xs text-slate-600 dark:text-slate-300 hidden sm:inline">
-              {isFa
-                ? 'هوش مستند بدون توهم · ۵۰ سند هم‌زمان · ۵۰۰ هزار واژه · پادکست و نقشه ذهنی'
-                : 'Zero-Hallucination Document Lab · 50 Sources · 500k Words'}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <a
-              href={NOTEBOOKLM_OVERVIEW.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1f5163] hover:bg-[#163c4a] text-white text-xs font-bold transition-colors whitespace-nowrap"
+    <div
+      ref={stageTopRef}
+      data-testid={isOverviewExpanded ? 'notebooklm-overview-expanded' : 'notebooklm-overview-collapsed'}
+      className="scroll-mt-4"
+    >
+      <FocusedLessonLayout
+        lang={lang}
+        moduleCode="NotebookLM"
+        moduleTitle={isFa ? 'کارگاه جامع Google NotebookLM' : 'Google NotebookLM Mastery Workshop'}
+        moduleSubtitle={
+          isFa
+            ? 'هوش مستند بدون توهم · ۵۰ سند هم‌زمان · ۵۰۰ هزار واژه · پادکست و نقشه ذهنی'
+            : 'Zero-Hallucination Document Lab · 50 Sources · 500k Words'
+        }
+        steps={currentSidebarSteps}
+        activeStepIndex={currentStepIndex}
+        visitedStepIndices={currentVisitedSet}
+        onSelectStep={handleSelectCurrentStageStep}
+        views={viewTabs}
+        activeViewId={activeStage}
+        onSelectView={(v) => switchStage(v as NotebookLmStage)}
+        isStepListVisible={activeStage !== 'usecases'}
+        isMobileDrawerOpen={isMobileDrawerOpen}
+        onToggleMobileDrawer={setIsMobileDrawerOpen}
+        sidebarTitleFa={
+          activeStage === 'basics'
+            ? '۷ درس پایه تا تسلط'
+            : activeStage === 'studio'
+            ? '۶ ابزار پنل Studio'
+            : 'سناریوهای کارگاه اسناد'
+        }
+        sidebarTitleEn={
+          activeStage === 'basics'
+            ? '7-Lesson Syllabus'
+            : activeStage === 'studio'
+            ? '6 Studio Tools'
+            : 'Real-Doc Labs'
+        }
+        stepUnitFa={activeStage === 'studio' ? 'ابزار' : activeStage === 'labs' ? 'سناریو' : 'درس'}
+        stepUnitEn={activeStage === 'studio' ? 'tools' : activeStage === 'labs' ? 'labs' : 'lessons'}
+        headerAction={
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            <button
+              type="button"
+              data-testid="open-notebooklm-companion-btn"
+              onClick={() => {
+                if (openCompanionWindow) {
+                  openCompanionWindow(NOTEBOOKLM_OVERVIEW.url, 'notebooklm_companion');
+                } else {
+                  openAiCompanionWindow(NOTEBOOKLM_OVERVIEW.url, 'notebooklm_companion');
+                }
+              }}
+              className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 rounded-[var(--cpai-radius)] bg-[var(--cpai-primary)] hover:bg-[var(--cpai-primary-strong)] text-white dark:text-[#0F171A] text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer"
+              title={isFa ? 'باز کردن NotebookLM در پنجره کناری (بدون ترک صفحه)' : 'Open NotebookLM in side companion window'}
             >
-              <span>{isFa ? 'ورود به NotebookLM' : 'Open NotebookLM'}</span>
+              <span>{isFa ? 'ورود به NotebookLM در پنجره کناری' : 'Open NotebookLM Side Window'}</span>
               <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-            </a>
+            </button>
             <button
               type="button"
               onClick={() => {
@@ -303,164 +434,65 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
               }}
               data-testid="notebooklm-overview-toggle"
               aria-expanded={isOverviewExpanded}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#1c2630] text-xs font-semibold text-slate-700 dark:text-slate-200 hover:border-[#1f5163]/50 cursor-pointer transition-colors whitespace-nowrap"
+              className="inline-flex items-center gap-1 min-h-[40px] px-3 py-1.5 rounded-[var(--cpai-radius)] border border-[var(--cpai-border)] bg-[var(--cpai-surface)] text-xs font-medium text-[var(--cpai-text)] hover:border-[var(--cpai-primary)] cursor-pointer transition-colors whitespace-nowrap"
             >
               {isOverviewExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
               <span>{isFa ? (isOverviewExpanded ? 'بستن معرفی' : 'معرفی کوتاه') : isOverviewExpanded ? 'Hide Overview' : 'Overview'}</span>
             </button>
           </div>
-        </div>
-
-        {/* Optional Expandable Overview (Single-Elevation, Clean Divider) */}
-        {isOverviewExpanded && (
-          <div className="px-4 pb-4 pt-3 sm:px-5 border-t border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-[#11181f] space-y-3.5 animate-fadeIn">
-            <div className="space-y-1">
-              <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white text-balance">
-                {isFa ? NOTEBOOKLM_OVERVIEW.titleFa : NOTEBOOKLM_OVERVIEW.titleEn}
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                {isFa ? NOTEBOOKLM_OVERVIEW.taglineFa : NOTEBOOKLM_OVERVIEW.taglineEn}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {NOTEBOOKLM_OVERVIEW.keyStats.map((stat, idx) => (
-                <div
-                  key={idx}
-                  className="px-3 py-2.5 rounded-xl bg-white dark:bg-[#18212b] border border-slate-200/80 dark:border-slate-800"
-                >
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {isFa ? stat.labelFa : stat.labelEn}
-                  </div>
-                  <div className="text-sm font-black text-[#1f5163] dark:text-[#6fb3c6] mt-0.5 tabular-nums">
-                    {stat.value}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-slate-700 dark:text-slate-300 leading-relaxed pt-1">
-              {(isFa ? NOTEBOOKLM_OVERVIEW.whyEngineersLoveItFa : NOTEBOOKLM_OVERVIEW.whyEngineersLoveItEn).map(
-                (item, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                    <span>{item}</span>
-                  </li>
-                )
-              )}
-            </ul>
-          </div>
-        )}
-      </div>
-
-      {/* 2. CLEAN 4-STAGE LINEAR STEPPER BAR (Replaces Chaotic 3D Keycaps) */}
-      <nav
-        aria-label={isFa ? 'مراحل آموزش Google NotebookLM' : 'NotebookLM Learning Stages'}
-        data-testid="nlm-stage-nav"
-        className="p-1.5 rounded-2xl bg-slate-100/90 dark:bg-[#11181f] border border-slate-200/90 dark:border-slate-800 grid grid-cols-2 lg:grid-cols-4 gap-1.5"
+        }
       >
-        {STAGES.map((stage) => {
-          const isSelected = activeStage === stage.id;
-          return (
-            <button
-              key={stage.id}
-              type="button"
-              data-testid={`nlm-stage-${stage.id}`}
-              aria-current={isSelected ? 'step' : undefined}
-              onClick={() => switchStage(stage.id)}
-              className={`px-3 py-2 rounded-xl text-right transition-all cursor-pointer flex items-center gap-2.5 min-w-0 ${
-                isSelected
-                  ? 'bg-white dark:bg-[#1c2732] text-slate-900 dark:text-white shadow-xs ring-1 ring-[#1f5163]/30 dark:ring-[#6fb3c6]/40'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-[#17212b]'
-              }`}
+        <div className="space-y-6">
+          {/* Optional Expandable Overview */}
+          {isOverviewExpanded && (
+            <div className="p-4 sm:p-5 rounded-[var(--cpai-radius)] border border-[var(--cpai-border)] bg-[var(--cpai-surface-subtle)] space-y-3.5 animate-fadeIn">
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-[var(--cpai-text)] text-balance">
+                  {isFa ? NOTEBOOKLM_OVERVIEW.titleFa : NOTEBOOKLM_OVERVIEW.titleEn}
+                </h3>
+                <p className="text-sm text-[var(--cpai-muted)] leading-relaxed">
+                  {isFa ? NOTEBOOKLM_OVERVIEW.taglineFa : NOTEBOOKLM_OVERVIEW.taglineEn}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {NOTEBOOKLM_OVERVIEW.keyStats.map((stat, idx) => (
+                  <div
+                    key={idx}
+                    className="px-3 py-2.5 rounded-lg bg-[var(--cpai-surface)] border border-[var(--cpai-border)]"
+                  >
+                    <div className="text-[11px] text-[var(--cpai-muted)]">
+                      {isFa ? stat.labelFa : stat.labelEn}
+                    </div>
+                    <div className="text-sm font-bold text-[var(--cpai-primary-strong)] mt-0.5 tabular-nums">
+                      {stat.value}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-[var(--cpai-text)] leading-relaxed pt-1">
+                {(isFa ? NOTEBOOKLM_OVERVIEW.whyEngineersLoveItFa : NOTEBOOKLM_OVERVIEW.whyEngineersLoveItEn).map(
+                  (item, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[var(--cpai-primary)] shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  )
+                )}
+              </ul>
+            </div>
+          )}
+
+          {/* ===================================================================== */}
+          {/* STAGE 1: CORE MASTERY — FOCUSED SINGLE-LESSON VIEW (7 LESSONS)        */}
+          {/* ===================================================================== */}
+          {activeStage === 'basics' && (
+            <div
+              ref={basicsPanelRef}
+              data-testid="nlm-panel-basics"
+              className="space-y-5 scroll-mt-3 animate-fadeIn"
             >
-              <span
-                className={`w-6 h-6 rounded-lg font-mono text-xs font-black flex items-center justify-center shrink-0 tabular-nums ${
-                  isSelected
-                    ? 'bg-[#1f5163] text-white'
-                    : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-                }`}
-              >
-                {isFa ? stage.numFa : stage.numEn}
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="text-xs font-extrabold leading-tight truncate">
-                  {isFa ? stage.labelFa : stage.labelEn}
-                </div>
-                <div className="text-[10.5px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                  {isFa ? stage.metaFa : stage.metaEn}
-                </div>
-              </div>
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* ===================================================================== */}
-      {/* STAGE 1: CORE MASTERY — CLEAN TWO-ZONE MASTER-DETAIL (7 LESSONS)      */}
-      {/* ===================================================================== */}
-      {activeStage === 'basics' && (
-        <div
-          ref={basicsPanelRef}
-          data-testid="nlm-panel-basics"
-          className="rounded-2xl bg-white dark:bg-[#151e26] border border-slate-200 dark:border-slate-800 overflow-x-clip scroll-mt-3 animate-fadeIn"
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-12">
-            {/* Sticky Syllabus Rail (Right in RTL) — stays pinned while lesson content scrolls */}
-            <aside className="lg:col-span-4 xl:col-span-3 border-b lg:border-b-0 lg:border-l border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-[#11181f] rounded-t-2xl lg:rounded-tr-2xl lg:rounded-tl-none lg:rounded-br-2xl">
-              <div
-                data-testid="nlm-syllabus-sticky"
-                className={`p-3 space-y-1.5 lg:sticky lg:overflow-y-auto ${
-                  isSplitCockpit
-                    ? 'lg:top-20 xl:top-0 lg:max-h-[calc(100vh-6rem)] xl:max-h-[calc(100dvh-15rem)]'
-                    : isPresentationMode
-                      ? 'lg:top-3 lg:max-h-[calc(100vh-2rem)]'
-                      : 'lg:top-20 lg:max-h-[calc(100vh-6rem)]'
-                }`}
-              >
-                <div className="px-2 py-1 flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                  <span>{isFa ? 'فهرست ۷ درس پایه تا تسلط' : '7-Lesson Syllabus'}</span>
-                  <span className="font-mono tabular-nums text-[#1f5163] dark:text-[#6fb3c6]">
-                    {(activeMasteryIdx + 1).toLocaleString('fa-IR')}/{NOTEBOOKLM_MASTERY_MODULES.length.toLocaleString('fa-IR')}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-1">
-                  {NOTEBOOKLM_MASTERY_MODULES.map((item, idx) => {
-                    const isSelected = idx === activeMasteryIdx;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        data-testid={`nlm-lesson-item-${idx + 1}`}
-                        onClick={() => selectMasteryLesson(idx)}
-                        className={`w-full px-2.5 py-2 rounded-xl text-right transition-colors cursor-pointer flex items-start gap-2 ${
-                          isSelected
-                            ? 'bg-[#1f5163] text-white shadow-2xs'
-                            : 'text-slate-700 dark:text-slate-200 hover:bg-white dark:hover:bg-[#19232d]'
-                        }`}
-                      >
-                        <span
-                          className={`w-5 h-5 rounded-md font-mono text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5 tabular-nums ${
-                            isSelected
-                              ? 'bg-white/20 text-white'
-                              : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-                          }`}
-                        >
-                          {isFa ? (idx + 1).toLocaleString('fa-IR') : idx + 1}
-                        </span>
-                        <span className="text-xs font-bold leading-snug line-clamp-2">
-                          {item.titleFa}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </aside>
-
-            {/* Focused Active Lesson Stage (Left in RTL) */}
-            <div className="lg:col-span-8 xl:col-span-9 p-5 sm:p-6 flex flex-col justify-between gap-5">
               <div className="space-y-5">
                 {/* Lesson Header */}
                 <div className="flex flex-wrap items-start justify-between gap-3 pb-3.5 border-b border-slate-200/80 dark:border-slate-800">
@@ -565,49 +597,24 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
                 )}
               </div>
 
-              {/* Clean Lesson Prev/Next Footer */}
-              <div className="pt-3 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    selectMasteryLesson(activeMasteryIdx > 0 ? activeMasteryIdx - 1 : NOTEBOOKLM_MASTERY_MODULES.length - 1)
-                  }
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#1a232d] hover:border-[#1f5163]/50 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer transition-colors"
-                >
-                  <ArrowRight className="w-3.5 h-3.5" />
-                  <span>{isFa ? 'درس قبلی' : 'Previous'}</span>
-                </button>
-
-                <span className="text-xs font-mono text-slate-500 dark:text-slate-400 tabular-nums">
-                  {isFa
-                    ? `درس ${(activeMasteryIdx + 1).toLocaleString('fa-IR')} از ${NOTEBOOKLM_MASTERY_MODULES.length.toLocaleString('fa-IR')}`
-                    : `Lesson ${activeMasteryIdx + 1} / ${NOTEBOOKLM_MASTERY_MODULES.length}`}
-                </span>
-
-                {activeMasteryIdx < NOTEBOOKLM_MASTERY_MODULES.length - 1 ? (
-                  <button
-                    type="button"
-                    onClick={() => selectMasteryLesson(activeMasteryIdx + 1)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#1f5163] hover:bg-[#163c4a] text-white text-xs font-bold cursor-pointer transition-colors"
-                  >
-                    <span>{isFa ? 'درس بعدی' : 'Next Lesson'}</span>
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => switchStage('studio', true)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#1f5163] hover:bg-[#163c4a] text-white text-xs font-bold cursor-pointer transition-colors"
-                  >
-                    <span>{isFa ? 'مرحله بعد: ابزارهای Studio' : 'Next: Studio Tools'}</span>
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
+              <FocusedLessonFooter
+                lang={lang}
+                boundary={currentBoundary}
+                onPrev={() => handleSelectCurrentStageStep(currentBoundary.currentIndex - 1)}
+                onNext={() => handleSelectCurrentStageStep(currentBoundary.currentIndex + 1)}
+                finalStepCta={{
+                  label: isFa ? 'مرحله بعد: ابزارهای Studio' : 'Next: Studio Tools',
+                  onClick: () => switchStage('studio', true)
+                }}
+                prevLabelFa="درس قبلی"
+                prevLabelEn="Previous lesson"
+                nextLabelFa="درس بعدی"
+                nextLabelEn="Next lesson"
+                stepUnitFa="درس"
+                stepUnitEn="Lesson"
+              />
             </div>
-          </div>
-        </div>
-      )}
+          )}
 
       {/* ===================================================================== */}
       {/* STAGE 2: STUDIO SUPER-TOOLS (6 DEDICATED OUTPUTS)                     */}
@@ -615,50 +622,52 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
       {activeStage === 'studio' && (
         <div
           data-testid="nlm-panel-studio"
-          className="rounded-2xl bg-white dark:bg-[#151e26] border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-5 animate-fadeIn"
+          className="space-y-5 animate-fadeIn"
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-slate-200/80 dark:border-slate-800">
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-[var(--cpai-border)]">
             <div className="space-y-0.5">
-              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+              <h3 className="text-base sm:text-lg font-bold text-[var(--cpai-text)]">
                 {isFa ? '۶ ابزار خروجی پنل Studio در NotebookLM' : 'NotebookLM Studio Panel: 6 Smart Outputs'}
               </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
+              <p className="text-xs sm:text-sm text-[var(--cpai-muted)]">
                 {isFa
-                  ? 'ابزار مورد نظر را انتخاب کنید تا روش اجرا و پرامپت فارسی‌ساز بخش Customize را ببینید.'
-                  : 'Select any Studio tool to view step-by-step instructions and its Customize prompt.'}
+                  ? 'ابزار مورد نظر را از فهرست سمت راست انتخاب کنید تا روش اجرا و پرامپت فارسی‌ساز بخش Customize را ببینید.'
+                  : 'Select any Studio tool from the sidebar to view step-by-step instructions and its Customize prompt.'}
               </p>
             </div>
           </div>
 
-          {/* Clean 6-Item Tool Selector Strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-            {NOTEBOOKLM_STUDIO_TOOLS.map((tool) => {
-              const isSelected = tool.id === activeStudioToolId;
-              return (
-                <button
-                  key={tool.id}
-                  type="button"
-                  onClick={() => {
-                    playTactileSound('switch');
-                    setActiveStudioToolId(tool.id);
-                  }}
-                  className={`p-2.5 rounded-xl border text-right transition-colors cursor-pointer flex flex-col justify-between gap-1 ${
-                    isSelected
-                      ? 'bg-[#1f5163] text-white border-[#1f5163] shadow-2xs'
-                      : 'bg-slate-50 dark:bg-[#11181f] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:border-[#1f5163]/50'
-                  }`}
-                >
-                  <span className={`text-[10px] font-mono truncate ${isSelected ? 'text-white/75' : 'text-slate-500 dark:text-slate-400'}`} dir="ltr">
-                    {tool.nameEn}
-                  </span>
-                  <span className="text-xs font-extrabold leading-snug line-clamp-2">{tool.nameFa}</span>
-                </button>
-              );
-            })}
-          </div>
-
           {/* Active Studio Tool Detail */}
           <div className="space-y-4">
+            {activeDisciplineMeta && (
+              <div
+                data-testid="nlm-studio-role-callout"
+                className="p-3.5 rounded-xl bg-[var(--cpai-primary-soft)]/50 border border-[var(--cpai-primary)]/35 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
+              >
+                <div className="space-y-0.5 min-w-0">
+                  <div className="text-[11px] font-bold text-[var(--cpai-primary-strong)]">
+                    {isFa
+                      ? `پیشنهاد متناسب با سطح «${activeRoleMeta.shortFa}» در دیسیپلین «${activeDisciplineMeta.shortTitleFa}»:`
+                      : `Recommended for ${activeRoleMeta.shortEn} · ${activeDisciplineMeta.shortTitleEn}:`}
+                  </div>
+                  <div className="text-xs font-semibold text-[var(--cpai-text)]">
+                    {isFa
+                      ? `${roleProfile.recommendedStudioToolFa} — ${roleProfile.challengeTypeFa}`
+                      : `${roleProfile.recommendedStudioToolEn} — ${roleProfile.challengeTypeEn}`}
+                  </div>
+                </div>
+                {onOpenDisciplineModal && (
+                  <button
+                    type="button"
+                    onClick={onOpenDisciplineModal}
+                    className="px-2.5 py-1.5 rounded-lg border border-[var(--cpai-border)] bg-[var(--cpai-surface)] text-[11px] font-semibold text-[var(--cpai-text)] hover:border-[var(--cpai-primary)] cursor-pointer shrink-0 whitespace-nowrap"
+                  >
+                    {isFa ? 'تغییر سطح / دیسیپلین' : 'Change Level / Discipline'}
+                  </button>
+                )}
+              </div>
+            )}
+
             <div className="space-y-1">
               <div className="text-xs font-bold text-[#1f5163] dark:text-[#6fb3c6]">{activeStudioTool.badgeFa}</div>
               <h4 className="text-base font-black text-slate-900 dark:text-white">{activeStudioTool.nameFa}</h4>
@@ -740,13 +749,32 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
           {/* Unified Inner Segmented Switcher */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-200/80 dark:border-slate-800">
             <div>
-              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                {isFa ? 'کاربردهای سازمانی NotebookLM' : 'Organizational Playbooks'}
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                  {isFa ? 'کاربردهای سازمانی NotebookLM' : 'Organizational Playbooks'}
+                </h3>
+                {activeDisciplineMeta && (
+                  <button
+                    type="button"
+                    onClick={onOpenDisciplineModal}
+                    disabled={!onOpenDisciplineModal}
+                    data-testid="nlm-active-discipline-pill"
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--cpai-primary-soft)] text-[var(--cpai-primary-strong)] border border-[var(--cpai-primary)]/30 text-[11px] font-bold ${
+                      onOpenDisciplineModal ? 'hover:border-[var(--cpai-primary)] cursor-pointer' : ''
+                    }`}
+                  >
+                    <span>
+                      {isFa
+                        ? `هم‌تراز با دیسیپلین: ${activeDisciplineMeta.shortTitleFa} · سطح ${activeRoleMeta.shortFa}`
+                        : `Matched: ${activeDisciplineMeta.shortTitleEn} · ${activeRoleMeta.shortEn}`}
+                    </span>
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
                 {isFa
-                  ? 'بر اساس دپارتمان کاری خودتان یا نوع خروجی مدیریتی (اسلاید، اینفوگرافیک، پادکست) الگو و سند نمونه بردارید.'
-                  : 'Browse ready-to-use workflows by department or by deliverable format.'}
+                  ? 'بر اساس دیسیپلین فعال، دپارتمان کاری خودتان یا نوع خروجی مدیریتی (اسلاید، اینفوگرافیک، پادکست) الگو و سند نمونه بردارید.'
+                  : 'Browse ready-to-use workflows tailored to your discipline, department, or deliverable format.'}
               </p>
             </div>
 
@@ -825,6 +853,26 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
 
               {/* Active Department Detail */}
               <div className="space-y-4 pt-1">
+                {selectedDepartment.id === 'discipline_active' && activeDisciplineMeta && (
+                  <div
+                    data-testid="nlm-role-challenge-banner"
+                    className="p-3.5 rounded-xl bg-[var(--cpai-primary-soft)]/45 border border-[var(--cpai-primary)]/35 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs"
+                  >
+                    <div>
+                      <span className="font-bold text-[var(--cpai-primary-strong)]">
+                        {isFa ? `جنس چالش سطح «${activeRoleMeta.shortFa}»: ` : `${activeRoleMeta.shortEn} Challenge: `}
+                      </span>
+                      <span className="text-[var(--cpai-text)]">{isFa ? roleProfile.challengeTypeFa : roleProfile.challengeTypeEn}</span>
+                    </div>
+                    <div>
+                      <span className="font-bold text-[var(--cpai-primary-strong)]">
+                        {isFa ? 'قالب خروجی این سطح: ' : 'Target Output: '}
+                      </span>
+                      <span className="text-[var(--cpai-text)]">{isFa ? roleProfile.deliverableShapeFa : roleProfile.deliverableShapeEn}</span>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200/70 dark:border-slate-800">
                   <div>
                     <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
@@ -1098,61 +1146,37 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
       {activeStage === 'labs' && (
         <div
           data-testid="nlm-panel-labs"
-          className="rounded-2xl bg-white dark:bg-[#151e26] border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-5 animate-fadeIn"
+          className="space-y-5 animate-fadeIn"
         >
-          <div className="flex flex-wrap items-center justify-between gap-2 pb-3.5 border-b border-slate-200/80 dark:border-slate-800">
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-3.5 border-b border-[var(--cpai-border)]">
             <div>
-              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                {isFa ? 'کارگاه عملی با اسناد واقعی (فایل‌های آماده .md)' : 'Hands-On Labs with Real Sample Documents'}
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-base sm:text-lg font-bold text-[var(--cpai-text)]">
+                  {isFa ? 'کارگاه عملی با اسناد واقعی (فایل‌های آماده .md)' : 'Hands-On Labs with Real Sample Documents'}
+                </h3>
+                {activeDisciplineMeta && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--cpai-primary-soft)] text-[var(--cpai-primary-strong)] border border-[var(--cpai-primary)]/30 text-[11px] font-bold">
+                    {isFa
+                      ? `تنظیم‌شده برای: ${activeDisciplineMeta.shortTitleFa} · ${activeRoleMeta.shortFa}`
+                      : `${activeDisciplineMeta.shortTitleEn} · ${activeRoleMeta.shortEn}`}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs sm:text-sm text-[var(--cpai-muted)] mt-0.5">
                 {isFa
-                  ? 'یکی از سناریوها را انتخاب کنید، فایل آماده آن را دانلود کرده در NotebookLM آپلود کنید و خروجی را ارزیابی نمایید.'
-                  : 'Pick a real-world scenario, upload its sample file to NotebookLM, and run the structured prompt.'}
+                  ? 'سناریو را از فهرست سمت راست انتخاب کنید، فایل آماده آن را دانلود کرده در NotebookLM آپلود کنید و خروجی را ارزیابی نمایید.'
+                  : 'Pick a scenario from the sidebar, upload its sample file to NotebookLM, and run the structured prompt.'}
               </p>
             </div>
-            <a
-              href={NOTEBOOKLM_OVERVIEW.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#1a232d] hover:border-[#1f5163]/50 text-xs font-bold text-[#1f5163] dark:text-[#6fb3c6] whitespace-nowrap"
-            >
-              <span>{isFa ? 'باز کردن NotebookLM' : 'Open NotebookLM'}</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
-
-          {/* Compact Lab Selector Strip */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
-            {NOTEBOOKLM_EXERCISES.map((ex) => {
-              const isSelected = ex.id === selectedExerciseId;
-              return (
-                <button
-                  key={ex.id}
-                  type="button"
-                  data-testid={`nlm-lab-${ex.id}`}
-                  onClick={() => {
-                    playTactileSound('switch');
-                    setSelectedExerciseId(ex.id);
-                    setActiveScenarioIdx(0);
-                    setPreviewDocId(null);
-                  }}
-                  className={`p-2.5 rounded-xl border text-right transition-colors cursor-pointer space-y-1 ${
-                    isSelected
-                      ? 'bg-[#1f5163] text-white border-[#1f5163]'
-                      : 'bg-slate-50 dark:bg-[#11181f] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:border-[#1f5163]/50'
-                  }`}
-                >
-                  <div className={`flex items-center justify-between text-[10.5px] font-mono tabular-nums ${isSelected ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'}`}>
-                    <span>{isFa ? `سناریو ${ex.exerciseNumber.toLocaleString('fa-IR')}` : `Lab #${ex.exerciseNumber}`}</span>
-                    <span>{ex.estimatedMinutes}m</span>
-                  </div>
-                  <div className="text-xs font-extrabold leading-snug line-clamp-2">
-                    {isFa ? ex.titleFa : ex.titleEn}
-                  </div>
-                </button>
-              );
-            })}
+            {onOpenDisciplineModal && (
+              <button
+                type="button"
+                onClick={onOpenDisciplineModal}
+                className="px-3 py-1.5 rounded-lg border border-[var(--cpai-border)] bg-[var(--cpai-surface)] text-xs font-semibold text-[var(--cpai-text)] hover:border-[var(--cpai-primary)] cursor-pointer shrink-0 whitespace-nowrap"
+              >
+                {isFa ? 'تغییر سطح / دیسیپلین' : 'Change Level / Discipline'}
+              </button>
+            )}
           </div>
 
           {/* Active Lab Workspace */}
@@ -1160,7 +1184,13 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
             <div className="space-y-1 pb-3 border-b border-slate-200/70 dark:border-slate-800">
               <div className="flex items-center gap-2 flex-wrap text-xs text-slate-500 dark:text-slate-400">
                 <span className="font-bold text-[#1f5163] dark:text-[#6fb3c6]">
-                  {isFa ? `سناریو ${selectedExercise.exerciseNumber.toLocaleString('fa-IR')}` : `Lab #${selectedExercise.exerciseNumber}`}
+                  {selectedExercise.exerciseNumber === 0
+                    ? isFa
+                      ? 'سناریوی اختصاصی دیسیپلین'
+                      : 'Discipline Lab'
+                    : isFa
+                    ? `سناریو ${selectedExercise.exerciseNumber.toLocaleString('fa-IR')}`
+                    : `Lab #${selectedExercise.exerciseNumber}`}
                 </span>
                 <span aria-hidden="true">·</span>
                 <span>{isFa ? selectedExercise.targetDepartmentFa : selectedExercise.targetDepartmentEn}</span>
@@ -1457,49 +1487,71 @@ export const NotebookLmWorkshop: React.FC<NotebookLmWorkshopProps> = ({
         </div>
       )}
 
-      {/* 3. QUIET SINGLE-LINE STAGE PROGRESSION BAR (Replaces Duplicated Bottom Keycap Deck) */}
-      <div className="flex items-center justify-between gap-2 pt-1">
-        {prevStageObj ? (
-          <button
-            type="button"
-            onClick={() => switchStage(prevStageObj.id, true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#151e26] hover:border-[#1f5163]/50 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer transition-colors"
-          >
-            <ArrowRight className="w-3.5 h-3.5" />
-            <span>
-              {isFa ? `مرحله قبل: ${prevStageObj.labelFa}` : `Prev: ${prevStageObj.labelEn}`}
-            </span>
-          </button>
-        ) : (
-          <span />
-        )}
+          {/* Stage-level Footer for Studio, Use Cases, and Labs */}
+          {activeStage === 'studio' && (
+            <FocusedLessonFooter
+              lang={lang}
+              boundary={currentBoundary}
+              onPrev={() => handleSelectCurrentStageStep(currentBoundary.currentIndex - 1)}
+              onNext={() => handleSelectCurrentStageStep(currentBoundary.currentIndex + 1)}
+              finalStepCta={{
+                label: isFa ? 'مرحله بعد: کاربردهای سازمانی' : 'Next: Org Playbooks',
+                onClick: () => switchStage('usecases', true)
+              }}
+              prevLabelFa="ابزار قبلی"
+              prevLabelEn="Previous tool"
+              nextLabelFa="ابزار بعدی"
+              nextLabelEn="Next tool"
+              stepUnitFa="ابزار"
+              stepUnitEn="Tool"
+            />
+          )}
 
-        {nextStageObj ? (
-          <button
-            type="button"
-            onClick={() => switchStage(nextStageObj.id, true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#1f5163] hover:bg-[#163c4a] text-white text-xs font-bold cursor-pointer transition-colors"
-          >
-            <span>
-              {isFa
-                ? `مرحله بعد: ${nextStageObj.numFa}. ${nextStageObj.labelFa}`
-                : `Next: ${nextStageObj.numEn}. ${nextStageObj.labelEn}`}
-            </span>
-            <ArrowLeft className="w-3.5 h-3.5" />
-          </button>
-        ) : onOpenHrToolsWorkshop ? (
-          <button
-            type="button"
-            onClick={onOpenHrToolsWorkshop}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#1f5163] hover:bg-[#163c4a] text-white text-xs font-bold cursor-pointer transition-colors"
-          >
-            <span>{isFa ? 'ماژول بعدی: ابزارهای تعاملی HR' : 'Next Module: Interactive HR Tools'}</span>
-            <ArrowLeft className="w-3.5 h-3.5" />
-          </button>
-        ) : (
-          <span />
-        )}
-      </div>
-    </section>
+          {activeStage === 'usecases' && (
+            <div className="pt-6 mt-6 border-t border-[var(--cpai-border)] flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => switchStage('studio', true)}
+                className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-[var(--cpai-radius)] border border-[var(--cpai-border)] bg-[var(--cpai-surface)] text-sm font-medium text-[var(--cpai-text)] hover:border-[var(--cpai-primary)] cursor-pointer transition-colors"
+              >
+                <ArrowRight className="w-4 h-4" />
+                <span>{isFa ? 'بازگشت به ابزارهای Studio' : 'Back to Studio Tools'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => switchStage('labs', true)}
+                className="inline-flex items-center gap-1.5 min-h-[44px] px-5 py-2 rounded-[var(--cpai-radius)] bg-[var(--cpai-primary)] hover:bg-[var(--cpai-primary-strong)] text-white dark:text-[#0F171A] text-sm font-semibold cursor-pointer transition-colors"
+              >
+                <span>{isFa ? 'مرحله بعد: کارگاه اسناد واقعی' : 'Next: Real-Doc Labs'}</span>
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {activeStage === 'labs' && (
+            <FocusedLessonFooter
+              lang={lang}
+              boundary={currentBoundary}
+              onPrev={() => handleSelectCurrentStageStep(currentBoundary.currentIndex - 1)}
+              onNext={() => handleSelectCurrentStageStep(currentBoundary.currentIndex + 1)}
+              finalStepCta={
+                onOpenHrToolsWorkshop
+                  ? {
+                      label: isFa ? 'ماژول بعدی: ابزارهای تعاملی HR' : 'Next Module: Interactive HR Tools',
+                      onClick: onOpenHrToolsWorkshop
+                    }
+                  : undefined
+              }
+              prevLabelFa="سناریو قبلی"
+              prevLabelEn="Previous lab"
+              nextLabelFa="سناریو بعدی"
+              nextLabelEn="Next lab"
+              stepUnitFa="سناریو"
+              stepUnitEn="Lab"
+            />
+          )}
+        </div>
+      </FocusedLessonLayout>
+    </div>
   );
 };

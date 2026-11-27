@@ -3,39 +3,38 @@ import { Language } from '../../types/cpmai';
 import { playTactileSound } from '../../utils/uiSoundEffects';
 import {
   Brain,
-  FolderTree,
-  Network,
   Copy,
   Check,
   Terminal,
-  Sparkles,
-  CheckCircle2,
-  AlertTriangle,
   Code2,
-  FileText,
   Workflow,
-  Sliders,
-  Play,
   Download,
-  ShieldAlert,
-  Layers,
-  Wrench,
-  BookOpen,
-  Lightbulb,
-  Zap,
-  Eye,
-  ExternalLink,
-  ChevronDown
+  ShieldAlert
 } from 'lucide-react';
-import {
-  OBSIDIAN_SECOND_BRAIN_STEPS,
-  OBSIDIAN_DAILY_WORKFLOWS
-} from '../../data/obsidian_second_brain_curriculum';
-import {
-  MCP_MASTERCLASS_STEPS,
-  MCP_TROUBLESHOOTING_TABLE
-} from '../../data/mcp_masterclass_curriculum';
+import { OBSIDIAN_SECOND_BRAIN_STEPS } from '../../data/obsidian_second_brain_curriculum';
+import { MCP_MASTERCLASS_STEPS } from '../../data/mcp_masterclass_curriculum';
 import { splitPointTitleAndBody } from '../../utils/lessonText';
+import {
+  clampStepIndex,
+  formatStepNumber,
+  getStepBoundaryState,
+  parseLessonBlocks,
+  stepBackward,
+  stepForward
+} from '../../utils/focusedLessonEngine';
+import { FocusedLessonLayout, FocusedStepItem } from '../learning/FocusedLessonLayout';
+import { LessonTakeawayCallout } from '../learning/LessonTakeawayCallout';
+import { FocusedLessonFooter } from '../learning/FocusedLessonFooter';
+import { AiSkillsComparisonPanel } from './AiSkillsComparisonPanel';
+import { AiSkillsLabPanel } from './AiSkillsLabPanel';
+import {
+  McpArchitectureComparisonPanel,
+  McpTroubleshootingPanel
+} from './McpReferencePanels';
+import {
+  ObsidianComparisonVaultPanel,
+  ObsidianConnectWorkflowsPanel
+} from './ObsidianReferencePanels';
 
 interface ObsidianBrainSkillsWorkshopProps {
   lang: Language;
@@ -335,9 +334,59 @@ export const ObsidianBrainSkillsWorkshop: React.FC<ObsidianBrainSkillsWorkshopPr
   );
   const subTab = mode !== 'all' ? mode : internalSubTab;
   const [activeStepIndex, setActiveStepIndex] = useState<number>(0);
+  const [visitedSkillSteps, setVisitedSkillSteps] = useState<Set<number>>(() => new Set([0]));
+  const [aiSkillsView, setAiSkillsView] = useState<'lesson' | 'comparison' | 'sandbox'>('lesson');
+  const [isMobileStepsOpen, setIsMobileStepsOpen] = useState<boolean>(false);
   const [activeObsidianStepIdx, setActiveObsidianStepIdx] = useState<number>(0);
+  const [visitedObsidianSteps, setVisitedObsidianSteps] = useState<Set<number>>(() => new Set([0]));
+  const [obsidianView, setObsidianView] = useState<'lesson' | 'comparison' | 'connect'>('lesson');
+  const [isObsidianDrawerOpen, setIsObsidianDrawerOpen] = useState<boolean>(false);
+
   const [activeMcpStepIdx, setActiveMcpStepIdx] = useState<number>(0);
+  const [visitedMcpSteps, setVisitedMcpSteps] = useState<Set<number>>(() => new Set([0]));
+  const [mcpView, setMcpView] = useState<'lesson' | 'architecture' | 'troubleshooting'>('lesson');
+  const [isMcpDrawerOpen, setIsMcpDrawerOpen] = useState<boolean>(false);
+
   const [selectedSkillId, setSelectedSkillId] = useState<string>(READY_SKILLS[0].id);
+
+  const handleSelectSkillStep = (nextIdx: number) => {
+    const safeIdx = clampStepIndex(nextIdx, CURRICULUM_MODULES.length);
+    playTactileSound('switch');
+    setActiveStepIndex(safeIdx);
+    setVisitedSkillSteps((prev) => {
+      if (prev.has(safeIdx)) return prev;
+      const next = new Set(prev);
+      next.add(safeIdx);
+      return next;
+    });
+    setAiSkillsView('lesson');
+  };
+
+  const handleSelectObsidianStep = (nextIdx: number) => {
+    const safeIdx = clampStepIndex(nextIdx, OBSIDIAN_SECOND_BRAIN_STEPS.length);
+    playTactileSound('switch');
+    setActiveObsidianStepIdx(safeIdx);
+    setVisitedObsidianSteps((prev) => {
+      if (prev.has(safeIdx)) return prev;
+      const next = new Set(prev);
+      next.add(safeIdx);
+      return next;
+    });
+    setObsidianView('lesson');
+  };
+
+  const handleSelectMcpStep = (nextIdx: number) => {
+    const safeIdx = clampStepIndex(nextIdx, MCP_MASTERCLASS_STEPS.length);
+    playTactileSound('switch');
+    setActiveMcpStepIdx(safeIdx);
+    setVisitedMcpSteps((prev) => {
+      if (prev.has(safeIdx)) return prev;
+      const next = new Set(prev);
+      next.add(safeIdx);
+      return next;
+    });
+    setMcpView('lesson');
+  };
 
   // Interactive Custom SKILL.md Builder state
   const [customName, setCustomName] = useState<string>('weekly-site-report-checker');
@@ -354,10 +403,14 @@ export const ObsidianBrainSkillsWorkshop: React.FC<ObsidianBrainSkillsWorkshopPr
     'اگر در گزارش کارگاه عددی بدون مستندات صورت‌جلسه یا به صورت تخمینی («حدوداً»، «فکر کنم») درج شده بود، آن را در جدول قطعی وارد نکن و با برچسب [نیازمند راستی‌آزمایی ⚠️] جداگانه گزارش ده.'
   );
 
-  const activeReadySkill =
-    READY_SKILLS.find((s) => s.id === selectedSkillId) || READY_SKILLS[0];
-
-  const currentModule = CURRICULUM_MODULES[activeStepIndex] || CURRICULUM_MODULES[0];
+  const skillStepBoundary = getStepBoundaryState(activeStepIndex, CURRICULUM_MODULES.length);
+  const currentModule = CURRICULUM_MODULES[skillStepBoundary.currentIndex] || CURRICULUM_MODULES[0];
+  const focusedSkillSteps: FocusedStepItem[] = CURRICULUM_MODULES.map((mod, idx) => ({
+    id: `ai-skill-step-${idx + 1}`,
+    title: lang === 'fa' ? mod.titleFa : mod.titleEn,
+    subtitle: mod.titleEn,
+    category: mod.badgeFa
+  }));
 
   const generatedCustomSkillMd = `---
 name: ${customName.trim() || 'custom-ai-skill'}
@@ -432,164 +485,33 @@ ${customOutputFormat.trim()}
 - هنگام ساخت یادداشت جدید، حتماً در بالای آن بخش Properties (شامل تاریخ و تگ‌ها) را اضافه کن.
 - بین یادداشت‌های مرتبط حتماً با فرمت \`[[نام یادداشت]]\` لینک داخلی برقرار کن.`;
 
-  const dailyPrompt = `فایل CLAUDE.md و پوشه 01_Projects والت من در Obsidian رو بررسی کن و بگو امروز بر اساس اولویت‌ها روی کدام ۳ تسک کلیدی باید تمرکز کنم؟ پاسخ رو در یک جدول جمع‌وجور بنویس.`;
-  const ideaCapturePrompt = `این ایده رو به عنوان یک یادداشت جدید در پوشه 03_Resources والت Obsidian من با نام مناسب ذخیره کن. در ابتدای فایل فرانت‌متر شامل تگ‌های مرتبط و تاریخ امروز رو بذار و به یادداشت‌های مرتبط قبلی با فرمت [[نام یادداشت]] لینک بده:\n\n[متن ایده یا نکته جدید خود را اینجا قرار دهید]`;
-  const inboxCleanPrompt = `تمام یادداشت‌های داخل پوشه 00_Inbox والت Obsidian من رو بخون. متون ناقص یا غلط‌های املایی رو اصلاح کن و بر اساس موضوع، هر کدوم رو به پوشه مناسب خودش (01_Projects یا 03_Resources) منتقل کن و نتیجه رو به من گزارش بده.`;
-
   const topSectionRef = useRef<HTMLDivElement>(null);
 
-  const render12StepKeycaps = (scrollToTopOnSelect: boolean) => (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 text-xs">
-      {CURRICULUM_MODULES.map((mod, idx) => {
-        const isCurrent = activeStepIndex === idx;
-        return (
-          <button
-            key={mod.stepNumber}
-            type="button"
-            onClick={() => {
-              playTactileSound('thock');
-              setActiveStepIndex(idx);
-              if (scrollToTopOnSelect) {
-                setTimeout(() => {
-                  topSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 40);
-              }
-            }}
-            className={`p-2.5 rounded-xl border text-right transition-all duration-150 cursor-pointer flex items-center gap-2 select-none active:scale-[0.98] ${
-              isCurrent
-                ? 'bg-gradient-to-r from-[#e0533c] to-[#c026d3] text-white border-transparent shadow-md'
-                : 'bg-white dark:bg-[#201729] text-[#261a1d] dark:text-[#faedf3] border-[#ecdcd8] dark:border-[#382645] hover:border-[#e0533c]/50 hover:bg-[#fdeee9]/40 dark:hover:bg-[#341528]/40 shadow-2xs'
-            }`}
-          >
-            <span
-              className={`w-6 h-6 rounded-lg font-mono text-[10px] font-black flex items-center justify-center shrink-0 ${
-                isCurrent
-                  ? 'bg-white/20 text-white'
-                  : 'bg-black/[0.05] dark:bg-white/[0.08] text-[#e0533c] dark:text-[#fb7185]'
-              }`}
-            >
-              {String(idx + 1).padStart(2, '0')}
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-extrabold leading-tight truncate">{mod.titleFa}</div>
-              <div
-                className={`text-[9px] truncate ${
-                  isCurrent ? 'text-white/80' : 'text-[#755e66] dark:text-[#ad99ab]'
-                }`}
-              >
-                {mod.badgeFa}
-              </div>
-            </div>
-          </button>
-        );
-      })}
-    </div>
+  const obsidianStepBoundary = getStepBoundaryState(
+    activeObsidianStepIdx,
+    OBSIDIAN_SECOND_BRAIN_STEPS.length
   );
-
   const currentObsidianStep =
-    OBSIDIAN_SECOND_BRAIN_STEPS[activeObsidianStepIdx] || OBSIDIAN_SECOND_BRAIN_STEPS[0];
+    OBSIDIAN_SECOND_BRAIN_STEPS[obsidianStepBoundary.currentIndex] || OBSIDIAN_SECOND_BRAIN_STEPS[0];
+  const focusedObsidianSteps: FocusedStepItem[] = OBSIDIAN_SECOND_BRAIN_STEPS.map((st, idx) => ({
+    id: `obsidian-step-${idx + 1}`,
+    title: lang === 'fa' ? st.titleFa : st.titleEn,
+    subtitle: st.titleEn,
+    category: st.badgeFa
+  }));
 
-  const render13ObsidianKeycaps = (scrollToTopOnSelect: boolean) => (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 text-xs">
-      {OBSIDIAN_SECOND_BRAIN_STEPS.map((st, idx) => {
-        const isCurrent = activeObsidianStepIdx === idx;
-        return (
-          <button
-            key={st.stepNumber}
-            type="button"
-            onClick={() => {
-              playTactileSound('thock');
-              setActiveObsidianStepIdx(idx);
-              if (scrollToTopOnSelect) {
-                setTimeout(() => {
-                  topSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 40);
-              }
-            }}
-            className={`p-2.5 rounded-xl border text-right transition-all duration-150 cursor-pointer flex items-center gap-2 select-none active:scale-[0.98] ${
-              isCurrent
-                ? 'bg-gradient-to-r from-[#0d9488] to-[#0f766e] text-white border-transparent shadow-md'
-                : 'bg-white dark:bg-[#201729] text-[#261a1d] dark:text-[#faedf3] border-[#ecdcd8] dark:border-[#382645] hover:border-[#0d9488]/50 hover:bg-[#0d9488]/5 shadow-2xs'
-            }`}
-          >
-            <span
-              className={`w-6 h-6 rounded-lg font-mono text-[10px] font-black flex items-center justify-center shrink-0 ${
-                isCurrent
-                  ? 'bg-white/20 text-white'
-                  : 'bg-[#0d9488]/10 text-[#0d9488] dark:text-[#2dd4bf]'
-              }`}
-            >
-              {String(idx + 1).padStart(2, '0')}
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-extrabold leading-tight truncate">{st.titleFa}</div>
-              <div
-                className={`text-[9px] truncate ${
-                  isCurrent ? 'text-white/80' : 'text-[#755e66] dark:text-[#ad99ab]'
-                }`}
-              >
-                {st.titleEn}
-              </div>
-            </div>
-          </button>
-        );
-      })}
-    </div>
-  );
-
+  const mcpStepBoundary = getStepBoundaryState(activeMcpStepIdx, MCP_MASTERCLASS_STEPS.length);
   const currentMcpStep =
-    MCP_MASTERCLASS_STEPS[activeMcpStepIdx] || MCP_MASTERCLASS_STEPS[0];
-
-  const render12McpKeycaps = (scrollToTopOnSelect: boolean) => (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 text-xs">
-      {MCP_MASTERCLASS_STEPS.map((st, idx) => {
-        const isCurrent = activeMcpStepIdx === idx;
-        return (
-          <button
-            key={st.stepNumber}
-            type="button"
-            onClick={() => {
-              playTactileSound('thock');
-              setActiveMcpStepIdx(idx);
-              if (scrollToTopOnSelect) {
-                setTimeout(() => {
-                  topSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 40);
-              }
-            }}
-            className={`p-2.5 rounded-xl border text-right transition-all duration-150 cursor-pointer flex items-center gap-2 select-none active:scale-[0.98] ${
-              isCurrent
-                ? 'bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] text-white border-transparent shadow-md'
-                : 'bg-white dark:bg-[#201729] text-[#261a1d] dark:text-[#faedf3] border-[#ecdcd8] dark:border-[#382645] hover:border-[#2563eb]/50 hover:bg-[#2563eb]/5 shadow-2xs'
-            }`}
-          >
-            <span
-              className={`w-6 h-6 rounded-lg font-mono text-[10px] font-black flex items-center justify-center shrink-0 ${
-                isCurrent
-                  ? 'bg-white/20 text-white'
-                  : 'bg-blue-500/10 text-blue-700 dark:text-blue-300'
-              }`}
-            >
-              {String(idx + 1).padStart(2, '0')}
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-extrabold leading-tight truncate">{st.titleFa}</div>
-              <div
-                className={`text-[9px] truncate ${
-                  isCurrent ? 'text-white/80' : 'text-[#755e66] dark:text-[#ad99ab]'
-                }`}
-              >
-                {st.titleEn}
-              </div>
-            </div>
-          </button>
-        );
-      })}
-    </div>
-  );
+    MCP_MASTERCLASS_STEPS[mcpStepBoundary.currentIndex] || MCP_MASTERCLASS_STEPS[0];
+  const focusedMcpSteps: FocusedStepItem[] = MCP_MASTERCLASS_STEPS.map((st, idx) => ({
+    id: `mcp-step-${idx + 1}`,
+    title: lang === 'fa' ? st.titleFa : st.titleEn,
+    subtitle: st.titleEn,
+    category: st.badgeFa
+  }));
 
   return (
-    <section className="space-y-6">
+    <section className={mode === 'all' ? 'space-y-6' : 'flex-1 min-h-0 flex flex-col'}>
       {/* Section Header (Only when mode === 'all') */}
       {mode === 'all' && (
         <div ref={topSectionRef} className="scroll-mt-4 space-y-4 border-b border-[#d9dad5] dark:border-[#2d3942] pb-4">
@@ -721,1810 +643,589 @@ ${customOutputFormat.trim()}
       {mode !== 'all' && <div ref={topSectionRef} className="scroll-mt-4" />}
 
       {/* ===================================================================== */}
-      {/* SUB-TAB 1: COMPREHENSIVE AI SKILLS MASTERCLASS (INTERACTIVE LAB)      */}
+      {/* SUB-TAB 1: AI SKILLS FOCUSED LEARNING PILOT (FRAMES 14, 15, 16)       */}
       {/* ===================================================================== */}
       {subTab === 'agent_skills' && (
-        <div className="space-y-6 animate-fadeIn">
-          {/* 1. 12-STEP INTERACTIVE CURRICULUM ROADMAP (ALL-VISIBLE GRID, NO NESTED SCROLLBAR) */}
-          <div className="p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.07] dark:border-white/[0.09] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <div className="rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 sm:p-6 space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
-                <div className="space-y-1">
+        <FocusedLessonLayout
+          lang={lang}
+          moduleCode={lang === 'fa' ? 'ماژول ۳\u200F-\u200F۲' : 'Module 3-2'}
+          moduleTitle={
+            lang === 'fa'
+              ? 'معماری AI Skills و استاندارد جهانی SKILL.md'
+              : 'AI Skills Architecture & SKILL.md Open Standard'
+          }
+          moduleSubtitle="Claude · ChatGPT · Codex · Gemini"
+          steps={focusedSkillSteps}
+          activeStepIndex={skillStepBoundary.currentIndex}
+          visitedStepIndices={visitedSkillSteps}
+          onSelectStep={handleSelectSkillStep}
+          views={[
+            { id: 'lesson', label: lang === 'fa' ? 'مطالعه درس' : 'Lesson' },
+            { id: 'comparison', label: lang === 'fa' ? 'مقایسه مفاهیم' : 'Compare Concepts' },
+            { id: 'sandbox', label: lang === 'fa' ? 'آزمایشگاه و سندباکس' : 'Lab & Sandbox' }
+          ]}
+          activeViewId={aiSkillsView}
+          onSelectView={(id) => {
+            if (id === 'lesson' || id === 'comparison' || id === 'sandbox') {
+              playTactileSound('thock');
+              setAiSkillsView(id);
+            }
+          }}
+          isStepListVisible={aiSkillsView === 'lesson'}
+          isMobileDrawerOpen={isMobileStepsOpen}
+          onToggleMobileDrawer={setIsMobileStepsOpen}
+        >
+          {aiSkillsView === 'lesson' && currentModule && (
+            <article className="space-y-7" data-testid="ai-skills-active-step">
+              {/* Step Header: Quiet Unboxed Kicker + Calm Title + Lead */}
+              <header className="space-y-3 pb-6 border-b border-[var(--cpai-border)]">
+                <div className="flex items-center justify-between gap-2 flex-wrap text-xs sm:text-sm text-[var(--cpai-muted)]">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20 flex items-center gap-1">
-                      <BookOpen className="w-3.5 h-3.5" />
-                      <span>نقشه راه ۱۲ گام استاندارد جهانی AI Skills</span>
+                    <span className="font-semibold text-[var(--cpai-primary-strong)] tabular-nums">
+                      {lang === 'fa'
+                        ? `گام ${formatStepNumber(skillStepBoundary.stepNumber, 'fa', true)} از ${formatStepNumber(skillStepBoundary.totalSteps, 'fa', true)}`
+                        : `Step ${formatStepNumber(skillStepBoundary.stepNumber, 'en', true)} of ${formatStepNumber(skillStepBoundary.totalSteps, 'en', true)}`}
                     </span>
-                    <span className="text-[11px] font-semibold text-[#5d6b73] dark:text-[#9aa8b0]">
-                      قابل اجرا در Claude · ChatGPT · Codex · Gemini
-                    </span>
+                    <span aria-hidden="true">·</span>
+                    <span>{currentModule.badgeFa}</span>
                   </div>
-                  <h3 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                    {lang === 'fa'
-                      ? 'مسیر یادگیری گام‌به‌گام ساخت AI Skills از صفر تا صد (روی هر گام کلیک کنید):'
-                      : 'Step-by-Step Learning Path: Building AI Skills from Scratch:'}
-                  </h3>
-                </div>
-              </div>
-
-              {/* Clean 4-Column All-Visible Tactile Keycap Grid of 12 Steps */}
-              {render12StepKeycaps(false)}
-
-              {/* Active Step Slide-Ready Multi-Column Presentation Card (No Nested Wall-of-Text!) */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-purple-500/[0.07] via-white to-indigo-500/[0.05] dark:from-purple-950/30 dark:via-[#141c23] dark:to-indigo-950/25 border-2 border-purple-500/35 space-y-5">
-                <div className="flex items-center justify-between gap-3 flex-wrap pb-3 border-b border-purple-500/20">
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <span className="px-3.5 py-1 rounded-xl bg-purple-600 text-white text-xs sm:text-sm font-black">
-                      {currentModule.stepNumber} — {currentModule.badgeFa}
-                    </span>
-                    <span className="text-xs sm:text-sm font-mono font-bold text-[#334155] dark:text-[#cbd5e1]" dir="ltr">
-                      {currentModule.titleEn}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        playTactileSound('switch');
-                        setActiveStepIndex((prev) => (prev > 0 ? prev - 1 : CURRICULUM_MODULES.length - 1));
-                      }}
-                      className="px-3 py-1.5 rounded-xl text-xs font-black bg-white dark:bg-[#1d262d] text-[#0f172a] dark:text-white border border-black/15 border-b-[3px] border-b-black/30 active:translate-y-[2px] active:border-b cursor-pointer"
-                    >
-                      → گام قبلی
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        playTactileSound('switch');
-                        setActiveStepIndex((prev) => (prev < CURRICULUM_MODULES.length - 1 ? prev + 1 : 0));
-                      }}
-                      className="px-3 py-1.5 rounded-xl text-xs font-black bg-purple-600 text-white border border-purple-800 border-b-[3px] border-b-purple-950 active:translate-y-[2px] active:border-b cursor-pointer"
-                    >
-                      گام بعدی ←
-                    </button>
-                  </div>
-                </div>
-
-                <h4 className="text-lg sm:text-2xl font-black text-[#0f172a] dark:text-white leading-snug">
-                  {currentModule.titleFa}
-                </h4>
-
-                {/* Multi-Column Scannable Slide Points */}
-                {(() => {
-                  const pts = currentModule.deepDiveFa
-                    .split('\n\n')
-                    .map((s) => s.trim())
-                    .filter(Boolean);
-                  return (
-                    <div
-                      className={`grid grid-cols-1 ${
-                        pts.length === 2 ? 'lg:grid-cols-2' : pts.length >= 3 ? 'md:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-1'
-                      } gap-4`}
-                    >
-                      {pts.map((pt, pIdx) => {
-                        const { heading, body } = splitPointTitleAndBody(pt);
-                        return (
-                          <div
-                            key={pIdx}
-                            className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#11171d] border border-purple-500/25 shadow-2xs space-y-2.5 flex flex-col justify-between"
-                          >
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2.5">
-                                <span className="w-7 h-7 rounded-lg bg-purple-600 text-white font-mono text-xs font-black flex items-center justify-center shrink-0">
-                                  {pIdx + 1}
-                                </span>
-                                <span className="text-sm sm:text-base font-black text-purple-800 dark:text-purple-300 leading-snug">
-                                  {heading || `نکته کلیدی ${pIdx + 1}`}
-                                </span>
-                              </div>
-                              <p className="text-sm sm:text-[15px] font-semibold text-[#0f172a] dark:text-[#f1f5f9] leading-relaxed">
-                                {body}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })()}
-
-                <div className="p-4 rounded-2xl bg-emerald-500/15 border-2 border-emerald-500/35 flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
-                  <div className="text-sm sm:text-base font-bold text-[#0f172a] dark:text-emerald-100 leading-relaxed">
-                    <strong className="font-black text-emerald-800 dark:text-emerald-300">جمع‌بندی طلایی این گام: </strong>
-                    {currentModule.keyTakeawayFa}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 2. THE GOLDEN TRIANGLE: PROMPT vs. SKILL vs. MCP (Collapsible Accordion) */}
-          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all">
-            <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
-              <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185]">
-                <Layers className="w-5 h-5 shrink-0" />
-                <h3 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa'
-                    ? 'درس اول: تفاوت دقیق بین Prompt، Skill و پروتکل MCP چیست؟'
-                    : 'Lesson 1: The Exact Difference Between a Prompt, a Skill, and MCP'}
-                </h3>
-              </div>
-              <span className="text-[11px] font-normal text-[#755e66] dark:text-[#ad99ab] flex items-center gap-1 group-open:text-[#e0533c]">
-                <span>{lang === 'fa' ? 'مشاهده جدول مقایسه' : 'View Comparison'}</span>
-                <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180 shrink-0" />
-              </span>
-            </summary>
-
-            <div className="p-4 sm:p-5 pt-0 border-t border-[#ecdcd8]/50 dark:border-[#382645]/50 space-y-4 pt-4">
-              <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                یکی از رایج‌ترین سردرگمی‌ها در کار با هوش مصنوعی، اشتباه گرفتن **پرامپت (Prompt)**، **اسکیل (Skill)** و **پروتکل MCP** است. با این مثال ملموس سازمانی، برای همیشه تفاوت این سه را به خاطر بسپارید:
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Card 1: Prompt */}
-                <div className="p-4 rounded-2xl bg-[#f8f9fa] dark:bg-[#12171b] border border-black/[0.06] dark:border-white/[0.08] space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-black bg-blue-500/15 text-blue-700 dark:text-blue-300">
-                      ۱. پرامپت (Prompt)
-                    </span>
-                    <span className="text-[10px] font-mono text-[#5d6b73]">دستور لحظه‌ای</span>
-                  </div>
-                  <h4 className="text-xs font-extrabold text-[#1c2830] dark:text-[#e8ebe9]">
-                    «چه کاری را همین الان انجام بده؟»
-                  </h4>
-                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    مثل توضیح شفاهی یک تسک به کارمند در همان لحظه است: *«این متن جلسه امروز را خلاصه کن»*. اگر فردا چت جدیدی باز کنید، هوش مصنوعی تمام نکات و قالب دلخواه شما را فراموش کرده است.
-                  </p>
-                </div>
-
-                {/* Card 2: Skill (SKILL.md) */}
-                <div className="p-4 rounded-2xl bg-purple-500/[0.05] dark:bg-purple-500/[0.1] border-2 border-purple-500/30 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-black bg-purple-600 text-white">
-                      ۲. اسکیل (SKILL.md) ⭐
-                    </span>
-                    <span className="text-[10px] font-mono text-purple-700 dark:text-purple-300 font-bold">مغز و روش انجام کار</span>
-                  </div>
-                  <h4 className="text-xs font-extrabold text-[#1c2830] dark:text-[#e8ebe9]">
-                    «چگونه و با چه استانداردی کار را انجام بده؟»
-                  </h4>
-                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    مثل **دفترچه شرح وظایف و آیین‌نامه استاندارد (SOP)** است که یک‌بار در فایل `SKILL.md` می‌نویسید. هوش مصنوعی فقط وقتی که موضوع مرتبط باشد به صورت خودکار آن را باز می‌کند و همیشه با یک کیفیت و قالب ثابت کار را تحویل می‌دهد.
-                  </p>
-                </div>
-
-                {/* Card 3: MCP */}
-                <div className="p-4 rounded-2xl bg-[#f8f9fa] dark:bg-[#12171b] border border-black/[0.06] dark:border-white/[0.08] space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-black bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
-                      ۳. پروتکل MCP
-                    </span>
-                    <span className="text-[10px] font-mono text-[#5d6b73]">دسترسی و ابزار</span>
-                  </div>
-                  <h4 className="text-xs font-extrabold text-[#1c2830] dark:text-[#e8ebe9]">
-                    «به چه داده‌ها و نرم‌افزارهایی دسترسی داری؟»
-                  </h4>
-                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    مثل **کابل شبکه و کارت تردد کارمند** به نرم‌افزارهای بیرونی (Google Drive، Gmail، تقویم، دیتابیس یا پوشه Obsidian) است. MCP خودش نمی‌داند چطور گزارش بنویسد؛ فقط دسترسی خواندن و نوشتن می‌دهد.
-                  </p>
-                </div>
-              </div>
-
-              {/* Comparison Matrix */}
-              <div className="overflow-x-auto pt-2">
-                <table className="w-full text-right text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-black/[0.03] dark:bg-white/[0.04] text-[#1c2830] dark:text-[#e8ebe9] font-bold border-b border-black/[0.08] dark:border-white/[0.1]">
-                      <th className="p-2.5">ویژگی کلیدی</th>
-                      <th className="p-2.5">پرامپت معمولی (Prompt)</th>
-                      <th className="p-2.5 text-purple-700 dark:text-purple-300">اسکیل استاندارد (SKILL.md)</th>
-                      <th className="p-2.5">پروتکل اتصال (MCP)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06] text-[#2c3840] dark:text-[#cfd6db]">
-                    <tr>
-                      <td className="p-2.5 font-bold">ماندگاری در حافظه</td>
-                      <td className="p-2.5">موقت (محدود به همان یک چت)</td>
-                      <td className="p-2.5 font-bold text-emerald-600 dark:text-emerald-400">دائمی و قابل استفاده در تمام چت‌ها</td>
-                      <td className="p-2.5">دائمی (در سطح اتصال به سرویس)</td>
-                    </tr>
-                    <tr>
-                      <td className="p-2.5 font-bold">مصرف توکن و حافظه (Context)</td>
-                      <td className="p-2.5">در صورت کپی مداوم، حافظه چت را پر می‌کند</td>
-                      <td className="p-2.5 font-bold text-emerald-600 dark:text-emerald-400">بهینه (فقط هنگام نیاز فراخوانی می‌شود)</td>
-                      <td className="p-2.5">فقط هنگام فراخوانی ابزار</td>
-                    </tr>
-                    <tr>
-                      <td className="p-2.5 font-bold">نیاز به دانش فنی</td>
-                      <td className="p-2.5">صفر (متن ساده)</td>
-                      <td className="p-2.5 font-bold text-emerald-600 dark:text-emerald-400">صفر (یک فایل متنی ساده SKILL.md)</td>
-                      <td className="p-2.5">متوسط (نیازمند تنظیم کانکتور یا JSON)</td>
-                    </tr>
-                    <tr>
-                      <td className="p-2.5 font-bold">قابلیت انتقال بین پلتفرم‌ها</td>
-                      <td className="p-2.5">کپی-پیست دستی</td>
-                      <td className="p-2.5 font-bold text-emerald-600 dark:text-emerald-400">استاندارد جهانی در Claude, ChatGPT, Codex, Gemini</td>
-                      <td className="p-2.5">پشتیبانی در کلاینت‌های سازگار با MCP</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </details>
-
-          {/* 3. ANATOMY OF SKILL.MD & 5-STEP ZERO-CODE CREATION GUIDE (Collapsible Accordion) */}
-          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all">
-            <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
-              <div className="flex items-center gap-2 text-[#e0533c] dark:text-[#fb7185]">
-                <Code2 className="w-5 h-5 shrink-0" />
-                <h3 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa'
-                    ? 'درس دوم: کالبدشکافی فایل SKILL.md و پرامپت اسکیل‌ساز بدون کدنویسی'
-                    : 'Lesson 2: Anatomy of SKILL.md & Zero-Code Meta Prompt'}
-                </h3>
-              </div>
-              <span className="text-[11px] font-normal text-[#755e66] dark:text-[#ad99ab] flex items-center gap-1 group-open:text-[#e0533c]">
-                <span>{lang === 'fa' ? 'مشاهده ساختار و کپی پرامپت' : 'View Anatomy & Prompt'}</span>
-                <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180 shrink-0" />
-              </span>
-            </summary>
-
-            <div className="p-4 sm:p-5 pt-0 border-t border-[#ecdcd8]/50 dark:border-[#382645]/50 pt-4">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                {/* Left 6 Cols: Anatomy of SKILL.md */}
-                <div className="lg:col-span-6 p-4 rounded-xl bg-[#f8f9fa] dark:bg-[#12171b] border border-black/[0.06] dark:border-white/[0.08] shadow-2xs space-y-3.5">
-                  <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                    <Code2 className="w-4 h-4" />
-                    <h4 className="font-black text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
-                      کالبدشکافی ۵ بخش اجباری یک SKILL استاندارد
-                    </h4>
-                  </div>
-
-                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    هر اسکیل یک پوشه ساده است که قلب تپنده آن فایلی دقیقاً با نام <code className="font-mono font-bold text-purple-600">SKILL.md</code> است:
-                  </p>
-
-                  <div className="space-y-2 text-xs">
-                    <div className="p-2.5 rounded-lg bg-purple-500/[0.05] border border-purple-500/20 space-y-1">
-                      <b className="text-purple-700 dark:text-purple-300 block">
-                        ۱. شناسنامه و شرط فعال‌سازی (YAML Frontmatter):
-                      </b>
-                      <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed text-[11px]">
-                        شامل <code className="font-mono">name</code> و <code className="font-mono">description</code>. مدل در شروع چت فقط این ۲ خط را می‌بیند تا هوشمندانه تصمیم به فراخوانی بگیرد.
-                      </p>
-                    </div>
-
-                    <div className="p-2.5 rounded-lg bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.05] dark:border-white/[0.06] space-y-1">
-                      <b className="text-[#1c2830] dark:text-[#e8ebe9] block">۲. هدف و نقش تخصصی (Role & Objective):</b>
-                      <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed text-[11px]">
-                        تعیین پرسونا و زاویه دید تخصصی بدون حاشیه‌پردازی.
-                      </p>
-                    </div>
-
-                    <div className="p-2.5 rounded-lg bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.05] dark:border-white/[0.06] space-y-1">
-                      <b className="text-[#1c2830] dark:text-[#e8ebe9] block">۳. گام‌های پردازش (Step-by-Step Workflow):</b>
-                      <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed text-[11px]">
-                        ترتیب منطقی اعتبارسنجی‌ها قبل از پاسخگویی.
-                      </p>
-                    </div>
-
-                    <div className="p-2.5 rounded-lg bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.05] dark:border-white/[0.06] space-y-1">
-                      <b className="text-[#1c2830] dark:text-[#e8ebe9] block">۴. قالب خروجی ثابت (Strict Output Format):</b>
-                      <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed text-[11px]">
-                        قالب جدول‌ها و تیترهایی که باید ۱۰۰٪ بدون تغییر رعایت شوند.
-                      </p>
-                    </div>
-
-                    <div className="p-2.5 rounded-lg bg-amber-500/[0.06] border border-amber-500/25 space-y-1">
-                      <b className="text-amber-800 dark:text-amber-300 block">
-                        ۵. تله‌های ضدتوهم (Edge Cases & Traps):
-                      </b>
-                      <p className="text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed text-[11px]">
-                        مدیریت شرایط عدم‌قطعیت و قانون تله اعداد تاییدنشده.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right 6 Cols: How to Build Without Coding + Meta-Prompt */}
-                <div className="lg:col-span-6 p-4 rounded-xl bg-[#f8f9fa] dark:bg-[#12171b] border border-black/[0.06] dark:border-white/[0.08] shadow-2xs flex flex-col justify-between space-y-3.5">
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                        <Zap className="w-4 h-4" />
-                        <h4 className="font-black text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
-                          روش ساخت خودکار با پرامپت متا
-                        </h4>
-                      </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600">
-                        Meta-Skill Prompt
-                      </span>
-                    </div>
-
-                    <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                      پرامپت زیر را کپی کنید، شرح کار تکراری‌تان را بگذارید و به مدل بدهید تا فایل کامل SKILL.md را برایتان بسازد:
-                    </p>
-
-                    <div className="p-3 rounded-xl bg-[#1e1e1e] text-[#d4d4d4] font-mono text-[11px] leading-relaxed max-h-52 overflow-y-auto">
-                      <pre dir="rtl" className="whitespace-pre-wrap text-right select-text">
-                        {metaSkillBuilderPrompt}
-                      </pre>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2.5 pt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      {onLoadToSandbox && (
-                        <button
-                          type="button"
-                          onClick={() => onLoadToSandbox(metaSkillBuilderPrompt)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/25 text-xs font-bold transition-all cursor-pointer"
-                        >
-                          <Play className="w-3.5 h-3.5" />
-                          <span>ارسال به سندباکس</span>
-                        </button>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={() => copyToClipboard(metaSkillBuilderPrompt, 'meta_skill_builder_prompt')}
-                        className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer ${
-                          copiedId === 'meta_skill_builder_prompt'
-                            ? 'bg-emerald-600 text-white'
-                            : 'bg-[#e0533c] hover:bg-[#c2410c] text-white'
-                        }`}
-                      >
-                        {copiedId === 'meta_skill_builder_prompt' ? (
-                          <>
-                            <Check className="w-3.5 h-3.5" />
-                            <span>کپی شد!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3.5 h-3.5" />
-                            <span>کپی پرامپت متا</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    <div className="p-2.5 rounded-lg bg-blue-500/[0.06] border border-blue-500/20 text-[10px] text-[#1c2830] dark:text-[#d1d7db] space-y-0.5">
-                      <b className="text-blue-700 dark:text-blue-300 block">
-                        مسیر نصب در ابزارها:
-                      </b>
-                      <div>• <b>Claude:</b> Settings &gt; Capabilities &gt; Skills یا پوشه <code>.claude/skills/</code></div>
-                      <div>• <b>ChatGPT / Gemini:</b> آپلود در Project Files یا Gem Knowledge</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </details>
-
-          {/* 4. HANDS-ON SKILL TESTING LAB: 3 READY SKILLS + TEST 1 vs TEST 2 */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-purple-500/[0.04] via-blue-500/[0.03] to-emerald-500/[0.04] border border-purple-500/25 space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-purple-600 text-white">
-                    آزمایشگاه عملی تست اسکیل‌ها
-                  </span>
-                  <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
-                    همراه با دانلود مستقیم SKILL.md و سناریوی «تله اعداد تاییدنشده»
-                  </span>
-                </div>
-                <h3 className="text-sm sm:text-base font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa'
-                    ? '۳ پکیج آماده SKILL.md (خلاصه‌ساز جلسات + منابع انسانی مترو خط ایکس + ممیزی ادعای پیمان)'
-                    : '3 Ready-to-Use SKILL.md Packages with Normal vs. Trap Test Scenarios'}
-                </h3>
-              </div>
-            </div>
-
-            {/* Skill Package Selector Tabs */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {READY_SKILLS.map((sk) => {
-                const isSelected = sk.id === selectedSkillId;
-                return (
-                  <button
-                    key={sk.id}
-                    type="button"
-                    onClick={() => setSelectedSkillId(sk.id)}
-                    className={`p-3.5 rounded-2xl border text-right transition-all cursor-pointer flex flex-col justify-between gap-2 ${
-                      isSelected
-                        ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
-                        : 'bg-white dark:bg-[#141b20] text-[#1c2830] dark:text-[#e8ebe9] border-black/[0.07] dark:border-white/[0.09] hover:border-purple-500/40'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-2 w-full">
-                      <span
-                        dir="ltr"
-                        className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded ${
-                          isSelected ? 'bg-white/20 text-white' : 'bg-purple-500/10 text-purple-700 dark:text-purple-300'
-                        }`}
-                      >
-                        {sk.name}/SKILL.md
-                      </span>
-                      <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          isSelected ? 'bg-white/20 text-white' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
-                        }`}
-                      >
-                        {sk.badgeFa}
-                      </span>
-                    </div>
-                    <div className="text-xs font-extrabold leading-snug">{sk.titleFa}</div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Active Skill Package Details */}
-            <div className="p-5 rounded-2xl bg-white dark:bg-[#12171b] border border-black/[0.08] dark:border-white/[0.1] space-y-5">
-              {/* Top Bar with Download & Copy SKILL.md */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
-                <div className="space-y-1">
-                  <h4 className="text-sm font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                    {activeReadySkill.titleFa}
-                  </h4>
-                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-                    <strong className="text-purple-700 dark:text-purple-300">شرط فعال‌سازی خودکار: </strong>
-                    {activeReadySkill.triggerWhenFa}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 flex-wrap shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => handleDownloadSkillFile('SKILL.md', activeReadySkill.skillMdContent)}
-                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>دانلود فایل SKILL.md</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      copyToClipboard(activeReadySkill.skillMdContent, `ready_skill_${activeReadySkill.id}`)
-                    }
-                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer ${
-                      copiedId === `ready_skill_${activeReadySkill.id}`
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-purple-600 hover:bg-purple-700 text-white'
-                    }`}
-                  >
-                    {copiedId === `ready_skill_${activeReadySkill.id}` ? (
-                      <>
-                        <Check className="w-3.5 h-3.5" />
-                        <span>محتوای SKILL.md کپی شد!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>کپی کل فایل SKILL.md</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* SKILL.md Code Preview */}
-              <div className="space-y-1.5">
-                <span className="text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-1.5">
-                  <FileText className="w-3.5 h-3.5 text-purple-600" />
-                  <span>محتوای کامل فایل استاندارد SKILL.md:</span>
-                </span>
-                <pre
-                  dir="rtl"
-                  className="p-4 rounded-xl bg-[#1e1e1e] text-[#d4d4d4] font-mono text-xs leading-relaxed overflow-x-auto max-h-72 whitespace-pre-wrap text-right select-text"
-                >
-                  {activeReadySkill.skillMdContent}
-                </pre>
-              </div>
-
-              {/* Test 1 (Normal) vs Test 2 (The Unverified Numbers Trap) */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2">
-                {/* Test 1: Normal Scenario */}
-                <div className="p-4 rounded-xl bg-emerald-500/[0.05] border border-emerald-500/25 space-y-3 flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-extrabold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
-                        <CheckCircle2 className="w-4 h-4 shrink-0" />
-                        <span>{activeReadySkill.test1NormalTitleFa}</span>
-                      </span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
-                        Test #1
-                      </span>
-                    </div>
-                    <p className="text-xs font-mono bg-white dark:bg-[#161e24] p-3 rounded-lg border border-emerald-500/20 text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed whitespace-pre-wrap">
-                      {activeReadySkill.test1NormalPromptFa}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2 pt-2 border-t border-emerald-500/20">
-                    {onLoadToSandbox && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onLoadToSandbox(
-                            `${activeReadySkill.skillMdContent}\n\n---\nورودی کاربر برای تست ۱:\n${activeReadySkill.test1NormalPromptFa}`
-                          )
-                        }
-                        className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        <Play className="w-3 h-3" />
-                        <span>تست اسکیل + ورودی ۱ در سندباکس</span>
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        copyToClipboard(activeReadySkill.test1NormalPromptFa, `test1_${activeReadySkill.id}`)
-                      }
-                      className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
-                    >
-                      {copiedId === `test1_${activeReadySkill.id}` ? (
-                        <>
-                          <Check className="w-3 h-3" />
-                          <span>کپی شد!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3 h-3" />
-                          <span>کپی متن تست ۱</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Test 2: Trap Scenario */}
-                <div className="p-4 rounded-xl bg-amber-500/[0.06] border border-amber-500/30 space-y-3 flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-extrabold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
-                        <AlertTriangle className="w-4 h-4 shrink-0" />
-                        <span>{activeReadySkill.test2TrapTitleFa}</span>
-                      </span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300">
-                        Test #2 (Trap)
-                      </span>
-                    </div>
-                    <p className="text-xs font-mono bg-white dark:bg-[#161e24] p-3 rounded-lg border border-amber-500/25 text-[#1c2830] dark:text-[#e8ebe9] leading-relaxed whitespace-pre-wrap">
-                      {activeReadySkill.test2TrapPromptFa}
-                    </p>
-                    <div className="p-2.5 rounded-lg bg-amber-500/10 text-[11px] text-amber-900 dark:text-amber-200 leading-relaxed">
-                      <strong>🎯 واکنش مورد انتظار اسکیل در این تله: </strong>
-                      {activeReadySkill.expectedTrapBehaviorFa}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2 pt-2 border-t border-amber-500/20">
-                    {onLoadToSandbox && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onLoadToSandbox(
-                            `${activeReadySkill.skillMdContent}\n\n---\nورودی کاربر برای تست ۲ (تله اعداد تاییدنشده):\n${activeReadySkill.test2TrapPromptFa}`
-                          )
-                        }
-                        className="text-[11px] font-bold text-amber-800 dark:text-amber-300 hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        <Play className="w-3 h-3" />
-                        <span>تست اسکیل + تله ۲ در سندباکس</span>
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        copyToClipboard(activeReadySkill.test2TrapPromptFa, `test2_${activeReadySkill.id}`)
-                      }
-                      className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
-                    >
-                      {copiedId === `test2_${activeReadySkill.id}` ? (
-                        <>
-                          <Check className="w-3 h-3" />
-                          <span>کپی شد!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3 h-3" />
-                          <span>کپی متن تست ۲ (تله)</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 5. INTERACTIVE LIVE SKILL.MD BUILDER (Collapsible Accordion) */}
-          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all">
-            <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
-              <div className="flex items-center gap-2 text-[#c026d3] dark:text-[#fb7185]">
-                <Wrench className="w-5 h-5 shrink-0" />
-                <h3 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa'
-                    ? 'کارگاه تعاملی آنلاین: ساخت و دانلود مستقیم اولین فایل SKILL.md اختصاصی'
-                    : 'Interactive SKILL.md Builder: Create & Download Your Custom Skill'}
-                </h3>
-              </div>
-              <span className="text-[11px] font-normal text-[#755e66] dark:text-[#ad99ab] flex items-center gap-1 group-open:text-[#e0533c]">
-                <span>{lang === 'fa' ? 'باز کردن ابزار سازنده' : 'Open Live Builder'}</span>
-                <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180 shrink-0" />
-              </span>
-            </summary>
-
-            <div className="p-4 sm:p-5 pt-4 border-t border-[#ecdcd8]/50 dark:border-[#382645]/50 space-y-5">
-              <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-                فیلدهای ساده زیر را متناسب با کار روزانه خود ویرایش کنید تا فایل استاندارد <code className="font-mono font-bold">SKILL.md</code> به صورت زنده در سمت چپ تولید شود و با یک کلیک دانلود نمایید:
-              </p>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-              {/* Builder Form Inputs (6 Cols) */}
-              <div className="lg:col-span-6 space-y-3.5 text-xs">
-                <div>
-                  <label className="font-bold text-[#1c2830] dark:text-[#e8ebe9] block mb-1">
-                    ۱. نام انگلیسی اسکیل (با خط تیره - بدون فاصله):
-                  </label>
-                  <input
-                    type="text"
+                  <bdi
                     dir="ltr"
-                    value={customName}
-                    onChange={(e) => setCustomName(e.target.value)}
-                    placeholder="e.g. weekly-site-report-checker"
-                    className="w-full p-2.5 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#f8f9fa] dark:bg-[#12171b] font-mono text-xs text-[#1c2830] dark:text-[#e8ebe9]"
-                  />
+                    className="text-xs font-mono text-[var(--cpai-muted)] truncate max-w-full"
+                  >
+                    {currentModule.titleEn}
+                  </bdi>
                 </div>
 
-                <div>
-                  <label className="font-bold text-[#1c2830] dark:text-[#e8ebe9] block mb-1">
-                    ۲. شرح ماموریت و شرط فعال‌سازی خودکار (Description):
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={customDesc}
-                    onChange={(e) => setCustomDesc(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#f8f9fa] dark:bg-[#12171b] text-xs text-[#1c2830] dark:text-[#e8ebe9]"
-                  />
-                </div>
+                <h3 className="cpai-lesson-title">
+                  {lang === 'fa' ? currentModule.titleFa : currentModule.titleEn}
+                </h3>
 
-                <div>
-                  <label className="font-bold text-[#1c2830] dark:text-[#e8ebe9] block mb-1">
-                    ۳. مراحل گام‌به‌گام انجام کار (Workflow Steps):
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={customSteps}
-                    onChange={(e) => setCustomSteps(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#f8f9fa] dark:bg-[#12171b] text-xs text-[#1c2830] dark:text-[#e8ebe9]"
-                  />
-                </div>
+                <p className="cpai-lesson-lead">{currentModule.summaryFa}</p>
+              </header>
 
-                <div>
-                  <label className="font-bold text-[#1c2830] dark:text-[#e8ebe9] block mb-1">
-                    ۴. قالب خروجی دلخواه (Output Format):
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={customOutputFormat}
-                    onChange={(e) => setCustomOutputFormat(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-[#d9dad5] dark:border-[#2d3942] bg-[#f8f9fa] dark:bg-[#12171b] text-xs text-[#1c2830] dark:text-[#e8ebe9]"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold text-amber-800 dark:text-amber-300 block mb-1">
-                    ۵. قانون ضدتوهم و مدیریت تله‌ها (Edge Cases & Traps):
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={customTrapRule}
-                    onChange={(e) => setCustomTrapRule(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-amber-500/40 bg-amber-500/[0.04] text-xs text-[#1c2830] dark:text-[#e8ebe9]"
-                  />
-                </div>
+              {/* Main Step Body Prose (Single-Column Calm Reading Flow) */}
+              <div className="cpai-prose space-y-5">
+                {parseLessonBlocks(currentModule.deepDiveFa).map((block, bIdx) => {
+                  if (block.type === 'paragraph') {
+                    return <p key={bIdx}>{block.text}</p>;
+                  }
+                  return (
+                    <ul key={bIdx} className="space-y-3 ps-5 list-disc marker:text-[var(--cpai-primary)]">
+                      {block.items.map((item, iIdx) => (
+                        <li key={iIdx} className="ps-1">
+                          {item.label ? (
+                            <>
+                              <strong className="font-semibold text-[var(--cpai-text)]">
+                                {item.label}:
+                              </strong>{' '}
+                              <span>{item.text}</span>
+                            </>
+                          ) : (
+                            item.text
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  );
+                })}
               </div>
 
-              {/* Live Generated SKILL.md Preview & Download (6 Cols) */}
-              <div className="lg:col-span-6 flex flex-col justify-between space-y-3">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9]">
-                    <span className="flex items-center gap-1.5">
-                      <Eye className="w-4 h-4 text-purple-600" />
-                      <span>پیش‌نمایش زنده فایل SKILL.md تولیدشده شما:</span>
-                    </span>
-                    <span dir="ltr" className="font-mono text-[11px] text-purple-600 dark:text-purple-400">
-                      {customName.trim() || 'custom-skill'}/SKILL.md
-                    </span>
+              {/* Step 11 (Index 10): Full Preserved Guidance on When NOT to Build a Skill + Security Red Lines */}
+              {skillStepBoundary.currentIndex === 10 && (
+                <div className="space-y-6 pt-2" data-testid="ai-skills-security-guidelines">
+                  <div className="space-y-3 pt-4 border-t border-[var(--cpai-border)]">
+                    <h4 className="text-base sm:text-lg font-semibold text-[var(--cpai-text)]">
+                      {lang === 'fa'
+                        ? 'در چه مواردی نباید Skill بسازیم؟'
+                        : 'When Should You NOT Build a Skill?'}
+                    </h4>
+                    <ul className="cpai-prose space-y-3 ps-5 list-disc marker:text-[var(--cpai-muted)]">
+                      <li>
+                        <strong className="font-semibold">
+                          کارهای یک‌بارمصرف و غیرتکراری (<bdi dir="ltr">One-Off Tasks</bdi>):
+                        </strong>{' '}
+                        اگر کاری را فقط سالی یک بار انجام می‌دهید، ساخت و نگهداری Skill برای آن اتلاف وقت است؛ یک پرامپت استاندارد RCTO کافی است.
+                      </li>
+                      <li>
+                        <strong className="font-semibold">
+                          طوفان فکری و ایده‌پردازی کاملاً آزاد (<bdi dir="ltr">Open Brainstorming</bdi>):
+                        </strong>{' '}
+                        اسکیل‌ها برای ایجاد «قالب استاندارد و محدودیت دقیق» طراحی شده‌اند. در کارهایی که نیاز به خلاقیت ساختارشکن دارید، قالب‌های خشک Skill دست‌وپای مدل را می‌بندد.
+                      </li>
+                      <li>
+                        <strong className="font-semibold">اسکیل‌های بیش از حد کلی («همه‌کاره»):</strong>{' '}
+                        هرگز یک اسکیل با نام «دستیار کلی شرکت» نسازید؛ هر اسکیل باید فقط یک مأموریت مشخص و تیز (مثلاً فقط «خلاصه‌ساز جلسات» یا فقط «ممیز اضافه‌کاری») داشته باشد.
+                      </li>
+                    </ul>
                   </div>
 
-                  <pre
-                    dir="rtl"
-                    className="p-4 rounded-2xl bg-[#1e1e1e] text-[#d4d4d4] font-mono text-xs leading-relaxed overflow-y-auto h-[310px] whitespace-pre-wrap text-right select-text border border-white/10"
+                  <aside
+                    aria-label={lang === 'fa' ? 'هشدارهای امنیتی AI Skills' : 'AI Skills Security Warnings'}
+                    className="rounded-[var(--cpai-radius)] bg-[var(--cpai-error-bg)] border border-[var(--cpai-error-border)] p-5 space-y-3"
                   >
-                    {generatedCustomSkillMd}
-                  </pre>
+                    <div className="flex items-center gap-2 text-sm sm:text-base font-semibold text-[var(--cpai-error)]">
+                      <ShieldAlert aria-hidden="true" className="w-5 h-5 shrink-0" />
+                      <span>
+                        {lang === 'fa'
+                          ? 'هشدارهای امنیتی حیاتی هنگام استفاده از AI Skills'
+                          : 'Critical Security Rules When Using AI Skills'}
+                      </span>
+                    </div>
+                    <ul className="space-y-2.5 text-[15px] sm:text-[16px] font-normal leading-[1.75] text-[var(--cpai-text)] ps-5 list-disc">
+                      <li>
+                        <strong className="font-semibold">
+                          خطر دانلود اسکیل‌های ناشناس از گیت‌هاب و اینترنت:
+                        </strong>{' '}
+                        هرگز یک پکیج اسکیل آماده را بدون باز کردن و خواندن خط‌به‌خط فایل{' '}
+                        <code dir="ltr" className="font-mono text-sm">SKILL.md</code> و پوشه{' '}
+                        <code dir="ltr" className="font-mono text-sm">scripts/</code> در اکانت خود آپلود نکنید (خطر دستورات مخفی <bdi dir="ltr">Prompt Injection</bdi>).
+                      </li>
+                      <li>
+                        <strong className="font-semibold">
+                          ممنوعیت قرار دادن رمز عبور و <bdi dir="ltr">API Key</bdi> داخل{' '}
+                          <bdi dir="ltr">SKILL.md</bdi>:
+                        </strong>{' '}
+                        فایل <code dir="ltr" className="font-mono text-sm">SKILL.md</code> یک سند متنی قابل اشتراک‌گذاری است؛ هرگز توکن‌های امنیتی، رمز عبور یا اطلاعات محرمانه را داخل متن آن قرار ندهید.
+                      </li>
+                      <li>
+                        <strong className="font-semibold">
+                          قانون تأیید انسان برای عملیات حذف یا ارسال (<bdi dir="ltr">Human-in-the-Loop</bdi>):
+                        </strong>{' '}
+                        اگر اسکیل شما به ابزارهای MCP (مثل ایمیل یا فایل‌های هارد دیسک) متصل است، همیشه شرط بگذارید که قبل از حذف فایل یا ارسال ایمیل، تأیید نهایی را از کاربر بگیرد.
+                      </li>
+                    </ul>
+                  </aside>
                 </div>
+              )}
 
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => handleDownloadSkillFile('SKILL.md', generatedCustomSkillMd)}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>دانلود مستقیم فایل SKILL.md</span>
-                  </button>
+              {/* Calm Single-Surface Key Takeaway */}
+              <LessonTakeawayCallout lang={lang} text={currentModule.keyTakeawayFa} />
 
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(generatedCustomSkillMd, 'custom_generated_skill_md')}
-                    className={`flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer ${
-                      copiedId === 'custom_generated_skill_md'
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-purple-600 hover:bg-purple-700 text-white'
-                    }`}
-                  >
-                    {copiedId === 'custom_generated_skill_md' ? (
-                      <>
-                        <Check className="w-4 h-4" />
-                        <span>فایل SKILL.md شما کپی شد!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-4 h-4" />
-                        <span>کپی کد SKILL.md</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-            </div>
-          </details>
+              {/* Single-Primary-CTA Footer Navigation */}
+              <FocusedLessonFooter
+                lang={lang}
+                boundary={skillStepBoundary}
+                onPrev={() =>
+                  handleSelectSkillStep(
+                    stepBackward(skillStepBoundary.currentIndex, CURRICULUM_MODULES.length)
+                  )
+                }
+                onNext={() =>
+                  handleSelectSkillStep(
+                    stepForward(skillStepBoundary.currentIndex, CURRICULUM_MODULES.length)
+                  )
+                }
+                secondaryAction={
+                  skillStepBoundary.currentIndex === 1
+                    ? {
+                        label: lang === 'fa' ? 'مشاهده جدول مقایسه مفاهیم' : 'Open comparison table',
+                        onClick: () => setAiSkillsView('comparison')
+                      }
+                    : [4, 5, 7, 8].includes(skillStepBoundary.currentIndex)
+                    ? {
+                        label: lang === 'fa' ? 'باز کردن آزمایشگاه و سندباکس' : 'Open lab & sandbox',
+                        onClick: () => setAiSkillsView('sandbox')
+                      }
+                    : undefined
+                }
+                finalStepCta={{
+                  label: lang === 'fa' ? 'ورود به آزمایشگاه و ساخت SKILL.md' : 'Open Lab & SKILL.md Builder',
+                  onClick: () => setAiSkillsView('sandbox')
+                }}
+              />
+            </article>
+          )}
 
-          {/* 6. WHEN NOT TO BUILD A SKILL & SECURITY RED LINES (Collapsible Accordion) */}
-          <details className="group rounded-2xl border border-[#ecdcd8] dark:border-[#382645] bg-white dark:bg-[#201729] shadow-xs overflow-hidden transition-all">
-            <summary className="cursor-pointer list-none p-4 sm:p-5 flex items-center justify-between font-bold text-xs sm:text-sm select-none hover:bg-[#fdeee9]/30 dark:hover:bg-[#341528]/30 transition-colors">
-              <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-                <ShieldAlert className="w-5 h-5 shrink-0" />
-                <h3 className="font-bold text-xs sm:text-sm text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa'
-                    ? 'درس سوم: چه مواردی نباید اسکیل شوند؟ + ۴ خط قرمز امنیتی'
-                    : 'Lesson 3: When NOT to Build a Skill & 4 Critical Security Rules'}
-                </h3>
-              </div>
-              <span className="text-[11px] font-normal text-[#755e66] dark:text-[#ad99ab] flex items-center gap-1 group-open:text-[#e0533c]">
-                <span>{lang === 'fa' ? 'مشاهده خطوط قرمز' : 'View Security Rules'}</span>
-                <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180 shrink-0" />
-              </span>
-            </summary>
+          {aiSkillsView === 'comparison' && (
+            <AiSkillsComparisonPanel
+              lang={lang}
+              onBackToLesson={() => setAiSkillsView('lesson')}
+            />
+          )}
 
-            <div className="p-4 sm:p-5 pt-4 border-t border-[#ecdcd8]/50 dark:border-[#382645]/50 grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* When NOT to build a skill */}
-            <div className="p-5 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.08] dark:border-white/[0.1] shadow-2xs space-y-3">
-              <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-                <Lightbulb className="w-5 h-5" />
-                <h3 className="font-black text-sm text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa'
-                    ? 'درس سوم: در چه مواردی نباید Skill بسازیم؟'
-                    : 'Lesson 3: When Should You NOT Build a Skill?'}
-                </h3>
-              </div>
-
-              <ul className="space-y-2.5 text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                <li className="p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.05] dark:border-white/[0.06]">
-                  <b className="text-[#1c2830] dark:text-[#e8ebe9] block mb-0.5">
-                    ۱. کارهای یک‌بارمصرف و غیرتکراری (One-Off Tasks):
-                  </b>
-                  اگر کاری را فقط سالی یک بار انجام می‌دهید، ساخت و نگهداری Skill برای آن اتلاف وقت است؛ یک پرامپت استاندارد RCTO کافی است.
-                </li>
-                <li className="p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.05] dark:border-white/[0.06]">
-                  <b className="text-[#1c2830] dark:text-[#e8ebe9] block mb-0.5">
-                    ۲. طوفان فکری و ایده‌پردازی کاملاً آزاد (Open Brainstorming):
-                  </b>
-                  اسکیل‌ها برای ایجاد «قالب استاندارد و محدودیت دقیق» طراحی شده‌اند. در کارهایی که نیاز به خلاقیت ساختارشکن دارید، قالب‌های خشک Skill دست‌وپای مدل را می‌بندد.
-                </li>
-                <li className="p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.05] dark:border-white/[0.06]">
-                  <b className="text-[#1c2830] dark:text-[#e8ebe9] block mb-0.5">
-                    ۳. اسکیل‌های بیش از حد کلی («همه‌کاره»):
-                  </b>
-                  هرگز یک اسکیل با نام «دستیار کلی شرکت» نسازید! هر اسکیل باید فقط یک ماموریت مشخص و تیز (مثلاً فقط «خلاصه‌ساز جلسات» یا فقط «ممیز اضافه‌کاری») داشته باشد.
-                </li>
-              </ul>
-            </div>
-
-            {/* Security Tips for Skills */}
-            <div className="p-5 rounded-2xl bg-red-500/[0.04] border border-red-500/25 shadow-2xs space-y-3">
-              <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-                <ShieldAlert className="w-5 h-5" />
-                <h3 className="font-black text-sm text-[#1c2830] dark:text-[#e8ebe9]">
-                  {lang === 'fa'
-                    ? '۴ هشدار امنیتی حیاتی هنگام استفاده از AI Skills'
-                    : '4 Critical Security Rules When Using AI Skills'}
-                </h3>
-              </div>
-
-              <ul className="space-y-2.5 text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                <li className="p-2.5 rounded-xl bg-white dark:bg-[#141b20] border border-red-500/20">
-                  <b className="text-red-700 dark:text-red-300 block mb-0.5">
-                    ۱. خطر دانلود اسکیل‌های ناشناس از گیت‌هاب و اینترنت:
-                  </b>
-                  هرگز یک پکیج اسکیل آماده را بدون باز کردن و خواندن خط‌به‌خط فایل <code className="font-mono">SKILL.md</code> و پوشه <code className="font-mono">scripts/</code> در اکانت خود آپلود نکنید (خطر دستورات مخفی Prompt Injection برای سرقت داده‌های چت).
-                </li>
-                <li className="p-2.5 rounded-xl bg-white dark:bg-[#141b20] border border-red-500/20">
-                  <b className="text-red-700 dark:text-red-300 block mb-0.5">
-                    ۲. ممنوعیت قرار دادن رمز عبور و API Key داخل SKILL.md:
-                  </b>
-                  فایل <code className="font-mono">SKILL.md</code> یک سند متنی قابل اشتراک‌گذاری است؛ هرگز توکن‌های امنیتی، رمزهای عبور یا اطلاعات محرمانه شخصی را داخل متن آن هاردکد نکنید.
-                </li>
-                <li className="p-2.5 rounded-xl bg-white dark:bg-[#141b20] border border-red-500/20">
-                  <b className="text-red-700 dark:text-red-300 block mb-0.5">
-                    ۳. قانون تایید انسان برای عملیات حذف یا ارسال (Human-in-the-Loop):
-                  </b>
-                  اگر اسکیل شما به ابزارهای MCP (مثل ایمیل یا فایل‌های هارد دیسک) متصل است، همیشه در <code className="font-mono">SKILL.md</code> شرط بگذارید که قبل از حذف فایل یا ارسال ایمیل، تایید نهایی را از کاربر بگیرد.
-                </li>
-              </ul>
-            </div>
-            </div>
-          </details>
-        </div>
+          {aiSkillsView === 'sandbox' && (
+            <AiSkillsLabPanel
+              lang={lang}
+              readySkills={READY_SKILLS}
+              selectedSkillId={selectedSkillId}
+              onSelectSkillId={setSelectedSkillId}
+              copyToClipboard={copyToClipboard}
+              copiedId={copiedId}
+              onDownloadSkillFile={handleDownloadSkillFile}
+              onLoadToSandbox={onLoadToSandbox}
+              metaSkillBuilderPrompt={metaSkillBuilderPrompt}
+              customName={customName}
+              onChangeCustomName={setCustomName}
+              customDesc={customDesc}
+              onChangeCustomDesc={setCustomDesc}
+              customSteps={customSteps}
+              onChangeCustomSteps={setCustomSteps}
+              customOutputFormat={customOutputFormat}
+              onChangeCustomOutputFormat={setCustomOutputFormat}
+              customTrapRule={customTrapRule}
+              onChangeCustomTrapRule={setCustomTrapRule}
+              generatedCustomSkillMd={generatedCustomSkillMd}
+              onBackToLesson={() => setAiSkillsView('lesson')}
+            />
+          )}
+        </FocusedLessonLayout>
       )}
 
       {/* ===================================================================== */}
-      {/* SUB-TAB 2: OBSIDIAN SECOND BRAIN + CLAUDE & HERMES (13 CHAPTERS)      */}
+      {/* SUB-TAB 2: OBSIDIAN SECOND BRAIN FOCUSED LEARNING (MODULE 4-4)        */}
       {/* ===================================================================== */}
       {subTab === 'obsidian_vault' && (
-        <div className="space-y-6 animate-fadeIn">
-          {/* 1. 13-CHAPTER INTERACTIVE CURRICULUM FOR OBSIDIAN + CLAUDE + HERMES */}
-          <div className="p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.07] dark:border-white/[0.09] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <div className="rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 sm:p-6 space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
-                <div className="space-y-1">
+        <FocusedLessonLayout
+          lang={lang}
+          moduleCode={lang === 'fa' ? 'ماژول ۴\u200F-\u200F۴' : 'Module 4-4'}
+          moduleTitle={
+            lang === 'fa'
+              ? 'مغز دوم Obsidian و اتصال به Claude و Hermes'
+              : 'Obsidian Second Brain + Claude & Hermes Agent'
+          }
+          moduleSubtitle="Obsidian · Claude Desktop · Hermes Agent"
+          steps={focusedObsidianSteps}
+          activeStepIndex={obsidianStepBoundary.currentIndex}
+          visitedStepIndices={visitedObsidianSteps}
+          onSelectStep={handleSelectObsidianStep}
+          views={[
+            { id: 'lesson', label: lang === 'fa' ? 'مطالعه درس' : 'Lesson' },
+            { id: 'comparison', label: lang === 'fa' ? 'مقایسه و معماری والت' : 'Compare & Vault' },
+            { id: 'connect', label: lang === 'fa' ? 'اتصال و پرامپت‌ها' : 'Connect & Prompts' }
+          ]}
+          activeViewId={obsidianView}
+          onSelectView={(id) => {
+            if (id === 'lesson' || id === 'comparison' || id === 'connect') {
+              playTactileSound('thock');
+              setObsidianView(id);
+            }
+          }}
+          isStepListVisible={obsidianView === 'lesson'}
+          isMobileDrawerOpen={isObsidianDrawerOpen}
+          onToggleMobileDrawer={setIsObsidianDrawerOpen}
+        >
+          {obsidianView === 'lesson' && currentObsidianStep && (
+            <article className="space-y-7" data-testid="obsidian-active-step">
+              <header className="space-y-3 pb-6 border-b border-[var(--cpai-border)]">
+                <div className="flex items-center justify-between gap-2 flex-wrap text-xs sm:text-sm text-[var(--cpai-muted)]">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#0d9488]/15 text-[#0d9488] dark:text-[#2dd4bf] border border-[#0d9488]/30 flex items-center gap-1">
-                      <Brain className="w-3.5 h-3.5" />
-                      <span>دوره کامل ۱۳ فصلی حافظه دائمی هوش مصنوعی (رایگان)</span>
+                    <span className="font-semibold text-[var(--cpai-primary-strong)] tabular-nums">
+                      {lang === 'fa'
+                        ? `فصل ${formatStepNumber(obsidianStepBoundary.stepNumber, 'fa', true)} از ${formatStepNumber(obsidianStepBoundary.totalSteps, 'fa', true)}`
+                        : `Chapter ${formatStepNumber(obsidianStepBoundary.stepNumber, 'en', true)} of ${formatStepNumber(obsidianStepBoundary.totalSteps, 'en', true)}`}
                     </span>
-                    <span className="text-[11px] font-semibold text-[#5d6b73] dark:text-[#9aa8b0]">
-                      Obsidian · Claude Desktop · Nous Research Hermes Agent
-                    </span>
+                    <span aria-hidden="true">·</span>
+                    <span>{currentObsidianStep.badgeFa}</span>
                   </div>
-                  <h3 className="text-sm sm:text-base font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                    {lang === 'fa'
-                      ? 'آموزش گام‌به‌گام ساخت «مغز دوم» با Obsidian و اتصال مستقیم به Claude و Hermes (روی هر فصل کلیک کنید):'
-                      : '13-Chapter Step-by-Step Guide to Building Your Second Brain with Obsidian, Claude & Hermes:'}
-                  </h3>
+                  <bdi dir="ltr" className="text-xs font-mono text-[var(--cpai-muted)] truncate max-w-full">
+                    {currentObsidianStep.titleEn}
+                  </bdi>
                 </div>
 
-                {/* Prev/Next Chapter Buttons */}
-                <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      playTactileSound('switch');
-                      setActiveObsidianStepIdx((prev) =>
-                        prev > 0 ? prev - 1 : OBSIDIAN_SECOND_BRAIN_STEPS.length - 1
-                      );
-                    }}
-                    className="px-2.5 py-1.5 rounded-xl text-xs font-extrabold bg-[#f4f6f5] dark:bg-[#1d262d] text-[#1c2830] dark:text-[#e8ebe9] border border-black/10 dark:border-white/10 border-b-[3px] border-b-black/25 active:translate-y-[2px] active:border-b cursor-pointer"
-                  >
-                    → فصل قبلی
-                  </button>
-                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-[#0d9488]/15 text-[#0d9488] dark:text-[#2dd4bf]">
-                    {activeObsidianStepIdx + 1} / {OBSIDIAN_SECOND_BRAIN_STEPS.length}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      playTactileSound('switch');
-                      setActiveObsidianStepIdx((prev) =>
-                        prev < OBSIDIAN_SECOND_BRAIN_STEPS.length - 1 ? prev + 1 : 0
-                      );
-                    }}
-                    className="px-2.5 py-1.5 rounded-xl text-xs font-extrabold bg-[#0d9488] text-white border border-[#115e59] border-b-[3px] border-b-[#042f2e] active:translate-y-[2px] active:border-b cursor-pointer"
-                  >
-                    فصل بعدی ←
-                  </button>
-                </div>
+                <h3 className="cpai-lesson-title">
+                  {lang === 'fa' ? currentObsidianStep.titleFa : currentObsidianStep.titleEn}
+                </h3>
+              </header>
+
+              {/* Calm Single-Column Structured Reading Flow */}
+              <div className="cpai-prose space-y-5">
+                {currentObsidianStep.deepDiveFa.map((para, pIdx) => {
+                  const { heading, body } = splitPointTitleAndBody(para);
+                  return (
+                    <section key={pIdx} className="space-y-1.5">
+                      {heading && (
+                        <h4 className="text-base sm:text-[17px] font-semibold text-[var(--cpai-text)] leading-snug">
+                          {formatStepNumber(pIdx + 1, lang)}. {heading}
+                        </h4>
+                      )}
+                      <p>{body}</p>
+                    </section>
+                  );
+                })}
               </div>
 
-              {/* 13-Chapter Tactile Keycap Grid */}
-              {render13ObsidianKeycaps(false)}
+              {/* Optional Code / Config Snippet */}
+              {currentObsidianStep.codeOrConfigSnippet && (
+                <div className="space-y-2.5 pt-1">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="text-sm font-semibold text-[var(--cpai-text)] flex items-center gap-2">
+                      <Code2 aria-hidden="true" className="w-4 h-4 text-[var(--cpai-primary)]" />
+                      <span>{currentObsidianStep.codeOrConfigSnippet.titleFa}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        copyToClipboard(
+                          currentObsidianStep.codeOrConfigSnippet!.code,
+                          `obs_step_code_${currentObsidianStep.keyHint}`
+                        )
+                      }
+                      className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-1.5 rounded-[var(--cpai-radius)] border border-[var(--cpai-border)] bg-[var(--cpai-surface)] hover:border-[var(--cpai-primary)] text-xs sm:text-sm font-medium text-[var(--cpai-text)] transition-colors"
+                    >
+                      {copiedId === `obs_step_code_${currentObsidianStep.keyHint}` ? (
+                        <>
+                          <Check aria-hidden="true" className="w-4 h-4 text-[var(--cpai-success-text)]" />
+                          <span>کپی شد</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy aria-hidden="true" className="w-4 h-4" />
+                          <span>کپی کد</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <pre dir="ltr" className="cpai-code-block p-4 overflow-x-auto text-left select-text">
+                    <code>{currentObsidianStep.codeOrConfigSnippet.code}</code>
+                  </pre>
+                </div>
+              )}
 
-              {/* Active Chapter Multi-Column Slide Card (High Contrast & Large Typography) */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#0d9488]/[0.07] via-white to-emerald-500/[0.05] dark:from-teal-950/30 dark:via-[#141c23] dark:to-emerald-950/20 border-2 border-[#0d9488]/40 space-y-5">
-                <div className="flex items-center justify-between gap-2 flex-wrap pb-3 border-b border-[#0d9488]/20">
-                  <span className="px-3.5 py-1 rounded-xl bg-[#0d9488] text-white text-xs sm:text-sm font-black">
-                    {currentObsidianStep.stepNumber} ({currentObsidianStep.keyHint}) — {currentObsidianStep.badgeFa}
-                  </span>
-                  <span dir="ltr" className="text-xs sm:text-sm font-mono font-bold text-[#334155] dark:text-[#cbd5e1]">
-                    {currentObsidianStep.titleEn}
-                  </span>
+              <LessonTakeawayCallout
+                lang={lang}
+                labelFa="نکته کلیدی و تجربه عملی"
+                labelEn="Key Takeaway"
+                text={currentObsidianStep.proTipFa}
+              />
+
+              <FocusedLessonFooter
+                lang={lang}
+                boundary={obsidianStepBoundary}
+                onPrev={() =>
+                  handleSelectObsidianStep(
+                    stepBackward(obsidianStepBoundary.currentIndex, OBSIDIAN_SECOND_BRAIN_STEPS.length)
+                  )
+                }
+                onNext={() =>
+                  handleSelectObsidianStep(
+                    stepForward(obsidianStepBoundary.currentIndex, OBSIDIAN_SECOND_BRAIN_STEPS.length)
+                  )
+                }
+                secondaryAction={
+                  obsidianStepBoundary.currentIndex <= 3
+                    ? {
+                        label: lang === 'fa' ? 'مشاهده مقایسه و معماری والت' : 'Open comparison & Vault',
+                        onClick: () => setObsidianView('comparison')
+                      }
+                    : {
+                        label: lang === 'fa' ? 'راهنمای اتصال و ۴ پرامپت آماده' : 'Connection & 4 prompts',
+                        onClick: () => setObsidianView('connect')
+                      }
+                }
+                finalStepCta={{
+                  label: lang === 'fa' ? 'ورود به راهنمای اتصال و پرامپت‌ها' : 'Open Connection & Prompts',
+                  onClick: () => setObsidianView('connect')
+                }}
+              />
+            </article>
+          )}
+
+          {obsidianView === 'comparison' && (
+            <ObsidianComparisonVaultPanel
+              lang={lang}
+              onBackToLesson={() => setObsidianView('lesson')}
+            />
+          )}
+
+          {obsidianView === 'connect' && (
+            <ObsidianConnectWorkflowsPanel
+              lang={lang}
+              claudeMdTemplate={claudeMdTemplate}
+              claudeMcpConfigCode={claudeMcpConfigCode}
+              copyToClipboard={copyToClipboard}
+              copiedId={copiedId}
+              onDownloadFile={handleDownloadSkillFile}
+              onLoadToSandbox={onLoadToSandbox}
+              onBackToLesson={() => setObsidianView('lesson')}
+            />
+          )}
+        </FocusedLessonLayout>
+      )}
+
+      {/* ===================================================================== */}
+      {/* SUB-TAB 3: MCP PROTOCOL FOCUSED LEARNING MASTERCLASS (MODULE 4-1)     */}
+      {/* ===================================================================== */}
+      {subTab === 'mcp_protocol' && (
+        <FocusedLessonLayout
+          lang={lang}
+          moduleCode={lang === 'fa' ? 'ماژول ۴\u200F-\u200F۱' : 'Module 4-1'}
+          moduleTitle={
+            lang === 'fa'
+              ? 'پروتکل MCP و ساخت سرورهای FastMCP'
+              : 'Model Context Protocol (MCP) & FastMCP Servers'
+          }
+          moduleSubtitle="Host · Client · Server · Python FastMCP"
+          steps={focusedMcpSteps}
+          activeStepIndex={mcpStepBoundary.currentIndex}
+          visitedStepIndices={visitedMcpSteps}
+          onSelectStep={handleSelectMcpStep}
+          views={[
+            { id: 'lesson', label: lang === 'fa' ? 'مطالعه درس' : 'Lesson' },
+            { id: 'architecture', label: lang === 'fa' ? 'معماری و دایرکتوری‌ها' : 'Architecture & Sources' },
+            { id: 'troubleshooting', label: lang === 'fa' ? 'جدول عیب‌یابی' : 'Troubleshooting' }
+          ]}
+          activeViewId={mcpView}
+          onSelectView={(id) => {
+            if (id === 'lesson' || id === 'architecture' || id === 'troubleshooting') {
+              playTactileSound('thock');
+              setMcpView(id);
+            }
+          }}
+          isStepListVisible={mcpView === 'lesson'}
+          isMobileDrawerOpen={isMcpDrawerOpen}
+          onToggleMobileDrawer={setIsMcpDrawerOpen}
+        >
+          {mcpView === 'lesson' && currentMcpStep && (
+            <article className="space-y-7" data-testid="mcp-active-step">
+              <header className="space-y-3 pb-6 border-b border-[var(--cpai-border)]">
+                <div className="flex items-center justify-between gap-2 flex-wrap text-xs sm:text-sm text-[var(--cpai-muted)]">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-[var(--cpai-primary-strong)] tabular-nums">
+                      {lang === 'fa'
+                        ? `فصل ${formatStepNumber(mcpStepBoundary.stepNumber, 'fa', true)} از ${formatStepNumber(mcpStepBoundary.totalSteps, 'fa', true)}`
+                        : `Chapter ${formatStepNumber(mcpStepBoundary.stepNumber, 'en', true)} of ${formatStepNumber(mcpStepBoundary.totalSteps, 'en', true)}`}
+                    </span>
+                    <span aria-hidden="true">·</span>
+                    <span>{currentMcpStep.badgeFa}</span>
+                  </div>
+                  <bdi dir="ltr" className="text-xs font-mono text-[var(--cpai-muted)] truncate max-w-full">
+                    {currentMcpStep.titleEn}
+                  </bdi>
                 </div>
 
-                <h4 className="text-lg sm:text-2xl font-black text-[#0f172a] dark:text-white leading-snug">
-                  {currentObsidianStep.titleFa}
-                </h4>
+                <h3 className="cpai-lesson-title">
+                  {lang === 'fa' ? currentMcpStep.titleFa : currentMcpStep.titleEn}
+                </h3>
+              </header>
 
-                {/* Multi-Column Scannable Cards Instead of Full-Width Text Lines */}
-                <div
-                  className={`grid grid-cols-1 ${
-                    currentObsidianStep.deepDiveFa.length === 2
-                      ? 'lg:grid-cols-2'
-                      : currentObsidianStep.deepDiveFa.length >= 3
-                        ? 'md:grid-cols-2 xl:grid-cols-3'
-                        : 'lg:grid-cols-1'
-                  } gap-4`}
-                >
-                  {currentObsidianStep.deepDiveFa.map((para, pIdx) => {
-                    const { heading, body } = splitPointTitleAndBody(para);
-                    return (
-                      <div
-                        key={pIdx}
-                        className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#11171d] border border-[#0d9488]/25 shadow-2xs space-y-2.5 flex flex-col justify-between"
-                      >
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2.5">
-                            <span className="w-7 h-7 rounded-lg bg-[#0d9488] text-white font-mono text-xs font-black flex items-center justify-center shrink-0">
-                              {pIdx + 1}
-                            </span>
-                            <span className="text-sm sm:text-base font-black text-[#0f766e] dark:text-[#2dd4bf] leading-snug">
-                              {heading || `گام اجرایی ${pIdx + 1}`}
-                            </span>
-                          </div>
-                          <p className="text-sm sm:text-[15px] font-semibold text-[#0f172a] dark:text-[#f1f5f9] leading-relaxed">
-                            {body}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+              {/* Calm Single-Column Structured Reading Flow */}
+              <div className="cpai-prose space-y-5">
+                {currentMcpStep.deepDiveFa.map((paragraph, pIdx) => {
+                  const { heading, body } = splitPointTitleAndBody(paragraph);
+                  return (
+                    <section key={pIdx} className="space-y-1.5">
+                      {heading && (
+                        <h4 className="text-base sm:text-[17px] font-semibold text-[var(--cpai-text)] leading-snug">
+                          {formatStepNumber(pIdx + 1, lang)}. {heading}
+                        </h4>
+                      )}
+                      <p>{body}</p>
+                    </section>
+                  );
+                })}
+              </div>
 
-                {/* Optional Code or Config Snippet inside Chapter */}
-                {currentObsidianStep.codeOrConfigSnippet && (
-                  <div className="p-4 sm:p-5 rounded-2xl bg-[#11161c] text-[#f1f5f9] space-y-2.5 border border-white/15">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <span className="text-xs sm:text-sm font-black text-[#2dd4bf]">
-                        {currentObsidianStep.codeOrConfigSnippet.titleFa}
-                      </span>
+              {/* Code / Config Snippet with Download (M5/M9) & Copy */}
+              {currentMcpStep.codeOrConfigSnippet && (
+                <div className="space-y-2.5 pt-1">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="text-sm font-semibold text-[var(--cpai-text)] flex items-center gap-2">
+                      <Code2 aria-hidden="true" className="w-4 h-4 text-[var(--cpai-primary)]" />
+                      <span>{currentMcpStep.codeOrConfigSnippet.titleFa}</span>
+                    </span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {(currentMcpStep.keyHint === 'M5' || currentMcpStep.keyHint === 'M9') && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDownloadSkillFile(
+                              currentMcpStep.keyHint === 'M5' ? 'server.py' : 'todo_server.py',
+                              currentMcpStep.codeOrConfigSnippet?.code || ''
+                            )
+                          }
+                          className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-1.5 rounded-[var(--cpai-radius)] bg-[var(--cpai-primary)] hover:bg-[var(--cpai-primary-strong)] text-white dark:text-[#0F171A] text-xs sm:text-sm font-semibold transition-colors"
+                        >
+                          <Download aria-hidden="true" className="w-4 h-4" />
+                          <span>
+                            دانلود <bdi dir="ltr">{currentMcpStep.keyHint === 'M5' ? 'server.py' : 'todo_server.py'}</bdi>
+                          </span>
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() =>
                           copyToClipboard(
-                            currentObsidianStep.codeOrConfigSnippet!.code,
-                            `obs_step_code_${currentObsidianStep.keyHint}`
+                            currentMcpStep.codeOrConfigSnippet?.code || '',
+                            `mcp_step_code_${currentMcpStep.keyHint}`
                           )
                         }
-                        className="px-3.5 py-1.5 rounded-xl bg-[#0d9488] hover:bg-[#0f766e] text-white text-xs font-black flex items-center gap-1.5 cursor-pointer"
+                        className="inline-flex items-center gap-1.5 min-h-[40px] px-3.5 py-1.5 rounded-[var(--cpai-radius)] border border-[var(--cpai-border)] bg-[var(--cpai-surface)] hover:border-[var(--cpai-primary)] text-xs sm:text-sm font-medium text-[var(--cpai-text)] transition-colors"
                       >
-                        {copiedId === `obs_step_code_${currentObsidianStep.keyHint}` ? (
+                        {copiedId === `mcp_step_code_${currentMcpStep.keyHint}` ? (
                           <>
-                            <Check className="w-3.5 h-3.5" />
-                            <span>کپی شد!</span>
+                            <Check aria-hidden="true" className="w-4 h-4 text-[var(--cpai-success-text)]" />
+                            <span>کپی شد</span>
                           </>
                         ) : (
                           <>
-                            <Copy className="w-3.5 h-3.5" />
-                            <span>کپی کد</span>
+                            <Copy aria-hidden="true" className="w-4 h-4" />
+                            <span>کپی کد / دستور</span>
                           </>
                         )}
                       </button>
                     </div>
-                    <pre
-                      dir="ltr"
-                      className="text-xs sm:text-sm font-mono whitespace-pre-wrap leading-relaxed select-text text-left overflow-x-auto"
-                    >
-                      {currentObsidianStep.codeOrConfigSnippet.code}
-                    </pre>
                   </div>
-                )}
-
-                {/* Pro Tip */}
-                <div className="p-4 rounded-2xl bg-emerald-500/15 border-2 border-emerald-500/35 flex items-start gap-3">
-                  <Lightbulb className="w-5 h-5 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
-                  <div className="text-sm sm:text-base font-bold text-[#0f172a] dark:text-emerald-100 leading-relaxed">
-                    <strong className="font-black text-emerald-800 dark:text-emerald-300">نکته کلیدی و تجربه عملی: </strong>
-                    {currentObsidianStep.proTipFa}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 2. 3-WAY COMPARISON MATRIX: OBSIDIAN vs. NOTION vs. GOOGLE NOTEBOOKLM */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            <div className="lg:col-span-4 p-5 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.08] dark:border-white/[0.1] shadow-2xs space-y-3 flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-[#0d9488] dark:text-[#2dd4bf]">
-                  <Brain className="w-5 h-5" />
-                  <h3 className="font-black text-sm text-[#1c2830] dark:text-[#e8ebe9]">
-                    چرا Obsidian تنها انتخاب واقعی برای «حافظه دائمی هوش مصنوعی» است؟
-                  </h3>
-                </div>
-                <ul className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] space-y-2.5 leading-relaxed">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span>
-                      <b>فایل متنی ساده روی هارد خودتان (Local .md):</b> برخلاف Notion که یادداشت‌ها را در سرور ابری قفل می‌کند، در Obsidian همه چیز فایل متنی ساده روی کامپیوتر شماست و هوش مصنوعی مستقیم آن‌ها را می‌خواند و ویرایش می‌کند.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span>
-                      <b>تفاوت با NotebookLM:</b> نوت‌بوک ال‌ام یک «کتابخانه تحقیق یک‌طرفه (فقط خواندنی)» برای PDFهای مرجع است؛ اما Obsidian یک «دفتر کار دوطرفه (خواندن و نوشتن)» است که هوش مصنوعی داخل آن یادداشت می‌سازد و پوشه‌ها را مرتب می‌کند.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span>
-                      <b>۱۰۰٪ رایگان، آفلاین و بدون تحریم:</b> هیچ محدودیت اکانت یا ریسک مسدود شدن حساب ابری وجود ندارد.
-                    </span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="flex items-center gap-2 pt-2 border-t border-black/[0.06] dark:border-white/[0.08] flex-wrap">
-                <a
-                  href="https://obsidian.md"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#7c3aed]/10 hover:bg-[#7c3aed]/20 text-[#7c3aed] dark:text-[#a78bfa] border border-[#7c3aed]/30 text-xs font-extrabold transition-all"
-                >
-                  <span>سایت رسمی Obsidian.md</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-                <a
-                  href="https://hermes-agent.nousresearch.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#0d9488]/10 hover:bg-[#0d9488]/20 text-[#0d9488] dark:text-[#2dd4bf] border border-[#0d9488]/30 text-xs font-extrabold transition-all"
-                >
-                  <span>سایت Hermes Agent</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              </div>
-            </div>
-
-            {/* Comparison Table */}
-            <div className="lg:col-span-8 p-5 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.08] dark:border-white/[0.1] shadow-2xs space-y-3 overflow-hidden">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <h3 className="font-black text-sm text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-                  <Sliders className="w-4 h-4 text-[#0d9488]" />
-                  <span>مقایسه دقیق: Obsidian در برابر Notion و Google NotebookLM</span>
-                </h3>
-                <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#0d9488]/10 text-[#0d9488] dark:text-[#2dd4bf] font-bold">
-                  انتخاب ابزار درست برای هر کار
-                </span>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-right text-xs border-collapse">
-                  <thead className="bg-black/[0.03] dark:bg-white/[0.04] text-[#1c2830] dark:text-[#e8ebe9] font-extrabold border-b border-black/[0.08] dark:border-white/[0.1]">
-                    <tr>
-                      <th className="p-2.5">معیار مقایسه</th>
-                      <th className="p-2.5 text-[#0d9488] dark:text-[#2dd4bf]">Obsidian (مغز دوم زنده)</th>
-                      <th className="p-2.5">Notion (فضای کاری ابری)</th>
-                      <th className="p-2.5 text-purple-700 dark:text-purple-300">Google NotebookLM (کتابخانه تحقیق)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-black/[0.05] dark:divide-white/[0.06] text-[#2c3840] dark:text-[#cfd6db]">
-                    <tr>
-                      <td className="p-2.5 font-bold">محل ذخیره و فرمت</td>
-                      <td className="p-2.5 font-bold text-emerald-600 dark:text-emerald-400">فایل متنی ساده (.md) روی هارد کامپیوتر شما</td>
-                      <td className="p-2.5">دیتابیس بسته در سرورهای ابری نوشن</td>
-                      <td className="p-2.5">منابع ثابت آپلودشده در کلود گوگل</td>
-                    </tr>
-                    <tr>
-                      <td className="p-2.5 font-bold">نوع دسترسی هوش مصنوعی</td>
-                      <td className="p-2.5 font-bold text-emerald-600 dark:text-emerald-400">دوطرفه کامل (خواندن، نوشتن، ویرایش و جابه‌جایی فایل‌ها)</td>
-                      <td className="p-2.5">محدود و نیازمند API پیچیده</td>
-                      <td className="p-2.5">یک‌طرفه (فقط می‌خواند و به سوالات جواب می‌دهد)</td>
-                    </tr>
-                    <tr>
-                      <td className="p-2.5 font-bold">اتصال به Claude و Hermes</td>
-                      <td className="p-2.5 font-bold text-emerald-600 dark:text-emerald-400">مستقیم و آنی (از طریق پوشه Vault روی هارد)</td>
-                      <td className="p-2.5">غیرمستقیم و کند</td>
-                      <td className="p-2.5">محیط بسته داخل سایت گوگل</td>
-                    </tr>
-                    <tr>
-                      <td className="p-2.5 font-bold">بهترین کاربرد</td>
-                      <td className="p-2.5 font-bold text-emerald-600 dark:text-emerald-400">حافظه دائمی روزانه، مدیریت پروژه‌ها، ایده‌ها و مرتب‌سازی خودکار</td>
-                      <td className="p-2.5">تابلوهای تسک تیمی آنلاین</td>
-                      <td className="p-2.5">تحلیل PDFهای سنگین، قراردادها و ساخت پادکست/اسلاید</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          {/* 3. VAULT ARCHITECTURE (D:/MIND) & CLAUDE.MD TEMPLATE */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            {/* Folder Structure & Note Rules (6 Cols) */}
-            <div className="lg:col-span-6 p-5 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.08] dark:border-white/[0.1] shadow-2xs space-y-4">
-              <div className="flex items-center gap-2 text-[#0d9488] dark:text-[#2dd4bf]">
-                <FolderTree className="w-5 h-5" />
-                <h3 className="font-black text-sm sm:text-base text-[#1c2830] dark:text-[#e8ebe9]">
-                  معماری استاندارد پوشه‌های Vault + قواعد یادداشت‌نویسی برای هوش مصنوعی
-                </h3>
-              </div>
-
-              <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                برای اینکه Claude و Hermes بلافاصله ساختار مغز دوم شما را بفهمند، از ساختن ده‌ها پوشه تودرتو خودداری کنید و فقط این ۵ پوشه شماره‌گذاری‌شده + فایل راهنمای <code className="font-mono font-bold">CLAUDE.md</code> را در ریشه والت بسازید:
-              </p>
-
-              <div className="p-3.5 rounded-xl bg-[#1e1e1e] text-[#d4d4d4] text-xs font-mono space-y-1.5" dir="ltr">
-                <div>📁 <span className="font-bold text-teal-400">D:/MIND/</span> (پوشه اصلی Vault — نام انگلیسی و بدون فاصله)</div>
-                <div className="ps-4">├── 📂 <span className="text-sky-400 font-bold">00_Inbox/</span> &nbsp;&nbsp;&nbsp;&nbsp;# یادداشت‌های خام و عجله‌ای روزانه</div>
-                <div className="ps-4">├── 📂 <span className="text-emerald-400 font-bold">01_Projects/</span> &nbsp;# پروژه‌های فعال در حال اجرا</div>
-                <div className="ps-4">├── 📂 <span className="text-amber-400 font-bold">02_Areas/</span> &nbsp;&nbsp;&nbsp;&nbsp;# حوزه‌های دائمی کار و زندگی</div>
-                <div className="ps-4">├── 📂 <span className="text-purple-400 font-bold">03_Resources/</span> # بانک مقالات، آموزش‌ها و پرامپت‌ها</div>
-                <div className="ps-4">├── 📂 <span className="text-gray-400 font-bold">04_Archive/</span> &nbsp;&nbsp;# پروژه‌های تکمیل‌شده</div>
-                <div className="ps-4">└── 📄 <span className="text-pink-400 font-bold">CLAUDE.md</span> &nbsp;&nbsp;&nbsp;&nbsp;# شناسنامه و قوانین والت برای هوش مصنوعی</div>
-              </div>
-
-              <div className="space-y-2 text-xs">
-                <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.05] dark:border-white/[0.06]">
-                  <b className="text-[#1c2830] dark:text-[#e8ebe9] block mb-0.5">
-                    ۱. ویژگی‌های بالای یادداشت (Properties / YAML Frontmatter):
-                  </b>
-                  <span className="text-[#5d6b73] dark:text-[#9aa8b0]">
-                    در خط اول هر یادداشت سه خط تیره (<code className="font-mono">---</code>) بزنید تا بخش Properties باز شود و حداقل <code className="font-mono">date</code>، <code className="font-mono">tags</code> و <code className="font-mono">status</code> را ثبت کنید.
-                  </span>
-                </div>
-                <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.05] dark:border-white/[0.06]">
-                  <b className="text-[#1c2830] dark:text-[#e8ebe9] block mb-0.5">
-                    ۲. لینک‌های داخلی دوطرفه با دو کروشه <code className="font-mono text-purple-600">[[نام یادداشت]]</code>:
-                  </b>
-                  <span className="text-[#5d6b73] dark:text-[#9aa8b0]">
-                    برای اتصال یادداشت‌ها در Graph View و درک ارتباط موضوعات توسط هوش مصنوعی، نام موضوعات مرتبط را داخل دو کروشه بگذارید.
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* CLAUDE.md Constitution Template (6 Cols) */}
-            <div className="lg:col-span-6 p-5 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.08] dark:border-white/[0.1] shadow-2xs flex flex-col justify-between space-y-4">
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
-                    <FileText className="w-5 h-5" />
-                    <h3 className="font-black text-sm sm:text-base text-[#1c2830] dark:text-[#e8ebe9]">
-                      فایل کلیدی CLAUDE.md (شناسنامه شما برای Claude و Hermes)
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-700 dark:text-purple-300">
-                    ذخیره در ریشه D:/MIND/CLAUDE.md
-                  </span>
-                </div>
-
-                <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                  این فایل را در پوشه اصلی Vault خود بسازید تا هر بار که Claude یا Hermes به والت شما وصل می‌شود، بدون نیاز به توضیح مجدد بداند شما که هستید و چطور باید یادداشت‌هایتان را مدیریت کند:
-                </p>
-
-                <pre
-                  dir="rtl"
-                  className="p-3.5 rounded-xl bg-[#1e1e1e] text-[#d4d4d4] font-mono text-xs leading-relaxed overflow-y-auto max-h-60 whitespace-pre-wrap text-right select-text border border-white/10"
-                >
-                  {claudeMdTemplate}
-                </pre>
-              </div>
-
-              <div className="flex items-center justify-between gap-2 flex-wrap pt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
-                <button
-                  type="button"
-                  onClick={() => handleDownloadSkillFile('CLAUDE.md', claudeMdTemplate)}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#0d9488] hover:bg-[#0f766e] text-white text-xs font-extrabold border border-[#115e59] border-b-[3px] border-b-[#042f2e] active:translate-y-[2px] active:border-b transition-all cursor-pointer"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>دانلود مستقیم فایل CLAUDE.md</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(claudeMdTemplate, 'claude_md_tpl')}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-extrabold border border-purple-800 border-b-[3px] border-b-purple-950 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
-                >
-                  {copiedId === 'claude_md_tpl' ? (
-                    <>
-                      <Check className="w-4 h-4" />
-                      <span>تمپلیت CLAUDE.md کپی شد!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4" />
-                      <span>کپی متن CLAUDE.md</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* 4. CONNECTING CLAUDE DESKTOP & HERMES AGENT (METHODS 1 & 2 + WINDOWS PATH FIX) */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-[#0d9488]/[0.05] via-purple-500/[0.04] to-amber-500/[0.04] border border-[#0d9488]/30 space-y-5">
-            <div className="space-y-1 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#0d9488] text-white">
-                  راهنمای جامع اتصال هوش مصنوعی به والت
-                </span>
-                <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300">
-                  شامل اتصال Claude Desktop + دو روش اتصال ایجنت رایگان Hermes + رفع مشکل رایج مسیر ویندوز
-                </span>
-              </div>
-              <h3 className="text-sm sm:text-base font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                نحوه وصل کردن Claude Desktop و ایجنت Hermes به یادداشت‌های Obsidian
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {/* Card A: Connecting Claude Desktop */}
-              <div className="p-4 rounded-2xl bg-white dark:bg-[#12171b] border border-black/[0.08] dark:border-white/[0.1] space-y-3 flex flex-col justify-between">
-                <div className="space-y-2">
-                  <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-purple-500/15 text-purple-700 dark:text-purple-300 inline-block">
-                    ۱. اتصال Claude Desktop به Vault
-                  </span>
-                  <h4 className="text-xs font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                    دسترسی مستقیم برنامه دسکتاپ کلاد به پوشه D:/MIND
-                  </h4>
-                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    در برنامه Claude Desktop وارد <code className="font-mono">Settings &gt; Developer &gt; Edit Config</code> شوید و آدرس پوشه Vault خود را در فایل <code className="font-mono">claude_desktop_config.json</code> قرار دهید و کلاد را ری‌استارت کنید:
-                  </p>
-                  <pre className="p-3 rounded-xl bg-[#1e1e1e] text-[#d4d4d4] font-mono text-[11px] leading-relaxed overflow-x-auto" dir="ltr">
-                    <code>{claudeMcpConfigCode}</code>
+                  <pre dir="ltr" className="cpai-code-block p-4 overflow-x-auto text-left select-text">
+                    <code>{currentMcpStep.codeOrConfigSnippet.code}</code>
                   </pre>
                 </div>
+              )}
 
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(claudeMcpConfigCode, 'mcp_cfg_code')}
-                  className="w-full py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  {copiedId === 'mcp_cfg_code' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedId === 'mcp_cfg_code' ? 'کپی شد!' : 'کپی کانفیگ Claude Desktop'}</span>
-                </button>
-              </div>
+              <LessonTakeawayCallout
+                lang={lang}
+                labelFa="نکته کلیدی و تجربی"
+                labelEn="Key Takeaway"
+                text={currentMcpStep.proTipFa}
+              />
 
-              {/* Card B: Hermes Agent Method 1 & Method 2 */}
-              <div className="p-4 rounded-2xl bg-white dark:bg-[#12171b] border border-black/[0.08] dark:border-white/[0.1] space-y-3 flex flex-col justify-between">
-                <div className="space-y-2">
-                  <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-[#0d9488]/15 text-[#0d9488] dark:text-[#2dd4bf] inline-block">
-                    ۲. اتصال ایجنت رایگان Hermes (هر دو روش)
-                  </span>
-                  <h4 className="text-xs font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                    اسکیل داخلی Obsidian در Hermes Agent
-                  </h4>
-                  <div className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] space-y-2 leading-relaxed">
-                    <p>
-                      <b>روش اول (تنظیم دائمی اسکیل داخلی):</b> در Hermes اسکیل پیش‌فرض <code className="font-mono">skills/note-taking/obsidian</code> را روشن کنید و در فایل <code className="font-mono">~/.hermes/.env</code> مسیر والت را بدهید:
-                    </p>
-                    <pre className="p-2.5 rounded-xl bg-[#1e1e1e] text-[#d4d4d4] font-mono text-[11px]" dir="ltr">
-                      <code>OBSIDIAN_VAULT_PATH="D:/MIND"</code>
-                    </pre>
-                    <p>
-                      <b>روش دوم (معرفی مستقیم مسیر در چت):</b> بدون درگیر شدن با فایل تنظیمات، مستقیماً در اولین پیام به Hermes بگویید: <code className="font-mono">«والت آبسیدین من در مسیر D:/MIND (یا /mnt/d/MIND) است؛ با اسکیل Obsidian وارد آن شو.»</code>
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard('OBSIDIAN_VAULT_PATH="D:/MIND"', 'hermes_env_code')}
-                  className="w-full py-2 rounded-xl bg-[#0d9488] hover:bg-[#0f766e] text-white text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  {copiedId === 'hermes_env_code' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedId === 'hermes_env_code' ? 'کپی شد!' : 'کپی کد مسیر Hermes'}</span>
-                </button>
-              </div>
-
-              {/* Card C: Fixing Common Windows Vault Path Error */}
-              <div className="p-4 rounded-2xl bg-amber-500/[0.07] border-2 border-amber-500/35 space-y-3 flex flex-col justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1.5 text-amber-800 dark:text-amber-300 font-black text-xs">
-                    <AlertTriangle className="w-4 h-4 shrink-0" />
-                    <span>۳. رفع مشکل رایج ویندوز (خوانده نشدن مسیر Vault)</span>
-                  </div>
-                  <p className="text-xs text-[#2c3840] dark:text-[#d1d7db] leading-relaxed">
-                    اگر در ویندوز Claude یا Hermes ارور می‌دهد که پوشه Vault پیدا نمی‌شود، یکی از این ۳ مورد علت آن است:
-                  </p>
-                  <ul className="text-xs text-[#2c3840] dark:text-[#d1d7db] space-y-1.5 leading-relaxed">
-                    <li>
-                      • <b>خطای بک‌اسلش ویندوز:</b> هرگز آدرس را به صورت <code className="font-mono text-red-600" dir="ltr">D:\MIND</code> ننویسید! حتماً از اسلش معمولی <code className="font-mono text-emerald-600 font-bold" dir="ltr">D:/MIND</code> یا دو بک‌اسلش <code className="font-mono" dir="ltr">D:\\MIND</code> استفاده کنید.
-                    </li>
-                    <li>
-                      • <b>مسیر درایوها در WSL ویندوز:</b> اگر Hermes را در محیط WSL اجرا می‌کنید، درایو D ویندوز باید به صورت <code className="font-mono text-emerald-600 font-bold" dir="ltr">/mnt/d/MIND</code> نوشته شود.
-                    </li>
-                    <li>
-                      • <b>حذف فاصله و حروف فارسی از نام پوشه اصلی:</b> نام پوشه ریشه Vault را کوتاه و انگلیسی بگذارید (مثلاً <code className="font-mono" dir="ltr">D:/MIND</code>).
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-white/80 dark:bg-[#161e24] border border-amber-500/30 font-mono text-[11px] text-left" dir="ltr">
-                  <div className="text-red-500">❌ Wrong: "D:\MIND\Notes"</div>
-                  <div className="text-emerald-600 dark:text-emerald-400 font-bold">✅ Windows: "D:/MIND"</div>
-                  <div className="text-blue-600 dark:text-blue-400 font-bold">✅ WSL/Hermes: "/mnt/d/MIND"</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 5. 4 EVERYDAY ACTIONABLE WORKFLOWS & AUTOMATED INBOX SORTING */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.08] dark:border-white/[0.1] shadow-2xs space-y-4">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <h3 className="font-black text-sm sm:text-base text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#0d9488]" />
-                <span>۴ پرامپت عملیاتی روزمره با مغز دوم (مرتب‌سازی خودکار یادداشت‌ها با Hermes و Claude + تمرین پایان دوره)</span>
-              </h3>
-              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
-                کارهای واقعی روزمره
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {OBSIDIAN_DAILY_WORKFLOWS.map((wf) => (
-                <div
-                  key={wf.id}
-                  className="p-4 rounded-2xl bg-[#f8f9fa] dark:bg-[#12171b] border border-black/[0.06] dark:border-white/[0.08] flex flex-col justify-between space-y-3"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] font-black px-2.5 py-0.5 rounded-lg bg-[#0d9488]/15 text-[#0d9488] dark:text-[#2dd4bf]">
-                        {wf.badgeFa}
-                      </span>
-                    </div>
-                    <h4 className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                      {wf.titleFa}
-                    </h4>
-                    <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                      {wf.descriptionFa}
-                    </p>
-                    <pre
-                      dir="rtl"
-                      className="p-3 rounded-xl bg-white dark:bg-[#161e24] border border-black/[0.06] dark:border-white/[0.08] font-mono text-[11px] text-[#1c2830] dark:text-[#e8ebe9] whitespace-pre-wrap leading-relaxed max-h-44 overflow-y-auto select-text text-right"
-                    >
-                      {wf.promptFa}
-                    </pre>
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-2 border-t border-black/[0.05] dark:border-white/[0.06]">
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(wf.promptFa, `obs_wf_${wf.id}`)}
-                      className="flex-1 py-2 rounded-xl bg-[#0d9488] hover:bg-[#0f766e] text-white text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer border border-[#115e59] border-b-[3px] border-b-[#042f2e] active:translate-y-[2px] active:border-b transition-all"
-                    >
-                      {copiedId === `obs_wf_${wf.id}` ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{copiedId === `obs_wf_${wf.id}` ? 'پرامپت کپی شد!' : 'کپی پرامپت'}</span>
-                    </button>
-                    {onLoadToSandbox && (
-                      <button
-                        type="button"
-                        onClick={() => onLoadToSandbox(wf.promptFa)}
-                        className="px-3 py-2 rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/25 text-xs font-bold transition-all cursor-pointer"
-                      >
-                        تست در سندباکس
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ===================================================================== */}
-      {/* SEPARATED STANDALONE BOX FOR MCP (MODEL CONTEXT PROTOCOL)             */}
-      {/* Full 12-Chapter Interactive Course when subTab === 'mcp_protocol'     */}
-      {/* ===================================================================== */}
-      <div
-        className={`p-5 sm:p-6 rounded-3xl border-2 transition-all space-y-6 ${
-          subTab === 'mcp_protocol'
-            ? 'bg-gradient-to-br from-blue-500/[0.08] via-indigo-500/[0.04] to-cyan-500/[0.06] border-blue-500/45 shadow-md animate-fadeIn'
-            : 'bg-gradient-to-br from-blue-500/[0.04] via-white to-indigo-500/[0.04] dark:from-blue-500/[0.07] dark:via-[#151d24] dark:to-indigo-500/[0.06] border-dashed border-blue-500/35'
-        }`}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-blue-500/20">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-3.5 py-1 rounded-full text-xs font-black bg-blue-600 text-white flex items-center gap-1.5">
-                <Terminal className="w-4 h-4" />
-                <span>باکس مستقل و تفکیک‌شده: مسترکلاس کامل پروتکل MCP (Model Context Protocol)</span>
-              </span>
-              <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/35">
-                ۱۲ فصل عملی: ساخت MCP Server با پایتون (FastMCP) + اتصال به Claude و Cursor
-              </span>
-            </div>
-            <h3 className="text-base sm:text-xl font-black text-[#0f172a] dark:text-white mt-1">
-              {lang === 'fa'
-                ? 'آموزش جامع Model Context Protocol (پورت USB-C دنیای هوش مصنوعی) + ساخت سرور مدیریت کارها و عیب‌یابی'
-                : 'Complete Model Context Protocol (MCP) Masterclass + FastMCP Server Lab & Troubleshooting'}
-            </h3>
-          </div>
-
-          {subTab !== 'mcp_protocol' && (
-            <div className="flex items-center gap-2 self-start sm:self-auto shrink-0 flex-wrap">
-              <button
-                type="button"
-                onClick={() => {
-                  playTactileSound('thock');
-                  setSubTab('mcp_protocol');
-                  topSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              <FocusedLessonFooter
+                lang={lang}
+                boundary={mcpStepBoundary}
+                onPrev={() =>
+                  handleSelectMcpStep(
+                    stepBackward(mcpStepBoundary.currentIndex, MCP_MASTERCLASS_STEPS.length)
+                  )
+                }
+                onNext={() =>
+                  handleSelectMcpStep(
+                    stepForward(mcpStepBoundary.currentIndex, MCP_MASTERCLASS_STEPS.length)
+                  )
+                }
+                secondaryAction={
+                  mcpStepBoundary.currentIndex <= 4
+                    ? {
+                        label: lang === 'fa' ? 'جدول مقایسه Tools / Resources / Prompts' : 'Compare MCP capabilities',
+                        onClick: () => setMcpView('architecture')
+                      }
+                    : {
+                        label: lang === 'fa' ? 'مشاهده جدول عیب‌یابی (۷ خطا)' : 'Open troubleshooting guide',
+                        onClick: () => setMcpView('troubleshooting')
+                      }
+                }
+                finalStepCta={{
+                  label: lang === 'fa' ? 'مرور جدول عیب‌یابی سریع MCP' : 'Review MCP Troubleshooting',
+                  onClick: () => setMcpView('troubleshooting')
                 }}
-                className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold border border-blue-800 border-b-[4px] border-b-blue-950 active:translate-y-[2px] active:border-b transition-all cursor-pointer shrink-0"
-              >
-                ورود به مسترکلاس ۱۲ فصلی MCP ←
-              </button>
-            </div>
+              />
+            </article>
           )}
-        </div>
 
-        {/* Always-visible 3-Pillar High-Contrast Projector-Ready Summary Cards (Fixes Screenshot 1!) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-5 rounded-2xl bg-white dark:bg-[#11171d] border-2 border-blue-500/25 shadow-2xs space-y-2.5">
-            <span className="inline-block px-3 py-1 rounded-lg bg-blue-600 text-white font-black text-xs sm:text-sm">
-              ۱. پورت USB-C هوش مصنوعی (چرخه N×M به N+M)
-            </span>
-            <p className="text-sm sm:text-[15px] font-semibold text-[#0f172a] dark:text-[#f1f5f9] leading-relaxed">
-              پروتکل متن‌باز معرفی‌شده توسط Anthropic که هوش مصنوعی را از «اتاق دربسته» خارج می‌کند تا به فایل‌ها، دیتابیس‌ها، گیت‌هاب و APIها با یک زبان مشترک وصل شود.
-            </p>
-          </div>
+          {mcpView === 'architecture' && (
+            <McpArchitectureComparisonPanel
+              lang={lang}
+              onBackToLesson={() => setMcpView('lesson')}
+            />
+          )}
 
-          <div className="p-5 rounded-2xl bg-white dark:bg-[#11171d] border-2 border-indigo-500/25 shadow-2xs space-y-2.5">
-            <span className="inline-block px-3 py-1 rounded-lg bg-indigo-600 text-white font-black text-xs sm:text-sm">
-              ۲. معماری ۳ جزئی: Host، Client و Server
-            </span>
-            <p className="text-sm sm:text-[15px] font-semibold text-[#0f172a] dark:text-[#f1f5f9] leading-relaxed">
-              برنامه‌هایی مثل <b>Claude Desktop</b> و <b>Cursor</b> میزبان (Host) هستند، بخش مترجم داخل آن‌ها <b>Client</b> است و برنامه پایتون شما <b>MCP Server</b> است که ۳ قابلیت <b>Tools</b>، <b>Resources</b> و <b>Prompts</b> را ارائه می‌دهد.
-            </p>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-white dark:bg-[#11171d] border-2 border-emerald-500/25 shadow-2xs space-y-2.5">
-            <span className="inline-block px-3 py-1 rounded-lg bg-emerald-600 text-white font-black text-xs sm:text-sm">
-              ۳. ساخت سریع با FastMCP + تست با Inspector
-            </span>
-            <p className="text-sm sm:text-[15px] font-semibold text-[#0f172a] dark:text-[#f1f5f9] leading-relaxed">
-              با پکیج رسمی <code className="font-mono font-bold text-blue-700 dark:text-blue-300" dir="ltr">mcp[cli]&gt;=1.28,&lt;2</code> و دکوراتور <code className="font-mono font-bold text-emerald-700 dark:text-emerald-300" dir="ltr">@mcp.tool()</code> هر تابع پایتونی به یک ابزار هوشمند برای هوش مصنوعی تبدیل می‌شود.
-            </p>
-          </div>
-        </div>
-
-        {/* FULL INTERACTIVE 12-CHAPTER MCP MASTERCLASS (WHEN S3 IS ACTIVE) */}
-        {subTab === 'mcp_protocol' && (
-          <div className="space-y-6 pt-2">
-            {/* 1. 12-CHAPTER MECHANICAL KEYCAPS GRID & ACTIVE CHAPTER VIEW */}
-            <div className="rounded-3xl bg-white dark:bg-[#161e24] border-2 border-blue-500/30 p-5 sm:p-6 space-y-5 shadow-xs">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.08] dark:border-white/[0.1]">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="px-3 py-0.5 rounded-full text-xs font-black bg-blue-500/15 text-blue-800 dark:text-blue-300 border border-blue-500/30">
-                      سرفصل‌های ۱۲ گانه دوره کامل MCP
-                    </span>
-                    <span className="text-xs font-bold text-[#334155] dark:text-[#cbd5e1]">
-                      روی هر کلید مکانیکی (M1 تا M12) کلیک کنید
-                    </span>
-                  </div>
-                  <h4 className="text-base sm:text-lg font-black text-[#0f172a] dark:text-white">
-                    ۱۲ فصل گام‌به‌گام: از مفاهیم پایه تا ساخت MCP Server واقعی با Python و FastMCP
-                  </h4>
-                </div>
-
-                <div className="flex items-center gap-1.5 self-start sm:self-auto flex-wrap">
-                  <button
-                    type="button"
-                    disabled={activeMcpStepIdx === 0}
-                    onClick={() => {
-                      playTactileSound('switch');
-                      setActiveMcpStepIdx((prev) => Math.max(0, prev - 1));
-                    }}
-                    className="px-3 py-1.5 rounded-xl border border-black/15 dark:border-white/15 border-b-[3px] border-b-black/30 bg-white dark:bg-[#1d262d] text-xs font-extrabold disabled:opacity-40 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
-                  >
-                    → فصل قبلی
-                  </button>
-                  <span className="px-3 py-1.5 rounded-lg bg-blue-500/15 text-blue-800 dark:text-blue-300 font-mono text-xs font-black">
-                    {activeMcpStepIdx + 1} / {MCP_MASTERCLASS_STEPS.length}
-                  </span>
-                  <button
-                    type="button"
-                    disabled={activeMcpStepIdx === MCP_MASTERCLASS_STEPS.length - 1}
-                    onClick={() => {
-                      playTactileSound('switch');
-                      setActiveMcpStepIdx((prev) => Math.min(MCP_MASTERCLASS_STEPS.length - 1, prev + 1));
-                    }}
-                    className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white border border-blue-800 border-b-[3px] border-b-blue-950 text-xs font-extrabold disabled:opacity-40 active:translate-y-[2px] active:border-b transition-all cursor-pointer"
-                  >
-                    فصل بعدی ←
-                  </button>
-                </div>
-              </div>
-
-              {/* 12 Mechanical Keycaps Grid */}
-              {render12McpKeycaps(false)}
-
-              {/* Active Chapter Slide-Ready Multi-Column Presentation Card (Fixes Screenshot 2!) */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-blue-500/[0.07] via-white to-indigo-500/[0.05] dark:from-blue-950/30 dark:via-[#141c23] dark:to-indigo-950/25 border-2 border-blue-500/40 space-y-5">
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-blue-500/20">
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <span className="px-3.5 py-1 rounded-xl bg-blue-600 text-white text-xs sm:text-sm font-black">
-                      {currentMcpStep.stepNumber} ({currentMcpStep.keyHint})
-                    </span>
-                    <span className="px-3 py-1 rounded-xl bg-blue-500/15 text-blue-800 dark:text-blue-300 text-xs sm:text-sm font-black">
-                      {currentMcpStep.badgeFa}
-                    </span>
-                  </div>
-                  <span dir="ltr" className="text-xs sm:text-sm font-mono font-bold text-[#334155] dark:text-[#cbd5e1]">
-                    {currentMcpStep.titleEn}
-                  </span>
-                </div>
-
-                <h4 className="text-lg sm:text-2xl font-black text-[#0f172a] dark:text-white leading-snug">
-                  {currentMcpStep.titleFa}
-                </h4>
-
-                {/* 3-Column Scannable Slide Cards Instead of Long Full-Width Text Lines */}
-                <div
-                  className={`grid grid-cols-1 ${
-                    currentMcpStep.deepDiveFa.length === 2
-                      ? 'lg:grid-cols-2'
-                      : currentMcpStep.deepDiveFa.length >= 3
-                        ? 'md:grid-cols-2 xl:grid-cols-3'
-                        : 'lg:grid-cols-1'
-                  } gap-4`}
-                >
-                  {currentMcpStep.deepDiveFa.map((paragraph, pIdx) => {
-                    const { heading, body } = splitPointTitleAndBody(paragraph);
-                    return (
-                      <div
-                        key={pIdx}
-                        className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#11171d] border border-blue-500/25 shadow-2xs space-y-2.5 flex flex-col justify-between"
-                      >
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2.5">
-                            <span className="w-7 h-7 rounded-lg bg-blue-600 text-white font-mono text-xs font-black flex items-center justify-center shrink-0">
-                              {pIdx + 1}
-                            </span>
-                            <span className="text-sm sm:text-base font-black text-blue-800 dark:text-blue-300 leading-snug">
-                              {heading || `بخش ${pIdx + 1}`}
-                            </span>
-                          </div>
-                          <p className="text-sm sm:text-[15px] font-semibold text-[#0f172a] dark:text-[#f1f5f9] leading-relaxed">
-                            {body}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Code Snippet Box if present in this chapter */}
-                {currentMcpStep.codeOrConfigSnippet && (
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <span className="text-xs sm:text-sm font-black text-[#0f172a] dark:text-white flex items-center gap-1.5">
-                        <Code2 className="w-4 h-4 text-blue-600" />
-                        <span>{currentMcpStep.codeOrConfigSnippet.titleFa}</span>
-                      </span>
-                      <div className="flex items-center gap-2">
-                        {(currentMcpStep.keyHint === 'M5' || currentMcpStep.keyHint === 'M9') && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleDownloadSkillFile(
-                                currentMcpStep.keyHint === 'M5' ? 'server.py' : 'todo_server.py',
-                                currentMcpStep.codeOrConfigSnippet?.code || ''
-                              )
-                            }
-                            className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black flex items-center gap-1.5 cursor-pointer"
-                          >
-                            <Download className="w-3.5 h-3.5" />
-                            <span>
-                              دانلود فایل {currentMcpStep.keyHint === 'M5' ? 'server.py' : 'todo_server.py'}
-                            </span>
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() =>
-                            copyToClipboard(
-                              currentMcpStep.codeOrConfigSnippet?.code || '',
-                              `mcp_step_code_${currentMcpStep.keyHint}`
-                            )
-                          }
-                          className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black flex items-center gap-1.5 cursor-pointer"
-                        >
-                          {copiedId === `mcp_step_code_${currentMcpStep.keyHint}` ? (
-                            <>
-                              <Check className="w-3.5 h-3.5" />
-                              <span>کپی شد!</span>
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="w-3.5 h-3.5" />
-                              <span>کپی کد / دستور</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    <pre
-                      dir="ltr"
-                      className="p-4 sm:p-5 rounded-2xl bg-[#11161c] text-[#f1f5f9] font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto select-text border border-white/15"
-                    >
-                      <code>{currentMcpStep.codeOrConfigSnippet.code}</code>
-                    </pre>
-                  </div>
-                )}
-
-                {/* Pro Tip Box */}
-                <div className="p-4 rounded-2xl bg-amber-500/15 border-2 border-amber-500/40 flex items-start gap-3">
-                  <Lightbulb className="w-5 h-5 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
-                  <div className="text-sm sm:text-base font-bold text-[#0f172a] dark:text-amber-100 leading-relaxed">
-                    <b className="font-black text-amber-900 dark:text-amber-300">نکته کلیدی و تجربی: </b>
-                    {currentMcpStep.proTipFa}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 2. READY-MADE OFFICIAL MCP SERVERS & DIRECTORIES */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-              <div className="lg:col-span-7 p-5 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.08] dark:border-white/[0.1] space-y-4">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <h4 className="text-sm sm:text-base font-black text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-                    <Layers className="w-5 h-5 text-blue-600" />
-                    <span>تفاوت دقیق ۳ قابلیت اصلی سرورهای MCP (Tools vs. Resources vs. Prompts)</span>
-                  </h4>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-right text-xs border-collapse">
-                    <thead>
-                      <tr className="border-b border-black/10 dark:border-white/10 bg-blue-500/5">
-                        <th className="p-2.5 font-black">قابلیت در MCP</th>
-                        <th className="p-2.5 font-black">نقش و عملکرد</th>
-                        <th className="p-2.5 font-black">کنترل‌کننده</th>
-                        <th className="p-2.5 font-black">مثال واقعی</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-black/5 dark:divide-white/5">
-                      <tr>
-                        <td className="p-2.5 font-mono font-bold text-blue-600 dark:text-blue-400" dir="ltr">
-                          1. Tools (@mcp.tool)
-                        </td>
-                        <td className="p-2.5">انجام عملیات، محاسبه، تغییر داده یا فراخوانی API</td>
-                        <td className="p-2.5 font-bold">مدل هوش مصنوعی (Model-Controlled)</td>
-                        <td className="p-2.5">افزودن تسک جدید، ارسال ایمیل، ثبت رکورد در دیتابیس</td>
-                      </tr>
-                      <tr>
-                        <td className="p-2.5 font-mono font-bold text-emerald-600 dark:text-emerald-400" dir="ltr">
-                          2. Resources (@mcp.resource)
-                        </td>
-                        <td className="p-2.5">داده‌ها و فایل‌های صرفاً خواندنی (Read-Only Context)</td>
-                        <td className="p-2.5 font-bold">برنامه و مدل</td>
-                        <td className="p-2.5">خواندن لاگ سرور، فایل راهنما یا جدول قیمت‌ها بدون تغییر</td>
-                      </tr>
-                      <tr>
-                        <td className="p-2.5 font-mono font-bold text-purple-600 dark:text-purple-400" dir="ltr">
-                          3. Prompts (@mcp.prompt)
-                        </td>
-                        <td className="p-2.5">قالب‌های آماده گفتگو و دستورالعمل‌های از پیش تعریف‌شده</td>
-                        <td className="p-2.5 font-bold">کاربر (User-Controlled)</td>
-                        <td className="p-2.5">قالب آماده «بررسی کد امنیتی» یا «خلاصه‌سازی گزارش روزانه»</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div className="lg:col-span-5 p-5 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.08] dark:border-white/[0.1] space-y-3 flex flex-col justify-between">
-                <div className="space-y-2.5">
-                  <h4 className="text-sm sm:text-base font-black text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-                    <ExternalLink className="w-4 h-4 text-blue-600" />
-                    <span>۴ منبع معتبر دانلود هزاران سرور MCP آماده و رایگان</span>
-                  </h4>
-                  <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                    قبل از اینکه خودتان سروری کدنویسی کنید، در این ۴ دایرکتوری رسمی بررسی کنید؛ برای اکثر سرویس‌ها (GitHub، Postgres، Google Drive، Brave Search، Slack) سرور آماده وجود دارد:
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs" dir="ltr">
-                    <a
-                      href="https://github.com/modelcontextprotocol/servers"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="p-2.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 font-mono font-bold flex items-center justify-between border border-blue-500/20"
-                    >
-                      <span>github.com/.../servers</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                    <a
-                      href="https://smithery.ai"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="p-2.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 font-mono font-bold flex items-center justify-between border border-purple-500/20"
-                    >
-                      <span>smithery.ai</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                    <a
-                      href="https://glama.ai/mcp/servers"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="p-2.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-700 dark:text-teal-300 font-mono font-bold flex items-center justify-between border border-teal-500/20"
-                    >
-                      <span>glama.ai/mcp/servers</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                    <a
-                      href="https://mcp.so"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono font-bold flex items-center justify-between border border-amber-500/20"
-                    >
-                      <span>mcp.so</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-xs text-[#1c2830] dark:text-[#e8ebe9]">
-                  <b>ابزار تست اعتبار فایل JSON تنظیمات: </b>
-                  قبل از ذخیره <code className="font-mono" dir="ltr">claude_desktop_config.json</code>، کد خود را در سایت{' '}
-                  <a
-                    href="https://jsonlint.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-mono font-bold text-emerald-700 dark:text-emerald-300 underline"
-                    dir="ltr"
-                  >
-                    jsonlint.com
-                  </a>{' '}
-                  تست کنید تا مطمئن شوید ویرگول اضافه یا بک‌اسلش تکی ندارد.
-                </div>
-              </div>
-            </div>
-
-            {/* 3. COMPLETE 7-ROW TROUBLESHOOTING TABLE */}
-            <div className="p-5 rounded-2xl bg-white dark:bg-[#161e24] border border-black/[0.08] dark:border-white/[0.1] space-y-4">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <h4 className="text-sm sm:text-base font-black text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-                  <Wrench className="w-5 h-5 text-amber-600" />
-                  <span>جدول مرجع عیب‌یابی: ۷ خطای پرتکرار در راه‌اندازی MCP و راه‌حل قطعی آن‌ها</span>
-                </h4>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-800 dark:text-amber-300">
-                  Troubleshooting Cheat Sheet
-                </span>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-right text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-black/10 dark:border-white/10 bg-amber-500/10">
-                      <th className="p-3 font-black">خطا / مشکل مشاهده‌شده</th>
-                      <th className="p-3 font-black">علت اصلی</th>
-                      <th className="p-3 font-black">راه‌حل سریع و قطعی</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-black/5 dark:divide-white/5">
-                    {MCP_TROUBLESHOOTING_TABLE.map((row, rIdx) => (
-                      <tr key={rIdx} className="hover:bg-black/[0.015] dark:hover:bg-white/[0.02]">
-                        <td className="p-3 font-bold text-red-600 dark:text-red-400">{row.errorTitle}</td>
-                        <td className="p-3 text-[#5d6b73] dark:text-[#9aa8b0]">{row.causeFa}</td>
-                        <td className="p-3 font-semibold text-[#1c2830] dark:text-[#e8ebe9]">{row.solutionFa}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+          {mcpView === 'troubleshooting' && (
+            <McpTroubleshootingPanel
+              lang={lang}
+              onBackToLesson={() => setMcpView('lesson')}
+            />
+          )}
+        </FocusedLessonLayout>
+      )}
     </section>
   );
 };

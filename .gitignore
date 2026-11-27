@@ -7,5 +7,6 @@ coverage/
 .env*
 !.env.example
 .vercel
+.aistudio/
 .claude/settings.local.json
 .claude/*.local*

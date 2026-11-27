@@ -1,3 +1,8 @@
+import {
+  adaptModuleExerciseDeckForContext,
+  ModuleExerciseContext
+} from '../utils/disciplineAdaptation';
+
 export type ModuleExerciseDifficulty = 'پایه' | 'عملیاتی' | 'پیشرفته';
 
 export interface ModuleExerciseItem {
@@ -1348,13 +1353,17 @@ description: ممیزی گزارش پیشرفت ماهانه و کشف مغای�
   }
 };
 
-export function getModuleExerciseDeck(moduleId: string): ModuleExerciseDeck | null {
+export function getModuleExerciseDeck(
+  moduleId: string,
+  context?: ModuleExerciseContext
+): ModuleExerciseDeck | null {
   const raw = RAW_MODULE_EXERCISES[moduleId];
   if (!raw) return null;
-  return {
+  const baseDeck: ModuleExerciseDeck = {
     moduleId,
     ...raw
   };
+  return context ? adaptModuleExerciseDeckForContext(baseDeck, context) : baseDeck;
 }
 
 export function getAllModuleExerciseIds(): string[] {

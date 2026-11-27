@@ -1,4 +1,8 @@
-import { IndustryTrackId } from '../types/industryTrack';
+import { DisciplineId, EngineeringRoleId, IndustryTrackId } from '../types/industryTrack';
+import {
+  buildDisciplineNotebookLmDepartment,
+  buildDisciplineNotebookLmExercise
+} from '../utils/disciplineAdaptation';
 
 export interface DepartmentUseCase {
   id: string;
@@ -1472,21 +1476,36 @@ export interface NotebookLmGuideBundle {
 }
 
 export function getNotebookLmGuideForTrack(
-  trackId: IndustryTrackId = 'CIVIL_INFRA'
+  trackId: IndustryTrackId = 'CIVIL_INFRA',
+  disciplineId?: DisciplineId,
+  roleId?: EngineeringRoleId
 ): NotebookLmGuideBundle {
-  if (trackId === 'PAYA_SAMAN_PARS') {
-    return {
-      overview: PAYA_NOTEBOOKLM_OVERVIEW,
-      departments: PAYA_UNIT_MANAGERS_MATRIX,
-      blueprints: PAYA_PRESENTATION_INFOGRAPHIC_GUIDES,
-      exercises: PAYA_NOTEBOOKLM_EXERCISES
-    };
+  const baseBundle: NotebookLmGuideBundle =
+    trackId === 'PAYA_SAMAN_PARS'
+      ? {
+          overview: PAYA_NOTEBOOKLM_OVERVIEW,
+          departments: PAYA_UNIT_MANAGERS_MATRIX,
+          blueprints: PAYA_PRESENTATION_INFOGRAPHIC_GUIDES,
+          exercises: PAYA_NOTEBOOKLM_EXERCISES
+        }
+      : {
+          overview: NOTEBOOKLM_OVERVIEW,
+          departments: UNIT_MANAGERS_MATRIX,
+          blueprints: PRESENTATION_INFOGRAPHIC_GUIDES,
+          exercises: NOTEBOOKLM_EXERCISES
+        };
+
+  if (!disciplineId) {
+    return baseBundle;
   }
+
+  const disciplineDepartment = buildDisciplineNotebookLmDepartment(disciplineId, roleId);
+  const disciplineExercise = buildDisciplineNotebookLmExercise(disciplineId, roleId);
+
   return {
-    overview: NOTEBOOKLM_OVERVIEW,
-    departments: UNIT_MANAGERS_MATRIX,
-    blueprints: PRESENTATION_INFOGRAPHIC_GUIDES,
-    exercises: NOTEBOOKLM_EXERCISES
+    ...baseBundle,
+    departments: [disciplineDepartment, ...baseBundle.departments],
+    exercises: [disciplineExercise, ...baseBundle.exercises]
   };
 }
 

@@ -34,6 +34,9 @@ import {
   STRUCTURED_P6_GUIDE,
   ANTI_HALLUCINATION_POWER_WORDS
 } from '../data/engineering_advanced_masterclass';
+import { FocusedLessonLayout, FocusedStepItem } from './learning/FocusedLessonLayout';
+import { FocusedLessonFooter } from './learning/FocusedLessonFooter';
+import { clampStepIndex, getStepBoundaryState, markStepVisited } from '../utils/focusedLessonEngine';
 
 interface Page0EngineeringMasterclassProps {
   lang: Language;
@@ -42,15 +45,37 @@ interface Page0EngineeringMasterclassProps {
   copiedId: string | null;
 }
 
+type MasterclassTabId =
+  | 'vision'
+  | 'negotiation'
+  | 'mermaid'
+  | 'few_shot'
+  | 'reasoning'
+  | 'web_grounding'
+  | 'p6_excel'
+  | 'power_words';
+
+const MASTERCLASS_TAB_IDS: MasterclassTabId[] = [
+  'vision',
+  'negotiation',
+  'mermaid',
+  'few_shot',
+  'reasoning',
+  'web_grounding',
+  'p6_excel',
+  'power_words'
+];
+
 export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassProps> = ({
   lang,
   onLoadToSandbox,
   copyToClipboard,
   copiedId
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<
-    'vision' | 'negotiation' | 'mermaid' | 'few_shot' | 'reasoning' | 'web_grounding' | 'p6_excel' | 'power_words'
-  >('vision');
+  const isFa = lang === 'fa';
+  const [activeSubTab, setActiveSubTab] = useState<MasterclassTabId>('vision');
+  const [visitedStepIndices, setVisitedStepIndices] = useState<Set<number>>(() => new Set([0]));
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
 
   const [selectedVisionId, setSelectedVisionId] = useState<string>('vision_hse_excavation');
   const [selectedMermaidId, setSelectedMermaidId] = useState<string>('mermaid_wbs_metro');
@@ -60,6 +85,58 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
   const activeVisionCase = VISION_CASES.find((v) => v.id === selectedVisionId) || VISION_CASES[0];
   const activeMermaid = MERMAID_EXAMPLES.find((m) => m.id === selectedMermaidId) || MERMAID_EXAMPLES[0];
   const activeWeb = WEB_GROUNDING_GUIDE.prompts[selectedWebIndex] || WEB_GROUNDING_GUIDE.prompts[0];
+
+  const masterclassSteps: FocusedStepItem[] = [
+    {
+      id: 'vision',
+      title: isFa ? 'بینایی ماشین و تحلیل نقشه‌ها' : 'Multimodal Vision & CAD',
+      category: isFa ? 'ابزار ۱ · تحلیل تصویر' : 'Tool 1 · Vision'
+    },
+    {
+      id: 'negotiation',
+      title: isFa ? 'شبیه‌ساز دفاع از لایحه و ادعا' : 'Claim Defense Simulator',
+      category: isFa ? 'ابزار ۲ · مذاکره' : 'Tool 2 · Negotiation'
+    },
+    {
+      id: 'mermaid',
+      title: isFa ? 'تولید دیاگرام‌های مهندسی Mermaid' : 'Engineering Mermaid Diagrams',
+      category: isFa ? 'ابزار ۳ · نمودار زنده' : 'Tool 3 · Diagrams'
+    },
+    {
+      id: 'few_shot',
+      title: isFa ? 'مهندسی چندمثاله (Few-Shot)' : 'Few-Shot Prompting',
+      category: isFa ? 'ابزار ۴ · دقت ساختاری' : 'Tool 4 · Few-Shot'
+    },
+    {
+      id: 'reasoning',
+      title: isFa ? 'استدلال عمیق و زنجیره تفکر' : 'Deep Reasoning Models',
+      category: isFa ? 'ابزار ۵ · تحلیل عمیق' : 'Tool 5 · Reasoning'
+    },
+    {
+      id: 'web_grounding',
+      title: isFa ? 'جستجوی زنده و وب‌گراندینگ' : 'Live Web Grounding',
+      category: isFa ? 'ابزار ۶ · داده‌های روز' : 'Tool 6 · Web Search'
+    },
+    {
+      id: 'p6_excel',
+      title: isFa ? 'تبدیل خروجی به داده P6 و Excel' : 'Structured P6 & Excel Data',
+      category: isFa ? 'ابزار ۷ · خروجی ساخت‌یافته' : 'Tool 7 · Structured Data'
+    },
+    {
+      id: 'power_words',
+      title: isFa ? 'کلمات جادویی و بندهای ضد توهم' : 'Anti-Hallucination Clauses',
+      category: isFa ? 'ابزار ۸ · کنترل کیفیت' : 'Tool 8 · Zero Hallucination'
+    }
+  ];
+
+  const activeStepIndex = Math.max(0, MASTERCLASS_TAB_IDS.indexOf(activeSubTab));
+  const boundary = getStepBoundaryState(activeStepIndex, masterclassSteps.length);
+
+  const handleSelectStep = (idx: number) => {
+    const nextIdx = clampStepIndex(idx, masterclassSteps.length);
+    setActiveSubTab(MASTERCLASS_TAB_IDS[nextIdx]);
+    setVisitedStepIndices((prev) => markStepVisited(prev, nextIdx));
+  };
 
   const handleCopyAllClauses = () => {
     const combined = ANTI_HALLUCINATION_POWER_WORDS.clauses
@@ -74,141 +151,32 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
   };
 
   return (
-    <section className="space-y-5">
-      {/* Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#6d28d9]/20 to-[#8b5cf6]/20 text-[#6d28d9] dark:text-[#a78bfa] border border-[#6d28d9]/30">
-            <Sparkles className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base sm:text-lg font-bold text-[#1c2830] dark:text-[#e8ebe9]">
-                {lang === 'fa'
-                  ? 'بخش ۸: مسترکلاس ابرقدرت‌های مهندسی با هوش مصنوعی (۸ ابزار تحول‌آفرین)'
-                  : 'Section 8: Advanced Engineering Superpowers Masterclass (8 Game-Changing Tools)'}
-              </h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#6d28d9]/10 text-[#6d28d9] dark:text-[#a78bfa] border border-[#6d28d9]/30">
-                PRO / MASTERCLASS
-              </span>
-            </div>
-            <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0]">
-              {lang === 'fa'
-                ? 'تحلیل تصویری کارگاه، شبیه‌ساز لایحه تاخیرات با کارفرما، تولید دیاگرام Mermaid، استدلال عمیق، و فرمول‌های ضد توهم.'
-                : 'Computer vision, claim defense simulator, live Mermaid diagrams in Artifacts, deep reasoning, and anti-hallucination.'}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* 8-Tab Navigation Bar (Double-Bezel Island) */}
-      <div className="p-1.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] backdrop-blur-xs shadow-inner">
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-1 text-[11px] font-semibold">
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('vision')}
-            className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all duration-150 active:scale-[0.96] ${
-              activeSubTab === 'vision'
-                ? 'bg-[#6d28d9] text-white shadow-xs font-bold'
-                : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#ffffff] dark:hover:bg-[#12171b]'
-            }`}
-          >
-            <Camera className="w-4 h-4" />
-            <span className="text-center truncate w-full">{lang === 'fa' ? '۱. بینایی و نقشه‌ها' : '1. Vision & CAD'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('negotiation')}
-            className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all duration-150 active:scale-[0.96] ${
-              activeSubTab === 'negotiation'
-                ? 'bg-[#6d28d9] text-white shadow-xs font-bold'
-                : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#ffffff] dark:hover:bg-[#12171b]'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            <span className="text-center truncate w-full">{lang === 'fa' ? '۲. شبیه‌ساز ادعا' : '2. Claim Sim'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('mermaid')}
-            className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all duration-150 active:scale-[0.96] ${
-              activeSubTab === 'mermaid'
-                ? 'bg-[#6d28d9] text-white shadow-xs font-bold'
-                : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#ffffff] dark:hover:bg-[#12171b]'
-            }`}
-          >
-            <Workflow className="w-4 h-4" />
-            <span className="text-center truncate w-full">{lang === 'fa' ? '۳. دیاگرام Mermaid' : '3. Mermaid'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('few_shot')}
-            className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all duration-150 active:scale-[0.96] ${
-              activeSubTab === 'few_shot'
-                ? 'bg-[#6d28d9] text-white shadow-xs font-bold'
-                : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#ffffff] dark:hover:bg-[#12171b]'
-            }`}
-          >
-            <Target className="w-4 h-4" />
-            <span className="text-center truncate w-full">{lang === 'fa' ? '۴. متد چندمثاله' : '4. Few-Shot'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('reasoning')}
-            className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all duration-150 active:scale-[0.96] ${
-              activeSubTab === 'reasoning'
-                ? 'bg-[#6d28d9] text-white shadow-xs font-bold'
-                : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#ffffff] dark:hover:bg-[#12171b]'
-            }`}
-          >
-            <Brain className="w-4 h-4" />
-            <span className="text-center truncate w-full">{lang === 'fa' ? '۵. استدلال عمیق' : '5. Reasoning'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('web_grounding')}
-            className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all duration-150 active:scale-[0.96] ${
-              activeSubTab === 'web_grounding'
-                ? 'bg-[#6d28d9] text-white shadow-xs font-bold'
-                : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#ffffff] dark:hover:bg-[#12171b]'
-            }`}
-          >
-            <Globe className="w-4 h-4" />
-            <span className="text-center truncate w-full">{lang === 'fa' ? '۶. وب‌گراندینگ' : '6. Web Search'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('p6_excel')}
-            className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all duration-150 active:scale-[0.96] ${
-              activeSubTab === 'p6_excel'
-                ? 'bg-[#6d28d9] text-white shadow-xs font-bold'
-                : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#ffffff] dark:hover:bg-[#12171b]'
-            }`}
-          >
-            <FileSpreadsheet className="w-4 h-4" />
-            <span className="text-center truncate w-full">{lang === 'fa' ? '۷. داده برای P6' : '7. P6 & Excel'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('power_words')}
-            className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all duration-150 active:scale-[0.96] ${
-              activeSubTab === 'power_words'
-                ? 'bg-[#6d28d9] text-white shadow-xs font-bold'
-                : 'text-[#5d6b73] dark:text-[#9aa8b0] hover:bg-[#ffffff] dark:hover:bg-[#12171b]'
-            }`}
-          >
-            <Shield className="w-4 h-4" />
-            <span className="text-center truncate w-full">{lang === 'fa' ? '۸. کلمات جادویی' : '8. Zero Halluc'}</span>
-          </button>
-        </div>
-      </div>
+    <div data-testid="engineering-masterclass-module">
+      <FocusedLessonLayout
+        lang={lang}
+        moduleCode={isFa ? 'ماژول ۵-۲' : 'Module 5-2'}
+        moduleTitle={
+          isFa
+            ? 'مسترکلاس ابرقدرت‌های مهندسی با هوش مصنوعی (۸ ابزار تحول‌آفرین)'
+            : 'Advanced Engineering Superpowers Masterclass (8 Tools)'
+        }
+        moduleSubtitle={
+          isFa
+            ? 'تحلیل تصویری کارگاه، شبیه‌ساز لایحه تاخیرات، دیاگرام Mermaid، استدلال عمیق و بندهای ضد توهم'
+            : 'Computer vision, claim defense simulator, Mermaid diagrams, deep reasoning & anti-hallucination'
+        }
+        steps={masterclassSteps}
+        activeStepIndex={activeStepIndex}
+        visitedStepIndices={visitedStepIndices}
+        onSelectStep={handleSelectStep}
+        isMobileDrawerOpen={isMobileDrawerOpen}
+        onToggleMobileDrawer={setIsMobileDrawerOpen}
+        sidebarTitleFa="۸ ابزار مسترکلاس"
+        sidebarTitleEn="8 Masterclass Tools"
+        stepUnitFa="ابزار"
+        stepUnitEn="tools"
+      >
+        <div className="space-y-5">
 
       {/* SUB-TAB 1: MULTIMODAL VISION */}
       {activeSubTab === 'vision' && (
@@ -1003,6 +971,21 @@ export const Page0EngineeringMasterclass: React.FC<Page0EngineeringMasterclassPr
           </div>
         </div>
       )}
-    </section>
+
+          <FocusedLessonFooter
+            lang={lang}
+            boundary={boundary}
+            onPrev={() => handleSelectStep(boundary.currentIndex - 1)}
+            onNext={() => handleSelectStep(boundary.currentIndex + 1)}
+            prevLabelFa="ابزار قبلی"
+            prevLabelEn="Previous tool"
+            nextLabelFa="ابزار بعدی"
+            nextLabelEn="Next tool"
+            stepUnitFa="ابزار"
+            stepUnitEn="Tool"
+          />
+        </div>
+      </FocusedLessonLayout>
+    </div>
   );
 };

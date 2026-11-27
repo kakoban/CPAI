@@ -2412,6 +2412,152 @@ app.post(['/api/admin/cohorts/assign-user', '/admin/cohorts/assign-user'], async
   }
 });
 
+// -------------------------------------------------------------
+// Platform Community & Social Invite Links (Admin -> Student Dashboard)
+// -------------------------------------------------------------
+let isPlatformSettingsReady = false;
+let platformSettingsInitPromise: Promise<void> | null = null;
+const COMMUNITY_LINKS_KEY = 'community_social_links';
+let memoryCommunityLinksConfig: any = null;
+
+function sanitizeServerSocialUrl(raw: unknown): string {
+  if (typeof raw !== 'string') return '';
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('vbscript:')) {
+    return '';
+  }
+  const candidate = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  try {
+    const parsed = new URL(candidate);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return '';
+    if (!parsed.hostname || !parsed.hostname.includes('.')) return '';
+    return parsed.toString();
+  } catch {
+    return '';
+  }
+}
+
+function sanitizeServerCommunityConfig(raw: unknown) {
+  const src = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const cleanStr = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
+  const validPlatforms = new Set(['linkedin', 'instagram', 'bale', 'telegram', 'youtube', 'website', 'other']);
+  const rawExtras = Array.isArray(src.extraLinks) ? src.extraLinks : [];
+  const extraLinks: Array<{ id: string; platform: string; label: string; url: string; badgeSubtext?: string }> = [];
+
+  for (let i = 0; i < rawExtras.length && extraLinks.length < 8; i++) {
+    const item = rawExtras[i];
+    if (!item || typeof item !== 'object') continue;
+    const rec = item as Record<string, unknown>;
+    const label = cleanStr(rec.label, 80);
+    const url = sanitizeServerSocialUrl(rec.url);
+    if (!label || !url) continue;
+    const plat = cleanStr(rec.platform, 20).toLowerCase();
+    extraLinks.push({
+      id: cleanStr(rec.id, 48) || `extra_${i + 1}`,
+      platform: validPlatforms.has(plat) ? plat : 'other',
+      label,
+      url,
+      badgeSubtext: cleanStr(rec.badgeSubtext, 80) || undefined
+    });
+  }
+
+  return {
+    instructorName: cleanStr(src.instructorName, 100),
+    instructorTitle: cleanStr(src.instructorTitle, 120) || '',
+    inviteMessage: cleanStr(src.inviteMessage, 280) || '',
+    adminLinkedinUrl: sanitizeServerSocialUrl(src.adminLinkedinUrl),
+    owjLinkedinUrl: sanitizeServerSocialUrl(src.owjLinkedinUrl),
+    instagramUrl: sanitizeServerSocialUrl(src.instagramUrl),
+    baleUrl: sanitizeServerSocialUrl(src.baleUrl),
+    extraLinks,
+    updatedAt: new Date().toISOString()
+  };
+}
+
+async function ensurePlatformSettingsTable(): Promise<void> {
+  if (isPlatformSettingsReady) return;
+  if (platformSettingsInitPromise) return platformSettingsInitPromise;
+
+  platformSettingsInitPromise = (async () => {
+    try {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS platform_settings (
+          setting_key VARCHAR(100) PRIMARY KEY,
+          setting_value JSONB NOT NULL DEFAULT '{}'::jsonb,
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        );
+      `);
+      isPlatformSettingsReady = true;
+    } catch (err: any) {
+      console.warn('ensurePlatformSettingsTable warning (non-fatal):', err?.message || err);
+    } finally {
+      platformSettingsInitPromise = null;
+    }
+  })();
+
+  return platformSettingsInitPromise;
+}
+
+app.get(['/api/community-links', '/community-links'], async (_req, res) => {
+  await ensurePlatformSettingsTable().catch(() => {});
+  try {
+    const result = await pool.query(
+      'SELECT setting_value, updated_at FROM platform_settings WHERE setting_key = $1 LIMIT 1;',
+      [COMMUNITY_LINKS_KEY]
+    );
+    if (result.rows.length > 0) {
+      const val = result.rows[0].setting_value || {};
+      return res.json({
+        config: {
+          ...sanitizeServerCommunityConfig(val),
+          updatedAt: result.rows[0].updated_at || val.updatedAt
+        }
+      });
+    }
+    return res.json({
+      config: memoryCommunityLinksConfig || sanitizeServerCommunityConfig({})
+    });
+  } catch (err: any) {
+    return res.json({
+      config: memoryCommunityLinksConfig || sanitizeServerCommunityConfig({})
+    });
+  }
+});
+
+app.post(['/api/admin/community-links', '/admin/community-links'], async (req, res) => {
+  await ensurePlatformSettingsTable().catch(() => {});
+  if (!verifyAdmin(req)) {
+    return res.status(403).json({ error: 'دسترسی غیرمجاز.' });
+  }
+
+  const sanitized = sanitizeServerCommunityConfig(req.body?.config ?? req.body);
+  memoryCommunityLinksConfig = sanitized;
+
+  try {
+    await pool.query(
+      `INSERT INTO platform_settings (setting_key, setting_value, updated_at)
+       VALUES ($1, $2::jsonb, NOW())
+       ON CONFLICT (setting_key) DO UPDATE
+       SET setting_value = EXCLUDED.setting_value,
+           updated_at = NOW();`,
+      [COMMUNITY_LINKS_KEY, JSON.stringify(sanitized)]
+    );
+    return res.json({
+      success: true,
+      config: sanitized
+    });
+  } catch (err: any) {
+    console.warn('Error saving community links to DB (using memory fallback):', err?.message || err);
+    return res.json({
+      success: true,
+      config: sanitized,
+      warning: 'Saved locally (DB fallback)'
+    });
+  }
+});
+
 // Health Check Endpoint (supports both /api/health and /health)
 app.get(['/api/health', '/health'], async (req, res) => {
   try {

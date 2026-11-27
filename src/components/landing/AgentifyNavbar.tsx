@@ -15,6 +15,7 @@ interface AgentifyNavbarProps {
   onOpenBookModal?: () => void;
   onOpenMarkdownStudio?: () => void;
   currentTrack?: IndustryTrackId;
+  allowedTracks?: IndustryTrackId[];
   onSelectTrack?: (track: IndustryTrackId) => void;
   onOpenTrackModal?: () => void;
 }
@@ -29,6 +30,7 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
   onOpenBookModal,
   onOpenMarkdownStudio,
   currentTrack,
+  allowedTracks,
   onSelectTrack,
   onOpenTrackModal
 }) => {
@@ -134,6 +136,7 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
           {currentTrack && onSelectTrack && (
             <IndustryTrackSwitcher
               currentTrack={currentTrack}
+              allowedTracks={allowedTracks}
               onSelectTrack={onSelectTrack}
               onOpenSelectorModal={onOpenTrackModal}
               variant="dropdown"
@@ -291,6 +294,7 @@ export const AgentifyNavbar: React.FC<AgentifyNavbarProps> = ({
                   <span className="text-[11px] font-semibold text-gray-500 text-right">حوزه تخصصی مگاپروژه‌ها:</span>
                   <IndustryTrackSwitcher
                     currentTrack={currentTrack}
+                    allowedTracks={allowedTracks}
                     onSelectTrack={onSelectTrack}
                     onOpenSelectorModal={onOpenTrackModal}
                     className="w-full justify-between"

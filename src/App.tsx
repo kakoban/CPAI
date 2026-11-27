@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Language, Theme } from './types/cpmai';
 import { Page0LlmFundamentals } from './components/Page0LlmFundamentals';
 import { Page1BusinessUnderstanding } from './components/Page1BusinessUnderstanding';
@@ -32,6 +32,7 @@ import { AdminControlCenterModal } from './components/admin/AdminControlCenterMo
 import { AjaBrandIntro } from './components/intro/AjaBrandIntro';
 import { LlmForHumansBookModal } from './components/book/LlmForHumansBookModal';
 import { OwjMarkdownStudioModal } from './components/markdown-studio/OwjMarkdownStudioModal';
+import { UserDashboardModal } from './components/dashboard/UserDashboardModal';
 import {
   IndustryTrackId,
   DisciplineId,
@@ -56,11 +57,19 @@ import { getDisciplineMetadata } from './data/disciplineExamplesRegistry';
 import { authApi, isAuthorizedAdminUser } from './services/authApi';
 import { lmsApi } from './services/lmsApi';
 import { AiQuotaState } from './utils/aiQuotaEngine';
+import { CohortScheduleRecord, buildExpectedLearningSummary } from './utils/cohortScheduleEngine';
+import {
+  SHOW_CPMAI_METHODOLOGY,
+  sanitizeActivePage,
+  resolveUserOrgTrack,
+  getAllowedTracksForUser,
+  coerceTrackToAllowed
+} from './utils/userWorkspaceEngine';
 import { UserProfile } from './types/auth';
 import { SessionLockEntity } from './types/lms';
 import { Footer } from './components/Footer';
 import { OWJ_LOGO, OWJ_LOGO_FALLBACK } from './data/logo';
-import { Clock, Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud, Calculator, Bot, Server, Sparkles, Trophy, Lock, Unlock, GraduationCap, Menu, PanelLeftClose, Home, FileCode2, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, StickyNote } from 'lucide-react';
+import { Clock, Moon, Sun, Globe, Copy, Printer, RotateCcw, Check, BookOpen, Layers, Award, DollarSign, TrendingUp, Brain, Cpu, Boxes, Split, Target, Gauge, ShieldCheck, Network, Workflow, Calendar, HardDrive, Cloud, Calculator, Bot, Server, Sparkles, Trophy, Lock, Unlock, GraduationCap, Menu, PanelLeftClose, Home, FileCode2, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Maximize2, Minimize2, StickyNote, LayoutDashboard } from 'lucide-react';
 
 export type AppPage = 'landing' | 'quiz' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21;
 
@@ -121,7 +130,9 @@ export default function App() {
         if (urlPage === 'landing' || urlPage === 'quiz') return urlPage;
         if (urlPage !== null) {
           const num = parseInt(urlPage, 10);
-          if (!isNaN(num) && num >= 0 && num <= 21) return num as AppPage;
+          if (!isNaN(num) && num >= 0 && num <= 21) {
+            return sanitizeActivePage(num) as AppPage;
+          }
         }
         if (searchParams.get('autostart') === '1') {
           return 0;
@@ -154,6 +165,11 @@ export default function App() {
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
   const [isBookModalOpen, setIsBookModalOpen] = useState<boolean>(false);
   const [isMarkdownStudioOpen, setIsMarkdownStudioOpen] = useState<boolean>(false);
+  const [isDashboardOpen, setIsDashboardOpen] = useState<boolean>(false);
+  const [myCohort, setMyCohort] = useState<CohortScheduleRecord | null>(null);
+  const [searchedCohort, setSearchedCohort] = useState<CohortScheduleRecord | null>(null);
+  const [isCohortLoading, setIsCohortLoading] = useState<boolean>(false);
+  const [dashboardModuleJump, setDashboardModuleJump] = useState<{ moduleId: string; nonce: number } | null>(null);
   const [industryTrack, setIndustryTrack] = useState<IndustryTrackId>(() => getSavedIndustryTrack());
   const [isIndustryModalOpen, setIsIndustryModalOpen] = useState<boolean>(false);
   const [activeDiscipline, setActiveDiscipline] = useState<DisciplineId>(() => getSavedDiscipline(getSavedIndustryTrack()));
@@ -170,6 +186,75 @@ export default function App() {
     return false;
   });
 
+  const activeCohort = searchedCohort || myCohort;
+
+  const isAdmin = isAuthorizedAdminUser(currentUser);
+
+  const userOrgTrack = useMemo(
+    () =>
+      resolveUserOrgTrack({
+        cohort: activeCohort,
+        currentUser,
+        savedTrack: industryTrack
+      }),
+    [activeCohort, currentUser, industryTrack]
+  );
+
+  const allowedTracks = useMemo(
+    () => getAllowedTracksForUser(userOrgTrack, isAdmin),
+    [userOrgTrack, isAdmin]
+  );
+
+  const loadMyCohort = useCallback(async () => {
+    if (!currentUser) {
+      setMyCohort(null);
+      return;
+    }
+    setIsCohortLoading(true);
+    try {
+      const res = await lmsApi.fetchMyCohortRoadmap();
+      if (res?.assigned && res.cohort) {
+        setMyCohort(res.cohort);
+      } else {
+        setMyCohort(null);
+      }
+    } catch {
+      setMyCohort(null);
+    } finally {
+      setIsCohortLoading(false);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    loadMyCohort();
+    const handleSchedulesUpdated = () => {
+      loadMyCohort();
+    };
+    window.addEventListener('cpmai_cohort_schedules_updated', handleSchedulesUpdated);
+    return () => {
+      window.removeEventListener('cpmai_cohort_schedules_updated', handleSchedulesUpdated);
+    };
+  }, [loadMyCohort]);
+
+  // Keep active track within allowed tracks (Admins have access to all tracks)
+  useEffect(() => {
+    if (!allowedTracks.includes(industryTrack)) {
+      const coerced = coerceTrackToAllowed(industryTrack, userOrgTrack, isAdmin);
+      setIndustryTrack(coerced);
+      saveIndustryTrack(coerced);
+      const fallbackDisc = getSavedDiscipline(coerced);
+      setActiveDiscipline(fallbackDisc);
+      saveDiscipline(fallbackDisc);
+    }
+  }, [allowedTracks, industryTrack, userOrgTrack, isAdmin]);
+
+  // Keep methodology pages (1..21) hidden when SHOW_CPMAI_METHODOLOGY is disabled
+  useEffect(() => {
+    if (!SHOW_CPMAI_METHODOLOGY && typeof page === 'number' && page >= 1 && page <= 21) {
+      setPage(0);
+    }
+  }, [page]);
+
   const toggleBottomNav = () => {
     setIsBottomNavOpen((prev) => {
       const next = !prev;
@@ -181,7 +266,14 @@ export default function App() {
   };
 
   const navigateToPage = (target: AppPage) => {
-    setPage(target);
+    const safeTarget = sanitizeActivePage(target) as AppPage;
+    setPage(safeTarget);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleJumpToModuleFromDashboard = (moduleId: string) => {
+    setPage(0);
+    setDashboardModuleJump({ moduleId, nonce: Date.now() });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -286,28 +378,33 @@ export default function App() {
   }, []);
 
   const handleSelectIndustryTrack = (track: IndustryTrackId) => {
-    setIndustryTrack(track);
-    saveIndustryTrack(track);
+    const safeTrack = coerceTrackToAllowed(track, userOrgTrack, isAdmin);
+    setIndustryTrack(safeTrack);
+    saveIndustryTrack(safeTrack);
     if (typeof window !== 'undefined') {
       const nextUrl = getCleanedUrlAfterTrackChange(window.location.pathname, window.location.search);
       if (nextUrl !== window.location.pathname + window.location.search) {
         window.history.replaceState({}, '', nextUrl);
       }
     }
-    const fallbackDisc = getSavedDiscipline(track);
+    const fallbackDisc = getSavedDiscipline(safeTrack);
     setActiveDiscipline(fallbackDisc);
     saveDiscipline(fallbackDisc);
     showToast(
       lang === 'fa'
-        ? `حوزه تخصصی به «${INDUSTRY_TRACKS[track].shortTitleFa}» تغییر یافت.`
-        : `Industry track switched to "${INDUSTRY_TRACKS[track].shortTitleEn}".`
+        ? `حوزه تخصصی به «${INDUSTRY_TRACKS[safeTrack].shortTitleFa}» تغییر یافت.`
+        : `Industry track switched to "${INDUSTRY_TRACKS[safeTrack].shortTitleEn}".`
     );
   };
 
   const handleSelectDiscipline = (disc: DisciplineId) => {
+    const meta = getDisciplineMetadata(disc);
+    if (isAdmin && meta.trackId !== industryTrack) {
+      setIndustryTrack(meta.trackId);
+      saveIndustryTrack(meta.trackId);
+    }
     setActiveDiscipline(disc);
     saveDiscipline(disc);
-    const meta = getDisciplineMetadata(disc);
     showToast(
       lang === 'fa'
         ? `دیسیپلین تخصصی به «${meta.shortTitleFa}» تنظیم شد.`
@@ -1016,6 +1113,7 @@ export default function App() {
           onOpenBookModal={() => setIsBookModalOpen(true)}
           onOpenMarkdownStudio={() => setIsMarkdownStudioOpen(true)}
           currentTrack={industryTrack}
+          allowedTracks={allowedTracks}
           onSelectTrack={handleSelectIndustryTrack}
           onOpenTrackModal={() => setIsIndustryModalOpen(true)}
           onEnterApp={() => {
@@ -1103,6 +1201,9 @@ export default function App() {
           onClose={() => setIsIndustryModalOpen(false)}
           currentTrack={industryTrack}
           onSelectTrack={handleSelectIndustryTrack}
+          allowedTracks={allowedTracks}
+          orgTrackId={userOrgTrack}
+          organizationLabel={activeCohort?.title}
         />
 
         {/* Discipline & Role Selector Modal */}
@@ -1114,6 +1215,8 @@ export default function App() {
           currentRole={activeRole}
           onSelectDiscipline={handleSelectDiscipline}
           onSelectRole={handleSelectRole}
+          onSelectTrack={isAdmin ? handleSelectIndustryTrack : undefined}
+          isAdmin={isAdmin}
           lang={lang}
         />
       </>
@@ -1166,7 +1269,7 @@ export default function App() {
 
             {/* Streamlined Presenter Controls */}
             <div className="flex items-center gap-2 shrink-0">
-              {typeof page === 'number' && (
+              {SHOW_CPMAI_METHODOLOGY && typeof page === 'number' && (
                 <div className="hidden sm:flex items-center gap-1.5">
                   <button
                     type="button"
@@ -1241,24 +1344,26 @@ export default function App() {
           </div>
         ) : (
         <div className="w-full max-w-[1750px] mx-auto px-2 sm:px-4 h-15 flex items-center justify-between gap-1.5 sm:gap-2 flex-nowrap overflow-x-auto">
-          {/* Section 1: Hamburger Menu + Brand */}
+          {/* Section 1: Brand & Landing */}
           <div className="flex items-center gap-1.5 shrink-0">
-            {/* Sidebar Toggle Button */}
-            <button
-              type="button"
-              onClick={toggleSidebar}
-              className={`flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl border transition-all cursor-pointer shrink-0 shadow-2xs ${
-                isSidebarOpen
-                  ? 'border-[#1f5163]/40 bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] dark:bg-[#6fb3c6]/15'
-                  : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#18232e] hover:border-[#1f5163]/50 text-[#1f5163] dark:text-[#6fb3c6]'
-              }`}
-              title={lang === 'fa' ? 'نمایش / پنهان‌سازی سایدبار سرفصل‌ها' : 'Toggle Curriculum Sidebar'}
-            >
-              <Menu className="w-4 h-4 shrink-0" />
-              <span className="text-[11px] font-bold whitespace-nowrap hidden sm:inline">
-                {lang === 'fa' ? (isSidebarOpen ? 'بستن سایدبار' : 'سرفصل‌ها') : (isSidebarOpen ? 'Hide' : 'Curriculum')}
-              </span>
-            </button>
+            {/* Methodology Sidebar Toggle Button (Hidden while SHOW_CPMAI_METHODOLOGY is false) */}
+            {SHOW_CPMAI_METHODOLOGY && (
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                className={`flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl border transition-all cursor-pointer shrink-0 shadow-2xs ${
+                  isSidebarOpen
+                    ? 'border-[#1f5163]/40 bg-[#1f5163]/10 text-[#1f5163] dark:text-[#6fb3c6] dark:bg-[#6fb3c6]/15'
+                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#18232e] hover:border-[#1f5163]/50 text-[#1f5163] dark:text-[#6fb3c6]'
+                }`}
+                title={lang === 'fa' ? 'نمایش / پنهان‌سازی سایدبار سرفصل‌ها' : 'Toggle Curriculum Sidebar'}
+              >
+                <Menu className="w-4 h-4 shrink-0" />
+                <span className="text-[11px] font-bold whitespace-nowrap hidden sm:inline">
+                  {lang === 'fa' ? (isSidebarOpen ? 'بستن سایدبار' : 'سرفصل‌ها') : (isSidebarOpen ? 'Hide' : 'Curriculum')}
+                </span>
+              </button>
+            )}
 
             {/* Brand & Organization -> Click to return to Landing Page */}
             <button
@@ -1283,7 +1388,7 @@ export default function App() {
               </div>
               <div className="hidden 2xl:flex flex-col shrink-0">
                 <span className="font-extrabold text-xs text-[#1c2830] dark:text-[#e8ebe9] whitespace-nowrap group-hover:text-[#e0533c] transition-colors">
-                  {lang === 'fa' ? 'کتاب کار CPMAI' : 'CPMAI Workbook'}
+                  {lang === 'fa' ? 'آکادمی هوش مصنوعی اوج' : 'OWJ AI Academy'}
                 </span>
                 <span className="text-[10px] text-[#5d6b73] dark:text-[#9aa8b0] whitespace-nowrap">
                   {lang === 'fa' ? 'مشاوران مدیریت اوج' : 'OWJ Business Council'}
@@ -1306,10 +1411,11 @@ export default function App() {
             </button>
           </div>
 
-          {/* Section 2: Active Track & Discipline Center Pill */}
+          {/* Section 2: Active Track (2 options: Org + Home & Family) & Discipline */}
           <div className="flex items-center gap-1 shrink-0 min-w-0">
             <IndustryTrackSwitcher
               currentTrack={industryTrack}
+              allowedTracks={allowedTracks}
               onSelectTrack={handleSelectIndustryTrack}
               onOpenSelectorModal={() => setIsIndustryModalOpen(true)}
               variant="dropdown"
@@ -1324,18 +1430,36 @@ export default function App() {
             />
           </div>
 
-          {/* Section 3: Tools & Utilities */}
-          <div className="flex items-center gap-1 shrink-0">
-            {/* OWJ Markdown Studio Pro Trigger Button */}
+          {/* Section 3: Clean User Controls (Consolidated under Single User Dashboard Button) */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Primary Consolidated User Dashboard Button */}
             <button
               type="button"
-              onClick={() => setIsMarkdownStudioOpen(true)}
-              className="flex items-center gap-1 px-2 py-1.5 rounded-xl text-[11px] font-bold transition-all border bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/30 hover:bg-indigo-500/20 active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
-              title={lang === 'fa' ? 'استودیو مارک‌دان اوج: آپلود، مرور، هایلایت ۶ رنگ و ویرایش زنده فایل‌های .md' : 'OWJ Markdown Studio Pro: Upload, Browse & Edit Markdown'}
+              onClick={() => setIsDashboardOpen(true)}
+              data-testid="open-user-dashboard-btn"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all border border-[#1f5163] dark:border-[#6fb3c6] bg-[#1f5163] hover:bg-[#163d4b] dark:bg-[#6fb3c6] dark:hover:bg-[#5ca3b8] text-white dark:text-[#0b1117] shadow-2xs active:scale-[0.98] cursor-pointer shrink-0 whitespace-nowrap"
+              title={lang === 'fa' ? 'باز کردن داشبورد کاربری، نقشه راه، پیشرفت، ابزارها و تنظیمات' : 'Open User Dashboard, Roadmap, Tools & Settings'}
             >
-              <FileCode2 className="w-3.5 h-3.5 shrink-0 text-indigo-500" />
-              <span className="hidden lg:inline whitespace-nowrap">{lang === 'fa' ? 'مارک‌دان' : 'Markdown'}</span>
+              {currentUser?.avatarUrl ? (
+                <img
+                  src={currentUser.avatarUrl}
+                  alt={currentUser.displayName}
+                  className="w-4.5 h-4.5 rounded-md object-cover border border-white/40 shrink-0"
+                />
+              ) : (
+                <LayoutDashboard className="w-3.5 h-3.5 shrink-0" />
+              )}
+              <span>{lang === 'fa' ? 'داشبورد من' : 'My Dashboard'}</span>
+              {activeCohort && (
+                <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-md bg-white/15 dark:bg-black/15 text-[10px] font-black tabular-nums">
+                  {buildExpectedLearningSummary(
+                    activeCohort.reviewedModules,
+                    activeCohort.nextModules
+                  ).totalReviewedModules.toLocaleString('fa-IR')}/۲۲
+                </span>
+              )}
             </button>
+
             <button
               type="button"
               onClick={toggleTutor}
@@ -1375,16 +1499,6 @@ export default function App() {
               )}
             </button>
 
-            {/* Class Leaderboard Button */}
-            <button
-              onClick={() => setIsLeaderboardModalOpen(true)}
-              className="flex items-center gap-1 px-2 py-1.5 rounded-xl text-[11px] font-bold transition-all border bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20 active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
-              title={lang === 'fa' ? 'جدول رتبه‌بندی رقابتی هم‌دوره‌ای‌ها (Class Leaderboard)' : 'Class Leaderboard'}
-            >
-              <Trophy className="w-3.5 h-3.5 shrink-0 text-amber-500" />
-              <span className="hidden xl:inline whitespace-nowrap">{lang === 'fa' ? 'رتبه‌بندی' : 'Leaderboard'}</span>
-            </button>
-
             {/* Admin Control Center Button */}
             {isUserAdmin(currentUser) && (
               <button
@@ -1410,32 +1524,10 @@ export default function App() {
               <span className="hidden md:inline whitespace-nowrap">{lang === 'fa' ? 'حالت ارائه' : 'Present'}</span>
             </button>
 
-            {/* User Profile / Google Sign-In Button */}
-            {currentUser ? (
+            {!currentUser && (
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-1 p-1 pe-1.5 rounded-xl border border-[#2f7d5b]/30 bg-[#2f7d5b]/10 hover:bg-[#2f7d5b]/20 transition-all text-xs font-bold text-[#1c2830] dark:text-[#e8ebe9] cursor-pointer shrink-0 whitespace-nowrap"
-                title={lang === 'fa' ? 'حساب کاربری' : 'User Account'}
-              >
-                {currentUser.avatarUrl ? (
-                  <img
-                    src={currentUser.avatarUrl}
-                    alt={currentUser.displayName}
-                    className="w-5 h-5 rounded-lg object-cover border border-white dark:border-[#161e24] shrink-0"
-                  />
-                ) : (
-                  <div className="w-5 h-5 rounded-lg bg-[#2f7d5b] text-white flex items-center justify-center text-[10px] font-mono shrink-0">
-                    {currentUser.displayName.charAt(0)}
-                  </div>
-                )}
-                <span className="hidden 2xl:inline max-w-24 truncate text-[11px]">
-                  {currentUser.displayName}
-                </span>
-              </button>
-            ) : (
-              <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-bold rounded-xl bg-[#1f5163] hover:bg-[#163d4b] dark:bg-[#6fb3c6] dark:hover:bg-[#5ca3b8] text-white dark:text-[#0b1117] shadow-xs transition-all active:scale-[0.96] cursor-pointer shrink-0 whitespace-nowrap"
+                className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-bold rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-[#18232e] text-slate-800 dark:text-slate-100 hover:border-[#1f5163] transition-all cursor-pointer shrink-0 whitespace-nowrap"
               >
                 <span>{lang === 'fa' ? 'ورود' : 'Sign In'}</span>
               </button>
@@ -1469,8 +1561,8 @@ export default function App() {
           isViewportScrollLocked ? 'min-h-0 overflow-hidden ' : ''
         }${isPresentationMode ? 'max-w-none' : 'max-w-[1750px]'}`}
       >
-        {/* Responsive Workspace Sidebar */}
-        {!isPresentationMode && (
+        {/* Responsive Workspace Sidebar (Hidden while SHOW_CPMAI_METHODOLOGY is false) */}
+        {SHOW_CPMAI_METHODOLOGY && !isPresentationMode && (
           <WorkspaceSidebar
             page={page}
             onSelectPage={setPage}
@@ -1498,7 +1590,7 @@ export default function App() {
             : page === 0
             ? isViewportScrollLocked
               ? 'max-w-[1720px] px-3 sm:px-5 lg:px-6 py-2.5'
-              : 'max-w-[1720px] p-3 sm:p-5 lg:px-7 lg:py-4'
+              : 'max-w-[1720px] p-2.5 sm:px-5 sm:py-3 lg:px-7 lg:py-3'
             : 'max-w-5xl p-4 sm:p-7 lg:p-10'
         }`}>
           {toastMsg && (
@@ -1534,8 +1626,7 @@ export default function App() {
             content={page0Content}
             onChangeContent={setPage0Content}
             onGoToPage1={() => {
-              setPage(1);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+              navigateToPage(1);
             }}
             onOpenQuiz={() => {
               setPage('quiz');
@@ -1543,6 +1634,7 @@ export default function App() {
             }}
             industryTrack={industryTrack}
             disciplineId={activeDiscipline}
+            roleId={activeRole}
             isAdmin={isUserAdmin(currentUser)}
             isPresentationMode={isPresentationMode}
             currentUser={currentUser}
@@ -1550,6 +1642,11 @@ export default function App() {
             onOpenAiTutor={() => setIsTutorOpen(true)}
             aiQuota={aiQuota}
             onModuleViewportLockChange={setIsPage0ModuleViewportLocked}
+            activeCohort={activeCohort}
+            onOpenDashboard={() => setIsDashboardOpen(true)}
+            onOpenDisciplineModal={() => setIsDisciplineModalOpen(true)}
+            hideMethodologyCta={!SHOW_CPMAI_METHODOLOGY}
+            externalModuleJump={dashboardModuleJump}
           />
         )}
 
@@ -2049,9 +2146,10 @@ export default function App() {
           </>
         )}
 
-        {/* Persistent, Collapsible Bottom Quick Navigation Panel (Hidden in Presentation & Single-Module Locked View) */}
+        {/* Persistent, Collapsible Bottom Quick Navigation Panel (Hidden while SHOW_CPMAI_METHODOLOGY is false) */}
         {!isPresentationMode && !isViewportScrollLocked && (
         <>
+        {SHOW_CPMAI_METHODOLOGY && (
         <section
           aria-label={lang === 'fa' ? 'ناوبری سریع پایین صفحه' : 'Bottom Quick Navigation'}
           className="mt-8 rounded-2xl bg-white dark:bg-[#131c24] border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden"
@@ -2160,8 +2258,10 @@ export default function App() {
             </div>
           )}
         </section>
+        )}
 
-        {/* Reset Option and Auto-save indicator */}
+        {/* Reset Option and Auto-save indicator (Only shown for methodology workbook mode; Cloud Sync lives in User Dashboard) */}
+        {SHOW_CPMAI_METHODOLOGY && (
         <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-4 flex-wrap">
             <span className="flex items-center gap-1.5">
@@ -2194,6 +2294,7 @@ export default function App() {
             <span>{lang === 'fa' ? 'پاک کردن کل کتاب کار' : 'Clear all'}</span>
           </button>
         </div>
+        )}
 
         {/* Footer with OWJ Council & PMI Copyright */}
         <Footer lang={lang} />
@@ -2263,12 +2364,15 @@ export default function App() {
           industryTrack={industryTrack}
         />
 
-        {/* Industry Track Selector Modal */}
+        {/* Industry Track Selector Modal (Strictly 2 Options: User's Org + Home & Family) */}
         <IndustryTrackSelectorModal
           isOpen={isIndustryModalOpen}
           onClose={() => setIsIndustryModalOpen(false)}
           currentTrack={industryTrack}
           onSelectTrack={handleSelectIndustryTrack}
+          allowedTracks={allowedTracks}
+          orgTrackId={userOrgTrack}
+          organizationLabel={activeCohort?.title}
         />
 
         {/* Discipline & Role Selector Modal */}
@@ -2280,7 +2384,43 @@ export default function App() {
           currentRole={activeRole}
           onSelectDiscipline={handleSelectDiscipline}
           onSelectRole={handleSelectRole}
+          onSelectTrack={isAdmin ? handleSelectIndustryTrack : undefined}
+          isAdmin={isAdmin}
           lang={lang}
+        />
+
+        {/* Consolidated User Dashboard Modal */}
+        <UserDashboardModal
+          isOpen={isDashboardOpen}
+          onClose={() => setIsDashboardOpen(false)}
+          lang={lang}
+          theme={theme}
+          onToggleLang={() => setLang((prev) => (prev === 'fa' ? 'en' : 'fa'))}
+          onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+          currentUser={currentUser}
+          myCohort={myCohort}
+          searchedCohort={searchedCohort}
+          isCohortLoading={isCohortLoading}
+          onRefreshCohort={loadMyCohort}
+          onSetSearchedCohort={setSearchedCohort}
+          industryTrack={industryTrack}
+          orgTrackId={userOrgTrack}
+          onSelectTrack={handleSelectIndustryTrack}
+          onOpenTrackModal={() => setIsIndustryModalOpen(true)}
+          activeDiscipline={activeDiscipline}
+          onSelectDiscipline={handleSelectDiscipline}
+          onOpenDisciplineModal={() => setIsDisciplineModalOpen(true)}
+          aiQuota={aiQuota}
+          onOpenAiTutor={() => setIsTutorOpen(true)}
+          onOpenLeaderboard={() => setIsLeaderboardModalOpen(true)}
+          onOpenMarkdownStudio={() => setIsMarkdownStudioOpen(true)}
+          onOpenAuth={() => setIsAuthModalOpen(true)}
+          onOpenAdmin={() => setIsAdminModalOpen(true)}
+          isAdmin={isUserAdmin(currentUser)}
+          onSelectModule={handleJumpToModuleFromDashboard}
+          onSyncToCloud={handleSyncToCloud}
+          isSyncing={isSyncing}
+          cloudStatus={cloudStatus}
         />
         </main>
 

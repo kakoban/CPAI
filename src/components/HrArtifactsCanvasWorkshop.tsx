@@ -7,17 +7,8 @@ import {
   Play,
   ExternalLink,
   Code,
-  Users,
   CheckCircle2,
-  Lightbulb,
-  Layers,
-  FileBarChart,
-  Calculator,
-  ClipboardCheck,
-  FileSpreadsheet,
-  Award,
-  ArrowLeft,
-  ArrowRight
+  FileSpreadsheet
 } from 'lucide-react';
 import {
   HR_ARTIFACTS_WORKSHOP_HEADER,
@@ -25,6 +16,10 @@ import {
   HR_NOTEBOOKLM_COMPANION,
   HrArtifactExercise
 } from '../data/hr_artifacts_canvas_workshop';
+import { FocusedLessonLayout, FocusedStepItem, FocusedViewTab } from './learning/FocusedLessonLayout';
+import { FocusedLessonFooter } from './learning/FocusedLessonFooter';
+import { LessonTakeawayCallout } from './learning/LessonTakeawayCallout';
+import { clampStepIndex, formatStepNumber, getStepBoundaryState, markStepVisited } from '../utils/focusedLessonEngine';
 
 interface HrArtifactsCanvasWorkshopProps {
   lang: Language;
@@ -39,534 +34,177 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
   copyToClipboard,
   copiedId
 }) => {
-  const [selectedExId, setSelectedExId] = useState<string>(HR_ARTIFACT_EXERCISES[0].id);
+  const isFa = lang === 'fa';
+  const [activeView, setActiveView] = useState<'apps' | 'playbook'>('apps');
+  const [activeExIdx, setActiveExIdx] = useState<number>(0);
+  const [visitedExIndices, setVisitedExIndices] = useState<Set<number>>(() => new Set([0]));
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
   const [notebookCompanionTab, setNotebookCompanionTab] = useState<'output' | 'assumptions'>('output');
   const [isNotebookCompanionOpen, setIsNotebookCompanionOpen] = useState<boolean>(true);
 
-  const activeEx: HrArtifactExercise =
-    HR_ARTIFACT_EXERCISES.find((ex) => ex.id === selectedExId) || HR_ARTIFACT_EXERCISES[0];
-
-  const renderExerciseIcon = (num: number, className = 'w-4 h-4') => {
-    switch (num) {
-      case 1:
-        return <FileBarChart className={className} />;
-      case 2:
-        return <Calculator className={className} />;
-      case 3:
-        return <ClipboardCheck className={className} />;
-      case 4:
-        return <FileSpreadsheet className={className} />;
-      case 5:
-      default:
-        return <Award className={className} />;
-    }
-  };
-
-  const activePrompt = lang === 'fa' ? activeEx.promptFa : activeEx.promptEn;
+  const activeEx: HrArtifactExercise = HR_ARTIFACT_EXERCISES[activeExIdx] || HR_ARTIFACT_EXERCISES[0];
+  const activePrompt = isFa ? activeEx.promptFa : activeEx.promptEn;
   const copyKey = `hr_artifact_prompt_${activeEx.id}`;
   const isCopied = copiedId === copyKey;
-  const notebookOutputText =
-    lang === 'fa' ? HR_NOTEBOOKLM_COMPANION.simulatedOutputFa : HR_NOTEBOOKLM_COMPANION.simulatedOutputEn;
-  const notebookPromptText =
-    lang === 'fa' ? HR_NOTEBOOKLM_COMPANION.extractionPromptFa : HR_NOTEBOOKLM_COMPANION.extractionPromptEn;
-  const notebookAssumptions =
-    lang === 'fa' ? HR_NOTEBOOKLM_COMPANION.assumptionsFa : HR_NOTEBOOKLM_COMPANION.assumptionsEn;
+
+  const notebookOutputText = isFa
+    ? HR_NOTEBOOKLM_COMPANION.simulatedOutputFa
+    : HR_NOTEBOOKLM_COMPANION.simulatedOutputEn;
+  const notebookPromptText = isFa
+    ? HR_NOTEBOOKLM_COMPANION.extractionPromptFa
+    : HR_NOTEBOOKLM_COMPANION.extractionPromptEn;
+  const notebookAssumptions = isFa
+    ? HR_NOTEBOOKLM_COMPANION.assumptionsFa
+    : HR_NOTEBOOKLM_COMPANION.assumptionsEn;
+
+  const steps: FocusedStepItem[] = HR_ARTIFACT_EXERCISES.map((ex) => ({
+    id: ex.id,
+    title: isFa ? ex.titleFa.replace(/^تمرین \d+:\s*/, '') : ex.titleEn.replace(/^Exercise \d+:\s*/, ''),
+    category: isFa ? ex.badgeFa : ex.badgeEn
+  }));
+
+  const views: FocusedViewTab[] = [
+    { id: 'apps', label: isFa ? 'کارگاه ۵ اپلیکیشن HR' : '5 HR Interactive Apps' },
+    { id: 'playbook', label: isFa ? 'جریان ۳ مرحله‌ای و NotebookLM' : '3-Step Playbook & NotebookLM' }
+  ];
+
+  const boundary = getStepBoundaryState(activeExIdx, steps.length);
+
+  const handleSelectStep = (idx: number) => {
+    const nextIdx = clampStepIndex(idx, steps.length);
+    setActiveExIdx(nextIdx);
+    setVisitedExIndices((prev) => markStepVisited(prev, nextIdx));
+  };
 
   return (
-    <div className="p-1.5 rounded-3xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
-      <div className="rounded-[calc(1.5rem-0.375rem)] bg-white dark:bg-[#161e24] p-5 sm:p-7 space-y-6">
-        {/* Top Header */}
-        <div className="flex flex-col gap-4 pb-4 border-b border-black/[0.06] dark:border-white/[0.08]">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#c026d3]/10 text-[#c026d3] dark:text-[#fb7185] border border-[#c026d3]/25 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5" />
-                <span>NotebookLM + Gemini + Claude</span>
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#d97706]/10 text-[#b45309] dark:text-[#fbbf24] border border-[#d97706]/25 flex items-center gap-1">
-                <Users className="w-3 h-3" />
-                <span>
-                  {lang === 'fa'
-                    ? 'ویژه واحد منابع انسانی، اداری و رفاهی'
-                    : 'HR, Admin & Welfare Track'}
+    <div data-testid="hr-artifacts-workshop">
+      <FocusedLessonLayout
+        lang={lang}
+        moduleCode={isFa ? 'کارگاه HR' : 'HR Track'}
+        moduleTitle={isFa ? HR_ARTIFACTS_WORKSHOP_HEADER.titleFa : HR_ARTIFACTS_WORKSHOP_HEADER.titleEn}
+        moduleSubtitle={
+          isFa
+            ? 'ویژه واحد منابع انسانی، اداری و رفاهی · NotebookLM + Gemini Canvas + Claude Artifacts'
+            : 'HR, Admin & Welfare Track · NotebookLM + Gemini Canvas + Claude Artifacts'
+        }
+        steps={steps}
+        activeStepIndex={boundary.currentIndex}
+        visitedStepIndices={visitedExIndices}
+        onSelectStep={handleSelectStep}
+        views={views}
+        activeViewId={activeView}
+        onSelectView={(v) => setActiveView(v as 'apps' | 'playbook')}
+        isStepListVisible={activeView === 'apps'}
+        isMobileDrawerOpen={isMobileDrawerOpen}
+        onToggleMobileDrawer={setIsMobileDrawerOpen}
+        sidebarTitleFa="۵ ابزار تعاملی منابع انسانی"
+        sidebarTitleEn="5 HR Artifact Exercises"
+        stepUnitFa="تمرین"
+        stepUnitEn="exercises"
+      >
+        {activeView === 'apps' ? (
+          <article className="space-y-6">
+            {/* Step Header */}
+            <header className="pb-4 border-b border-[var(--cpai-border)] space-y-2">
+              <div className="flex items-center gap-2 text-xs text-[var(--cpai-muted)] flex-wrap tabular-nums">
+                <span className="font-semibold text-[var(--cpai-primary-strong)]">
+                  {isFa
+                    ? `تمرین ${formatStepNumber(boundary.stepNumber, 'fa')} از ${formatStepNumber(boundary.totalSteps, 'fa')}`
+                    : `Exercise ${boundary.stepNumber} of ${boundary.totalSteps}`}
                 </span>
-              </span>
-            </div>
-
-            <h2 className="text-base sm:text-lg font-black text-[#1c2830] dark:text-[#e8ebe9] leading-snug">
-              {lang === 'fa' ? HR_ARTIFACTS_WORKSHOP_HEADER.titleFa : HR_ARTIFACTS_WORKSHOP_HEADER.titleEn}
-            </h2>
-            <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-              {lang === 'fa' ? HR_ARTIFACTS_WORKSHOP_HEADER.subtitleFa : HR_ARTIFACTS_WORKSHOP_HEADER.subtitleEn}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <a
-              href="https://notebooklm.google.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#9333ea] hover:bg-[#7e22ce] text-white text-xs font-bold shadow-xs transition-all whitespace-nowrap"
-            >
-              <span>1. NotebookLM</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-            <a
-              href="https://gemini.google.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#1a73e8] hover:bg-[#1557b0] text-white text-xs font-bold shadow-xs transition-all whitespace-nowrap"
-            >
-              <span>2. Gemini Canvas</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-            <a
-              href="https://claude.ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#b45309] hover:bg-[#92400e] text-white text-xs font-bold shadow-xs transition-all whitespace-nowrap"
-            >
-              <span>3. Claude Artifacts</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
-        </div>
-
-        {/* 3-Step Integrated Workflow Playbook (NotebookLM -> Gemini Canvas -> Claude Artifacts) */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#c026d3]/[0.06] via-[#1a73e8]/[0.06] to-[#d97706]/[0.06] border border-[#c026d3]/20 space-y-3.5">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <span className="text-xs sm:text-sm font-black text-[#1c2830] dark:text-[#e8ebe9] flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[#c026d3] dark:text-[#fb7185]" />
-              <span>
-                {lang === 'fa'
-                  ? HR_ARTIFACTS_WORKSHOP_HEADER.twoStepChainGuide.titleFa
-                  : HR_ARTIFACTS_WORKSHOP_HEADER.twoStepChainGuide.titleEn}
-              </span>
-            </span>
-            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white/80 dark:bg-[#12171b] text-[#2f7d5b] dark:text-[#52b788] border border-[#2f7d5b]/25">
-              {lang === 'fa' ? 'بدون نیاز به دانش برنامه‌نویسی (No-Code AI App Building)' : 'Zero-Code AI Tooling'}
-            </span>
-          </div>
-
-          <p className="text-xs text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-            {lang === 'fa'
-              ? HR_ARTIFACTS_WORKSHOP_HEADER.twoStepChainGuide.descriptionFa
-              : HR_ARTIFACTS_WORKSHOP_HEADER.twoStepChainGuide.descriptionEn}
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(195px,1fr))] gap-3">
-            {HR_ARTIFACTS_WORKSHOP_HEADER.twoStepChainGuide.steps.map((st) => (
-              <div
-                key={st.stepNumber}
-                className="p-3.5 rounded-xl bg-white dark:bg-[#12171b] border border-black/[0.06] dark:border-white/[0.08] space-y-1.5 shadow-2xs"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span
-                      className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 ${
-                        st.stepNumber === 1
-                          ? 'bg-[#9333ea] text-white'
-                          : st.stepNumber === 2
-                          ? 'bg-[#1a73e8] text-white'
-                          : 'bg-[#b45309] text-white'
-                      }`}
-                    >
-                      {st.stepNumber}
-                    </span>
-                    <h4 className="text-xs font-extrabold text-[#1c2830] dark:text-[#e8ebe9] leading-snug">
-                      {lang === 'fa' ? st.titleFa : st.titleEn}
-                    </h4>
-                  </div>
-                </div>
-                <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                  {lang === 'fa' ? st.descriptionFa : st.descriptionEn}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {/* Grounded NotebookLM Simulated Output + Assumptions Companion Pack */}
-          <div
-            data-testid="hr-notebooklm-companion-panel"
-            className="rounded-2xl bg-white/95 dark:bg-[#12171b] border border-[#9333ea]/25 dark:border-[#9333ea]/35 overflow-hidden shadow-xs"
-          >
-            <div className="px-4 py-3 bg-[#9333ea]/[0.07] dark:bg-[#9333ea]/15 border-b border-[#9333ea]/15 flex flex-wrap items-center justify-between gap-2">
-              <div className="space-y-0.5 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="px-2 py-0.5 rounded-md bg-[#9333ea] text-white text-[10px] font-black">
-                    {lang === 'fa' ? HR_NOTEBOOKLM_COMPANION.badgeFa : HR_NOTEBOOKLM_COMPANION.badgeEn}
-                  </span>
-                  <h4 className="text-xs sm:text-[13px] font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                    {lang === 'fa' ? HR_NOTEBOOKLM_COMPANION.titleFa : HR_NOTEBOOKLM_COMPANION.titleEn}
-                  </h4>
-                </div>
-                <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                  {lang === 'fa' ? HR_NOTEBOOKLM_COMPANION.subtitleFa : HR_NOTEBOOKLM_COMPANION.subtitleEn}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setIsNotebookCompanionOpen((prev) => !prev)}
-                className="px-2.5 py-1 rounded-lg border border-[#9333ea]/30 bg-white dark:bg-[#161e24] text-[11px] font-bold text-[#7e22ce] dark:text-[#d8b4fe] hover:bg-[#9333ea]/10 transition-colors cursor-pointer shrink-0"
-              >
-                {isNotebookCompanionOpen
-                  ? lang === 'fa'
-                    ? 'جمع کردن پنل'
-                    : 'Collapse'
-                  : lang === 'fa'
-                  ? 'مشاهده خروجی و فرضیات'
-                  : 'Expand Pack'}
-              </button>
-            </div>
-
-            {isNotebookCompanionOpen && (
-              <div className="p-4 space-y-3.5">
-                {/* 2-Tab Selector + Quick Copy Actions */}
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="inline-flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
-                    <button
-                      type="button"
-                      data-testid="hr-nlm-tab-output"
-                      onClick={() => setNotebookCompanionTab('output')}
-                      className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer ${
-                        notebookCompanionTab === 'output'
-                          ? 'bg-[#9333ea] text-white shadow-2xs'
-                          : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                      }`}
-                    >
-                      {lang === 'fa'
-                        ? '۱. خروجی فرضی و مستند NotebookLM'
-                        : '1. Simulated NotebookLM Output'}
-                    </button>
-                    <button
-                      type="button"
-                      data-testid="hr-nlm-tab-assumptions"
-                      onClick={() => setNotebookCompanionTab('assumptions')}
-                      className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer ${
-                        notebookCompanionTab === 'assumptions'
-                          ? 'bg-[#9333ea] text-white shadow-2xs'
-                          : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                      }`}
-                    >
-                      {lang === 'fa'
-                        ? '۲. فرضیات منابع و پرامپت استخراج'
-                        : '2. Source Assumptions & Extraction Prompt'}
-                    </button>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <button
-                      type="button"
-                      data-testid="hr-nlm-copy-output-btn"
-                      onClick={() => copyToClipboard(notebookOutputText, 'hr_nlm_simulated_output')}
-                      className="px-2.5 py-1.5 rounded-lg bg-[#9333ea] hover:bg-[#7e22ce] text-white text-[11px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-                    >
-                      {copiedId === 'hr_nlm_simulated_output' ? (
-                        <Check className="w-3.5 h-3.5" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
-                      )}
-                      <span>
-                        {copiedId === 'hr_nlm_simulated_output'
-                          ? lang === 'fa'
-                            ? 'خروجی NotebookLM کپی شد'
-                            : 'Output Copied'
-                          : lang === 'fa'
-                          ? 'کپی خروجی NotebookLM (برای گام ۲ و ۳)'
-                          : 'Copy NotebookLM Output'}
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      data-testid="hr-nlm-copy-csv-btn"
-                      onClick={() => copyToClipboard(HR_NOTEBOOKLM_COMPANION.sampleCsv, 'hr_nlm_sample_csv')}
-                      className="px-2.5 py-1.5 rounded-lg border border-[#1a73e8]/35 bg-[#1a73e8]/10 hover:bg-[#1a73e8]/20 text-[#1557b0] dark:text-[#7dd3fc] text-[11px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-                    >
-                      {copiedId === 'hr_nlm_sample_csv' ? (
-                        <Check className="w-3.5 h-3.5" />
-                      ) : (
-                        <FileSpreadsheet className="w-3.5 h-3.5" />
-                      )}
-                      <span>
-                        {copiedId === 'hr_nlm_sample_csv'
-                          ? lang === 'fa'
-                            ? 'CSV نمونه کپی شد'
-                            : 'Sample CSV Copied'
-                          : lang === 'fa'
-                          ? 'کپی جدول نمونه CSV کارکرد'
-                          : 'Copy Sample CSV'}
-                      </span>
-                    </button>
-                  </div>
-                </div>
-
-                {notebookCompanionTab === 'output' ? (
-                  <div className="space-y-3">
-                    <div
-                      dir={lang === 'fa' ? 'rtl' : 'ltr'}
-                      className="p-3.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-[#0d141a] border border-slate-200 dark:border-slate-800 max-h-72 overflow-y-auto text-[11.5px] leading-relaxed text-[#1c2830] dark:text-[#e8ebe9] whitespace-pre-wrap font-normal"
-                    >
-                      {notebookOutputText}
-                    </div>
-                    <div className="p-3 rounded-xl bg-[#1a73e8]/[0.06] border border-[#1a73e8]/20 flex flex-wrap items-center justify-between gap-2 text-[11px]">
-                      <div className="flex items-center gap-2 text-[#12343b] dark:text-[#d6e9ee]">
-                        <Sparkles className="w-3.5 h-3.5 text-[#1a73e8] shrink-0" />
-                        <span>
-                          {lang === 'fa'
-                            ? 'مسیر سریع اجرا: ابتدا دکمه «کپی خروجی NotebookLM» و «کپی جدول CSV» را بزنید، سپس پرامپت یکی از ۵ تمرین زیر را در Gemini Canvas یا Claude Artifacts پیست کنید.'
-                            : 'Fast Track: Copy the grounded NotebookLM output + sample CSV above, then paste any of the 5 prompts below into Gemini Canvas or Claude Artifacts.'}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onLoadToSandbox(`${notebookOutputText}\n\n--- CSV کارکرد نمونه ---\n${HR_NOTEBOOKLM_COMPANION.sampleCsv}`)
-                        }
-                        className="px-2.5 py-1 rounded-lg bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold text-[10.5px] cursor-pointer whitespace-nowrap"
-                      >
-                        {lang === 'fa' ? 'ارسال به سندباکس پرامپت' : 'Send to Sandbox'}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                      {notebookAssumptions.map((item, idx) => (
-                        <div
-                          key={idx}
-                          className="p-3 rounded-xl bg-slate-50 dark:bg-[#0d141a] border border-slate-200 dark:border-slate-800 space-y-1"
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-[11.5px] font-extrabold text-[#1c2830] dark:text-[#e8ebe9]">
-                              {item.title}
-                            </span>
-                            <span
-                              dir="ltr"
-                              className="px-1.5 py-0.5 rounded bg-[#9333ea]/10 text-[#7e22ce] dark:text-[#d8b4fe] font-mono text-[9.5px] font-bold shrink-0"
-                            >
-                              {item.sourceTag}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-[#5d6b73] dark:text-[#9aa8b0] leading-relaxed">
-                            {item.detail}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="p-3.5 rounded-xl bg-[#9333ea]/[0.05] border border-[#9333ea]/20 space-y-2">
-                      <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <span className="text-[11.5px] font-extrabold text-[#7e22ce] dark:text-[#d8b4fe] flex items-center gap-1.5">
-                          <Code className="w-3.5 h-3.5" />
-                          <span>
-                            {lang === 'fa'
-                              ? 'پرامپت آماده استخراج قواعد در NotebookLM (گام ۱):'
-                              : 'Ready-to-Use NotebookLM Extraction Prompt (Step 1):'}
-                          </span>
-                        </span>
-                        <button
-                          type="button"
-                          data-testid="hr-nlm-copy-prompt-btn"
-                          onClick={() => copyToClipboard(notebookPromptText, 'hr_nlm_extraction_prompt')}
-                          className="px-2.5 py-1 rounded-lg bg-[#9333ea] hover:bg-[#7e22ce] text-white text-[10.5px] font-bold flex items-center gap-1 cursor-pointer"
-                        >
-                          {copiedId === 'hr_nlm_extraction_prompt' ? (
-                            <Check className="w-3 h-3" />
-                          ) : (
-                            <Copy className="w-3 h-3" />
-                          )}
-                          <span>
-                            {copiedId === 'hr_nlm_extraction_prompt'
-                              ? lang === 'fa'
-                                ? 'کپی شد'
-                                : 'Copied'
-                              : lang === 'fa'
-                              ? 'کپی پرامپت گام ۱'
-                              : 'Copy Step-1 Prompt'}
-                          </span>
-                        </button>
-                      </div>
-                      <pre
-                        dir={lang === 'fa' ? 'rtl' : 'ltr'}
-                        className="p-3 rounded-lg bg-white dark:bg-[#12171b] border border-slate-200 dark:border-slate-800 text-[11px] leading-relaxed text-[#1c2830] dark:text-[#e8ebe9] whitespace-pre-wrap font-sans"
-                      >
-                        {notebookPromptText}
-                      </pre>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* 5 Exercise Selector Cards */}
-        <div className="space-y-2.5">
-          <span className="text-xs font-extrabold text-[#1c2830] dark:text-[#e8ebe9] block">
-            {lang === 'fa'
-              ? 'انتخاب تمرین عملی ساخت ابزار تعاملی (۵ تمرین کاربردی ویژه منابع انسانی و اداری):'
-              : 'Select Interactive Artifact / Canvas Exercise (5 Applied HR & Admin Tools):'}
-          </span>
-
-          <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(185px,1fr))] gap-2.5">
-            {HR_ARTIFACT_EXERCISES.map((ex) => {
-              const isSelected = ex.id === selectedExId;
-              return (
-                <button
-                  key={ex.id}
-                  type="button"
-                  onClick={() => setSelectedExId(ex.id)}
-                  className={`p-3.5 rounded-2xl border text-right transition-all active:scale-[0.97] flex flex-col justify-between gap-2 cursor-pointer ${
-                    isSelected
-                      ? 'bg-[#e0533c] text-white border-[#e0533c] shadow-sm'
-                      : 'bg-[#f8f9fa] dark:bg-[#12171b] text-[#1c2830] dark:text-[#e8ebe9] border-black/[0.06] dark:border-white/[0.08] hover:border-[#c026d3]/40'
-                  }`}
-                >
-                  <div className="flex items-center justify-between w-full gap-1">
-                    <span
-                      className={`text-[10px] font-black px-2 py-0.5 rounded-md flex items-center gap-1 ${
-                        isSelected
-                          ? 'bg-white/20 text-white'
-                          : 'bg-[#d97706]/15 text-[#b45309] dark:text-[#fbbf24]'
-                      }`}
-                    >
-                      {renderExerciseIcon(ex.number, 'w-3 h-3')}
-                      <span>{lang === 'fa' ? `تمرین ${ex.number}` : `Ex ${ex.number}`}</span>
-                    </span>
-                    <span
-                      className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${
-                        isSelected ? 'bg-white/15 text-white/90' : 'text-[#5d6b73] dark:text-[#9aa8b0]'
-                      }`}
-                    >
-                      {lang === 'fa' ? ex.badgeFa : ex.badgeEn}
-                    </span>
-                  </div>
-
-                  <div className="text-xs font-bold leading-snug line-clamp-2">
-                    {lang === 'fa' ? ex.titleFa.replace(/^تمرین \d+:\s*/, '') : ex.titleEn.replace(/^Exercise \d+:\s*/, '')}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Active Exercise Detailed Workspace */}
-        <div className="p-5 rounded-2xl bg-[#f8f9fa] dark:bg-[#12171b] border border-black/[0.07] dark:border-white/[0.09] space-y-5">
-          {/* Exercise Title & Objective */}
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3.5 border-b border-black/[0.06] dark:border-white/[0.08]">
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black bg-[#b45309] text-white">
-                  {lang === 'fa' ? activeEx.badgeFa : activeEx.badgeEn}
-                </span>
+                <span aria-hidden="true">·</span>
+                <span>{isFa ? activeEx.badgeFa : activeEx.badgeEn}</span>
                 {activeEx.targetTools.map((tool, tIdx) => (
-                  <span
-                    key={tIdx}
-                    className="px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-white dark:bg-[#182026] text-[#1c2830] dark:text-[#e8ebe9] border border-black/[0.08] dark:border-white/[0.1]"
-                  >
-                    {tool}
-                  </span>
+                  <React.Fragment key={tIdx}>
+                    <span aria-hidden="true">·</span>
+                    <span dir="ltr" className="font-mono text-[var(--cpai-text)]">
+                      {tool}
+                    </span>
+                  </React.Fragment>
                 ))}
               </div>
-              <h4 className="text-sm sm:text-base font-black text-[#1c2830] dark:text-[#e8ebe9]">
-                {lang === 'fa' ? activeEx.titleFa : activeEx.titleEn}
-              </h4>
+              <h3 className="text-lg sm:text-[22px] font-bold text-[var(--cpai-text)] leading-snug">
+                {isFa ? activeEx.titleFa : activeEx.titleEn}
+              </h3>
+            </header>
+
+            {/* Objective */}
+            <div className="rounded-[var(--cpai-radius)] bg-[var(--cpai-surface-subtle)] border border-[var(--cpai-border)] p-4 sm:p-5 text-[15px] sm:text-[16px] leading-[1.8] text-[var(--cpai-text)]">
+              <strong className="font-semibold text-[var(--cpai-primary-strong)]">
+                {isFa ? 'هدف تمرین: ' : 'Exercise Objective: '}
+              </strong>
+              <span>{isFa ? activeEx.objectiveFa : activeEx.objectiveEn}</span>
             </div>
-          </div>
 
-          {/* Objective Banner */}
-          <div className="p-3.5 rounded-xl bg-white dark:bg-[#161e24] border border-black/[0.05] dark:border-white/[0.07] text-xs leading-relaxed">
-            <strong className="text-[#c026d3] dark:text-[#fb7185] font-extrabold">
-              {lang === 'fa' ? '🎯 هدف تمرین: ' : '🎯 Exercise Objective: '}
-            </strong>
-            <span className="text-[#1c2830] dark:text-[#e8ebe9]">
-              {lang === 'fa' ? activeEx.objectiveFa : activeEx.objectiveEn}
-            </span>
-          </div>
+            {/* Ready-to-Copy Prompt */}
+            <div className="rounded-[var(--cpai-radius)] border border-[var(--cpai-border)] overflow-hidden">
+              <div className="px-4 py-3 bg-[var(--cpai-surface-subtle)] border-b border-[var(--cpai-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-[var(--cpai-text)]">
+                  <Sparkles className="w-4 h-4 text-[var(--cpai-primary)] shrink-0" />
+                  <span>
+                    {isFa
+                      ? 'پرامپت آماده برای Claude Artifacts یا Gemini Canvas'
+                      : 'Ready-to-Use Prompt for Claude Artifacts or Gemini Canvas'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => onLoadToSandbox(activePrompt)}
+                    className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--cpai-border)] bg-[var(--cpai-surface)] text-[var(--cpai-primary-strong)] hover:border-[var(--cpai-primary)] transition-colors cursor-pointer"
+                  >
+                    <Play className="w-3.5 h-3.5" />
+                    <span>{isFa ? 'ارسال به سندباکس' : 'Load to Sandbox'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(activePrompt, copyKey)}
+                    className="inline-flex items-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[var(--cpai-primary)] hover:bg-[var(--cpai-primary-strong)] text-white dark:text-[#0F171A] transition-colors cursor-pointer"
+                  >
+                    {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>
+                      {isCopied
+                        ? isFa
+                          ? 'پرامپت کپی شد!'
+                          : 'Copied!'
+                        : isFa
+                        ? 'کپی پرامپت ساخت ابزار'
+                        : 'Copy Artifact Prompt'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+              <div className="p-4 bg-[var(--cpai-code-bg)] max-h-80 overflow-y-auto">
+                <pre
+                  dir={isFa ? 'rtl' : 'ltr'}
+                  className="text-xs font-mono text-[var(--cpai-code-text)] whitespace-pre-wrap leading-relaxed select-text text-right"
+                >
+                  {activePrompt}
+                </pre>
+              </div>
+            </div>
 
-          {/* Ready-to-Copy Prompt Box for Claude Artifacts / Gemini Canvas */}
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-[#fffbeb]/80 to-[#fef3c7]/40 dark:from-[#2b1f09]/40 dark:to-[#1a160b]/40 border border-[#d97706]/35 space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-[#b45309] dark:text-[#fbbf24] font-extrabold text-xs">
-                <Sparkles className="w-4 h-4 shrink-0" />
+            {/* Expected Output & Highlights */}
+            <div className="rounded-[var(--cpai-radius)] bg-[var(--cpai-surface-subtle)] border border-[var(--cpai-border)] p-5 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-[var(--cpai-text)]">
+                <CheckCircle2 className="w-4 h-4 text-[var(--cpai-primary)] shrink-0" />
                 <span>
-                  {lang === 'fa'
-                    ? 'پرامپت آماده برای وارد کردن در Claude (قابلیت Artifacts) یا Gemini (قابلیت Canvas):'
-                    : 'Ready-to-Use Prompt for Claude Artifacts or Gemini Canvas:'}
+                  {isFa
+                    ? 'خروجی مورد انتظار در محیط Artifact / Canvas'
+                    : 'Expected Output in Artifact / Canvas'}
                 </span>
               </div>
-
-              <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => onLoadToSandbox(activePrompt)}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-white/80 dark:bg-[#12171b] text-[#b45309] dark:text-[#fbbf24] border border-[#d97706]/30 hover:bg-white transition-all cursor-pointer"
-                >
-                  <Play className="w-3 h-3" />
-                  <span>{lang === 'fa' ? 'انتقال به کارگاه تست پرامپت' : 'Load to Sandbox'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(activePrompt, copyKey)}
-                  className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold shadow-xs transition-all active:scale-[0.96] cursor-pointer ${
-                    isCopied
-                      ? 'bg-[#2f7d5b] text-white'
-                      : 'bg-[#b45309] hover:bg-[#92400e] text-white'
-                  }`}
-                >
-                  {isCopied ? (
-                    <>
-                      <Check className="w-3.5 h-3.5" />
-                      <span>{lang === 'fa' ? 'پرامپت کپی شد!' : 'Prompt Copied!'}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>{lang === 'fa' ? 'کپی پرامپت ساخت ابزار' : 'Copy Artifact Prompt'}</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-white dark:bg-[#0e1317] border border-[#d97706]/25 max-h-80 overflow-y-auto">
-              <pre
-                dir={lang === 'fa' ? 'rtl' : 'ltr'}
-                className="text-xs font-mono text-[#1c2830] dark:text-[#e8ebe9] whitespace-pre-wrap leading-relaxed select-text text-right"
-              >
-                {activePrompt}
-              </pre>
-            </div>
-          </div>
-
-          {/* Expected Output & Key Highlights Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Expected Output in Artifact / Canvas */}
-            <div className="p-4 rounded-xl bg-white dark:bg-[#161e24] border border-black/[0.06] dark:border-white/[0.08] space-y-2.5">
-              <div className="text-xs font-extrabold text-[#2f7d5b] dark:text-[#52b788] flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span>
-                  {lang === 'fa'
-                    ? 'خروجی مورد انتظار در محیط Artifact / Canvas:'
-                    : 'Expected Output in Artifact / Canvas:'}
-                </span>
-              </div>
-              <p className="text-xs text-[#1c2830] dark:text-[#d1d7db] leading-relaxed">
-                {lang === 'fa' ? activeEx.expectedOutputFa : activeEx.expectedOutputEn}
+              <p className="text-sm sm:text-[15px] text-[var(--cpai-text)] leading-[1.8]">
+                {isFa ? activeEx.expectedOutputFa : activeEx.expectedOutputEn}
               </p>
-
-              <div className="pt-2 border-t border-black/[0.05] dark:border-white/[0.06] space-y-1.5">
-                <span className="text-[11px] font-bold text-[#5d6b73] dark:text-[#9aa8b0] block">
-                  {lang === 'fa' ? 'ویژگی‌های کلیدی ابزار تولیدشده:' : 'Generated Tool Highlights:'}
-                </span>
-                <ul className="space-y-1 text-xs text-[#1c2830] dark:text-[#e8ebe9]">
-                  {(lang === 'fa' ? activeEx.keyHighlightsFa : activeEx.keyHighlightsEn).map((hl, idx) => (
+              <div className="pt-3 border-t border-[var(--cpai-border)] space-y-2">
+                <div className="text-xs font-semibold text-[var(--cpai-muted)]">
+                  {isFa ? 'ویژگی‌های کلیدی ابزار تولیدشده:' : 'Generated Tool Highlights:'}
+                </div>
+                <ul className="space-y-1.5 text-sm text-[var(--cpai-text)]">
+                  {(isFa ? activeEx.keyHighlightsFa : activeEx.keyHighlightsEn).map((hl, idx) => (
                     <li key={idx} className="flex items-start gap-2 leading-relaxed">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#2f7d5b] mt-1.5 shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--cpai-primary)] mt-2 shrink-0" />
                       <span>{hl}</span>
                     </li>
                   ))}
@@ -574,46 +212,327 @@ export const HrArtifactsCanvasWorkshop: React.FC<HrArtifactsCanvasWorkshopProps>
               </div>
             </div>
 
-            {/* Educational Takeaway for HR Team */}
-            <div className="p-4 rounded-xl bg-white dark:bg-[#161e24] border border-black/[0.06] dark:border-white/[0.08] flex flex-col justify-between space-y-3">
-              <div className="space-y-2">
-                <div className="text-xs font-extrabold text-[#b45309] dark:text-[#fbbf24] flex items-center gap-1.5">
-                  <Lightbulb className="w-4 h-4 shrink-0" />
-                  <span>
-                    {lang === 'fa'
-                      ? 'مهارت آموزشی برای تیم منابع انسانی و اداری:'
-                      : 'Educational Takeaway for the HR & Admin Team:'}
-                  </span>
-                </div>
-                <p className="text-xs text-[#1c2830] dark:text-[#d1d7db] leading-relaxed">
-                  {lang === 'fa' ? activeEx.educationalTakeawayFa : activeEx.educationalTakeawayEn}
+            {/* Educational Takeaway */}
+            <LessonTakeawayCallout
+              lang={lang}
+              labelFa="مهارت آموزشی برای تیم منابع انسانی و اداری"
+              labelEn="Educational Takeaway for HR & Admin Teams"
+              text={isFa ? activeEx.educationalTakeawayFa : activeEx.educationalTakeawayEn}
+            />
+
+            <FocusedLessonFooter
+              lang={lang}
+              boundary={boundary}
+              onPrev={() => handleSelectStep(boundary.currentIndex - 1)}
+              onNext={() => handleSelectStep(boundary.currentIndex + 1)}
+              secondaryAction={{
+                label: isFa ? 'مشاهده جریان ۳ مرحله‌ای و NotebookLM' : 'Open 3-Step Playbook & NotebookLM',
+                onClick: () => setActiveView('playbook')
+              }}
+              prevLabelFa="تمرین قبلی"
+              prevLabelEn="Previous exercise"
+              nextLabelFa="تمرین بعدی"
+              nextLabelEn="Next exercise"
+              stepUnitFa="تمرین"
+              stepUnitEn="Exercise"
+            />
+          </article>
+        ) : (
+          <div className="space-y-6">
+            {/* Quick Links to External Tools */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[var(--cpai-border)]">
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold text-[var(--cpai-text)]">
+                  {isFa
+                    ? HR_ARTIFACTS_WORKSHOP_HEADER.twoStepChainGuide.titleFa
+                    : HR_ARTIFACTS_WORKSHOP_HEADER.twoStepChainGuide.titleEn}
+                </h3>
+                <p className="text-sm text-[var(--cpai-muted)] leading-relaxed">
+                  {isFa
+                    ? HR_ARTIFACTS_WORKSHOP_HEADER.twoStepChainGuide.descriptionFa
+                    : HR_ARTIFACTS_WORKSHOP_HEADER.twoStepChainGuide.descriptionEn}
                 </p>
               </div>
-
-              <div className="p-3 rounded-xl bg-[#f4f7f6] dark:bg-[#12171b] border border-black/[0.05] dark:border-white/[0.06] flex items-center justify-between gap-2 text-[11px]">
-                <span className="text-[#5d6b73] dark:text-[#9aa8b0] font-medium">
-                  {lang === 'fa'
-                    ? 'نکته: در Claude قابلیت Artifacts و در Gemini گزینه Canvas را فعال کنید.'
-                    : 'Tip: Enable Artifacts in Claude or select Canvas in Gemini before pasting.'}
-                </span>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const nextIdx = (HR_ARTIFACT_EXERCISES.findIndex((e) => e.id === selectedExId) + 1) % HR_ARTIFACT_EXERCISES.length;
-                      setSelectedExId(HR_ARTIFACT_EXERCISES[nextIdx].id);
-                    }}
-                    className="px-2.5 py-1 rounded-lg bg-[#c026d3]/10 hover:bg-[#c026d3]/20 text-[#c026d3] dark:text-[#fb7185] font-bold flex items-center gap-1 cursor-pointer transition-colors"
-                  >
-                    <span>{lang === 'fa' ? 'تمرین بعدی' : 'Next Exercise'}</span>
-                    {lang === 'fa' ? <ArrowLeft className="w-3 h-3" /> : <ArrowRight className="w-3 h-3" />}
-                  </button>
-                </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <a
+                  href="https://notebooklm.google.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-lg border border-[var(--cpai-border)] bg-[var(--cpai-surface)] text-xs font-semibold text-[var(--cpai-text)] hover:border-[var(--cpai-primary)] transition-colors"
+                >
+                  <span>1. NotebookLM</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-[var(--cpai-primary)]" />
+                </a>
+                <a
+                  href="https://gemini.google.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-lg border border-[var(--cpai-border)] bg-[var(--cpai-surface)] text-xs font-semibold text-[var(--cpai-text)] hover:border-[var(--cpai-primary)] transition-colors"
+                >
+                  <span>2. Gemini Canvas</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-[var(--cpai-primary)]" />
+                </a>
+                <a
+                  href="https://claude.ai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-lg border border-[var(--cpai-border)] bg-[var(--cpai-surface)] text-xs font-semibold text-[var(--cpai-text)] hover:border-[var(--cpai-primary)] transition-colors"
+                >
+                  <span>3. Claude Artifacts</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-[var(--cpai-primary)]" />
+                </a>
               </div>
             </div>
+
+            {/* 3 Workflow Steps */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+              {HR_ARTIFACTS_WORKSHOP_HEADER.twoStepChainGuide.steps.map((st) => (
+                <div
+                  key={st.stepNumber}
+                  className="p-4 rounded-[var(--cpai-radius)] bg-[var(--cpai-surface-subtle)] border border-[var(--cpai-border)] space-y-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-md bg-[var(--cpai-primary)] text-white dark:text-[#0F171A] text-xs font-bold flex items-center justify-center shrink-0 tabular-nums">
+                      {formatStepNumber(st.stepNumber, lang)}
+                    </span>
+                    <h4 className="text-sm font-bold text-[var(--cpai-text)] leading-snug">
+                      {isFa ? st.titleFa : st.titleEn}
+                    </h4>
+                  </div>
+                  <p className="text-xs sm:text-sm text-[var(--cpai-muted)] leading-relaxed">
+                    {isFa ? st.descriptionFa : st.descriptionEn}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Grounded NotebookLM Simulated Output + Assumptions Companion Pack */}
+            <div
+              data-testid="hr-notebooklm-companion-panel"
+              className="rounded-[var(--cpai-radius)] bg-[var(--cpai-surface)] border border-[var(--cpai-border)] overflow-hidden"
+            >
+              <div className="px-4 py-3.5 bg-[var(--cpai-surface-subtle)] border-b border-[var(--cpai-border)] flex flex-wrap items-center justify-between gap-2.5">
+                <div className="space-y-0.5 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2 py-0.5 rounded bg-[var(--cpai-primary-soft)] text-[var(--cpai-primary-strong)] text-[11px] font-semibold">
+                      {isFa ? HR_NOTEBOOKLM_COMPANION.badgeFa : HR_NOTEBOOKLM_COMPANION.badgeEn}
+                    </span>
+                    <h4 className="text-sm font-bold text-[var(--cpai-text)]">
+                      {isFa ? HR_NOTEBOOKLM_COMPANION.titleFa : HR_NOTEBOOKLM_COMPANION.titleEn}
+                    </h4>
+                  </div>
+                  <p className="text-xs text-[var(--cpai-muted)] leading-relaxed">
+                    {isFa ? HR_NOTEBOOKLM_COMPANION.subtitleFa : HR_NOTEBOOKLM_COMPANION.subtitleEn}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsNotebookCompanionOpen((prev) => !prev)}
+                  className="px-3 py-1.5 rounded-lg border border-[var(--cpai-border)] bg-[var(--cpai-surface)] text-xs font-medium text-[var(--cpai-primary-strong)] hover:border-[var(--cpai-primary)] transition-colors cursor-pointer shrink-0"
+                >
+                  {isNotebookCompanionOpen
+                    ? isFa
+                      ? 'جمع کردن پنل'
+                      : 'Collapse'
+                    : isFa
+                    ? 'مشاهده خروجی و فرضیات'
+                    : 'Expand Pack'}
+                </button>
+              </div>
+
+              {isNotebookCompanionOpen && (
+                <div className="p-4 sm:p-5 space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2.5">
+                    <div className="inline-flex items-center p-1 rounded-[var(--cpai-radius)] bg-[var(--cpai-surface-subtle)] border border-[var(--cpai-border)]">
+                      <button
+                        type="button"
+                        data-testid="hr-nlm-tab-output"
+                        onClick={() => setNotebookCompanionTab('output')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                          notebookCompanionTab === 'output'
+                            ? 'bg-[var(--cpai-surface)] text-[var(--cpai-primary-strong)] shadow-2xs border border-[var(--cpai-border)]'
+                            : 'text-[var(--cpai-muted)] hover:text-[var(--cpai-text)] border border-transparent'
+                        }`}
+                      >
+                        {isFa
+                          ? '۱. خروجی فرضی و مستند NotebookLM'
+                          : '1. Simulated NotebookLM Output'}
+                      </button>
+                      <button
+                        type="button"
+                        data-testid="hr-nlm-tab-assumptions"
+                        onClick={() => setNotebookCompanionTab('assumptions')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                          notebookCompanionTab === 'assumptions'
+                            ? 'bg-[var(--cpai-surface)] text-[var(--cpai-primary-strong)] shadow-2xs border border-[var(--cpai-border)]'
+                            : 'text-[var(--cpai-muted)] hover:text-[var(--cpai-text)] border border-transparent'
+                        }`}
+                      >
+                        {isFa
+                          ? '۲. فرضیات منابع و پرامپت استخراج'
+                          : '2. Source Assumptions & Extraction Prompt'}
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        data-testid="hr-nlm-copy-output-btn"
+                        onClick={() => copyToClipboard(notebookOutputText, 'hr_nlm_simulated_output')}
+                        className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-[var(--cpai-primary)] hover:bg-[var(--cpai-primary-strong)] text-white dark:text-[#0F171A] text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        {copiedId === 'hr_nlm_simulated_output' ? (
+                          <Check className="w-3.5 h-3.5" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                        <span>
+                          {copiedId === 'hr_nlm_simulated_output'
+                            ? isFa
+                              ? 'خروجی کپی شد'
+                              : 'Output Copied'
+                            : isFa
+                            ? 'کپی خروجی NotebookLM'
+                            : 'Copy NotebookLM Output'}
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        data-testid="hr-nlm-copy-csv-btn"
+                        onClick={() => copyToClipboard(HR_NOTEBOOKLM_COMPANION.sampleCsv, 'hr_nlm_sample_csv')}
+                        className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg border border-[var(--cpai-border)] bg-[var(--cpai-surface)] hover:border-[var(--cpai-primary)] text-[var(--cpai-text)] text-xs font-medium transition-colors cursor-pointer"
+                      >
+                        {copiedId === 'hr_nlm_sample_csv' ? (
+                          <Check className="w-3.5 h-3.5 text-[var(--cpai-primary)]" />
+                        ) : (
+                          <FileSpreadsheet className="w-3.5 h-3.5 text-[var(--cpai-primary)]" />
+                        )}
+                        <span>
+                          {copiedId === 'hr_nlm_sample_csv'
+                            ? isFa
+                              ? 'CSV کپی شد'
+                              : 'CSV Copied'
+                            : isFa
+                            ? 'کپی جدول CSV کارکرد'
+                            : 'Copy Sample CSV'}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {notebookCompanionTab === 'output' ? (
+                    <div className="space-y-3">
+                      <div
+                        dir={isFa ? 'rtl' : 'ltr'}
+                        className="p-4 rounded-[var(--cpai-radius)] bg-[var(--cpai-surface-subtle)] border border-[var(--cpai-border)] max-h-72 overflow-y-auto text-xs sm:text-sm leading-relaxed text-[var(--cpai-text)] whitespace-pre-wrap"
+                      >
+                        {notebookOutputText}
+                      </div>
+                      <div className="p-3.5 rounded-[var(--cpai-radius)] bg-[var(--cpai-primary-soft)] border border-[var(--cpai-border)] flex flex-wrap items-center justify-between gap-2.5 text-xs">
+                        <span className="text-[var(--cpai-text)] leading-relaxed">
+                          {isFa
+                            ? 'مسیر سریع: خروجی NotebookLM و جدول CSV را کپی کنید، سپس به تب «کارگاه ۵ اپلیکیشن HR» بروید و پرامپت ابزار دلخواه را در Gemini Canvas یا Claude Artifacts اجرا کنید.'
+                            : 'Fast Track: Copy the grounded output + sample CSV, then open the 5 HR Apps tab and run any exercise prompt.'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onLoadToSandbox(
+                              `${notebookOutputText}\n\n--- CSV کارکرد نمونه ---\n${HR_NOTEBOOKLM_COMPANION.sampleCsv}`
+                            )
+                          }
+                          className="inline-flex items-center gap-1.5 min-h-[36px] px-3 py-1.5 rounded-lg bg-[var(--cpai-primary)] hover:bg-[var(--cpai-primary-strong)] text-white dark:text-[#0F171A] font-semibold text-xs cursor-pointer whitespace-nowrap"
+                        >
+                          <Play className="w-3.5 h-3.5" />
+                          <span>{isFa ? 'ارسال به سندباکس پرامپت' : 'Send to Sandbox'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {notebookAssumptions.map((item, idx) => (
+                          <div
+                            key={idx}
+                            className="p-3.5 rounded-[var(--cpai-radius)] bg-[var(--cpai-surface-subtle)] border border-[var(--cpai-border)] space-y-1.5"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs font-bold text-[var(--cpai-text)]">
+                                {item.title}
+                              </span>
+                              <span
+                                dir="ltr"
+                                className="px-2 py-0.5 rounded bg-[var(--cpai-surface)] border border-[var(--cpai-border)] text-[var(--cpai-primary-strong)] font-mono text-[10px] font-semibold shrink-0"
+                              >
+                                {item.sourceTag}
+                              </span>
+                            </div>
+                            <p className="text-xs text-[var(--cpai-muted)] leading-relaxed">
+                              {item.detail}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="rounded-[var(--cpai-radius)] border border-[var(--cpai-border)] overflow-hidden">
+                        <div className="px-4 py-2.5 bg-[var(--cpai-surface-subtle)] border-b border-[var(--cpai-border)] flex items-center justify-between gap-2 flex-wrap">
+                          <span className="text-xs font-semibold text-[var(--cpai-text)] flex items-center gap-1.5">
+                            <Code className="w-3.5 h-3.5 text-[var(--cpai-primary)]" />
+                            <span>
+                              {isFa
+                                ? 'پرامپت آماده استخراج قواعد در NotebookLM (گام ۱)'
+                                : 'Ready-to-Use NotebookLM Extraction Prompt (Step 1)'}
+                            </span>
+                          </span>
+                          <button
+                            type="button"
+                            data-testid="hr-nlm-copy-prompt-btn"
+                            onClick={() => copyToClipboard(notebookPromptText, 'hr_nlm_extraction_prompt')}
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--cpai-primary)] hover:bg-[var(--cpai-primary-strong)] text-white dark:text-[#0F171A] text-xs font-semibold cursor-pointer"
+                          >
+                            {copiedId === 'hr_nlm_extraction_prompt' ? (
+                              <Check className="w-3 h-3" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                            <span>
+                              {copiedId === 'hr_nlm_extraction_prompt'
+                                ? isFa
+                                  ? 'کپی شد'
+                                  : 'Copied'
+                                : isFa
+                                ? 'کپی پرامپت گام ۱'
+                                : 'Copy Step-1 Prompt'}
+                            </span>
+                          </button>
+                        </div>
+                        <pre
+                          dir={isFa ? 'rtl' : 'ltr'}
+                          className="p-4 bg-[var(--cpai-code-bg)] text-[var(--cpai-code-text)] text-xs leading-relaxed whitespace-pre-wrap font-mono"
+                        >
+                          {notebookPromptText}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setActiveView('apps')}
+                className="inline-flex items-center gap-2 min-h-[44px] px-5 py-2 rounded-[var(--cpai-radius)] bg-[var(--cpai-primary)] hover:bg-[var(--cpai-primary-strong)] text-white dark:text-[#0F171A] text-sm font-semibold transition-colors cursor-pointer"
+              >
+                <span>{isFa ? 'شروع کارگاه ۵ اپلیکیشن HR' : 'Start 5 HR Interactive Apps'}</span>
+              </button>
+            </div>
           </div>
-        </div>
-      </div>
+        )}
+      </FocusedLessonLayout>
     </div>
   );
 };

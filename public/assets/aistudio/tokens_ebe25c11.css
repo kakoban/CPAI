@@ -1,0 +1,31 @@
+/* Reference only: map into existing theme; do not import blindly. */
+:root {
+  --cpai-primary: #007D86;
+  --cpai-primary-strong: #07515A;
+  --cpai-bg: #F8F9FA;
+  --cpai-surface: #FFFFFF;
+  --cpai-text: #242B30;
+  --cpai-muted: #646D73;
+  /* Proposed supporting tokens; verify contrast in context. */
+  --cpai-border: #DCE2E4;
+  --cpai-success-bg: #EAF5EE;
+  --cpai-success-text: #245B3B;
+  --cpai-error: #B42318;
+  --cpai-focus: #07515A;
+  --cpai-font: Vazirmatn, Tahoma, sans-serif;
+  --cpai-space-1: 4px; --cpai-space-2: 8px; --cpai-space-3: 12px;
+  --cpai-space-4: 16px; --cpai-space-6: 24px; --cpai-space-8: 32px;
+  --cpai-radius: 10px;
+  --cpai-reading-width: 904px;
+  --cpai-body-size: 18px;
+  --cpai-body-leading: 1.6;
+}
+/* Proposed dark palette; adapt to existing theme mechanism. */
+[data-theme="dark"] {
+  --cpai-primary: #63D0D4; --cpai-primary-strong: #A0E5E7;
+  --cpai-bg: #151B1E; --cpai-surface: #20282C;
+  --cpai-text: #F1F4F5; --cpai-muted: #B6C2C7;
+  --cpai-border: #3C494F; --cpai-success-bg: #203B30;
+  --cpai-success-text: #A7E3BD; --cpai-error: #FFB4AB;
+  --cpai-focus: #A0E5E7;
+}
